@@ -1,0 +1,92 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Estilos base */
+body {
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Modo oscuro */
+.dark body {
+  background: radial-gradient(circle at 20% 30%, #0a0a1a, #020205);
+  color: #ffffff;
+}
+
+/* Modo claro */
+.light body {
+  background: radial-gradient(circle at 20% 30%, #e8f5e9, #c8e6c9);
+  color: #1a2e1f;
+}
+
+/* Fondo de ruido solo para modo oscuro */
+.dark body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0.3;
+}
+
+.light body::before {
+  display: none;
+}
+
+/* Tarjetas vidrio para modo oscuro */
+.dark .glass-card {
+  background: rgba(10, 14, 23, 0.6);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(0, 255, 136, 0.15);
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  transition: all 0.3s ease;
+}
+
+/* Tarjetas para modo claro */
+.light .glass-card {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(0, 255, 136, 0.4);
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  transition: all 0.3s ease;
+}
+
+.glass-card:hover {
+  border-color: rgba(0, 255, 136, 0.8);
+  box-shadow: 0 8px 32px rgba(0, 255, 136, 0.15);
+}
+
+/* Texto gradiente */
+.text-gradient {
+  background: linear-gradient(135deg, #00ff88 0%, #ff8a3c 50%, #00ff88 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: shine 3s linear infinite;
+}
+
+@keyframes shine {
+  to {
+    background-position: 200% center;
+  }
+}
+
+/* Botón gradiente */
+.btn-gradient {
+  background: linear-gradient(135deg, #00ff88 0%, #00cc6e 100%);
+  transition: all 0.3s ease;
+  box-shadow: 0 0 15px rgba(0, 255, 136, 0.3);
+}
+
+.btn-gradient:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 255, 136, 0.5);
+}

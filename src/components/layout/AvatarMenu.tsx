@@ -1,0 +1,135 @@
+'use client'
+
+import Image from 'next/image'
+import { useState, useRef, useEffect } from 'react'
+import Link from 'next/link'
+import { useAuth } from '@/hooks/useAuth'
+import { UserCircle, LogOut, LayoutDashboard } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
+
+export default function AvatarMenu() {
+  const { user, signOut } = useAuth()
+  const [isOpen, setIsOpen] = useState(false)
+  const menuRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setIsOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
+
+  const getInitials = () => {
+    if (!user?.name) return 'U'
+    return user.name.charAt(0).toUpperCase()
+  }
+
+  // 🔴 PANEL ROUTE SEGÚN ROL
+  const getPanelRoute = () => {
+    const role = user?.role
+    if (role === 'comercio') return '/business'
+    if (role === 'admin' || role === 'super_admin') return '/admin'
+    return '/dashboard'
+  }
+
+  // 🔴 NOMBRE DEL ROL PARA MOSTRAR
+  const getRoleName = () => {
+    const role = user?.role
+    if (role === 'super_admin') return 'Super Admin'
+    if (role === 'admin') return 'Administrador'
+    if (role === 'comercio') return 'Comercio'
+    return 'Usuario'
+  }
+
+  return (
+    <div className="flex items-center gap-3">
+      {/* Botón Panel */}
+      <Link
+        href={getPanelRoute()}
+        className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-primary/10 hover:bg-primary/20 text-primary transition-all duration-300"
+      >
+        <LayoutDashboard className="w-4 h-4" />
+        <span className="text-sm font-medium">Panel</span>
+      </Link>
+
+      <Link
+        href={getPanelRoute()}
+        className="flex sm:hidden items-center justify-center w-9 h-9 rounded-lg bg-primary/10 hover:bg-primary/20 text-primary transition-all duration-300"
+      >
+        <LayoutDashboard className="w-4 h-4" />
+      </Link>
+
+      {/* Avatar con menú desplegable */}
+      <div className="relative" ref={menuRef}>
+        <button
+          onClick={() => setIsOpen(!isOpen)}
+          className="flex items-center gap-2 focus:outline-none"
+        >
+          {user?.avatar_url ? (
+            <Image
+              src={user.avatar_url}
+              alt={user.name || 'Avatar'}
+              width={36}
+              height={36}
+              className="w-9 h-9 rounded-full object-cover border-2 border-primary"
+            />
+          ) : (
+            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-primary/30 to-primary/10 border border-primary flex items-center justify-center">
+              <span className="text-primary font-bold text-sm">
+                {getInitials()}
+              </span>
+            </div>
+          )}
+        </button>
+
+        <AnimatePresence>
+          {isOpen && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.2 }}
+              className="absolute right-0 mt-2 w-56 bg-gray-900/95 backdrop-blur-md rounded-xl border border-gray-800 shadow-xl z-50 overflow-hidden"
+            >
+              <div className="p-2">
+                {/* Información del usuario */}
+                <div className="px-3 py-3 border-b border-gray-800 mb-2">
+                  <p className="text-sm font-semibold text-white truncate">{user?.name}</p>
+                  <p className="text-xs text-gray-400 truncate mt-0.5">{user?.email}</p>
+                  <div className="mt-2">
+                    <span className="text-xs bg-primary/20 text-primary px-2 py-0.5 rounded-full">
+                      {getRoleName()}
+                    </span>
+                  </div>
+                </div>
+                
+                <Link
+                  href="/profile"
+                  onClick={() => setIsOpen(false)}
+                  className="flex items-center gap-3 px-3 py-2.5 text-sm text-gray-300 hover:bg-gray-800 rounded-lg transition-all duration-200 group"
+                >
+                  <UserCircle className="w-5 h-5 text-primary group-hover:scale-110 transition-transform" />
+                  <span>Mi Perfil</span>
+                </Link>
+                
+                <button
+                  onClick={() => {
+                    setIsOpen(false)
+                    signOut()
+                  }}
+                  className="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-red-400 hover:bg-red-500/10 rounded-lg transition-all duration-200 group"
+                >
+                  <LogOut className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                  <span>Cerrar Sesión</span>
+                </button>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+    </div>
+  )
+}
