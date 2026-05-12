@@ -7,9 +7,9 @@ import { Home, Search, Calendar, Heart, User } from 'lucide-react';
 const navItems = [
   { id: 'home', label: 'Inicio', icon: Home, href: '/dashboard' },
   { id: 'search', label: 'Buscar', icon: Search, href: '/packs' },
-  { id: 'reservations', label: 'Reservas', icon: Calendar, href: '/dashboard/reservations' },
-  { id: 'favorites', label: 'Favoritos', icon: Heart, href: '/dashboard/favorites' },
-  { id: 'profile', label: 'Perfil', icon: User, href: '/dashboard/profile' },
+    { id: 'reservations', label: 'Reservas', icon: Calendar, href: '/reservations' },
+  { id: 'favorites', label: 'Favoritos', icon: Heart, href: '/favorites' },
+  { id: 'profile', label: 'Perfil', icon: User, href: '/profile' },
 ];
 
 export default function BottomNav() {

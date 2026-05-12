@@ -16,11 +16,11 @@ interface ButtonProps extends MotionProps {
 }
 
 const variants = {
-  primary: 'bg-gradient-to-r from-primary to-primary/80 text-white hover:shadow-lg hover:shadow-primary/25',
-  secondary: 'bg-gray-200 dark:bg-gray-800 text-gray-800 dark:text-white hover:bg-gray-300 dark:hover:bg-gray-700',
-  outline: 'border-2 border-primary text-primary hover:bg-primary/10',
-  ghost: 'text-gray-600 dark:text-gray-400 hover:bg-white/10',
-  danger: 'bg-red-500 text-white hover:bg-red-600',
+  primary: 'bg-gradient-to-r from-primary to-primary/80 text-dark font-bold hover:shadow-lg hover:shadow-primary/25',
+  secondary: 'bg-dark-muted text-white hover:bg-dark-hover',
+  outline: 'border border-primary/30 text-primary hover:bg-primary/10 hover:border-primary/60',
+  ghost: 'text-gray-400 hover:text-white hover:bg-white/5',
+  danger: 'bg-red-500/80 text-white hover:bg-red-600 border border-red-500/20',
 };
 
 const sizes = {

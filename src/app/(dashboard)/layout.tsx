@@ -33,18 +33,16 @@ export default async function DashboardLayout({
     if (role === 'admin' || role === 'super_admin') redirect('/admin');
   }
 
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-[#0a0a1a] via-[#0f0f1a] to-[#020205]">
+    return (
+    <div className="min-h-screen">
       <Header />
       <div className="pt-16 pb-20 lg:pb-12">
         <Breadcrumbs />
         <main className="pb-12">
-          <div className="container mx-auto px-4">
+          <div className="container-page">
             <Suspense fallback={
               <div className="flex items-center justify-center min-h-[60vh]">
-                <div className="text-center">
-                  <PageLoader />
-                </div>
+                <PageLoader />
               </div>
             }>
               {children}

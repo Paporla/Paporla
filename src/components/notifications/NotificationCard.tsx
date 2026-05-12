@@ -7,6 +7,10 @@ import {
   CheckCircle, 
   Package, 
   ShieldCheck,
+  ShoppingBag,
+  UserPlus,
+  Store,
+  AlertTriangle,
   Trash2
 } from 'lucide-react';
 import type { Notification } from '@/hooks/useNotifications';
@@ -17,12 +21,19 @@ interface NotificationCardProps {
   onDelete: (id: string) => void;
 }
 
-const iconMap = {
-  pickup_reminder: { icon: Clock, color: 'text-primary', bg: 'bg-primary/10' },
+const iconMap: Record<string, { icon: any; color: string; bg: string }> = {
+  pickup_reminder: { icon: Clock, color: 'text-amber-400', bg: 'bg-amber-500/10' },
   cancellation: { icon: XCircle, color: 'text-red-400', bg: 'bg-red-500/10' },
+  shop_cancelled: { icon: XCircle, color: 'text-red-400', bg: 'bg-red-500/10' },
   confirmation: { icon: CheckCircle, color: 'text-green-400', bg: 'bg-green-500/10' },
   new_pack: { icon: Package, color: 'text-primary', bg: 'bg-primary/10' },
   shop_verified: { icon: ShieldCheck, color: 'text-primary', bg: 'bg-primary/10' },
+  new_reservation: { icon: ShoppingBag, color: 'text-blue-400', bg: 'bg-blue-500/10' },
+  user_cancelled: { icon: XCircle, color: 'text-orange-400', bg: 'bg-orange-500/10' },
+  pickup_completed: { icon: CheckCircle, color: 'text-primary', bg: 'bg-primary/10' },
+  new_user: { icon: UserPlus, color: 'text-purple-400', bg: 'bg-purple-500/10' },
+  new_shop: { icon: Store, color: 'text-primary', bg: 'bg-primary/10' },
+  incidence: { icon: AlertTriangle, color: 'text-red-400', bg: 'bg-red-500/10' },
 };
 
 export default function NotificationCard({ notification, onMarkAsRead, onDelete }: NotificationCardProps) {

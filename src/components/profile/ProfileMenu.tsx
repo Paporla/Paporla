@@ -5,8 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { 
-  Package, Heart, Bell, User, CreditCard, MapPin, 
-  Shield, Settings, HelpCircle, Info, LogOut, ChevronRight 
+  Package, Heart, Bell, HelpCircle, Info, LogOut, ChevronRight 
 } from 'lucide-react';
 import ConfirmModal from '@/components/ui/ConfirmModal';
 import { useState } from 'react';
@@ -22,24 +21,14 @@ const menuSections = [
   {
     title: 'Mis datos',
     items: [
-      { icon: Package, label: 'Mis reservas', href: '/dashboard/reservations', value: 'Ver todas' },
-      { icon: Heart, label: 'Favoritos', href: '/dashboard/favorites', value: 'Ver guardados' },
-      { icon: Bell, label: 'Notificaciones', href: '/dashboard/notifications', value: 'Configurar' },
-    ] as MenuItem[],
-  },
-  {
-    title: 'Cuenta',
-    items: [
-      { icon: User, label: 'Editar perfil', href: '/profile/edit' },
-      { icon: CreditCard, label: 'Métodos de pago', href: '/profile/payment-methods' },
-      { icon: MapPin, label: 'Direcciones', href: '/profile/addresses' },
-      { icon: Shield, label: 'Seguridad', href: '/profile/security' },
+      { icon: Package, label: 'Mis reservas', href: '/reservations', value: 'Ver todas' },
+      { icon: Heart, label: 'Favoritos', href: '/favorites', value: 'Ver guardados' },
+      { icon: Bell, label: 'Notificaciones', href: '/notifications', value: 'Configurar' },
     ] as MenuItem[],
   },
   {
     title: 'General',
     items: [
-      { icon: Settings, label: 'Configuración', href: '/profile/settings' },
       { icon: HelpCircle, label: 'Centro de ayuda', href: '/faq' },
       { icon: Info, label: 'Sobre Paporla', href: '/about' },
     ] as MenuItem[],

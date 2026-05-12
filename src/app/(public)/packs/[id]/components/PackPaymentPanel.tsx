@@ -1,0 +1,139 @@
+'use client'
+
+import { useState } from 'react'
+import Link from 'next/link'
+import Image from 'next/image'
+import { Calendar, Clock, CreditCard, MapPin, Package } from 'lucide-react'
+import Button from '@/components/ui/Button'
+import { formatPrice } from '@/lib/utils/formatPrice'
+import { formatDate } from '@/lib/utils/formatDate'
+
+interface PackPaymentPanelProps {
+  packId: string
+  user: any | null
+  isAvailable: boolean
+  remainingStock: number
+  priceCents: number
+  onReserve: (quantity: number, paymentMethod: 'cash' | 'demo', acceptedPolicies: boolean) => void
+  reserving: boolean
+}
+
+export default function PackPaymentPanel({
+  packId,
+  user,
+  isAvailable,
+  remainingStock,
+  priceCents,
+  onReserve,
+  reserving
+}: PackPaymentPanelProps) {
+  const [quantity, setQuantity] = useState(1)
+  const [paymentMethod, setPaymentMethod] = useState<'cash' | 'demo'>('cash')
+  const [acceptedPolicies, setAcceptedPolicies] = useState(false)
+
+  const handleReserve = () => {
+    if (!user) return
+    onReserve(quantity, paymentMethod, acceptedPolicies)
+  }
+
+  return (
+    <div className="space-y-5">
+      {/* Selector de cantidad */}
+      <div className="flex items-center gap-4">
+        <span className="text-gray-300">Cantidad:</span>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setQuantity(Math.max(1, quantity - 1))}
+            className="w-8 h-8 rounded-lg bg-gray-800 hover:bg-gray-700 text-white transition-colors"
+          >
+            -
+          </button>
+          <span className="w-12 text-center text-white font-semibold">{quantity}</span>
+          <button
+            onClick={() => setQuantity(Math.min(remainingStock, quantity + 1))}
+            className="w-8 h-8 rounded-lg bg-gray-800 hover:bg-gray-700 text-white transition-colors"
+          >
+            +
+          </button>
+        </div>
+      </div>
+
+      {/* Método de pago */}
+      <div className="p-4 glass-card rounded-xl">
+        <h3 className="font-semibold text-white mb-3 flex items-center gap-2">
+          <CreditCard className="w-4 h-4 text-primary" />
+          Método de pago
+        </h3>
+        <div className="space-y-2">
+          <label className="flex items-center gap-3 p-3 rounded-xl bg-white/5 border border-white/10 cursor-pointer hover:border-primary/50 transition-all has-checked:border-primary has-checked:bg-primary/10">
+            <input
+              type="radio"
+              name="payment"
+              value="cash"
+              checked={paymentMethod === 'cash'}
+              onChange={() => setPaymentMethod('cash')}
+              className="w-4 h-4 accent-primary"
+            />
+            <div className="flex-1">
+              <p className="text-white text-sm font-medium">Efectivo</p>
+              <p className="text-xs text-gray-500">Paga al recoger en el comercio</p>
+            </div>
+          </label>
+          <label className="flex items-center gap-3 p-3 rounded-xl bg-white/5 border border-white/10 cursor-pointer hover:border-primary/50 transition-all has-checked:border-primary has-checked:bg-primary/10">
+            <input
+              type="radio"
+              name="payment"
+              value="demo"
+              checked={paymentMethod === 'demo'}
+              onChange={() => setPaymentMethod('demo')}
+              className="w-4 h-4 accent-primary"
+            />
+            <div className="flex-1">
+              <p className="text-white text-sm font-medium">Demo</p>
+              <p className="text-xs text-gray-500">Confirmación de prueba (sin pago real)</p>
+            </div>
+          </label>
+        </div>
+      </div>
+
+      {/* Políticas */}
+      <label className="flex items-start gap-3 cursor-pointer group">
+        <input
+          type="checkbox"
+          checked={acceptedPolicies}
+          onChange={() => setAcceptedPolicies(!acceptedPolicies)}
+          className="mt-1 w-4 h-4 accent-primary rounded"
+        />
+        <div className="text-xs text-gray-400 group-hover:text-gray-300 transition-colors">
+          Acepto las{' '}
+          <Link href="/legal/politicas-retiro" target="_blank" className="text-primary hover:underline">
+            políticas de retiro y cancelación
+          </Link>
+          . Confirmo que podré recoger el pedido en la fecha y hora indicadas.
+        </div>
+      </label>
+
+      {isAvailable ? (
+        <Button
+          onClick={handleReserve}
+          disabled={reserving || !acceptedPolicies}
+          className="w-full py-6 text-lg"
+        >
+          {reserving ? (
+            <div className="flex items-center gap-2">
+              <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              Reservando...
+            </div>
+          ) : (
+            `Reservar Ahora - ${formatPrice(priceCents * quantity)}`
+          )}
+        </Button>
+      ) : (
+        <Button disabled className="w-full py-6 text-lg" variant="outline">
+          <Package className="w-5 h-5" />
+          Agotado
+        </Button>
+      )}
+    </div>
+  )
+}

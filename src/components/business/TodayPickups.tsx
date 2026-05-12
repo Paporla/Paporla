@@ -1,0 +1,101 @@
+'use client'
+
+import { useState, useEffect, useCallback } from 'react'
+import { supabaseBrowser } from '@/lib/supabase/client'
+import { AnimatePresence } from 'framer-motion'
+import { Clock } from 'lucide-react'
+import Toast from '@/components/ui/Toast'
+import PickupCard, { PickupItem } from './pickups/PickupCard'
+
+interface Props { shopId: string }
+
+export default function TodayPickups({ shopId }: Props) {
+  const supabase = supabaseBrowser()
+  const [pickups, setPickups] = useState<PickupItem[]>([])
+  const [loading, setLoading] = useState(true)
+  const [validating, setValidating] = useState<string | null>(null)
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null)
+
+  const load = useCallback(async () => {
+    const today = new Date().toISOString().split('T')[0]
+    const { data } = await supabase
+      .from('reservations')
+      .select('id,pickup_code,pickup_date,pickup_start_time,pickup_end_time,status,pack_id,user_id')
+      .eq('shop_id', shopId)
+      .in('status', ['confirmed', 'ready_pickup'])
+      .or(`pickup_date.eq.${today},pickup_date.is.null`)
+      .order('pickup_start_time', { ascending: true })
+
+    if (!data) { setPickups([]); setLoading(false); return }
+
+    const enriched = await Promise.all(
+      data.map(async (r: any) => {
+        const { data: u } = await supabase.from('user_profiles').select('name').eq('id', r.user_id).maybeSingle()
+        const { data: p } = await supabase.from('packs').select('title').eq('id', r.pack_id).maybeSingle()
+        return { ...r, user_name: u?.name || 'Usuario', pack_title: p?.title || 'Pack' } as PickupItem
+      })
+    )
+    setPickups(enriched)
+    setLoading(false)
+  }, [shopId, supabase])
+
+  useEffect(() => {
+    load()
+    const interval = setInterval(load, 15000)
+    return () => clearInterval(interval)
+  }, [load])
+
+  const handleValidate = async (pickup: PickupItem): Promise<string | null> => {
+    setValidating(pickup.id)
+    setToast(null)
+
+    const { error: updateError } = await supabase
+      .from('reservations')
+      .update({ status: 'picked_up', picked_up_at: new Date().toISOString() })
+      .eq('id', pickup.id)
+      .eq('shop_id', shopId)
+
+    if (updateError) {
+      setValidating(null)
+      return updateError.message
+    }
+
+    setToast({ message: 'Recogida validada para ' + pickup.user_name, type: 'success' })
+    setPickups(prev => prev.filter(p => p.id !== pickup.id))
+    setValidating(null)
+    return null
+  }
+
+  if (loading) return (
+    <div className="animate-pulse space-y-3">
+      {[1, 2, 3].map(i => <div key={i} className="h-24 bg-white/5 rounded-xl" />)}
+    </div>
+  )
+
+  if (pickups.length === 0) return (
+    <div className="text-center py-8 px-4 bg-white/5 rounded-xl border border-dashed border-white/10">
+      <Clock className="w-10 h-10 text-gray-600 mx-auto mb-2" />
+      <p className="text-gray-400 font-medium">No hay recogidas programadas para hoy</p>
+      <p className="text-xs text-gray-600 mt-1">Las reservas apareceran aqui automaticamente</p>
+    </div>
+  )
+
+  return (
+    <div className="space-y-3">
+      <div className="flex items-center justify-between">
+        <h2 className="text-lg font-bold text-white flex items-center gap-2">
+          <Clock className="w-5 h-5 text-primary" />
+          Recogidas de Hoy
+          <span className="text-sm bg-primary/20 text-primary px-2 py-0.5 rounded-full">{pickups.length}</span>
+        </h2>
+        <span className="text-xs text-gray-500">Auto-actualizable</span>
+      </div>
+      <AnimatePresence>
+        {pickups.map((p, i) => (
+          <PickupCard key={p.id} pickup={p} index={i} validating={validating} onValidate={handleValidate} />
+        ))}
+      </AnimatePresence>
+      {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
+    </div>
+  )
+}

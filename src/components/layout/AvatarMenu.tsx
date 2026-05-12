@@ -2,13 +2,14 @@
 
 import Image from 'next/image'
 import { useState, useRef, useEffect } from 'react'
-import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { useAuth } from '@/hooks/useAuth'
 import { UserCircle, LogOut, LayoutDashboard } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 
 export default function AvatarMenu() {
   const { user, signOut } = useAuth()
+  const router = useRouter()
   const [isOpen, setIsOpen] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
 
@@ -27,8 +28,7 @@ export default function AvatarMenu() {
     return user.name.charAt(0).toUpperCase()
   }
 
-  // 🔴 PANEL ROUTE SEGÚN ROL
-  const getPanelRoute = () => {
+      const getPanelRoute = () => {
     const role = user?.role
     if (role === 'comercio') return '/business'
     if (role === 'admin' || role === 'super_admin') return '/admin'
@@ -46,21 +46,29 @@ export default function AvatarMenu() {
 
   return (
     <div className="flex items-center gap-3">
-      {/* Botón Panel */}
-      <Link
-        href={getPanelRoute()}
+            {/* Botón Panel - usa button + router para navegacion controlada */}
+      <button
+        onClick={() => {
+          setIsOpen(false)
+          const route = getPanelRoute()
+          router.replace(route)
+        }}
         className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-primary/10 hover:bg-primary/20 text-primary transition-all duration-300"
       >
         <LayoutDashboard className="w-4 h-4" />
         <span className="text-sm font-medium">Panel</span>
-      </Link>
+      </button>
 
-      <Link
-        href={getPanelRoute()}
+      <button
+        onClick={() => {
+          setIsOpen(false)
+          const route = getPanelRoute()
+          router.replace(route)
+        }}
         className="flex sm:hidden items-center justify-center w-9 h-9 rounded-lg bg-primary/10 hover:bg-primary/20 text-primary transition-all duration-300"
       >
         <LayoutDashboard className="w-4 h-4" />
-      </Link>
+      </button>
 
       {/* Avatar con menú desplegable */}
       <div className="relative" ref={menuRef}>
@@ -106,14 +114,19 @@ export default function AvatarMenu() {
                   </div>
                 </div>
                 
-                <Link
-                  href="/profile"
-                  onClick={() => setIsOpen(false)}
-                  className="flex items-center gap-3 px-3 py-2.5 text-sm text-gray-300 hover:bg-gray-800 rounded-lg transition-all duration-200 group"
+                                                                <button
+                  onClick={() => {
+                    setIsOpen(false)
+                    const role = user?.role
+                    if (role === 'comercio') router.push('/business/profile')
+                    else if (role === 'admin' || role === 'super_admin') router.push('/admin')
+                    else router.push('/profile')
+                  }}
+                  className="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-gray-300 hover:bg-gray-800 rounded-lg transition-all duration-200 group"
                 >
                   <UserCircle className="w-5 h-5 text-primary group-hover:scale-110 transition-transform" />
                   <span>Mi Perfil</span>
-                </Link>
+                </button>
                 
                 <button
                   onClick={() => {

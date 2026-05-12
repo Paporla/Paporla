@@ -8,6 +8,19 @@ export async function middleware(request: NextRequest) {
     },
   })
 
+  // ============================================
+  // MODO MANTENIMIENTO
+  // ============================================
+  if (process.env.NEXT_PUBLIC_MAINTENANCE_MODE === 'true') {
+    const path = request.nextUrl.pathname
+    // Permitir acceso a la pagina de mantenimiento y recursos estaticos
+    if (path !== '/mantenimiento' && !path.startsWith('/_next') && !path.startsWith('/api') && !path.startsWith('/favicon')) {
+      return NextResponse.redirect(new URL('/mantenimiento', request.url))
+    }
+    // Si ya esta en /mantenimiento, seguir
+    return response
+  }
+
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,

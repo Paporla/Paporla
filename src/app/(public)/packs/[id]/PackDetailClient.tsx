@@ -4,15 +4,13 @@ import Image from 'next/image'
 import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { ArrowLeft, Home, LayoutDashboard, MapPin, Calendar, Clock, DollarSign, Package, 
+  Store, CheckCircle, AlertCircle, 
+  CreditCard, Shield, Star, Truck, Clock as ClockIcon,
+  Heart, Share2, ExternalLink, Navigation, FileText } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
 import { supabaseBrowser } from '@/lib/supabase/client'
 import { motion } from 'framer-motion'
-import { 
-  MapPin, Calendar, Clock, DollarSign, Package, 
-  Store, ArrowLeft, CheckCircle, AlertCircle, 
-  CreditCard, Shield, Star, Truck, Clock as ClockIcon,
-  Heart, Share2, ExternalLink, Navigation, FileText
-} from 'lucide-react'
 import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
 import Toast from '@/components/ui/Toast'
@@ -150,7 +148,9 @@ export default function PackDetailPage() {
         status: 'confirmed',
         payment_method: paymentMethod === 'demo' ? 'demo' : 'cash',
         payment_status: 'completed',
-        confirmed_at: new Date().toISOString(),
+        pickup_date: pack.pickup_date,
+        pickup_start_time: pack.pickup_start_time,
+        pickup_end_time: pack.pickup_end_time,
         reserved_at: new Date().toISOString()
       })
       .select(`
@@ -230,14 +230,33 @@ export default function PackDetailPage() {
 
   return (
     <div className="min-h-screen pb-12">
-      <div className="container mx-auto px-4 py-8">
-        <button
-          onClick={() => router.back()}
-          className="flex items-center gap-2 text-gray-400 hover:text-primary transition-colors mb-6 group"
-        >
-          <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-          Volver
-        </button>
+            <div className="container mx-auto px-4 py-8">
+        {/* Navegacion superior */}
+        <div className="flex items-center justify-between mb-6">
+          <button
+            onClick={() => router.back()}
+            className="flex items-center gap-2 text-gray-400 hover:text-primary transition-colors group"
+          >
+            <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+            <span className="hidden sm:inline">Volver</span>
+          </button>
+          <div className="flex items-center gap-3">
+            <Link
+              href="/"
+              className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-primary transition-colors px-3 py-1.5 rounded-lg bg-white/5 hover:bg-primary/10"
+            >
+              <Home className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Inicio</span>
+            </Link>
+            <Link
+              href="/packs"
+              className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-primary transition-colors px-3 py-1.5 rounded-lg bg-white/5 hover:bg-primary/10"
+            >
+              <Package className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Packs</span>
+            </Link>
+          </div>
+        </div>
 
         <div className="grid md:grid-cols-2 gap-8">
           {/* Imagen del pack */}

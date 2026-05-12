@@ -39,9 +39,8 @@ export function useAuth() {
     if (role === 'comercio') target = '/business'
     else if (role === 'admin' || role === 'super_admin') target = '/admin'
 
-    // Hard navigation para asegurar que cookies se sincronicen
-    // y evitar el doble salto del middleware
-    window.location.href = target
+    // Usar router.replace para evitar recarga completa de pagina
+    router.replace(target)
   }
 
   const fetchProfile = async (userId: string) => {
@@ -59,9 +58,9 @@ export function useAuth() {
     return profile as UserProfile | null
   }
 
-  const getUser = async () => {
+  const getUser = async (skipLoading = false) => {
     try {
-      setLoading(true)
+      if (!skipLoading) setLoading(true)
 
       const {
         data: { user: authUser },
@@ -99,13 +98,15 @@ export function useAuth() {
   }
 
   useEffect(() => {
-    getUser()
+    getUser(false)
 
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((event) => {
-      if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'USER_UPDATED') {
-        getUser()
+      // Solo recargar en eventos significativos, ignorar TOKEN_REFRESHED
+      // para evitar doble recarga al navegar entre paginas
+      if (event === 'SIGNED_IN' || event === 'USER_UPDATED') {
+        getUser(true)
       }
 
       if (event === 'SIGNED_OUT') {
@@ -169,18 +170,38 @@ export function useAuth() {
       throw new Error('Error al crear usuario')
     }
 
-    // Enviar email de bienvenida (no bloqueante)
+    // Enviar email de confirmacion de registro (no bloqueante)
     try {
       const baseUrl = window.location.origin
       fetch(baseUrl + '/api/email', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          type: 'welcome',
+          type: 'confirmation_required',
           email: email,
           data: { name },
         }),
-      }).catch(err => console.error('[Email] Error welcome:', err))
+      }).catch(err => console.error('[Email] Error confirmation:', err))
+
+      // NOTIFICAR A ADMINS: Nuevo usuario registrado
+      supabase
+        .from('user_profiles')
+        .select('id')
+        .in('role', ['admin', 'super_admin'])
+        .then(({ data: admins }) => {
+          if (admins && admins.length > 0) {
+            const notifications = admins.map((admin) => ({
+              userId: admin.id,
+              type: 'new_user',
+              message: `${name || 'Usuario'} se registro como ${role === 'comercio' ? 'comercio' : 'usuario'}${role === 'comercio' && shopData?.name ? ' - ' + shopData.name : ''}`,
+            }))
+            fetch(baseUrl + '/api/notifications', {
+              method: 'PUT',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ notifications }),
+            }).catch(err => console.error('[Notifications] Error:', err))
+          }
+        })
     } catch (_) {}
 
     if (!data.session) {
@@ -204,8 +225,8 @@ export function useAuth() {
   const signOut = async () => {
     await supabase.auth.signOut()
     setUser(null)
-    router.replace('/')
-    router.refresh()
+    // Usar window.location.href para recarga completa y evitar doble navegacion
+    window.location.href = '/'
   }
 
   return {

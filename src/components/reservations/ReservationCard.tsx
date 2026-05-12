@@ -55,10 +55,10 @@ export default function ReservationCard({
     ? `${reservation.pickup_start_time.slice(0,5)} - ${reservation.pickup_end_time.slice(0,5)}`
     : null
 
-  const isActive = ['pending', 'confirmed', 'ready_pickup'].includes(status)
-  const canCancel = ['pending', 'confirmed'].includes(status)
-  const canConfirm = status === 'pending'
-  const canComplete = status === 'confirmed' || status === 'ready_pickup'
+  const isActive = ['confirmed', 'pending'].includes(status)
+  const canCancel = ['confirmed', 'pending'].includes(status)
+  const canConfirm = false // Auto-confirmado en demo
+  const canComplete = status === 'confirmed'
 
   return (
     <motion.div

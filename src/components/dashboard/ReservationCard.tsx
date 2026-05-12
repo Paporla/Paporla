@@ -14,9 +14,9 @@ import { Reservation } from '@/types/reservation';
 // Función de ordenamiento para reservas por fecha de recogida más cercana
 export const sortReservationsByPickupTime = (reservations: Reservation[]) => {
   return [...reservations].sort((a, b) => {
-    // Primero las que están por expirar (confirmed/pending)
-    const aPriority = a.status === 'confirmed' || a.status === 'pending' ? 0 : 1;
-    const bPriority = b.status === 'confirmed' || b.status === 'pending' ? 0 : 1;
+    // Primero las que están por expirar (confirmed)
+    const aPriority = a.status === 'confirmed' ? 0 : 1;
+    const bPriority = b.status === 'confirmed' ? 0 : 1;
     if (aPriority !== bPriority) return aPriority - bPriority;
     
     // Luego por fecha de recogida más cercana
@@ -35,13 +35,12 @@ interface ReservationCardProps {
 
 const getStatusBadge = (status: string) => {
   const badges: Record<string, { label: string; color: string }> = {
-    pending: { label: 'Pendiente', color: 'bg-yellow-500/20 text-yellow-400' },
     confirmed: { label: 'Confirmada', color: 'bg-blue-500/20 text-blue-400' },
-    completed: { label: 'Retirado', color: 'bg-green-500/20 text-green-400' },
+    picked_up: { label: 'Recogido', color: 'bg-green-500/20 text-green-400' },
     cancelled: { label: 'Cancelada', color: 'bg-red-500/20 text-red-400' },
     no_show: { label: 'No retirado', color: 'bg-gray-500/20 text-gray-400' },
   };
-  const badge = badges[status] || badges.pending;
+  const badge = badges[status] || badges.confirmed;
   return (
     <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${badge.color}`}>
       {badge.label}
@@ -64,7 +63,7 @@ export default function ReservationCard({
     : null;
 
   const hasPickupInfo = reservation.pickup_date && reservation.pickup_end_time;
-  const isActive = reservation.status === 'pending' || reservation.status === 'confirmed';
+  const isActive = reservation.status === 'confirmed';
 
   return (
     <Card glass hover className="mb-4 overflow-hidden transition-all duration-300 group">

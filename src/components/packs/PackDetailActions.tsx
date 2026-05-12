@@ -1,106 +1,106 @@
-'use client';
+'use client'
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { useAuth } from '@/hooks/useAuth';
-import Button from '@/components/ui/Button';
-import Toast from '@/components/ui/Toast';
-import { supabaseBrowser } from '@/lib/supabase/client';
-import { formatPrice } from '@/lib/utils/formatPrice';
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { useAuth } from '@/hooks/useAuth'
+import { supabaseBrowser } from '@/lib/supabase/client'
+import { Package, AlertCircle } from 'lucide-react'
+import Button from '@/components/ui/Button'
+import QuickReserveFlow from '@/components/reservations/QuickReserveFlow'
+import { formatPrice } from '@/lib/utils/formatPrice'
+
+interface PackMinData {
+  id: string
+  title: string
+  description: string | null
+  price_cents: number
+  image_url: string | null
+  pickup_date: string | null
+  pickup_start_time: string | null
+  pickup_end_time: string | null
+  remaining_stock: number
+  shop_id: string
+  shop: {
+    id: string
+    name: string
+    address: string | null
+    phone: string | null
+  }
+}
 
 interface PackDetailActionsProps {
-  packId: string;
-  shopId: string;
-  priceCents: number;
-  remainingStock: number;
-  isActive: boolean;
-  onSuccess?: () => void;
+  packId: string
+  shopId: string
+  priceCents: number
+  remainingStock: number
+  isActive: boolean
+  onSuccess?: () => void
 }
 
 export default function PackDetailActions({
-  packId,
-  shopId,
-  priceCents,
-  remainingStock,
-  isActive,
-  onSuccess,
+  packId, priceCents, remainingStock, isActive, onSuccess
 }: PackDetailActionsProps) {
-  const { user } = useAuth();
-  const router = useRouter();
-  const supabase = supabaseBrowser();
-  const [reserving, setReserving] = useState(false);
-  const [error, setError] = useState('');
+  const { user } = useAuth()
+  const router = useRouter()
+  const supabase = supabaseBrowser()
+  const [showReserveFlow, setShowReserveFlow] = useState(false)
+  const [packData, setPackData] = useState<PackMinData | null>(null)
+  const [loadingPack, setLoadingPack] = useState(false)
 
-  const isAvailable = remainingStock > 0 && isActive;
-
-  const handleReserve = async () => {
-    if (!user) {
-      router.push('/login');
-      return;
+  const handleReserveClick = async () => {
+    if (!user) { router.push('/login'); return }
+    setLoadingPack(true)
+    const { data } = await supabase
+      .from('packs')
+      .select('id, title, description, price_cents, image_url, pickup_date, pickup_start_time, pickup_end_time, remaining_stock, shop_id, shop:shops(id, name, address, phone)')
+      .eq('id', packId)
+      .single()
+    if (data) {
+      setPackData(data as unknown as PackMinData)
+      setShowReserveFlow(true)
     }
+    setLoadingPack(false)
+  }
 
-    setReserving(true);
-    setError('');
-
-    // Verificar reserva existente
-    const { data: existing } = await supabase
-      .from('reservations')
-      .select('id')
-      .eq('user_id', user.id)
-      .eq('pack_id', packId)
-      .not('status', 'in', '(cancelled,completed,no_show)')
-      .maybeSingle();
-
-    if (existing) {
-      setError('Ya tienes una reserva activa para este pack');
-      setReserving(false);
-      return;
-    }
-
-    // Crear reserva
-    const { error: reservationError } = await supabase
-      .from('reservations')
-      .insert({
-        user_id: user.id,
-        shop_id: shopId,
-        pack_id: packId,
-        quantity: 1,
-        total_price_cents: priceCents,
-        status: 'pending',
-        payment_method: 'cash',
-      });
-
-    if (reservationError) {
-      setError(reservationError.message);
-      setReserving(false);
-      return;
-    }
-
-    setReserving(false);
-    onSuccess?.();
-    router.push('/dashboard/reservations');
-  };
+  if (!isActive || remainingStock <= 0) {
+    return (
+      <div className="fixed bottom-0 left-0 right-0 p-4 bg-black/90 backdrop-blur-md border-t border-white/10">
+        <div className="max-w-md mx-auto">
+          <div className="flex items-center justify-center gap-2 text-gray-400 py-3">
+            <AlertCircle className="w-5 h-5" />
+            <span className="font-medium">No disponible</span>
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <>
-      <div className="fixed bottom-0 left-0 right-0 bg-dark-card/90 backdrop-blur-xl border-t border-dark-border p-4 z-10">
-        <div className="max-w-lg mx-auto flex items-center gap-4">
-          <div>
-            <p className="text-xs text-gray-500">Total a pagar</p>
-            <p className="text-xl font-black text-primary">{formatPrice(priceCents)}</p>
-          </div>
-          <Button
-            onClick={handleReserve}
-            disabled={!isAvailable || reserving}
-            loading={reserving}
-            className="flex-1 py-4"
-          >
-            {!isAvailable ? 'Agotado' : 'Reservar ahora'}
+      <div className="fixed bottom-0 left-0 right-0 p-4 bg-black/90 backdrop-blur-md border-t border-white/10 z-40">
+        <div className="max-w-md mx-auto">
+          <Button onClick={handleReserveClick} disabled={loadingPack} className="w-full py-4 text-lg font-bold shadow-lg shadow-primary/20">
+            {loadingPack ? (
+              <div className="flex items-center justify-center gap-2">
+                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                Cargando...
+              </div>
+            ) : (
+              <div className="flex items-center justify-center gap-2">
+                <Package className="w-5 h-5" />
+                Reservar Ahora - {formatPrice(priceCents)}
+              </div>
+            )}
           </Button>
         </div>
       </div>
-
-      {error && <Toast message={error} type="error" onClose={() => setError('')} />}
+      {showReserveFlow && packData && (
+        <QuickReserveFlow
+          pack={packData}
+          onClose={() => { setShowReserveFlow(false); setPackData(null) }}
+          onSuccess={() => { setShowReserveFlow(false); setPackData(null); if (onSuccess) onSuccess() }}
+        />
+      )}
     </>
-  );
+  )
 }

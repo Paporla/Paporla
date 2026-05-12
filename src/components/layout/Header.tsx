@@ -41,12 +41,12 @@ export default function Header() {
 
   if (!mounted || loading) {
     return (
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-black/80 backdrop-blur-xl border-b border-primary/20 h-16" />
+      <nav className="fixed top-0 left-0 right-0 z-[60] bg-black/80 backdrop-blur-xl border-b border-dark-border h-16" />
     );
   }
 
   return (
-    <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled ? 'bg-black/80 backdrop-blur-xl border-b border-primary/20' : 'bg-transparent'}`}>
+    <nav className={`fixed top-0 left-0 right-0 z-[60] transition-all duration-300 ${isScrolled ? 'bg-black/80 backdrop-blur-xl border-b border-dark-border' : 'bg-transparent'}`}>
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
 
@@ -65,7 +65,7 @@ export default function Header() {
           </Link>
 
           {/* Enlaces desktop */}
-          <div className="hidden md:flex items-center gap-8">
+          <div className="hidden md:flex items-center gap-6 lg:gap-8">
             {navLinks.map((link) => (
               <Link
                 key={link.href}
@@ -112,7 +112,7 @@ export default function Header() {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
-            className="md:hidden bg-black/95 backdrop-blur-xl border-t border-primary/20"
+            className="md:hidden bg-black/95 backdrop-blur-xl border-t border-dark-border"
           >
             <div className="px-4 py-4 flex flex-col gap-3">
               {navLinks.map((link) => (

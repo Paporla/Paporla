@@ -25,20 +25,22 @@ export default function PackDetail({ pack, onClose }: PackDetailProps) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-dark overflow-y-auto">
-      <PackDetailHeader
-        title={pack.title}
-        priceCents={pack.price_cents}
-        originalPriceCents={pack.original_price_cents}
-        remainingStock={pack.remaining_stock}
-        totalStock={pack.total_stock}
-        onBack={handleBack}
-      />
+    <div className="fixed inset-0 z-40 bg-dark overflow-y-auto">
+      <div className="pt-16">
+        <PackDetailHeader
+          title={pack.title}
+          priceCents={pack.price_cents}
+          originalPriceCents={pack.original_price_cents}
+          remainingStock={pack.remaining_stock}
+          totalStock={pack.total_stock}
+          onBack={handleBack}
+        />
 
-      <PackDetailHero
-        imageUrl={pack.image_url ?? null}  // ← Convertir undefined a null
-        title={pack.title}
-      />
+        <PackDetailHero
+          imageUrl={pack.image_url ?? null}
+          title={pack.title}
+        />
+      </div>
 
       <div className="p-5 pb-32 space-y-6">
         <PackDetailShopInfo
@@ -58,7 +60,7 @@ export default function PackDetail({ pack, onClose }: PackDetailProps) {
           description={pack.description}
           priceCents={pack.price_cents}
           originalPriceCents={pack.original_price_cents}
-          endsAt={pack.ends_at ?? null}  // ← Convertir undefined a null
+          endsAt={pack.ends_at ?? null}
         />
       </div>
 

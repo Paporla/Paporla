@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabaseBrowser } from '@/lib/supabase/client';
 import { motion } from 'framer-motion';
-import { Calendar, CreditCard, MapPin, Inbox } from 'lucide-react';
+import { Calendar, CreditCard, MapPin, Inbox, AlertTriangle } from 'lucide-react';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import CopyButton from '@/components/ui/CopyButton';
@@ -13,6 +13,7 @@ import EmptyState from '@/components/ui/EmptyState';
 import PageLoader from '@/components/ui/PageLoader';
 import { formatPrice } from '@/lib/utils/formatPrice';
 import { formatDate } from '@/lib/utils/formatDate';
+import { canCancelReservation } from '@/lib/utils/canCancelReservation';
 
 interface Reservation {
   id: string;
@@ -48,7 +49,6 @@ export default function UserReservationsPage() {
 
   useEffect(() => {
     if (user) loadReservations();
-    else setLoading(false);
   }, [user]);
 
   const loadReservations = async () => {
@@ -89,6 +89,20 @@ export default function UserReservationsPage() {
   };
 
   const handleCancel = async (id: string) => {
+    const reservation = reservations.find(r => r.id === id);
+    if (!reservation) return;
+
+    const cancelCheck = canCancelReservation({
+      status: reservation.status,
+      pickup_date: reservation.pickup_date,
+      pickup_start_time: reservation.pickup_end_time, // Usamos end_time como ref
+    });
+
+    if (!cancelCheck.allowed) {
+      setError(cancelCheck.reason || 'No puedes cancelar esta reserva');
+      return;
+    }
+
     setCancelling(id);
     await supabase
       .from('reservations')

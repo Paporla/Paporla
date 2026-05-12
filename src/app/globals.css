@@ -2,25 +2,34 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Estilos base */
+/* ============================================
+   DISEÑO SISTEMA - CSS Variables
+   ============================================ */
+:root {
+  --color-dark: #0a0a1a;
+  --color-dark-card: #0f0f1a;
+  --color-dark-muted: #1a1a2e;
+  --color-dark-border: rgba(255, 255, 255, 0.08);
+  --color-dark-hover: rgba(255, 255, 255, 0.12);
+  --color-primary: #00ff88;
+  --color-primary-dark: #00cc6e;
+  --color-secondary: #ff8a3c;
+  --glass-bg: rgba(15, 15, 26, 0.7);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --glass-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+}
+
+/* ============================================
+   ESTILOS BASE
+   ============================================ */
 body {
+  background: radial-gradient(circle at 20% 30%, #0a0a1a, #020205);
+  color: #ffffff;
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-/* Modo oscuro */
-.dark body {
-  background: radial-gradient(circle at 20% 30%, #0a0a1a, #020205);
-  color: #ffffff;
-}
-
-/* Modo claro */
-.light body {
-  background: radial-gradient(circle at 20% 30%, #e8f5e9, #c8e6c9);
-  color: #1a2e1f;
-}
-
-/* Fondo de ruido solo para modo oscuro */
-.dark body::before {
+/* Fondo de ruido */
+body::before {
   content: '';
   position: fixed;
   top: 0;
@@ -34,59 +43,106 @@ body {
   opacity: 0.3;
 }
 
-.light body::before {
-  display: none;
-}
+/* ============================================
+   COMPONENTES REUTILIZABLES
+   ============================================ */
+@layer components {
 
-/* Tarjetas vidrio para modo oscuro */
-.dark .glass-card {
-  background: rgba(10, 14, 23, 0.6);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(0, 255, 136, 0.15);
-  border-radius: 0.75rem;
-  padding: 1.5rem;
-  transition: all 0.3s ease;
-}
+  /* --- CARD BASE --- */
+  .card-base {
+    @apply rounded-xl p-5;
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--glass-shadow);
+    backdrop-filter: blur(12px);
+    transition: all 0.3s ease;
+  }
 
-/* Tarjetas para modo claro */
-.light .glass-card {
-  background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(0, 255, 136, 0.4);
-  border-radius: 0.75rem;
-  padding: 1.5rem;
-  transition: all 0.3s ease;
-}
+  .card-hover {
+    @apply card-base;
+  }
 
-.glass-card:hover {
-  border-color: rgba(0, 255, 136, 0.8);
-  box-shadow: 0 8px 32px rgba(0, 255, 136, 0.15);
-}
+  .card-hover:hover {
+    border-color: rgba(0, 255, 136, 0.3);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(0, 255, 136, 0.1);
+  }
 
-/* Texto gradiente */
-.text-gradient {
-  background: linear-gradient(135deg, #00ff88 0%, #ff8a3c 50%, #00ff88 100%);
-  background-size: 200% auto;
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  animation: shine 3s linear infinite;
-}
+  /* --- SECTION HEADER (Hero) --- */
+  .section-header {
+    @apply relative overflow-hidden;
+    background: linear-gradient(135deg, rgba(0, 255, 136, 0.05) 0%, transparent 50%, rgba(255, 138, 60, 0.05) 100%);
+  }
 
-@keyframes shine {
-  to {
-    background-position: 200% center;
+  /* --- GLOW EFFECTS --- */
+  .glow-primary {
+    box-shadow: 0 0 20px rgba(0, 255, 136, 0.15);
+  }
+
+  .glow-primary-lg {
+    box-shadow: 0 0 40px rgba(0, 255, 136, 0.2);
+  }
+
+  /* --- STATUS BADGE --- */
+  .badge {
+    @apply text-xs px-2 py-0.5 rounded-full font-medium inline-flex items-center gap-1;
+  }
+
+  /* --- GRADIENT TEXT --- */
+  .text-gradient {
+    background: linear-gradient(135deg, #00ff88 0%, #ff8a3c 50%, #00ff88 100%);
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: shine 3s linear infinite;
+  }
+
+  @keyframes shine {
+    to { background-position: 200% center; }
+  }
+
+  /* --- BACKDROP OVERLAY --- */
+  .overlay {
+    @apply fixed inset-0 z-50;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(8px);
+  }
+
+  /* --- SECTION SPACING --- */
+  .section-padding {
+    @apply px-4 py-8 md:py-12;
+  }
+
+  .container-page {
+    @apply max-w-6xl mx-auto px-4;
   }
 }
 
-/* Botón gradiente */
-.btn-gradient {
-  background: linear-gradient(135deg, #00ff88 0%, #00cc6e 100%);
-  transition: all 0.3s ease;
-  box-shadow: 0 0 15px rgba(0, 255, 136, 0.3);
+/* ============================================
+   TRANSICIONES GLOBALES
+   ============================================ */
+* {
+  transition-property: background-color, border-color, color;
+  transition-duration: 150ms;
+  transition-timing-function: ease;
 }
 
-.btn-gradient:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(0, 255, 136, 0.5);
+/* ============================================
+   SCROLL PERSONALIZADO
+   ============================================ */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
 }

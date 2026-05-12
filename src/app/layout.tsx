@@ -24,8 +24,8 @@ export const metadata: Metadata = {
     siteName: 'Paporla',
     title: 'Paporla - Rescate Alimentario',
     description: 'Conectamos comercios con excedentes de comida con personas que necesitan alimentarse. Reduce el desperdicio, ayuda a tu comunidad.',
-    images: [{
-      url: '/og-image.png',
+        images: [{
+      url: '/og-image.svg',
       width: 1200,
       height: 630,
       alt: 'Paporla - Rescate Alimentario'
@@ -35,7 +35,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Paporla - Rescate Alimentario',
     description: 'Conectamos comercios con excedentes de comida con personas que necesitan alimentarse.',
-    images: ['/og-image.png'],
+    images: ['/og-image.svg'],
     creator: '@paporla'
   },
   robots: {

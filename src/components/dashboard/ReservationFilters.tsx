@@ -3,19 +3,17 @@
 import { motion } from 'framer-motion';
 
 interface ReservationFiltersProps {
-  activeFilter: 'all' | 'pending' | 'confirmed';
-  onFilterChange: (filter: 'all' | 'pending' | 'confirmed') => void;
+  activeFilter: 'all' | 'confirmed';
+  onFilterChange: (filter: 'all' | 'confirmed') => void;
   counts: {
     all: number;
-    pending: number;
     confirmed: number;
   };
 }
 
 export default function ReservationFilters({ activeFilter, onFilterChange, counts }: ReservationFiltersProps) {
-  const filters = [
+    const filters = [
     { value: 'all' as const, label: 'Todas', count: counts.all },
-    { value: 'pending' as const, label: 'Pendientes', count: counts.pending },
     { value: 'confirmed' as const, label: 'Confirmadas', count: counts.confirmed },
   ];
 

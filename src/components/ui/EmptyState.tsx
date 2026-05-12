@@ -90,7 +90,7 @@ export default function EmptyState({ type, icon: customIcon, title: customTitle,
       animate={{ opacity: 1, y: 0 }}
       className="flex flex-col items-center justify-center text-center py-12 px-4"
     >
-      <div className="bg-black/40 backdrop-blur-sm border border-white/10 rounded-2xl p-8 max-w-md mx-auto">
+      <div className="card-base max-w-md mx-auto">
         <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-primary/10 flex items-center justify-center">
           <Icon className="w-10 h-10 text-primary" />
         </div>

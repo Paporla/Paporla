@@ -5,7 +5,7 @@ import {
   RotateCcw, QrCode, Star, AlertTriangle,
   Package, Zap, Trash2, Leaf, ChevronRight
 } from 'lucide-react'
-import { useReservationStore } from '../../store/reservationStore'
+import { useSimulationStore } from '@/hooks/useSimulationStore'
 
 const statusColors: Record<ReservationStatus, { text: string; bg: string; border: string }> = {
   pending: { text: 'text-amber-400', bg: 'bg-amber-500/10', border: 'border-amber-500/20' },
@@ -40,7 +40,7 @@ export default function FlowSimulator() {
     packs, reservations, logs,
     reservePack, confirmPayment, activatePickupWindow,
     validatePickup, expireReservation, cancelReservation, rateReservation,
-  } = useReservationStore()
+  } = useSimulationStore()
 
   const [pickupCode, setPickupCode] = useState('')
   const [validationResult, setValidationResult] = useState<string | null>(null)

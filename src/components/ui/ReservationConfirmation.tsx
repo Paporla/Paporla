@@ -3,7 +3,7 @@
 import Image from 'next/image'
 import { motion } from 'framer-motion';
 import Link from 'next/link';
-import { CheckCircle, MapPin, Clock, Calendar, Navigation, Copy } from 'lucide-react';;
+import { CheckCircle, MapPin, Clock, Calendar, Navigation, Copy } from 'lucide-react';
 import Button from './Button';
 import Toast from './Toast';
 import { useState } from 'react';

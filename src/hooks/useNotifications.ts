@@ -1,14 +1,16 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { supabaseBrowser } from '@/lib/supabase/client';
 import { useAuth } from './useAuth';
+import type { RealtimePostgresChangesPayload } from '@supabase/supabase-js';
 
 export interface Notification {
   id: string;
   user_id: string;
   reservation_id: string | null;
-  type: 'pickup_reminder' | 'cancellation' | 'confirmation' | 'new_pack' | 'shop_verified';
+  type: 'pickup_reminder' | 'cancellation' | 'confirmation' | 'new_pack' | 'shop_verified'
+    | 'new_reservation' | 'user_cancelled' | 'pickup_completed' | 'new_user' | 'new_shop' | 'incidence';
   message: string;
   is_read: boolean;
   sent_at: string | null;
@@ -22,6 +24,7 @@ export function useNotifications() {
   const [unreadCount, setUnreadCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
 
   const loadNotifications = useCallback(async () => {
     if (!user) {
@@ -54,16 +57,47 @@ export function useNotifications() {
     loadNotifications();
   }, [loadNotifications]);
 
-  // Polling cada 30 segundos (en lugar de Realtime)
+  // ============================================
+  // SUPABASE REALTIME — Escuchar notificaciones
+  // ============================================
   useEffect(() => {
     if (!user) return;
-    
-    const interval = setInterval(() => {
-      loadNotifications();
-    }, 30000);
-    
-    return () => clearInterval(interval);
-  }, [user, loadNotifications]);
+
+    // Limpiar canal anterior si existe
+    if (channelRef.current) {
+      supabase.removeChannel(channelRef.current)
+    }
+
+    // Suscribirse a nuevos inserts en notifications para este usuario
+    const channel = supabase
+      .channel('notifications-realtime')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'notifications',
+          filter: `user_id=eq.${user.id}`,
+        },
+        (payload: RealtimePostgresChangesPayload<Notification>) => {
+          const newNotif = payload.new as Notification
+          if (newNotif) {
+            setNotifications(prev => [newNotif, ...prev])
+            setUnreadCount(prev => prev + 1)
+          }
+        }
+      )
+      .subscribe()
+
+    channelRef.current = channel
+
+    return () => {
+      if (channelRef.current) {
+        supabase.removeChannel(channelRef.current)
+        channelRef.current = null
+      }
+    }
+  }, [user, supabase])
 
   const markAsRead = useCallback(async (notificationId: string) => {
     const { error } = await supabase

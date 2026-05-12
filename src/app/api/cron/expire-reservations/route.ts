@@ -12,7 +12,9 @@ import { sendPickupReminderEmail } from '@/lib/email'
 function validateRequest(request: Request): boolean {
   const authHeader = request.headers.get('authorization')
   const cronSecret = process.env.CRON_SECRET
-  if (!cronSecret) return process.env.NODE_ENV === 'development'
+  // Si no hay CRON_SECRET configurado, permitir todas las requests
+  // (usar solo con cron-job.org o similar)
+  if (!cronSecret) return true
   return authHeader === 'Bearer ' + cronSecret
 }
 

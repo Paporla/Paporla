@@ -119,7 +119,7 @@ export default function ReservationStatus({
       )}
 
       {/* Advertencia de expiración */}
-      {status === 'pending' && (
+      {status === 'confirmed' && (
         <div className="mt-4 p-3 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
           <p className="text-sm text-yellow-400">
             ⚠️ La reserva está pendiente de confirmación por el comercio

@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { Plus, Package, Calendar, Store, Copy } from 'lucide-react';
+import { Plus, Package, Calendar, Store, Copy, BarChart3 } from 'lucide-react';
 import Card from '@/components/ui/Card';
 
 const actions = [
@@ -11,6 +11,7 @@ const actions = [
   { icon: Package, label: 'Mis Packs', href: '/business/packs', color: 'from-blue-500 to-cyan-500', description: 'Gestionar packs' },
   { icon: Calendar, label: 'Reservas', href: '/business/reservations', color: 'from-orange-500 to-red-500', description: 'Ver pedidos' },
   { icon: Store, label: 'Mi Comercio', href: '/business/profile', color: 'from-green-500 to-emerald-500', description: 'Editar perfil' },
+  { icon: BarChart3, label: 'Estadisticas', href: '/business/analytics', color: 'from-amber-500 to-orange-500', description: 'Analisis completo' },
 ];
 
 export default function QuickActions() {
@@ -20,7 +21,7 @@ export default function QuickActions() {
         <span className="w-1 h-6 bg-primary rounded-full" />
         Acciones Rápidas
       </h2>
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
         {actions.map((action, idx) => (
           <motion.div
             key={idx}

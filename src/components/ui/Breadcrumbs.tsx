@@ -68,7 +68,7 @@ export default function Breadcrumbs() {
   if (breadcrumbs.length <= 2 && breadcrumbs[1]?.href === '/') return null
 
   return (
-    <div className="bg-black/40 backdrop-blur-md border-b border-white/5">
+    <div className="border-b border-dark-border">
       <div className="container mx-auto px-4">
         <div className="py-2.5">
           <nav className="flex items-center gap-1 text-xs md:text-sm overflow-x-auto whitespace-nowrap scrollbar-hide">

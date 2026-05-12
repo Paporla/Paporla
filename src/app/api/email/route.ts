@@ -24,11 +24,6 @@ function baseLayout(content: string) {
   <tr><td style="text-align:center;line-height:0;font-size:0;">
     <img src="${baseUrl}/images/banner-optimized.webp" alt="Paporla" style="width:100%;max-width:600px;height:auto;display:block;" width="600" />
   </td></tr>
-  <tr><td style="padding:20px 20px 10px;text-align:center;background:linear-gradient(180deg,rgba(${primaryRgb},0.08) 0%,#0a0a0f 100%);">
-    <img src="${baseUrl}/images/logo-transparent.png" alt="Paporla" style="width:48px;height:48px;display:inline-block;margin-bottom:8px;" width="48" height="48" />
-    <h1 style="color:${primaryColor};margin:4px 0 2px;font-size:22px;font-weight:700;letter-spacing:3px;text-transform:uppercase;">Paporla</h1>
-    <p style="color:#666;font-size:12px;margin:0 0 4px;letter-spacing:1px;">Rescate Alimentario</p>
-  </td></tr>
   <tr><td style="padding:30px 30px 20px;">
     ${content}
   </td></tr>
@@ -64,8 +59,8 @@ function welcomeTemplate(name: string) {
   </table>
 </div>
 <div style="text-align:center;margin:24px 0 8px;">${button(`${baseUrl}/packs`, 'Explorar packs disponibles')}</div>
-<p style="color:#555;font-size:12px;text-align:center;margin:16px 0 0;line-height:1.6;">\u26A0\uFE0F Esta es una versi\u00F3n <strong>DEMO</strong>. No hay procesamiento de pagos reales.</p>
 `)
+// @ts-ignore - supabase template literal
 }
 
 function reservationTemplate(data: {
@@ -89,7 +84,6 @@ function reservationTemplate(data: {
   <tr><td style="padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.05);"><span style="color:#888;font-size:13px;">Total</span></td><td style="padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.05);text-align:right;"><span style="color:${primaryColor};font-size:14px;font-weight:700;">${data.price}</span></td></tr>
 </table>
 <div style="text-align:center;margin:24px 0 8px;">${button(`${baseUrl}/dashboard`, 'Ver mis reservas')}</div>
-<p style="color:#555;font-size:12px;text-align:center;margin:16px 0 0;line-height:1.6;">\u26A0\uFE0F Esta es una versi\u00F3n <strong>DEMO</strong>. No hay procesamiento de pagos reales.</p>
 `)
 }
 
