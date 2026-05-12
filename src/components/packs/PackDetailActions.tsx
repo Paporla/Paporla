@@ -46,19 +46,41 @@ export default function PackDetailActions({
   const [showReserveFlow, setShowReserveFlow] = useState(false)
   const [packData, setPackData] = useState<PackMinData | null>(null)
   const [loadingPack, setLoadingPack] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   const handleReserveClick = async () => {
     if (!user) { router.push('/login'); return }
+    
     setLoadingPack(true)
-    const { data } = await supabase
+    setError(null)
+    
+    // Obtener datos del pack
+    const { data, error: fetchError } = await supabase
       .from('packs')
       .select('id, title, description, price_cents, image_url, pickup_date, pickup_start_time, pickup_end_time, remaining_stock, shop_id, shop:shops(id, name, address, phone)')
       .eq('id', packId)
       .single()
-    if (data) {
-      setPackData(data as unknown as PackMinData)
-      setShowReserveFlow(true)
+    
+    if (fetchError || !data) {
+      setError('Error al cargar el pack')
+      setLoadingPack(false)
+      return
     }
+
+    // ✅ VALIDACIÓN: Verificar si el pack ya expiró
+    if (data.pickup_date && data.pickup_end_time) {
+      const pickupDateTime = new Date(`${data.pickup_date}T${data.pickup_end_time}`)
+      const now = new Date()
+      
+      if (pickupDateTime < now) {
+        setError('Este pack ya expiró. No puedes reservarlo.')
+        setLoadingPack(false)
+        return
+      }
+    }
+    
+    setPackData(data as unknown as PackMinData)
+    setShowReserveFlow(true)
     setLoadingPack(false)
   }
 
@@ -79,6 +101,11 @@ export default function PackDetailActions({
     <>
       <div className="fixed bottom-0 left-0 right-0 p-4 bg-black/90 backdrop-blur-md border-t border-white/10 z-40">
         <div className="max-w-md mx-auto">
+          {error && (
+            <div className="mb-3 p-2 bg-red-500/10 border border-red-500/20 rounded-lg text-center">
+              <span className="text-sm text-red-400">{error}</span>
+            </div>
+          )}
           <Button onClick={handleReserveClick} disabled={loadingPack} className="w-full py-4 text-lg font-bold shadow-lg shadow-primary/20">
             {loadingPack ? (
               <div className="flex items-center justify-center gap-2">

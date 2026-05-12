@@ -49,9 +49,9 @@ export default function AboutPage() {
               </div>
               <h2 className="text-2xl font-bold text-white mb-4">Nuestra Misión</h2>
               <p className="text-gray-400 leading-relaxed">
-                En Paporla, nuestra misión es reducir el desperdicio alimentario en Caracas 
-                conectando comercios con excedentes de comida con personas que necesitan alimentarse. 
-                Creemos que ningún alimento debería terminar en la basura mientras haya personas que lo necesitan.
+                En Paporla, nuestra misión es reducir el desperdicio alimentario 
+                conectando comercios con excedentes de comida. 
+                Creemos que ningún alimento debería terminar en la basura.
               </p>
             </Card>
           </motion.div>
@@ -91,7 +91,7 @@ export default function AboutPage() {
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
               {[
                 { icon: Leaf, title: 'Sostenibilidad', desc: 'Comprometidos con el medio ambiente reduciendo el desperdicio', color: 'text-green-400', bgColor: 'bg-green-400/10' },
-                { icon: Users, title: 'Comunidad', desc: 'Fortalociendo lazos entre comercios y vecinos', color: 'text-primary', bgColor: 'bg-primary/10' },
+                { icon: Users, title: 'Comunidad', desc: 'Fortaleciendo lazos entre comercios y vecinos', color: 'text-primary', bgColor: 'bg-primary/10' },
                 { icon: Shield, title: 'Transparencia', desc: 'Procesos claros y comunicación abierta', color: 'text-blue-400', bgColor: 'bg-blue-400/10' },
                 { icon: TrendingUp, title: 'Innovación', desc: 'Buscamos constantemente mejorar la experiencia', color: 'text-secondary', bgColor: 'bg-secondary/10' },
                 { icon: Heart, title: 'Empatía', desc: 'Entendemos las necesidades de todos los usuarios', color: 'text-red-400', bgColor: 'bg-red-400/10' },

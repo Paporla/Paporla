@@ -30,6 +30,8 @@ export function usePackSearch(initialFilters?: Partial<SearchFilters>) {
     setLoading(true);
     setError(null);
 
+    const now = new Date().toISOString();
+
     let query = supabase
       .from('packs')
       .select(`
@@ -48,6 +50,9 @@ export function usePackSearch(initialFilters?: Partial<SearchFilters>) {
       .eq('is_active', true)
       .gt('remaining_stock', 0)
       .is('deleted_at', null);
+
+    // ✅ FILTRO: No mostrar packs cuya fecha/hora de recogida ya pasó
+    query = query.or(`pickup_date.is.null,pickup_end_time.is.null,and(pickup_date.not.is.null,pickup_end_time.not.is.null,concat(pickup_date,' ',pickup_end_time).gt.${now})`);
 
     // Filtro por búsqueda
     if (filters.search) {

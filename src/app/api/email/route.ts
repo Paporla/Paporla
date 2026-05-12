@@ -20,20 +20,39 @@ function baseLayout(content: string) {
 <body style="margin:0;padding:0;background:#000;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
 <table width="100%" cellpadding="0" cellspacing="0" style="background:#000;padding:40px 20px;">
 <tr><td align="center">
-<table width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;background:#0a0a0f;border-radius:16px;overflow:hidden;border:1px solid rgba(255,255,255,0.06);">
-  <tr><td style="text-align:center;line-height:0;font-size:0;">
-    <img src="${baseUrl}/images/banner-optimized.webp" alt="Paporla" style="width:100%;max-width:600px;height:auto;display:block;" width="600" />
+<table width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background:#0a0a0f;border-radius:20px;overflow:hidden;border:1px solid rgba(255,255,255,0.06);box-shadow:0 20px 60px rgba(0,0,0,0.5);">
+  <tr><td style="background:linear-gradient(135deg,#0a0a1a 0%,#0f0f1a 50%,#0a0a1a 100%);padding:36px 40px 28px;text-align:center;border-bottom:1px solid rgba(0,255,136,0.08);">
+    <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:16px;"><tr><td align="center">
+      <table cellpadding="0" cellspacing="0"><tr>
+        <td style="width:40px;height:2px;background:rgba(0,255,136,0.15);border-radius:2px;"></td>
+        <td style="width:40px;height:2px;background:${primaryColor};border-radius:2px;box-shadow:0 0 8px rgba(0,255,136,0.5);"></td>
+        <td style="width:40px;height:2px;background:rgba(0,255,136,0.15);border-radius:2px;"></td>
+      </tr></table>
+    </td></tr></table>
+    <table cellpadding="0" cellspacing="0" style="margin:0 auto;"><tr>
+      <td style="text-align:center;">
+        <span style="color:#ffffff;font-size:36px;font-weight:900;letter-spacing:3px;text-transform:uppercase;">PAPORLA</span>
+        <span style="color:${primaryColor};font-size:36px;font-weight:300;letter-spacing:-1px;">.</span>
+      </td>
+    </tr><tr>
+      <td style="text-align:center;padding-top:4px;">
+        <span style="color:#555;font-size:12px;letter-spacing:5px;text-transform:uppercase;">Rescate Alimentario</span>
+      </td>
+    </tr></table>
   </td></tr>
-  <tr><td style="padding:30px 30px 20px;">
+  <tr><td style="padding:30px 40px 20px;">
     ${content}
   </td></tr>
-  <tr><td style="padding:20px 30px;text-align:center;border-top:1px solid rgba(255,255,255,0.06);">
-    <p style="color:#444;font-size:11px;line-height:1.8;margin:0 0 8px;">Paporla &mdash; Rescate Alimentario<br>Caracas, Venezuela</p>
-    <p style="color:#333;font-size:11px;margin:0;">Si tienes dudas, escr\u00EDbenos a <a href="mailto:hola@paporla.com" style="color:${primaryColor};text-decoration:none;">hola@paporla.com</a></p>
-    <hr style="border:none;border-top:1px solid rgba(255,255,255,0.04);margin:16px 0;">
-    <p style="color:#2a2a2a;font-size:10px;margin:0;">&copy; 2026 Paporla. Todos los derechos reservados.</p>
+  <tr><td style="padding:20px 40px 28px;text-align:center;border-top:1px solid rgba(255,255,255,0.04);">
+    <table cellpadding="0" cellspacing="0" style="margin:0 auto 14px;"><tr><td style="width:30px;height:2px;background:rgba(0,255,136,0.2);border-radius:2px;"></td></tr></table>
+    <p style="color:#333;font-size:10px;margin:0 0 2px;letter-spacing:1px;text-transform:uppercase;">Paporla &mdash; Rescate Alimentario</p>
+    <p style="color:#2a2a2a;font-size:10px;margin:0 0 8px;">Caracas, Venezuela</p>
+    <p style="color:#222;font-size:9px;margin:0;">&copy; 2026 Paporla. Todos los derechos reservados.</p>
   </td></tr>
 </table>
+<p style="color:#222;font-size:10px;margin:16px 0 0;text-align:center;">
+  ¿Tienes dudas? Escribinos a <a href="mailto:hola@paporla.com" style="color:${primaryColor};text-decoration:none;">hola@paporla.com</a>
+</p>
 </td></tr>
 </table>
 </body>
@@ -51,16 +70,15 @@ function welcomeTemplate(name: string) {
 <h2 style="color:#fff;font-size:24px;margin:0 0 6px;text-align:center;">\u00A1Bienvenido, ${name}!</h2>
 <p style="color:#999;font-size:14px;line-height:1.7;margin:0 0 8px;text-align:center;">Gracias por unirte a <strong style="color:${primaryColor};">Paporla</strong>.<br>Ahora formas parte del cambio para reducir el desperdicio alimentario.</p>
 <div style="background:rgba(255,255,255,0.03);border-radius:12px;padding:20px;margin:20px 0;">
-  <p style="margin:0 0 12px;color:#ccc;font-size:14px;font-weight:600;">\u{1F4A1} \u00BFC\u00F3mo funciona?</p>
+  <p style="margin:0 0 12px;color:#ccc;font-size:14px;font-weight:600;">\u00BFC\u00F3mo funciona?</p>
   <table cellpadding="0" cellspacing="0">
     <tr><td style="width:28px;vertical-align:top;padding-right:10px;"><span style="display:inline-block;width:24px;height:24px;background:rgba(${primaryRgb},0.2);border-radius:50%;text-align:center;line-height:24px;color:${primaryColor};font-size:12px;font-weight:700;">1</span></td><td style="padding-bottom:12px;"><p style="margin:0;color:#aaa;font-size:13px;line-height:1.5;"><strong style="color:#fff;">Explora</strong> packs sorpresa de comercios locales</p></td></tr>
     <tr><td style="width:28px;vertical-align:top;padding-right:10px;"><span style="display:inline-block;width:24px;height:24px;background:rgba(${primaryRgb},0.2);border-radius:50%;text-align:center;line-height:24px;color:${primaryColor};font-size:12px;font-weight:700;">2</span></td><td style="padding-bottom:12px;"><p style="margin:0;color:#aaa;font-size:13px;line-height:1.5;"><strong style="color:#fff;">Reserva</strong> el que m\u00E1s te guste</p></td></tr>
-    <tr><td style="width:28px;vertical-align:top;padding-right:10px;"><span style="display:inline-block;width:24px;height:24px;background:rgba(${primaryRgb},0.2);border-radius:50%;text-align:center;line-height:24px;color:${primaryColor};font-size:12px;font-weight:700;">3</span></td><td><p style="margin:0;color:#aaa;font-size:13px;line-height:1.5;"><strong style="color:#fff;">Recoge</strong> tu pedido y disfruta \u{1F331}</p></td></tr>
+    <tr><td style="width:28px;vertical-align:top;padding-right:10px;"><span style="display:inline-block;width:24px;height:24px;background:rgba(${primaryRgb},0.2);border-radius:50%;text-align:center;line-height:24px;color:${primaryColor};font-size:12px;font-weight:700;">3</span></td><td><p style="margin:0;color:#aaa;font-size:13px;line-height:1.5;"><strong style="color:#fff;">Recoge</strong> tu pedido y disfruta</p></td></tr>
   </table>
 </div>
 <div style="text-align:center;margin:24px 0 8px;">${button(`${baseUrl}/packs`, 'Explorar packs disponibles')}</div>
 `)
-// @ts-ignore - supabase template literal
 }
 
 function reservationTemplate(data: {
@@ -120,7 +138,7 @@ export async function POST(request: Request) {
 
     switch (type) {
       case 'welcome': {
-        subject = '\u00A1Bienvenido a Paporla! \u{1F331}'
+        subject = '\u00A1Bienvenido a Paporla!'
         html = welcomeTemplate(data?.name || 'Usuario')
         break
       }

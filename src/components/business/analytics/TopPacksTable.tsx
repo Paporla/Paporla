@@ -1,48 +1,55 @@
-'use client'
+'use client';
 
-import { motion } from 'framer-motion'
-import { Package, TrendingUp, TrendingDown } from 'lucide-react'
-import Link from 'next/link'
-import type { TopPack } from './useBusinessAnalytics'
+import { motion } from 'framer-motion';
+import Link from 'next/link';
+import { Package, TrendingUp, TrendingDown, Eye } from 'lucide-react';
 
-interface Props { packs: TopPack[] }
+interface TopPack {
+  id: string;
+  title: string;
+  totalSold: number;
+  revenue: number;
+  cancellationRate: number;
+}
 
-export default function TopPacksTable({ packs }: Props) {
+interface TopPacksTableProps {
+  packs: TopPack[];
+}
+
+export default function TopPacksTable({ packs }: TopPacksTableProps) {
   if (packs.length === 0) {
     return (
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.35 }}
-        className="card-base"
-      >
+      <div className="bg-dark-card border border-dark-border rounded-2xl p-6">
         <div className="flex items-center gap-2 mb-4">
           <Package className="w-5 h-5 text-primary" />
           <h3 className="font-bold text-white">Top packs vendidos</h3>
         </div>
-        <p className="text-gray-500 text-sm py-8 text-center">Aun no hay ventas registradas</p>
-      </motion.div>
-    )
+        <div className="text-center py-8">
+          <p className="text-gray-500 text-sm">No hay datos suficientes</p>
+          <p className="text-xs text-gray-600 mt-1">Los packs aparecerán aquí cuando tengas ventas</p>
+        </div>
+      </div>
+    );
   }
 
-  const maxSold = packs[0]?.totalSold || 1
+  const maxSold = packs[0]?.totalSold || 1;
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.35 }}
-      className="card-base"
+      className="bg-dark-card border border-dark-border rounded-2xl p-6"
     >
       <div className="flex items-center gap-2 mb-5">
         <Package className="w-5 h-5 text-primary" />
         <h3 className="font-bold text-white">Top packs vendidos</h3>
       </div>
+
       <div className="space-y-3">
         {packs.map((pack, idx) => (
           <Link key={pack.id} href={`/business/packs/${pack.id}`} className="block group">
-            <div className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-white/[0.03] transition-colors">
-              {/* Posicion */}
+            <div className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-white/5 transition-colors">
+              {/* Posición */}
               <div className={`w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold ${
                 idx === 0 ? 'bg-amber-500/20 text-amber-400' :
                 idx === 1 ? 'bg-gray-400/20 text-gray-400' :
@@ -57,7 +64,7 @@ export default function TopPacksTable({ packs }: Props) {
                 <p className="text-sm font-medium text-white group-hover:text-primary transition-colors truncate">
                   {pack.title}
                 </p>
-                <div className="flex items-center gap-3 mt-0.5">
+                <div className="flex items-center gap-3 mt-1">
                   <span className="text-xs text-gray-500">{pack.totalSold} vendidos</span>
                   <span className="text-xs text-green-400">${pack.revenue.toFixed(2)}</span>
                 </div>
@@ -73,7 +80,7 @@ export default function TopPacksTable({ packs }: Props) {
                 </div>
               </div>
 
-              {/* Cancelacion */}
+              {/* Tasa de cancelación */}
               {pack.cancellationRate > 0 && (
                 <div className={`flex items-center gap-1 text-xs ${
                   pack.cancellationRate > 20 ? 'text-red-400' : 'text-gray-500'
@@ -86,10 +93,12 @@ export default function TopPacksTable({ packs }: Props) {
                   {pack.cancellationRate}%
                 </div>
               )}
+
+              <Eye className="w-4 h-4 text-gray-500 opacity-0 group-hover:opacity-100 transition-opacity" />
             </div>
           </Link>
         ))}
       </div>
     </motion.div>
-  )
+  );
 }
