@@ -1,34 +1,30 @@
 'use client';
 
-import { Search, Filter, X, Calendar } from 'lucide-react';
+import { Search, Filter, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState } from 'react';
 import Input from '@/components/ui/Input';
 
-interface ReservationFiltersProps {
+interface PackFiltersProps {
   searchTerm: string;
   onSearchChange: (value: string) => void;
-  statusFilter: string;
-  onStatusFilterChange: (value: string) => void;
+  filterStatus: 'all' | 'active' | 'inactive';
+  onStatusChange: (value: 'all' | 'active' | 'inactive') => void;
 }
 
-const statusOptions = [
-  { value: 'all', label: 'Todas', color: 'text-gray-400' },
-  { value: 'pending', label: 'Pendientes', color: 'text-yellow-400' },
-  { value: 'confirmed', label: 'Confirmadas', color: 'text-blue-400' },
-  { value: 'ready_pickup', label: 'Listas', color: 'text-primary' },
-  { value: 'picked_up', label: 'Recogidas', color: 'text-green-400' },
-  { value: 'no_show', label: 'No retiradas', color: 'text-orange-400' },
-  { value: 'cancelled', label: 'Canceladas', color: 'text-red-400' },
-];
-
-export default function ReservationFilters({
+export default function PackFilters({
   searchTerm,
   onSearchChange,
-  statusFilter,
-  onStatusFilterChange,
-}: ReservationFiltersProps) {
+  filterStatus,
+  onStatusChange,
+}: PackFiltersProps) {
   const [showFilters, setShowFilters] = useState(false);
+
+  const filters = [
+    { id: 'all', label: 'Todos', count: null },
+    { id: 'active', label: 'Activos', count: null },
+    { id: 'inactive', label: 'Inactivos', count: null },
+  ];
 
   return (
     <div className="space-y-3">
@@ -36,7 +32,7 @@ export default function ReservationFilters({
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
           <Input
-            placeholder="Buscar por cliente, email o pack..."
+            placeholder="Buscar packs por nombre..."
             value={searchTerm}
             onChange={(e) => onSearchChange(e.target.value)}
             className="pl-10"
@@ -48,9 +44,6 @@ export default function ReservationFilters({
         >
           <Filter className="w-4 h-4 text-gray-400" />
           <span className="text-sm text-gray-400">Filtros</span>
-          {statusFilter !== 'all' && (
-            <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-          )}
         </button>
       </div>
 
@@ -63,17 +56,17 @@ export default function ReservationFilters({
             className="overflow-hidden"
           >
             <div className="flex flex-wrap gap-2 p-4 bg-dark-muted/50 rounded-xl border border-dark-border">
-              {statusOptions.map((option) => (
+              {filters.map((filter) => (
                 <button
-                  key={option.value}
-                  onClick={() => onStatusFilterChange(option.value)}
+                  key={filter.id}
+                  onClick={() => onStatusChange(filter.id as any)}
                   className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                    statusFilter === option.value
-                      ? `${option.color} bg-primary/10 border border-primary/30`
-                      : 'text-gray-400 hover:text-white hover:bg-white/5'
+                    filterStatus === filter.id
+                      ? 'bg-primary/20 text-primary border border-primary/30'
+                      : 'bg-dark-muted text-gray-400 hover:text-white hover:bg-white/5'
                   }`}
                 >
-                  {option.label}
+                  {filter.label}
                 </button>
               ))}
             </div>

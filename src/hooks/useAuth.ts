@@ -170,39 +170,30 @@ export function useAuth() {
       throw new Error('Error al crear usuario')
     }
 
-    // Enviar email de confirmacion de registro (no bloqueante)
-    try {
-      const baseUrl = window.location.origin
-      fetch(baseUrl + '/api/email', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          type: 'confirmation_required',
-          email: email,
-          data: { name },
-        }),
-      }).catch(err => console.error('[Email] Error confirmation:', err))
-
       // NOTIFICAR A ADMINS: Nuevo usuario registrado
-      supabase
-        .from('user_profiles')
-        .select('id')
-        .in('role', ['admin', 'super_admin'])
-        .then(({ data: admins }) => {
+      const baseUrl = window.location.origin
+      ;(async () => {
+        try {
+          const { data: admins } = await supabase
+            .from('user_profiles')
+            .select('id')
+            .in('role', ['admin', 'super_admin'])
           if (admins && admins.length > 0) {
-            const notifications = admins.map((admin) => ({
+            const notifications = admins.map((admin: any) => ({
               userId: admin.id,
               type: 'new_user',
               message: `${name || 'Usuario'} se registro como ${role === 'comercio' ? 'comercio' : 'usuario'}${role === 'comercio' && shopData?.name ? ' - ' + shopData.name : ''}`,
             }))
-            fetch(baseUrl + '/api/notifications', {
+            await fetch(baseUrl + '/api/notifications', {
               method: 'PUT',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({ notifications }),
-            }).catch(err => console.error('[Notifications] Error:', err))
+            })
           }
-        })
-    } catch (_) {}
+        } catch (err) {
+          console.error('[Notifications] Error:', err)
+        }
+      })()
 
     if (!data.session) {
       router.replace('/login?registered=true')

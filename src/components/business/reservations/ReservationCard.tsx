@@ -1,65 +1,128 @@
-'use client'
+'use client';
 
-import Link from 'next/link'
-import { motion } from 'framer-motion'
-import { CheckCircle, XCircle, Clock, User, Calendar, Ban, Eye } from 'lucide-react'
-import Card from '@/components/ui/Card'
-import Button from '@/components/ui/Button'
-import CopyButton from '@/components/ui/CopyButton'
-import { formatPrice } from '@/lib/utils/formatPrice'
-import { formatDate } from '@/lib/utils/formatDate'
-import type { ReservationItem } from './useBusinessReservations'
+import Link from 'next/link';
+import { motion } from 'framer-motion';
+import { CheckCircle, XCircle, Clock, User, Calendar, Ban, Eye, Phone } from 'lucide-react';
+import Card from '@/components/ui/Card';
+import Button from '@/components/ui/Button';
+import CopyButton from '@/components/ui/CopyButton';
+import { formatPrice } from '@/lib/utils/formatPrice';
+import { formatDate } from '@/lib/utils/formatDate';
+import type { ReservationItem } from './useBusinessReservations';
 
-const statusConfig: Record<string, { label: string; color: string; icon: any }> = {
-  pending: { label: 'Pendiente', color: 'bg-yellow-500/20 text-yellow-400', icon: Clock },
-  confirmed: { label: 'Confirmada', color: 'bg-blue-500/20 text-blue-400', icon: CheckCircle },
-  ready_pickup: { label: 'Lista', color: 'bg-green-500/20 text-green-400', icon: CheckCircle },
-  picked_up: { label: 'Recogido', color: 'bg-green-500/20 text-green-400', icon: CheckCircle },
-  completed: { label: 'Completada', color: 'bg-green-500/20 text-green-400', icon: CheckCircle },
-  cancelled: { label: 'Cancelada', color: 'bg-red-500/20 text-red-400', icon: XCircle },
-  no_show: { label: 'No retirado', color: 'bg-gray-500/20 text-gray-400', icon: Ban },
+const statusConfig: Record<string, { label: string; color: string; icon: any; bg: string; borderColor: string }> = {
+  pending: { label: 'Pendiente', color: 'text-yellow-400', icon: Clock, bg: 'bg-yellow-500/10', borderColor: 'border-l-yellow-500/50' },
+  confirmed: { label: 'Confirmada', color: 'text-blue-400', icon: CheckCircle, bg: 'bg-blue-500/10', borderColor: 'border-l-blue-500/50' },
+  ready_pickup: { label: 'Lista para recoger', color: 'text-primary', icon: Clock, bg: 'bg-primary/10', borderColor: 'border-l-primary' },
+  picked_up: { label: 'Recogido', color: 'text-green-400', icon: CheckCircle, bg: 'bg-green-500/10', borderColor: 'border-l-green-500/50' },
+  completed: { label: 'Completada', color: 'text-green-400', icon: CheckCircle, bg: 'bg-green-500/10', borderColor: 'border-l-green-500/50' },
+  cancelled: { label: 'Cancelada', color: 'text-red-400', icon: XCircle, bg: 'bg-red-500/10', borderColor: 'border-l-red-500/50' },
+  no_show: { label: 'No retirado', color: 'text-gray-400', icon: Ban, bg: 'bg-gray-500/10', borderColor: 'border-l-gray-500/50' },
+};
+
+interface ReservationCardProps {
+  reservation: ReservationItem;
+  index: number;
+  updating: string | null;
+  onValidate?: (id: string) => void;
+  onNoShow?: (id: string) => void;
+  onCancelClick?: (id: string) => void;
+  compact?: boolean;
 }
 
-interface Props {
-  reservation: ReservationItem
-  index: number
-  updating: string | null
-  onValidate: (id: string) => void
-  onNoShow: (id: string) => void
-  onCancelClick: (id: string) => void
-}
+export default function ReservationCard({
+  reservation,
+  index,
+  updating,
+  onValidate,
+  onNoShow,
+  onCancelClick,
+  compact = false,
+}: ReservationCardProps) {
+  const config = statusConfig[reservation.status] || statusConfig.pending;
+  const StatusIcon = config.icon;
+  const isActive = ['pending', 'confirmed', 'ready_pickup'].includes(reservation.status);
+  const showCode = ['pending', 'confirmed', 'ready_pickup'].includes(reservation.status);
+  const isReady = reservation.status === 'ready_pickup';
 
-export default function ReservationCard({ reservation, index, updating, onValidate, onNoShow, onCancelClick }: Props) {
-  const config = statusConfig[reservation.status] || statusConfig.pending
-  const StatusIcon = config.icon
-  const canAct = ['confirmed', 'pending', 'ready_pickup'].includes(reservation.status)
-  const showCode = ['confirmed', 'pending'].includes(reservation.status)
+  // Versión compacta (para grupos)
+  if (compact) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: index * 0.03 }}
+        className={`bg-dark-card border ${config.borderColor} border-l-4 rounded-xl p-3 hover:bg-white/5 transition-colors`}
+      >
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 flex-wrap">
+              <p className="text-sm font-medium text-white truncate">{reservation.pack.title}</p>
+              <span className={`text-[10px] px-2 py-0.5 rounded-full flex items-center gap-1 ${config.bg} ${config.color}`}>
+                <StatusIcon className="w-3 h-3" />
+                {config.label}
+              </span>
+            </div>
+            <p className="text-xs text-gray-500 mt-1 flex items-center gap-1">
+              <User className="w-3 h-3" />
+              {reservation.user.name}
+            </p>
+            <p className="text-[10px] text-gray-600 mt-0.5">
+              {formatPrice(reservation.total_price_cents)} • {reservation.quantity}x
+            </p>
+          </div>
+          <div className="flex items-center gap-2">
+            {showCode && reservation.pickup_code && (
+              <div className="hidden sm:block">
+                <p className="text-[10px] text-gray-500">Código</p>
+                <p className="text-xs font-bold text-primary font-mono">{reservation.pickup_code}</p>
+              </div>
+            )}
+            <Link href={`/packs/${reservation.pack.id}`}>
+              <Eye className="w-4 h-4 text-gray-500 hover:text-primary transition-colors cursor-pointer" />
+            </Link>
+          </div>
+        </div>
+      </motion.div>
+    );
+  }
 
+  // Versión completa (original)
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.03 }}
     >
-      <Card glass hover className="p-5 group">
+      <Card glass hover className={`p-5 group border-l-4 ${config.borderColor}`}>
         <div className="flex flex-col md:flex-row justify-between gap-4">
+          {/* Columna izquierda - Info */}
           <div className="flex-1">
             <div className="flex items-center gap-2 mb-2 flex-wrap">
               <h3 className="text-lg font-semibold text-white group-hover:text-primary transition-colors">
                 {reservation.pack.title}
               </h3>
-              <span className={`text-xs px-2 py-0.5 rounded-full flex items-center gap-1 ${config.color}`}>
-                <StatusIcon className="w-3 h-3" /> {config.label}
+              <span className={`text-xs px-2 py-0.5 rounded-full flex items-center gap-1 ${config.bg} ${config.color}`}>
+                <StatusIcon className="w-3 h-3" />
+                {config.label}
               </span>
+              {isReady && (
+                <span className="text-xs bg-green-500/20 text-green-400 px-2 py-0.5 rounded-full animate-pulse">
+                  ¡Listo para recoger!
+                </span>
+              )}
             </div>
 
-            <div className="space-y-1">
+            <div className="space-y-1.5">
               <p className="text-sm text-gray-300 flex items-center gap-2">
                 <User className="w-4 h-4 text-gray-500" />
                 {reservation.user.name} ({reservation.user.email})
               </p>
               {reservation.user.phone && (
-                <p className="text-xs text-gray-500 flex items-center gap-1">📞 {reservation.user.phone}</p>
+                <p className="text-xs text-gray-500 flex items-center gap-1">
+                  <Phone className="w-3 h-3" />
+                  {reservation.user.phone}
+                </p>
               )}
               <p className="text-xs text-gray-500 flex items-center gap-2">
                 <Calendar className="w-3 h-3" />
@@ -70,7 +133,7 @@ export default function ReservationCard({ reservation, index, updating, onValida
               </p>
             </div>
 
-            {showCode && (
+            {showCode && reservation.pickup_code && (
               <div className="mt-3 flex flex-wrap items-center gap-3">
                 <div className="bg-primary/10 border border-primary/30 rounded-lg px-3 py-1.5 flex items-center gap-2">
                   <p className="text-lg font-bold text-primary tracking-wider font-mono">
@@ -88,21 +151,22 @@ export default function ReservationCard({ reservation, index, updating, onValida
             )}
           </div>
 
-          <div className="flex items-center gap-2 flex-wrap">
-            {canAct && (
-              <>
-                <Button size="sm" onClick={() => onValidate(reservation.id)} disabled={updating === reservation.id} className="flex items-center gap-1">
-                  <CheckCircle className="w-4 h-4" /> Validar
-                </Button>
-                <Button variant="outline" size="sm" onClick={() => onNoShow(reservation.id)} disabled={updating === reservation.id}
-                  className="flex items-center gap-1 text-gray-400 hover:text-white border-gray-600">
-                  <Ban className="w-4 h-4" /> No retiró
-                </Button>
-                <Button variant="danger" size="sm" onClick={() => onCancelClick(reservation.id)} disabled={updating === reservation.id}
-                  className="flex items-center gap-1">
-                  <XCircle className="w-4 h-4" /> Cancelar
-                </Button>
-              </>
+          {/* Columna derecha - Acciones */}
+          <div className="flex flex-wrap items-center gap-2">
+            {isActive && onValidate && (
+              <Button size="sm" onClick={() => onValidate(reservation.id)} disabled={updating === reservation.id} className="flex items-center gap-1">
+                <CheckCircle className="w-4 h-4" /> Validar
+              </Button>
+            )}
+            {isActive && onNoShow && (
+              <Button variant="outline" size="sm" onClick={() => onNoShow(reservation.id)} disabled={updating === reservation.id} className="flex items-center gap-1 text-gray-400 hover:text-white border-gray-600">
+                <Ban className="w-4 h-4" /> No retiró
+              </Button>
+            )}
+            {isActive && onCancelClick && (
+              <Button variant="danger" size="sm" onClick={() => onCancelClick(reservation.id)} disabled={updating === reservation.id} className="flex items-center gap-1">
+                <XCircle className="w-4 h-4" /> Cancelar
+              </Button>
             )}
             <Link href={`/packs/${reservation.pack.id}`}>
               <Button variant="outline" size="sm" className="p-2">
@@ -111,7 +175,18 @@ export default function ReservationCard({ reservation, index, updating, onValida
             </Link>
           </div>
         </div>
+
+        {isActive && reservation.pickup_start_time && reservation.pickup_end_time && (
+          <div className="mt-3 pt-3 border-t border-dark-border/50">
+            <div className="flex items-center justify-between text-xs">
+              <span className="text-gray-500">Ventana de recogida</span>
+              <span className="text-primary font-mono">
+                {reservation.pickup_start_time.slice(0,5)} - {reservation.pickup_end_time.slice(0,5)}
+              </span>
+            </div>
+          </div>
+        )}
       </Card>
     </motion.div>
-  )
+  );
 }

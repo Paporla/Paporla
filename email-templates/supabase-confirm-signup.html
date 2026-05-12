@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+</head>
+<body style="margin:0;padding:0;background:#000;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
+
+  <!-- Fondo general -->
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#000;padding:40px 20px;">
+    <tr>
+      <td align="center">
+        
+        <!-- Tarjeta principal -->
+        <table width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background:#0a0a0f;border-radius:20px;overflow:hidden;border:1px solid rgba(0,255,136,0.08);box-shadow:0 20px 60px rgba(0,0,0,0.5);">
+          
+          <!-- ============================================ -->
+          <!-- BRAND HEADER -->
+          <!-- ============================================ -->
+          <tr>
+            <td style="background:linear-gradient(135deg,#0a0a1a 0%,#0f0f1a 50%,#0a0a1a 100%);padding:36px 40px 28px;text-align:center;border-bottom:1px solid rgba(0,255,136,0.08);position:relative;">
+              
+              <!-- Linea decorativa superior -->
+              <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:20px;">
+                <tr>
+                  <td align="center">
+                    <table cellpadding="0" cellspacing="0">
+                      <tr>
+                        <td style="width:40px;height:2px;background:rgba(0,255,136,0.15);border-radius:2px;"></td>
+                        <td style="width:40px;height:2px;background:#00ff88;border-radius:2px;box-shadow:0 0 8px rgba(0,255,136,0.5);"></td>
+                        <td style="width:40px;height:2px;background:rgba(0,255,136,0.15);border-radius:2px;"></td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+              
+              <!-- Logo texto -->
+              <table cellpadding="0" cellspacing="0" style="margin:0 auto 10px;">
+                <tr>
+                  <td style="text-align:center;">
+                    <span style="color:#ffffff;font-size:36px;font-weight:900;letter-spacing:3px;text-transform:uppercase;">PAPORLA</span>
+                    <span style="color:#00ff88;font-size:36px;font-weight:300;letter-spacing:-1px;">.</span>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="text-align:center;padding-top:4px;">
+                    <span style="color:#555;font-size:12px;letter-spacing:5px;text-transform:uppercase;">Rescate Alimentario</span>
+                  </td>
+                </tr>
+              </table>
+              
+            </td>
+          </tr>
+          
+          <!-- ============================================ -->
+          <!-- CONTENIDO PRINCIPAL -->
+          <!-- ============================================ -->
+          <tr>
+            <td style="padding:32px 40px 20px;">
+              
+              <!-- Titulo -->
+              <h1 style="color:#ffffff;font-size:22px;font-weight:800;margin:0 0 8px;letter-spacing:-0.3px;text-align:center;line-height:1.3;">
+                Confirmáno  tu correo electrónico
+              </h1>
+              <p style="color:#999;font-size:14px;line-height:1.7;margin:0 0 24px;text-align:center;">
+                ¡Ya falta poco para que formes parte del cambio!
+              </p>
+              
+              <!-- Caja de pasos -->
+              <table width="100%" cellpadding="0" cellspacing="0" style="background:rgba(0,255,136,0.03);border:1px solid rgba(0,255,136,0.08);border-radius:14px;margin:0 0 24px;">
+                <tr>
+                  <td style="padding:20px 24px;">
+                    <table cellpadding="0" cellspacing="0">
+                      <tr>
+                        <td style="width:36px;vertical-align:top;padding:0 10px 14px 0;text-align:center;">
+                          <span style="display:inline-block;width:28px;height:28px;border-radius:50%;background:rgba(0,255,136,0.12);text-align:center;line-height:28px;color:#00ff88;font-size:13px;font-weight:700;">1</span>
+                        </td>
+                        <td style="padding-bottom:14px;">
+                          <p style="margin:0;color:#ddd;font-size:14px;line-height:1.5;">
+                            <strong style="color:#fff;">Hacé clic en el botón verde</strong><br>
+                            <span style="color:#888;font-size:13px;">Confirmá tu identidad en un solo paso</span>
+                          </p>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td style="width:36px;vertical-align:top;padding:0 10px 0 0;text-align:center;">
+                          <span style="display:inline-block;width:28px;height:28px;border-radius:50%;background:rgba(0,255,136,0.12);text-align:center;line-height:28px;color:#00ff88;font-size:13px;font-weight:700;">2</span>
+                        </td>
+                        <td>
+                          <p style="margin:0;color:#ddd;font-size:14px;line-height:1.5;">
+                            <strong style="color:#fff;">Empezá a descubrir</strong><br>
+                            <span style="color:#888;font-size:13px;">Packs sorpresa de comercios locales cerca de ti</span>
+                          </p>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+              
+              <!-- BOTON PRINCIPAL -->
+              <table width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 24px;">
+                <tr>
+                  <td align="center">
+                    <table cellpadding="0" cellspacing="0">
+                      <tr>
+                        <td align="center" style="border-radius:50px;background:linear-gradient(135deg,#00ff88 0%,#00cc6e 100%);box-shadow:0 4px 24px rgba(0,255,136,0.3);">
+                          <a href="{{ .ConfirmationURL }}" 
+                             style="display:inline-block;padding:15px 44px;background:linear-gradient(135deg,#00ff88 0%,#00cc6e 100%);color:#000000;text-decoration:none;border-radius:50px;font-size:15px;font-weight:700;letter-spacing:0.5px;">
+                            Confirmar mi correo
+                          </a>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+              
+              <!-- Link de respaldo -->
+              <p style="color:#555;font-size:12px;line-height:1.6;margin:0 0 20px;text-align:center;">
+                ¿El botón no funciona? Copiá este enlace en tu navegador:<br>
+                <a href="{{ .ConfirmationURL }}" style="color:#00ff88;word-break:break-all;font-size:11px;text-decoration:underline;">{{ .ConfirmationURL }}</a>
+              </p>
+              
+              <!-- Separador -->
+              <hr style="border:none;border-top:1px solid rgba(255,255,255,0.04);margin:0 0 16px;">
+              
+              <!-- Nota de seguridad -->
+              <table width="100%" cellpadding="0" cellspacing="0" style="background:rgba(255,200,0,0.03);border:1px solid rgba(255,200,0,0.06);border-radius:10px;">
+                <tr>
+                  <td style="padding:14px 18px;">
+                    <p style="margin:0;color:#9a9a7a;font-size:12px;line-height:1.6;">
+                      🔒 Si no creaste una cuenta en Paporla, ignorá este mensaje. 
+                      Nadie más puede activar tu cuenta sin acceso a este correo.
+                    </p>
+                  </td>
+                </tr>
+              </table>
+              
+            </td>
+          </tr>
+          
+          <!-- ============================================ -->
+          <!-- FOOTER -->
+          <!-- ============================================ -->
+          <tr>
+            <td style="padding:24px 40px 28px;text-align:center;border-top:1px solid rgba(255,255,255,0.04);">
+              
+              <!-- Linea verde pequeña -->
+              <table cellpadding="0" cellspacing="0" style="margin:0 auto 14px;">
+                <tr>
+                  <td style="width:30px;height:2px;background:rgba(0,255,136,0.2);border-radius:2px;"></td>
+                </tr>
+              </table>
+              
+              <p style="color:#333;font-size:10px;line-height:1.6;margin:0 0 2px;letter-spacing:1px;text-transform:uppercase;">
+                Paporla — Rescate Alimentario
+              </p>
+              <p style="color:#2a2a2a;font-size:10px;margin:0 0 8px;">
+                Caracas, Venezuela
+              </p>
+              <p style="color:#222;font-size:9px;margin:0;">
+                © 2026 Paporla. Todos los derechos reservados.
+              </p>
+              
+            </td>
+          </tr>
+          
+        </table>
+        
+        <!-- Mensaje fuera de la tarjeta -->
+        <p style="color:#222;font-size:10px;margin:16px 0 0;text-align:center;">
+          ¿Tenés dudas? Escribinos a 
+          <a href="mailto:hola@paporla.com" style="color:#00ff88;text-decoration:none;">hola@paporla.com</a>
+        </p>
+        
+      </td>
+    </tr>
+  </table>
+  
+</body>
+</html>

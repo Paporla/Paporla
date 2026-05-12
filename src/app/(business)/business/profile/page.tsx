@@ -5,20 +5,19 @@ import { useAuth } from '@/hooks/useAuth';
 import { supabaseBrowser } from '@/lib/supabase/client';
 import Toast from '@/components/ui/Toast';
 import LoadingSkeleton from '@/components/business/LoadingSkeleton';
-import ProfileHeader from './components/ProfileHeader';
-import ProfileTabs from './components/ProfileTabs';
-import InfoTab from './components/InfoTab';
-import ImagesTab from './components/ImagesTab';
-import LocationTab from './components/LocationTab';
-import HoursTab from './components/HoursTab';
-import SettingsTab from './components/SettingsTab';
-import ProfilePreview from './components/ProfilePreview';
-import UnsavedChangesBar from './components/UnsavedChangesBar';
+import BusinessProfileLayout from '@/components/business/profile/BusinessProfileLayout';
+import ProfileInfoForm from '@/components/business/profile/ProfileInfoForm';
+import ProfileImagesForm from '@/components/business/profile/ProfileImagesForm';
+import ProfileLocationForm from '@/components/business/profile/ProfileLocationForm';
+import ProfileHoursForm from '@/components/business/profile/ProfileHoursForm';
+import ProfileSettingsForm from '@/components/business/profile/ProfileSettingsForm';
+import ProfilePreview from '@/components/business/ProfilePreview';
+import UnsavedChangesBar from '@/components/business/UnsavedChangesBar';
 
-type Tab = 'info' | 'images' | 'location' | 'hours' | 'settings';
-export interface HoursData {
+interface HoursData {
   [key: string]: { open: string; close: string; closed: boolean };
 }
+
 const DAYS = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
 
 export default function BusinessProfilePage() {
@@ -26,21 +25,34 @@ export default function BusinessProfilePage() {
   const supabase = supabaseBrowser();
   const [loading, setLoading] = useState(true);
   const [shop, setShop] = useState<any>(null);
-  const [activeTab, setActiveTab] = useState<Tab>('info');
+  const [activeTab, setActiveTab] = useState('info');
   const [previewMode, setPreviewMode] = useState(false);
   const [isDirty, setIsDirty] = useState(false);
   const [saving, setSaving] = useState(false);
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
 
-  // Datos del formulario
   const [formData, setFormData] = useState({
-    name: '', description: '', category: '', address: '', city: '', country: 'VE',
-    latitude: '', longitude: '', phone: '', website: '', instagram: '',
-    logoUrl: '', coverUrl: '', verified: false,
+    name: '',
+    description: '',
+    category: '',
+    address: '',
+    city: '',
+    country: 'VE',
+    latitude: '',
+    longitude: '',
+    phone: '',
+    website: '',
+    instagram: '',
+    logoUrl: '',
+    coverUrl: '',
+    verified: false,
   });
+
   const [hours, setHours] = useState<HoursData>(() => {
     const initial: HoursData = {};
-    DAYS.forEach(day => { initial[day] = { open: '09:00', close: '18:00', closed: day === 'Domingo' }; });
+    DAYS.forEach(day => {
+      initial[day] = { open: '09:00', close: '18:00', closed: day === 'Domingo' };
+    });
     return initial;
   });
 
@@ -53,34 +65,51 @@ export default function BusinessProfilePage() {
     if (data) {
       setShop(data);
       setFormData({
-        name: data.name || '', description: data.description || '', category: data.category || '',
-        address: data.address || '', city: data.city || '', country: data.country || 'VE',
-        latitude: data.latitude ? data.latitude.toString() : '', longitude: data.longitude ? data.longitude.toString() : '',
-        phone: data.phone || '', website: data.website || '', instagram: data.instagram || '',
-        logoUrl: data.logo_url || '', coverUrl: data.cover_url || '', verified: data.verified || false,
+        name: data.name || '',
+        description: data.description || '',
+        category: data.category || '',
+        address: data.address || '',
+        city: data.city || '',
+        country: data.country || 'VE',
+        latitude: data.latitude ? data.latitude.toString() : '',
+        longitude: data.longitude ? data.longitude.toString() : '',
+        phone: data.phone || '',
+        website: data.website || '',
+        instagram: data.instagram || '',
+        logoUrl: data.logo_url || '',
+        coverUrl: data.cover_url || '',
+        verified: data.verified || false,
       });
-      if (data.hours) try { setHours(prev => ({ ...prev, ...JSON.parse(data.hours) })); } catch(e) {}
+      if (data.hours) {
+        try {
+          setHours((prev) => ({ ...prev, ...JSON.parse(data.hours) }));
+        } catch (e) {}
+      }
     }
     setLoading(false);
   };
 
   const updateForm = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    setFormData((prev) => ({ ...prev, [field]: value }));
     setIsDirty(true);
   };
 
-  if (loading) return <LoadingSkeleton />;
-
   const handleSave = async () => {
+    if (!shop?.id) {
+      setToast({ message: 'No se encontró el comercio', type: 'error' });
+      return;
+    }
+
     setSaving(true);
+
     try {
-      const updates: any = {
+      const updateData = {
         name: formData.name,
-        description: formData.description,
+        description: formData.description || null,
         category: formData.category || null,
         address: formData.address || null,
         city: formData.city || null,
-        country: formData.country || 'VE',
+        country: formData.country,
         latitude: formData.latitude ? parseFloat(formData.latitude) : null,
         longitude: formData.longitude ? parseFloat(formData.longitude) : null,
         phone: formData.phone || null,
@@ -91,86 +120,127 @@ export default function BusinessProfilePage() {
         hours: JSON.stringify(hours),
       };
 
-      const { error } = await supabase
-        .from('shops')
-        .update(updates)
-        .eq('owner_id', user?.id);
+      const { error } = await supabase.from('shops').update(updateData).eq('id', shop.id);
 
       if (error) throw error;
 
-      setToast({ message: 'Cambios guardados exitosamente', type: 'success' });
+      setToast({ message: 'Perfil actualizado correctamente', type: 'success' });
       setIsDirty(false);
     } catch (err: any) {
-      setToast({ message: err.message || 'Error al guardar', type: 'error' });
+      setToast({ message: err.message || 'Error al guardar los cambios', type: 'error' });
     } finally {
       setSaving(false);
     }
   };
 
-  const detectLocation = () => {
-    if (!navigator.geolocation) {
-      setToast({ message: 'La geolocalizacion no esta disponible en este navegador', type: 'error' });
-      return;
-    }
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        updateForm('latitude', position.coords.latitude.toString());
-        updateForm('longitude', position.coords.longitude.toString());
-        setToast({ message: 'Ubicacion detectada correctamente', type: 'success' });
-      },
-      (err) => {
-        setToast({ message: 'Error al detectar ubicacion: ' + err.message, type: 'error' });
-      }
-    );
-  };
-
-  const handleDiscard = async () => {
+  const handleDiscard = () => {
     if (shop) {
       setFormData({
-        name: shop.name || '', description: shop.description || '', category: shop.category || '',
-        address: shop.address || '', city: shop.city || '', country: shop.country || 'VE',
-        latitude: shop.latitude ? shop.latitude.toString() : '', longitude: shop.longitude ? shop.longitude.toString() : '',
-        phone: shop.phone || '', website: shop.website || '', instagram: shop.instagram || '',
-        logoUrl: shop.logo_url || '', coverUrl: shop.cover_url || '', verified: shop.verified || false,
+        name: shop.name || '',
+        description: shop.description || '',
+        category: shop.category || '',
+        address: shop.address || '',
+        city: shop.city || '',
+        country: shop.country || 'VE',
+        latitude: shop.latitude ? shop.latitude.toString() : '',
+        longitude: shop.longitude ? shop.longitude.toString() : '',
+        phone: shop.phone || '',
+        website: shop.website || '',
+        instagram: shop.instagram || '',
+        logoUrl: shop.logo_url || '',
+        coverUrl: shop.cover_url || '',
+        verified: shop.verified || false,
       });
+      if (shop.hours) {
+        try {
+          setHours((prev) => ({ ...prev, ...JSON.parse(shop.hours) }));
+        } catch (e) {}
+      }
     }
     setIsDirty(false);
+    setToast({ message: 'Cambios descartados', type: 'success' });
   };
 
+  const handleDelete = async () => {
+    if (!shop?.id) return;
+    const { error } = await supabase.from('shops').delete().eq('id', shop.id);
+    if (error) {
+      setToast({ message: error.message, type: 'error' });
+    } else {
+      window.location.href = '/business';
+    }
+  };
+
+  if (loading) return <LoadingSkeleton />;
+
   if (previewMode) {
-    return <ProfilePreview formData={formData} hours={hours} onBack={() => setPreviewMode(false)} />;
+    return (
+      <ProfilePreview
+        formData={formData}
+        hours={hours}
+        onBack={() => setPreviewMode(false)}
+      />
+    );
   }
+
+  const completionPercentage = Object.values(formData).filter((v) => v).length * 10;
 
   return (
     <div className="space-y-6">
-      <ProfileHeader
+      <BusinessProfileLayout
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
         shopName={formData.name}
         verified={formData.verified}
-        completionPercentage={Object.values(formData).filter(v => v).length * 10}
+        completionPercentage={completionPercentage}
         onPreview={() => setPreviewMode(true)}
-      />
-      <UnsavedChangesBar isDirty={isDirty} onSave={handleSave} onDiscard={handleDiscard} saving={saving} />
-      <ProfileTabs activeTab={activeTab} onTabChange={setActiveTab} tabs={[
-        { id: 'info', label: 'Información', icon: 'Store' },
-        { id: 'images', label: 'Imágenes', icon: 'Image' },
-        { id: 'location', label: 'Ubicación', icon: 'MapPin' },
-        { id: 'hours', label: 'Horarios', icon: 'Clock' },
-        { id: 'settings', label: 'Ajustes', icon: 'Settings' },
-      ]} />
-      {activeTab === 'info' && <InfoTab formData={formData} updateForm={updateForm} />}
-      {activeTab === 'images' && <ImagesTab formData={formData} updateForm={updateForm} bucket="shop-images" />}
-      {activeTab === 'location' && <LocationTab formData={formData} updateForm={updateForm} onDetectLocation={detectLocation} locating={false} />}
-      {activeTab === 'hours' && <HoursTab hours={hours} updateHours={(day, field, value) => {
-          setHours(prev => ({ ...prev, [day]: { ...prev[day], [field]: value } }));
-          setIsDirty(true);
-        }} />}
-      {activeTab === 'settings' && <SettingsTab onDelete={async () => {
-          if (!confirm('Esta accion eliminara tu comercio permanentemente. Estas seguro?')) return;
-          const { error } = await supabase.from('shops').delete().eq('owner_id', user?.id);
-          if (error) setToast({ message: error.message, type: 'error' });
-          else window.location.href = '/business';
-        }} />}
-      {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
+      >
+        <UnsavedChangesBar
+          isDirty={isDirty}
+          onSave={handleSave}
+          onDiscard={handleDiscard}
+          saving={saving}
+        />
+
+        {activeTab === 'info' && (
+          <ProfileInfoForm formData={formData} updateForm={updateForm} />
+        )}
+
+        {activeTab === 'images' && (
+          <ProfileImagesForm
+            logoUrl={formData.logoUrl}
+            coverUrl={formData.coverUrl}
+            onLogoChange={(url) => updateForm('logoUrl', url)}
+            onCoverChange={(url) => updateForm('coverUrl', url)}
+            shopId={shop?.id}
+          />
+        )}
+
+        {activeTab === 'location' && (
+          <ProfileLocationForm
+            latitude={formData.latitude}
+            longitude={formData.longitude}
+            onLatitudeChange={(value) => updateForm('latitude', value)}
+            onLongitudeChange={(value) => updateForm('longitude', value)}
+          />
+        )}
+
+        {activeTab === 'hours' && (
+          <ProfileHoursForm hours={hours} onHoursChange={setHours} />
+        )}
+
+        {activeTab === 'settings' && (
+          <ProfileSettingsForm onDelete={handleDelete} />
+        )}
+      </BusinessProfileLayout>
+
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast(null)}
+        />
+      )}
     </div>
   );
 }

@@ -1,64 +1,91 @@
-'use client'
+'use client';
 
-import { Package, DollarSign, Tag } from 'lucide-react'
-import Input from '@/components/ui/Input'
-import ImageUpload from '@/components/ui/ImageUpload'
+import { Package, DollarSign, Tag } from 'lucide-react';
+import Input from '@/components/ui/Input';
+
+// Elimina la importación de ImageUpload
 
 interface BasicData {
-  title: string
-  description: string
-  price_cents: number
-  original_price_cents: number
-  total_stock: number
-  image_url: string
+  title: string;
+  description: string;
+  price_cents: number;
+  original_price_cents: number;
+  total_stock: number;
+  image_url: string;
 }
 
 interface Props {
-  data: BasicData
-  onChange: (data: BasicData) => void
-  shopId: string
-  onError: (err: string) => void
+  data: BasicData;
+  onChange: (data: BasicData) => void;
+  shopId: string;
+  onError: (err: string) => void;
 }
 
 export default function PackFormBasicInfo({ data, onChange, shopId, onError }: Props) {
-  const update = (partial: Partial<BasicData>) => onChange({ ...data, ...partial })
+  const update = (partial: Partial<BasicData>) => onChange({ ...data, ...partial });
 
   const discount = data.original_price_cents > data.price_cents
-    ? Math.round((1 - data.price_cents / data.original_price_cents) * 100) : null
+    ? Math.round((1 - data.price_cents / data.original_price_cents) * 100) : null;
 
   return (
     <div className="bg-black/40 backdrop-blur-sm rounded-2xl p-6 border border-white/10">
       <h2 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
         <Package className="w-5 h-5 text-primary" />
-        Informacion del Pack
+        Información del Pack
       </h2>
 
       <div className="space-y-4">
-        <Input label="Titulo del pack *" placeholder="Ej: Pack Sorpresa Vegano"
-          value={data.title} onChange={(e) => update({ title: e.target.value })}
-          icon={<Tag className="w-4 h-4" />} required />
+        <Input
+          label="Título del pack *"
+          placeholder="Ej: Pack Sorpresa Vegano"
+          value={data.title}
+          onChange={(e) => update({ title: e.target.value })}
+          icon={<Tag className="w-4 h-4" />}
+          required
+        />
 
         <div>
-          <label className="block text-sm font-medium text-gray-400 mb-2">Descripcion (opcional)</label>
-          <textarea value={data.description} onChange={(e) => update({ description: e.target.value })}
-            rows={3} className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-gray-500 focus:border-primary focus:outline-none transition-all"
-            placeholder="Describe lo que incluye el pack..." />
+          <label className="block text-sm font-medium text-gray-400 mb-2">Descripción (opcional)</label>
+          <textarea
+            value={data.description}
+            onChange={(e) => update({ description: e.target.value })}
+            rows={3}
+            className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-gray-500 focus:border-primary focus:outline-none transition-all"
+            placeholder="Describe lo que incluye el pack..."
+          />
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <Input label="Precio (USD) *" type="number" step="0.01" placeholder="9.99"
+          <Input
+            label="Precio (USD) *"
+            type="number"
+            step="0.01"
+            placeholder="9.99"
             value={data.price_cents / 100}
             onChange={(e) => update({ price_cents: Math.round(parseFloat(e.target.value || '0') * 100) })}
-            icon={<DollarSign className="w-4 h-4" />} required />
+            icon={<DollarSign className="w-4 h-4" />}
+            required
+          />
 
-          <Input label="Precio original (opcional)" type="number" step="0.01" placeholder="24.99"
+          <Input
+            label="Precio original (opcional)"
+            type="number"
+            step="0.01"
+            placeholder="24.99"
             value={data.original_price_cents / 100 || ''}
             onChange={(e) => update({ original_price_cents: e.target.value ? Math.round(parseFloat(e.target.value) * 100) : 0 })}
-            icon={<DollarSign className="w-4 h-4" />} />
+            icon={<DollarSign className="w-4 h-4" />}
+          />
 
-          <Input label="Stock disponible *" type="number" placeholder="10"
-            value={data.total_stock} onChange={(e) => update({ total_stock: parseInt(e.target.value) || 0 })}
-            icon={<Package className="w-4 h-4" />} required />
+          <Input
+            label="Stock disponible *"
+            type="number"
+            placeholder="10"
+            value={data.total_stock}
+            onChange={(e) => update({ total_stock: parseInt(e.target.value) || 0 })}
+            icon={<Package className="w-4 h-4" />}
+            required
+          />
         </div>
 
         {discount && (
@@ -68,11 +95,8 @@ export default function PackFormBasicInfo({ data, onChange, shopId, onError }: P
           </div>
         )}
 
-        <ImageUpload bucket="pack-images" path={'packs/' + shopId}
-          existingImage={data.image_url}
-          onUploadComplete={(url) => update({ image_url: url })}
-          onError={onError} label="Imagen del pack" />
+        {/* Eliminado ImageUpload - la imagen se usará del perfil del comercio */}
       </div>
     </div>
-  )
+  );
 }
