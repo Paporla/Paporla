@@ -4,6 +4,7 @@ import './globals.css'
 import RouteLoader from '@/components/RouteLoader'
 import Providers from './providers'
 import GoogleAnalytics from '@/components/GoogleAnalytics'
+import GoogleTagManager from '@/components/GoogleTagManager'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -74,11 +75,12 @@ export default function RootLayout({
   return (
     <html lang="es">
       <body className={`${inter.className} bg-black text-white min-h-screen`}>
+        <GoogleTagManager />
         <Providers>
           <RouteLoader />
           {children}
+          <GoogleAnalytics />
         </Providers>
-        <GoogleAnalytics />
       </body>
     </html>
   )
