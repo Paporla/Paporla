@@ -3,6 +3,7 @@ import { Inter } from 'next/font/google'
 import './globals.css'
 import RouteLoader from '@/components/RouteLoader'
 import Providers from './providers'
+import GoogleAnalytics from '@/components/GoogleAnalytics'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -12,7 +13,7 @@ export const metadata: Metadata = {
     template: '%s | Paporla'
   },
   description: 'Conectamos comercios con excedentes de comida con personas que necesitan alimentarse. Reduce el desperdicio, ayuda a tu comunidad.',
-  keywords: ['rescate alimentario', 'comida', 'Caracas', 'desperdicio', 'packs sorpresa', 'excedentes', 'alimentaciÃ³n', 'LatinoamÃ©rica'],
+  keywords: ['rescate alimentario', 'comida', 'Caracas', 'desperdicio', 'packs sorpresa', 'excedentes', 'alimentación', 'Latinoamérica'],
   authors: [{ name: 'Paporla', url: 'https://paporla.com' }],
   creator: 'Paporla',
   publisher: 'Paporla',
@@ -24,7 +25,7 @@ export const metadata: Metadata = {
     siteName: 'Paporla',
     title: 'Paporla - Rescate Alimentario',
     description: 'Conectamos comercios con excedentes de comida con personas que necesitan alimentarse. Reduce el desperdicio, ayuda a tu comunidad.',
-        images: [{
+    images: [{
       url: '/og-image.svg',
       width: 1200,
       height: 630,
@@ -49,12 +50,12 @@ export const metadata: Metadata = {
       'max-snippet': -1,
     },
   },
-    icons: {
-      icon: '/favicon.svg',
-      shortcut: '/favicon.svg',
-      apple: '/favicon.svg',
-    },
-    manifest: '/site.webmanifest',
+  icons: {
+    icon: '/favicon.svg',
+    shortcut: '/favicon.svg',
+    apple: '/favicon.svg',
+  },
+  manifest: '/site.webmanifest',
 }
 
 export const viewport: Viewport = {
@@ -73,11 +74,12 @@ export default function RootLayout({
   return (
     <html lang="es">
       <body className={`${inter.className} bg-black text-white min-h-screen`}>
-        <Providers><RouteLoader />{children}</Providers>
+        <Providers>
+          <RouteLoader />
+          {children}
+        </Providers>
+        <GoogleAnalytics />
       </body>
     </html>
   )
 }
-
-
-

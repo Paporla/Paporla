@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { supabaseBrowser } from '@/lib/supabase/client';
 import { useAuth } from './useAuth';
 
@@ -28,6 +28,7 @@ export function useFavorites() {
   const [favorites, setFavorites] = useState<FavoriteShop[]>([]);
   const [loading, setLoading] = useState(true);
   const [favoriteShopIds, setFavoriteShopIds] = useState<Set<string>>(new Set());
+  const isFirstLoad = useRef(true);
 
   const loadFavorites = useCallback(async () => {
     if (!user) {
@@ -37,7 +38,10 @@ export function useFavorites() {
       return;
     }
 
-    setLoading(true);
+    // Solo mostrar loading en la primera carga
+    if (isFirstLoad.current) {
+      setLoading(true);
+    }
 
     const { data, error } = await supabase
       .from('favorites')
@@ -66,7 +70,9 @@ export function useFavorites() {
       setFavorites(typedData || []);
       setFavoriteShopIds(new Set(typedData?.map(f => f.shop_id) || []));
     }
+    
     setLoading(false);
+    isFirstLoad.current = false;
   }, [user, supabase]);
 
   useEffect(() => {
@@ -78,7 +84,7 @@ export function useFavorites() {
 
     const { error } = await supabase
       .from('favorites')
- .insert({
+      .insert({
         user_id: user.id,
         shop_id: shopId,
       });

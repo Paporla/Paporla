@@ -2,21 +2,21 @@
 
 import { motion } from 'framer-motion';
 import Link from 'next/link';
-import { Sparkles, TrendingUp, CalendarCheck, ShoppingBag, Store } from 'lucide-react';
+import { Sparkles, Package, ShoppingBag, Store, Award } from 'lucide-react';
 
-interface BusinessWelcomeBannerProps {
-  shopName: string;
-  todayReservations?: number;
-  weekGrowth?: number;
+interface UserWelcomeBannerProps {
+  userName: string;
+  packsRescued?: number;
+  level?: string;
+  points?: number;
 }
 
-export default function BusinessWelcomeBanner({
-  shopName,
-  todayReservations = 0,
-  weekGrowth = 0,
-}: BusinessWelcomeBannerProps) {
-  const isPositive = weekGrowth >= 0;
-
+export default function UserWelcomeBanner({
+  userName,
+  packsRescued = 0,
+  level = 'Aprendiz',
+  points = 0,
+}: UserWelcomeBannerProps) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -27,7 +27,7 @@ export default function BusinessWelcomeBanner({
       <div className="absolute bottom-0 left-0 w-48 h-48 bg-secondary/10 rounded-full blur-3xl" />
 
       <div className="relative flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
+        <div className="flex-1">
           <div className="flex items-center gap-2 mb-2">
             <Sparkles className="w-5 h-5 text-primary" />
             <span className="text-xs font-medium text-primary uppercase tracking-wider">
@@ -35,10 +35,11 @@ export default function BusinessWelcomeBanner({
             </span>
           </div>
           <h1 className="text-2xl lg:text-3xl font-bold text-white">
-            ¡Hola, <span className="text-primary">{shopName}</span>!
+            ¡Hola, <span className="text-primary">{userName}</span>!
           </h1>
           <p className="text-gray-400 text-sm mt-1">
-            Gestiona tus packs o descubre nuevos comercios para inspirarte.
+            Has rescatado <span className="text-primary font-bold">{packsRescued}</span> packs. 
+            ¡Sigue salvando comida! 🌱
           </p>
           
           {/* Enlaces rápidos a explorar */}
@@ -61,26 +62,24 @@ export default function BusinessWelcomeBanner({
           </div>
         </div>
 
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3">
           <div className="flex items-center gap-3 px-4 py-2 rounded-xl bg-black/40 backdrop-blur-sm border border-white/10">
             <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-              <CalendarCheck className="w-5 h-5 text-primary" />
+              <Package className="w-5 h-5 text-primary" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-white">{todayReservations}</p>
-              <p className="text-[10px] text-gray-500">Reservas hoy</p>
+              <p className="text-2xl font-bold text-white">{packsRescued}</p>
+              <p className="text-[10px] text-gray-500">Packs salvados</p>
             </div>
           </div>
 
           <div className="flex items-center gap-3 px-4 py-2 rounded-xl bg-black/40 backdrop-blur-sm border border-white/10">
             <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-              <TrendingUp className="w-5 h-5 text-primary" />
+              <Award className="w-5 h-5 text-primary" />
             </div>
             <div>
-              <p className={`text-2xl font-bold ${isPositive ? 'text-green-400' : 'text-red-400'}`}>
-                {isPositive ? '+' : ''}{weekGrowth}%
-              </p>
-              <p className="text-[10px] text-gray-500">vs semana pasada</p>
+              <p className="text-lg font-bold text-white">{level}</p>
+              <p className="text-[10px] text-gray-500">{points} pts</p>
             </div>
           </div>
         </div>

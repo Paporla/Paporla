@@ -4,15 +4,13 @@ import { usePathname, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import {
   LayoutDashboard,
-  Package,
   Calendar,
-  BarChart3,
-  Store,
+  Heart,
   LogOut,
   HelpCircle,
   Bell,
   ShoppingBag,
-  Compass,
+  Store,
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useNotifications } from '@/hooks/useNotifications';
@@ -24,32 +22,30 @@ interface NavItem {
   badge?: number;
 }
 
-export default function BusinessSidebar() {
+export default function UserSidebar() {
   const pathname = usePathname();
   const router = useRouter();
   const { signOut, user } = useAuth();
   const { unreadCount } = useNotifications();
 
   const navItems: NavItem[] = [
-    { href: '/business', label: 'Panel', icon: LayoutDashboard },
-    { href: '/business/packs', label: 'Mis Packs', icon: Package },
-    { href: '/business/reservations', label: 'Mis Reservas', icon: Calendar },
-    { href: '/business/analytics', label: 'Estadísticas', icon: BarChart3 },
-    { href: '/business/profile', label: 'Mi Comercio', icon: Store },
+    { href: '/dashboard', label: 'Panel', icon: LayoutDashboard },
+    { href: '/reservations', label: 'Mis Reservas', icon: Calendar },
+    { href: '/favorites', label: 'Favoritos', icon: Heart },
   ];
 
   const exploreItems: NavItem[] = [
     { href: '/packs', label: 'Explorar Packs', icon: ShoppingBag },
-    { href: '/shops', label: 'Explorar Comercios', icon: Compass },
+    { href: '/shops', label: 'Explorar Comercios', icon: Store },
   ];
 
   const bottomItems: NavItem[] = [
-    { href: '/business/notifications', label: 'Notificaciones', icon: Bell, badge: unreadCount },
+    { href: '/notifications', label: 'Notificaciones', icon: Bell, badge: unreadCount },
     { href: '/faq', label: 'FAQ', icon: HelpCircle },
   ];
 
   const isActive = (href: string) => {
-    if (href === '/business') return pathname === '/business';
+    if (href === '/dashboard') return pathname === '/dashboard';
     return pathname.startsWith(href);
   };
 
@@ -73,21 +69,24 @@ export default function BusinessSidebar() {
         </div>
         <div>
           <h1 className="font-bold text-white text-lg">Paporla</h1>
-          <p className="text-[10px] text-gray-500">Panel de Comercio</p>
+          <p className="text-[10px] text-gray-500">Panel de Usuario</p>
         </div>
       </div>
 
-      {/* Store info */}
+      {/* User info */}
       <div className="mx-4 mt-6 p-3 rounded-xl bg-primary/5 border border-primary/20">
         <div className="flex items-center gap-2">
-          <Store className="w-4 h-4 text-primary" />
-          <span className="text-sm font-medium text-white truncate">
-            {user?.name || 'Mi Comercio'}
-          </span>
-        </div>
-        <div className="flex items-center gap-1 mt-1">
-          <span className="w-1.5 h-1.5 rounded-full bg-green-400" />
-          <span className="text-[10px] text-gray-500">Activo</span>
+          <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">
+            <span className="text-primary text-sm font-bold">
+              {user?.name?.charAt(0) || 'U'}
+            </span>
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-medium text-white truncate">
+              {user?.name || 'Usuario'}
+            </p>
+            <p className="text-[10px] text-gray-500">{user?.email}</p>
+          </div>
         </div>
       </div>
 

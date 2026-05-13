@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { supabaseBrowser } from '@/lib/supabase/client';
 import { useAuth } from './useAuth';
 
@@ -23,6 +23,7 @@ export function useNotifications() {
   const [unreadCount, setUnreadCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const isFirstLoad = useRef(true);
 
   const loadNotifications = useCallback(async () => {
     if (!user) {
@@ -32,7 +33,11 @@ export function useNotifications() {
       return;
     }
 
-    setLoading(true);
+    // Solo mostrar loading en la primera carga
+    if (isFirstLoad.current) {
+      setLoading(true);
+    }
+
     setError(null);
 
     const { data, error } = await supabase
@@ -47,7 +52,9 @@ export function useNotifications() {
       setNotifications(data || []);
       setUnreadCount(data?.filter(n => !n.is_read).length || 0);
     }
+    
     setLoading(false);
+    isFirstLoad.current = false;
   }, [user, supabase]);
 
   // Cargar al inicio
@@ -55,16 +62,30 @@ export function useNotifications() {
     loadNotifications();
   }, [loadNotifications]);
 
-  // Polling cada 30 segundos en lugar de Realtime
+  // Polling cada 30 segundos (sin mostrar loading)
   useEffect(() => {
     if (!user) return;
     
     const interval = setInterval(() => {
-      loadNotifications();
+      // Recarga silenciosa - no afecta loading
+      (async () => {
+        if (!user) return;
+        
+        const { data, error } = await supabase
+          .from('notifications')
+          .select('*')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false });
+
+        if (!error && data) {
+          setNotifications(data);
+          setUnreadCount(data.filter(n => !n.is_read).length);
+        }
+      })();
     }, 30000);
     
     return () => clearInterval(interval);
-  }, [user, loadNotifications]);
+  }, [user, supabase]);
 
   const markAsRead = useCallback(async (notificationId: string) => {
     const { error } = await supabase

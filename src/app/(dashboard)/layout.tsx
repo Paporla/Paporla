@@ -1,7 +1,6 @@
 ﻿import { Suspense } from 'react';
-import Header from '@/components/layout/Header';
-import Footer from '@/components/layout/Footer';
-import BottomNav from '@/components/layout/BottomNav';
+import UserSidebar from '@/components/dashboard/layout/UserSidebar';
+import UserMobileNav from '@/components/dashboard/layout/UserMobileNav';
 import Breadcrumbs from '@/components/ui/Breadcrumbs';
 import PageLoader from '@/components/ui/PageLoader';
 import { createClient } from '@/lib/supabase/server';
@@ -27,31 +26,34 @@ export default async function DashboardLayout({
 
   const role = profile?.role;
 
-  // Solo usuario normal puede entrar al dashboard
   if (role !== 'user') {
     if (role === 'comercio') redirect('/business');
     if (role === 'admin' || role === 'super_admin') redirect('/admin');
+    redirect('/dashboard');
   }
 
-    return (
-    <div className="min-h-screen">
-      <Header />
-      <div className="pt-16 pb-20 lg:pb-12">
-        <Breadcrumbs />
-        <main className="pb-12">
-          <div className="container-page">
-            <Suspense fallback={
-              <div className="flex items-center justify-center min-h-[60vh]">
-                <PageLoader />
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-[#0a0a1a] via-[#0f0f1a] to-[#020205]">
+      <div className="flex">
+        <UserSidebar />
+        <div className="flex-1 lg:ml-72">
+          <div className="pt-4 pb-20 lg:pb-12">
+            <Breadcrumbs />
+            <main className="pb-12">
+              <div className="container-page px-4 max-w-7xl mx-auto">
+                <Suspense fallback={
+                  <div className="flex items-center justify-center min-h-[60vh]">
+                    <PageLoader />
+                  </div>
+                }>
+                  {children}
+                </Suspense>
               </div>
-            }>
-              {children}
-            </Suspense>
+            </main>
           </div>
-        </main>
+        </div>
       </div>
-      <BottomNav />
-      <Footer />
+      <UserMobileNav />
     </div>
   );
 }
