@@ -134,6 +134,27 @@ export default function PackDetailPage() {
         throw new Error(data?.error || 'Error al crear la reserva')
       }
 
+      // Enviar email de confirmacion
+      try {
+        await fetch('/api/email', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            type: 'reservation',
+            email: user.email,
+            data: {
+              userName: user.name || 'Usuario',
+              packTitle: pack.title,
+              shopName: pack.shop.name,
+              pickupCode: data.pickup_code,
+              price: formatPrice(pack.price_cents * quantity),
+            },
+          }),
+        })
+      } catch (emailErr) {
+        console.error('Error enviando email de confirmacion:', emailErr)
+      }
+
       setLastReservation({
         id: data.reservation_id,
         pickup_code: data.pickup_code,

@@ -9,7 +9,7 @@ export interface ReservationItem {
   user_id: string
   quantity: number
   total_price_cents: number
-  status: 'pending' | 'confirmed' | 'ready_pickup' | 'picked_up' | 'completed' | 'cancelled' | 'no_show'
+  status: string
   created_at: string
   pickup_code: string
   pickup_date: string | null
@@ -41,7 +41,8 @@ export function useBusinessReservations() {
       filtered = filtered.filter(r =>
         r.user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         r.user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        r.pack.title.toLowerCase().includes(searchTerm.toLowerCase())
+        r.pack.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        r.pickup_code?.toLowerCase().includes(searchTerm.toLowerCase())
       )
     }
     if (statusFilter !== 'all') {
@@ -69,16 +70,30 @@ export function useBusinessReservations() {
       .from('shops').select('id').eq('owner_id', user.id).maybeSingle()
 
     if (shopError || !shopData) {
-      setError(shopError?.message || 'No se encontró tu comercio')
+      setError(shopError?.message || 'No se encontro tu comercio')
       setLoading(false)
       return
     }
 
     setShopId(shopData.id)
 
+    // Single query con joins - sin N+1
     const { data: reservationsData, error: reservationsError } = await supabase
       .from('reservations')
-      .select(`id,user_id,quantity,total_price_cents,status,created_at,pickup_code,pickup_date,pickup_start_time,pickup_end_time,pack:packs(id,title,price_cents)`)
+      .select(`
+        id,
+        user_id,
+        quantity,
+        total_price_cents,
+        status,
+        created_at,
+        pickup_code,
+        pickup_date,
+        pickup_start_time,
+        pickup_end_time,
+        pack:packs(id, title, price_cents),
+        user:user_profiles(name, email, phone)
+      `)
       .eq('shop_id', shopData.id)
       .order('created_at', { ascending: false })
 
@@ -88,15 +103,12 @@ export function useBusinessReservations() {
       return
     }
 
-    const enriched = await Promise.all(
-      (reservationsData || []).map(async (r: any) => {
-        const { data: userData } = await supabase
-          .from('user_profiles').select('name, email, phone').eq('id', r.user_id).maybeSingle()
-        return { ...r, user: userData || { name: 'Usuario', email: 'N/A', phone: null } }
-      })
-    )
+    const enriched = (reservationsData || []).map((r: any) => ({
+      ...r,
+      user: r.user || { name: 'Usuario', email: 'N/A', phone: null },
+    }))
 
-    setReservations(enriched as unknown as ReservationItem[])
+    setReservations(enriched as ReservationItem[])
     setLoading(false)
   }
 
@@ -105,24 +117,62 @@ export function useBusinessReservations() {
     setError('')
     setSuccess('')
 
-    const updates: any = { status: newStatus }
-    if (['picked_up', 'completed'].includes(newStatus)) updates.picked_up_at = new Date().toISOString()
-    if (newStatus === 'cancelled') updates.cancelled_at = new Date().toISOString()
+    try {
+      if (newStatus === 'cancelled') {
+        // Usar RPC cancel_reservation que reintegra stock
+        const { data, error: rpcError } = await supabase.rpc('cancel_reservation', {
+          p_reservation_id: reservationId,
+          p_cancel_reason: 'Cancelado por el comercio',
+        })
 
-    const { error: updateError } = await supabase
-      .from('reservations').update(updates).eq('id', reservationId)
+        if (rpcError) throw rpcError
+        if (!data?.success) throw new Error(data?.error || 'Error al cancelar')
 
-    if (updateError) {
-      setError(updateError.message)
-    } else {
-      const labels: Record<string, string> = {
-        confirmed: 'confirmada', ready_pickup: 'lista para recoger',
-        picked_up: 'validada', completed: 'completada',
-        cancelled: 'cancelada', no_show: 'no retirada'
+        setSuccess('Reserva cancelada y stock reintegrado')
+      } else if (newStatus === 'picked_up') {
+        // Usar RPC validate_pickup que verifica autorizacion y actualiza stats
+        const { data: reservation } = await supabase
+          .from('reservations')
+          .select('pickup_code')
+          .eq('id', reservationId)
+          .maybeSingle()
+
+        if (!reservation?.pickup_code) {
+          throw new Error('No se encontro el codigo de recogida')
+        }
+
+        const { data, error: rpcError } = await supabase.rpc('validate_pickup', {
+          p_pickup_code: reservation.pickup_code,
+        })
+
+        if (rpcError) throw rpcError
+        if (!data?.success) throw new Error(data?.error || 'Error al validar recogida')
+
+        setSuccess('Recogida validada correctamente')
+      } else {
+        // Para otros estados (confirmed, no_show) usar update directo
+        const updates: any = { status: newStatus }
+        if (newStatus === 'no_show') {
+          updates.updated_at = new Date().toISOString()
+        }
+
+        const { error: updateError } = await supabase
+          .from('reservations').update(updates).eq('id', reservationId)
+
+        if (updateError) throw updateError
+
+        const labels: Record<string, string> = {
+          confirmed: 'confirmada',
+          no_show: 'marcada como no retirada',
+        }
+        setSuccess(`Reserva ${labels[newStatus] || 'actualizada'} correctamente`)
       }
-      setSuccess(`Reserva ${labels[newStatus] || 'actualizada'} correctamente`)
+
       await loadShopAndReservations()
+    } catch (err: any) {
+      setError(err.message || 'Error al actualizar la reserva')
     }
+
     setUpdating(null)
   }
 

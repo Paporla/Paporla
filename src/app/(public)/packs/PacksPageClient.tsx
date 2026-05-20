@@ -12,6 +12,7 @@ import EmptyState from '@/components/ui/EmptyState';
 import Toast from '@/components/ui/Toast';
 import PacksHeroSection from '@/components/packs/PacksHeroSection';
 import PacksLoadingGrid from '@/components/packs/PacksLoadingGrid';
+import { formatPrice } from '@/lib/utils/formatPrice';
 
 const ITEMS_PER_PAGE = 9;
 
@@ -46,6 +47,28 @@ export default function PacksPage() {
 
       if (rpcError) throw rpcError;
       if (!data?.success) throw new Error(data?.error || 'Error al reservar');
+
+      // Enviar email de confirmacion
+      try {
+        const pack = packs.find(p => p.id === packId);
+        await fetch('/api/email', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            type: 'reservation',
+            email: user.email,
+            data: {
+              userName: user.name || 'Usuario',
+              packTitle: pack?.title || 'Pack',
+              shopName: pack?.shop_name || 'Comercio',
+              pickupCode: data.pickup_code,
+              price: pack ? formatPrice(pack.price_cents) : '',
+            },
+          }),
+        });
+      } catch (emailErr) {
+        console.error('Error enviando email:', emailErr);
+      }
 
       router.push('/dashboard?reserved=true');
     } catch (err: any) {

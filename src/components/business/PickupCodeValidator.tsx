@@ -12,6 +12,7 @@ interface ValidationResult {
   message: string
   userName?: string
   packTitle?: string
+  quantity?: number
 }
 
 export default function PickupCodeValidator() {
@@ -26,62 +27,40 @@ export default function PickupCodeValidator() {
     setResult({ state: 'validating', message: 'Validando codigo...' })
 
     try {
-      // Buscar reserva por codigo de recogida
-      const { data: reservation, error: searchError } = await supabase
+      // Usar RPC validate_pickup que verifica autorizacion, ventana de tiempo y actualiza stats
+      const { data, error: rpcError } = await supabase.rpc('validate_pickup', {
+        p_pickup_code: cleanCode,
+      })
+
+      if (rpcError) {
+        setResult({ state: 'error', message: rpcError.message || 'Error al validar el codigo.' })
+        setCode('')
+        return
+      }
+
+      if (!data?.success) {
+        setResult({ state: 'error', message: data?.error || 'Error al validar el codigo.' })
+        setCode('')
+        return
+      }
+
+      // Buscar info adicional para mostrar confirmacion
+      const { data: reservation } = await supabase
         .from('reservations')
         .select(`
-          id, status, pickup_code, user_id, pack_id,
+          user_id, quantity,
           user:user_id (name),
           pack:pack_id (title)
         `)
-        .eq('pickup_code', cleanCode)
+        .eq('id', data.reservation_id)
         .maybeSingle()
-
-      if (searchError || !reservation) {
-        setResult({ state: 'error', message: 'Codigo invalido. No se encontro ninguna reserva con este codigo.' })
-        setCode('')
-        return
-      }
-
-      // Verificar estado valido para recogida
-      const validStatuses = ['confirmed', 'ready_pickup']
-      if (!validStatuses.includes(reservation.status)) {
-        const statusMessages: Record<string, string> = {
-          pending: 'La reserva aun no ha sido confirmada.',
-          picked_up: 'Este pack ya fue recogido.',
-          completed: 'Este pack ya fue completado.',
-          cancelled: 'Esta reserva fue cancelada.',
-          expired: 'Esta reserva expiro.',
-          no_show: 'Esta reserva fue marcada como no retirada.',
-        }
-        setResult({
-          state: 'error',
-          message: statusMessages[reservation.status] || 'Estado invalido para recogida.',
-        })
-        setCode('')
-        return
-      }
-
-      // Marcar como recogido
-      const { error: updateError } = await supabase
-        .from('reservations')
-        .update({ status: 'picked_up', picked_up_at: new Date().toISOString() })
-        .eq('id', reservation.id)
-
-      if (updateError) {
-        setResult({ state: 'error', message: 'Error al actualizar la reserva: ' + updateError.message })
-        setCode('')
-        return
-      }
-
-      const userName = (reservation as any).user?.name || 'Usuario'
-      const packTitle = (reservation as any).pack?.title || 'Pack'
 
       setResult({
         state: 'success',
-        message: `Recogida validada exitosamente!`,
-        userName,
-        packTitle,
+        message: data.message || 'Recogida validada exitosamente!',
+        userName: (reservation as any)?.user?.name || 'Usuario',
+        packTitle: (reservation as any)?.pack?.title || 'Pack',
+        quantity: (reservation as any)?.quantity || 1,
       })
       setCode('')
     } catch (err) {
@@ -96,7 +75,6 @@ export default function PickupCodeValidator() {
 
   return (
     <div className="bg-dark-card border border-dark-border rounded-2xl overflow-hidden">
-      {/* Header */}
       <div className="p-5 border-b border-dark-border">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
@@ -104,12 +82,11 @@ export default function PickupCodeValidator() {
           </div>
           <div>
             <h3 className="font-bold text-white">Validar codigo de recogida</h3>
-            <p className="text-xs text-gray-500">Ingresa el codigo PAP-XXXX del usuario</p>
+            <p className="text-xs text-gray-500">Ingresa el codigo P4P-XXXX del usuario</p>
           </div>
         </div>
       </div>
 
-      {/* Input */}
       <div className="p-5">
         <div className="flex gap-3">
           <div className="relative flex-1">
@@ -119,8 +96,8 @@ export default function PickupCodeValidator() {
               value={code}
               onChange={(e) => setCode(e.target.value.toUpperCase())}
               onKeyDown={handleKeyDown}
-              placeholder="PAP-XXXX"
-              maxLength={8}
+              placeholder="P4P-XXXX"
+              maxLength={10}
               className="w-full pl-11 pr-4 py-3 bg-dark-muted border border-dark-border rounded-xl text-white font-mono text-lg tracking-widest placeholder-gray-600 focus:border-primary focus:ring-1 focus:ring-primary/20 focus:outline-none transition-all"
               autoComplete="off"
             />
@@ -140,14 +117,12 @@ export default function PickupCodeValidator() {
           </button>
         </div>
 
-        {/* Sugerencias de codigos de prueba */}
         <p className="text-xs text-gray-600 mt-3 flex items-center gap-1">
           <span className="inline-block w-1.5 h-1.5 rounded-full bg-gray-600" />
           Los codigos aparecen en cada reserva confirmada
         </p>
       </div>
 
-      {/* Resultado */}
       <AnimatePresence>
         {result && result.state !== 'validating' && (
           <motion.div
@@ -168,13 +143,14 @@ export default function PickupCodeValidator() {
               )}
               <div>
                 <p className={`font-bold text-sm ${result.state === 'success' ? 'text-green-400' : 'text-red-400'}`}>
-                  {result.state === 'success' ? '¡Recogida validada!' : 'Error'}
+                  {result.state === 'success' ? 'Recogida validada!' : 'Error'}
                 </p>
                 <p className="text-sm text-gray-400 mt-0.5">{result.message}</p>
                 {result.userName && result.packTitle && (
                   <div className="mt-2 text-xs text-gray-500 space-y-0.5">
-                    <p>👤 {result.userName}</p>
-                    <p>📦 {result.packTitle}</p>
+                    <p>Usuario: {result.userName}</p>
+                    <p>Pack: {result.packTitle}</p>
+                    {result.quantity && result.quantity > 1 && <p>Cantidad: {result.quantity}</p>}
                   </div>
                 )}
               </div>
