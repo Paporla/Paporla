@@ -7,37 +7,48 @@ type Theme = 'dark' | 'light'
 interface ThemeContextType {
   theme: Theme
   toggleTheme: () => void
+  setTheme: (theme: Theme) => void
 }
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined)
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setTheme] = useState<Theme>('dark')
+  const [theme, setThemeState] = useState<Theme>('dark')
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
     setMounted(true)
-    const savedTheme = localStorage.getItem('theme') as Theme | null
-    if (savedTheme) {
-      setTheme(savedTheme)
-      document.documentElement.classList.add(savedTheme)
-    } else {
-      document.documentElement.classList.add('dark')
+    const stored = localStorage.getItem('paporla-theme') as Theme | null
+    if (stored && (stored === 'dark' || stored === 'light')) {
+      setThemeState(stored)
+    } else if (window.matchMedia('(prefers-color-scheme: light)').matches) {
+      setThemeState('light')
     }
   }, [])
 
+  useEffect(() => {
+    if (!mounted) return
+
+    const root = document.documentElement
+    if (theme === 'dark') {
+      root.classList.add('dark')
+    } else {
+      root.classList.remove('dark')
+    }
+
+    localStorage.setItem('paporla-theme', theme)
+  }, [theme, mounted])
+
   const toggleTheme = () => {
-    const newTheme = theme === 'dark' ? 'light' : 'dark'
-    setTheme(newTheme)
-    document.documentElement.classList.remove(theme)
-    document.documentElement.classList.add(newTheme)
-    localStorage.setItem('theme', newTheme)
+    setThemeState(prev => prev === 'dark' ? 'light' : 'dark')
   }
 
-  if (!mounted) return null
+  const setTheme = (newTheme: Theme) => {
+    setThemeState(newTheme)
+  }
 
   return (
-    <ThemeContext.Provider value={{ theme, toggleTheme }}>
+    <ThemeContext.Provider value={{ theme, toggleTheme, setTheme }}>
       {children}
     </ThemeContext.Provider>
   )

@@ -1,28 +1,37 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 
-// ============================================
-// Cron: Revisar reservas proximas a recoger
-// Llamar cada 15-30 minutos
-// ============================================
+function validateCronRequest(request: Request): boolean {
+  const authHeader = request.headers.get('authorization')
+  const cronSecret = process.env.CRON_SECRET
+  if (!cronSecret) return true
+  return authHeader === 'Bearer ' + cronSecret
+}
 
-export async function GET() {
+export async function GET(request: Request) {
+  if (!validateCronRequest(request)) {
+    return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
+  }
+
   try {
     const supabase = await createClient()
     const now = new Date()
-    const nowISO = now.toISOString()
+    const today = now.toISOString().split('T')[0]
 
-    // Buscar reservas con pickup en la proxima hora
     const oneHourLater = new Date(now.getTime() + 60 * 60 * 1000)
-    const oneHourLaterStr = oneHourLater.toISOString()
 
-    // Reservas del dia de hoy que empiezan en menos de 1 hora
-    const today = nowISO.split('T')[0]
-
-    // Buscar reservas confirmed o ready_pickup para hoy
     const { data: reservations } = await supabase
       .from('reservations')
-      .select('id, user_id, pickup_date, pickup_start_time, pickup_end_time, pack:packs(title), shop:shops(name)')
+      .select(`
+        id,
+        user_id,
+        pickup_date,
+        pickup_start_time,
+        pickup_end_time,
+        pack_id,
+        pack:packs(title),
+        shop:shops(name)
+      `)
       .in('status', ['confirmed', 'ready_pickup'])
       .eq('pickup_date', today)
       .order('pickup_start_time', { ascending: true })
@@ -36,21 +45,17 @@ export async function GET() {
     for (const reservation of reservations as any[]) {
       if (!reservation.pickup_start_time) continue
 
-      // Calcular hora de inicio
       const [hours, minutes] = reservation.pickup_start_time.split(':').map(Number)
       const pickupTime = new Date()
       pickupTime.setHours(hours, minutes, 0, 0)
 
-      // Diferencia en minutos entre ahora y la pickup
       const diffMs = pickupTime.getTime() - now.getTime()
       const diffMinutes = Math.round(diffMs / 60000)
 
-      // Enviar recordatorio si falta entre 15 y 60 minutos
       if (diffMinutes >= 15 && diffMinutes <= 60) {
         const packTitle = reservation.pack?.title || 'Pack'
         const shopName = reservation.shop?.name || 'Comercio'
 
-        // Verificar si ya enviamos recordatorio para no duplicar
         const { data: existing } = await supabase
           .from('notifications')
           .select('id')
@@ -60,20 +65,19 @@ export async function GET() {
           .gte('created_at', today + 'T00:00:00')
           .maybeSingle()
 
-        if (existing) continue // Ya se envio
+        if (existing) continue
 
         await supabase.from('notifications').insert({
           user_id: reservation.user_id,
           type: 'pickup_reminder',
-          message: `⏰ Tu reserva de "${packTitle}" en ${shopName} esta proxima a recogerse (${reservation.pickup_start_time.slice(0, 5)})`,
+          message: `Tu reserva de "${packTitle}" en ${shopName} esta proxima a recogerse (${reservation.pickup_start_time.slice(0, 5)})`,
           reservation_id: reservation.id,
           is_read: false,
-          sent_at: nowISO,
+          sent_at: now.toISOString(),
         })
 
         sentCount++
 
-        // Tambien avisar al comercio
         const { data: pack } = await supabase
           .from('packs').select('shop_id').eq('id', reservation.pack_id).maybeSingle()
 
@@ -85,10 +89,10 @@ export async function GET() {
             await supabase.from('notifications').insert({
               user_id: shop.owner_id,
               type: 'pickup_reminder',
-              message: `📦 Se acerca la hora de recogida de "${packTitle}" - ${reservation.pickup_start_time?.slice(0, 5)}`,
+              message: `Se acerca la hora de recogida de "${packTitle}" - ${reservation.pickup_start_time?.slice(0, 5)}`,
               reservation_id: reservation.id,
               is_read: false,
-              sent_at: nowISO,
+              sent_at: now.toISOString(),
             })
             sentCount++
           }

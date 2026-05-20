@@ -1,7 +1,14 @@
 ﻿import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
+import { applyRateLimit } from '@/lib/middleware/rateLimit'
 
 export async function middleware(request: NextRequest) {
+  // Rate limiting para API routes
+  if (request.nextUrl.pathname.startsWith('/api')) {
+    const rateLimitResponse = applyRateLimit(request)
+    if (rateLimitResponse) return rateLimitResponse
+  }
+
   let response = NextResponse.next({
     request: {
       headers: request.headers,
@@ -43,7 +50,6 @@ export async function middleware(request: NextRequest) {
     }
   )
 
-  const { data: { user } } = await supabase.auth.getUser()
   const path = request.nextUrl.pathname
 
   const publicPaths = ['/', '/login', '/register', '/faq', '/about', '/forgot-password', '/reset-password']
@@ -54,48 +60,55 @@ export async function middleware(request: NextRequest) {
     path.startsWith('/legal/') ||
     path.startsWith('/packs') ||
     path.startsWith('/shops') ||
-    path.startsWith('/callback')
+    path.startsWith('/callback') ||
+    path.startsWith('/api') ||
+    path.startsWith('/mantenimiento')
 
   const isDashboardPath = path.startsWith('/dashboard') || path.startsWith('/profile') || path.startsWith('/notifications') || path.startsWith('/favorites') || path.startsWith('/reservations')
   const isBusinessPath = path.startsWith('/business')
   const isAdminPath = path.startsWith('/admin')
   const isAuthPage = path === '/login' || path === '/register'
 
-  if (!user && !isPublicPath) {
-    return NextResponse.redirect(new URL('/login', request.url))
-  }
+  // Solo verificar auth para rutas protegidas
+  if (!isPublicPath || isDashboardPath || isBusinessPath || isAdminPath) {
+    const { data: { user } } = await supabase.auth.getUser()
 
-  let role = 'user'
+    if (!user && !isPublicPath) {
+      return NextResponse.redirect(new URL('/login', request.url))
+    }
 
-  if (user) {
-    const { data: profile } = await supabase
-      .from('user_profiles')
-      .select('role')
-      .eq('id', user.id)
-      .maybeSingle()
+    let role = 'user'
 
-    role = profile?.role || 'user'
-  }
+    if (user) {
+      const { data: profile } = await supabase
+        .from('user_profiles')
+        .select('role')
+        .eq('id', user.id)
+        .maybeSingle()
 
-  // Si ya esta logueado y entra a login/register, redirigir a su panel
-  if (user && isAuthPage) {
-    const dest = role === 'comercio' ? '/business' : role === 'admin' || role === 'super_admin' ? '/admin' : '/dashboard'
-    return NextResponse.redirect(new URL(dest, request.url))
-  }
+      role = profile?.role || 'user'
 
-  // Proteccion por roles
-  if (user && isDashboardPath && role !== 'user') {
-    const dest = role === 'comercio' ? '/business' : '/admin'
-    return NextResponse.redirect(new URL(dest, request.url))
-  }
+      // Si ya esta logueado y entra a login/register, redirigir a su panel
+      if (isAuthPage) {
+        const dest = role === 'comercio' ? '/business' : role === 'admin' || role === 'super_admin' ? '/admin' : '/dashboard'
+        return NextResponse.redirect(new URL(dest, request.url))
+      }
 
-  if (user && isBusinessPath && role !== 'comercio' && role !== 'admin' && role !== 'super_admin') {
-    return NextResponse.redirect(new URL('/dashboard', request.url))
-  }
+      // Proteccion por roles
+      if (isDashboardPath && role !== 'user') {
+        const dest = role === 'comercio' ? '/business' : '/admin'
+        return NextResponse.redirect(new URL(dest, request.url))
+      }
 
-  if (user && isAdminPath && role !== 'admin' && role !== 'super_admin') {
-    const dest = role === 'comercio' ? '/business' : '/dashboard'
-    return NextResponse.redirect(new URL(dest, request.url))
+      if (isBusinessPath && role !== 'comercio' && role !== 'admin' && role !== 'super_admin') {
+        return NextResponse.redirect(new URL('/dashboard', request.url))
+      }
+
+      if (isAdminPath && role !== 'admin' && role !== 'super_admin') {
+        const dest = role === 'comercio' ? '/business' : '/dashboard'
+        return NextResponse.redirect(new URL(dest, request.url))
+      }
+    }
   }
 
   return response

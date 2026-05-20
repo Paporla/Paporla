@@ -121,67 +121,41 @@ export default function PackDetailPage() {
     setReserving(true)
     setError('')
 
-        // Verificar reserva existente (usando .in() con array, que es la sintaxis correcta)
-    const { data: existingReservation } = await supabase
-      .from('reservations')
-      .select('id')
-      .eq('user_id', user.id)
-      .eq('pack_id', pack.id)
-      .in('status', ['pending', 'confirmed', 'ready_pickup'])
-      .maybeSingle()
+    try {
+      const { data, error: rpcError } = await supabase.rpc('create_reservation_atomic', {
+        p_pack_id: pack.id,
+        p_quantity: quantity,
+        p_payment_method: paymentMethod,
+      })
 
-    if (existingReservation) {
-      setError('Ya has reservado este pack')
-      setReserving(false)
-      return
-    }
+      if (rpcError) throw rpcError
 
-    // Crear reserva AUTO-CONFIRMADA (sin pago real)
-    const { data: reservationData, error: reservationError } = await supabase
-      .from('reservations')
-      .insert({
-        user_id: user.id,
-        shop_id: pack.shop_id,
+      if (!data?.success) {
+        throw new Error(data?.error || 'Error al crear la reserva')
+      }
+
+      setLastReservation({
+        id: data.reservation_id,
+        pickup_code: data.pickup_code,
         pack_id: pack.id,
-        quantity: quantity,
+        shop_id: pack.shop_id,
+        quantity,
         total_price_cents: pack.price_cents * quantity,
-        status: 'confirmed',
-        payment_method: paymentMethod === 'demo' ? 'demo' : 'cash',
-        payment_status: 'completed',
+        payment_method: paymentMethod,
         pickup_date: pack.pickup_date,
         pickup_start_time: pack.pickup_start_time,
         pickup_end_time: pack.pickup_end_time,
-        reserved_at: new Date().toISOString()
+        pack: { title: pack.title, image_url: pack.image_url },
+        shop: { name: pack.shop.name, address: pack.shop.address, phone: pack.shop.phone },
       })
-      .select(`
-        *,
-        pack:packs (
-          title,
-          image_url
-        ),
-        shop:shops (
-          name,
-          address,
-          phone
-        )
-      `)
-      .single()
-
-    if (reservationError) {
-      setError(reservationError.message)
+      setShowSummary(false)
+      setShowConfirmation(true)
+      await loadPack()
+    } catch (err: any) {
+      setError(err.message || 'Error al procesar la reserva')
+    } finally {
       setReserving(false)
-      return
     }
-
-    setLastReservation({
-      ...reservationData,
-      pickup_date: pack.pickup_date,
-      pickup_start_time: pack.pickup_start_time,
-      pickup_end_time: pack.pickup_end_time,
-    })
-    setShowSummary(false)
-    setShowConfirmation(true)
-    setReserving(false)
   }
 
   const calculateDiscount = () => {

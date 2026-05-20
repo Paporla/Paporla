@@ -38,22 +38,19 @@ export default function PacksPage() {
     setError('');
 
     try {
-      const { data: pack } = await supabase.from('packs').select('shop_id, price_cents').eq('id', packId).maybeSingle();
-      if (!pack) throw new Error('Pack no encontrado');
-
-      const { data: existing } = await supabase.from('reservations').select('id')
-        .eq('user_id', user.id).eq('pack_id', packId).in('status', ['pending', 'confirmed']).maybeSingle();
-      if (existing) throw new Error('Ya tienes una reserva activa');
-
-      const { error: resErr } = await supabase.from('reservations').insert({
-        user_id: user.id, shop_id: pack.shop_id, pack_id: packId, quantity: 1,
-        total_price_cents: pack.price_cents, status: 'pending',
-        payment_method: 'cash', payment_status: 'pending', reserved_at: new Date().toISOString(),
+      const { data, error: rpcError } = await supabase.rpc('create_reservation_atomic', {
+        p_pack_id: packId,
+        p_quantity: 1,
+        p_payment_method: 'cash',
       });
-      if (resErr) throw resErr;
+
+      if (rpcError) throw rpcError;
+      if (!data?.success) throw new Error(data?.error || 'Error al reservar');
+
       router.push('/dashboard?reserved=true');
     } catch (err: any) {
       setError(err.message);
+    } finally {
       setReserving(null);
     }
   };

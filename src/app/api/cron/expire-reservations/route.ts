@@ -31,13 +31,13 @@ export async function GET(request: Request) {
 
     const results: string[] = []
 
-    // ============================
-    // 1. Expiracion automatica
-    // ============================
-    const { data: expired, error: expireError } = await supabase.rpc('expire_reservations')
+    const { data: expireResult, error: expireError } = await supabase.rpc('expire_reservations')
     if (expireError) throw expireError
-    const expiredCount = expired || 0
-    results.push(expiredCount + ' reservas expiradas')
+
+    const expiredRes = expireResult as any
+    results.push(`${expiredRes.expired_reservations || 0} reservas expiradas`)
+    results.push(`${expiredRes.expired_packs || 0} packs expirados`)
+    results.push(`${expiredRes.sold_out_packs || 0} packs agotados`)
 
     // ============================
     // 2. Recordatorios para recoger manana
@@ -107,7 +107,9 @@ export async function GET(request: Request) {
 
     return NextResponse.json({
       success: true,
-      expired: expiredCount,
+      expired_reservations: expireResult.expired_reservations,
+      expired_packs: expireResult.expired_packs,
+      sold_out_packs: expireResult.sold_out_packs,
       results,
       timestamp: new Date().toISOString(),
     })

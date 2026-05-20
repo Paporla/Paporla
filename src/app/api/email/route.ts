@@ -1,131 +1,42 @@
 ﻿import { NextResponse } from 'next/server'
 import { Resend } from 'resend'
+import { createClient } from '@/lib/supabase/server'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 const senderEmail = process.env.RESEND_FROM_EMAIL || 'noreply@paporla.com'
 const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://paporla.vercel.app'
-
 const primaryColor = '#00ff88'
 const primaryRgb = '0, 255, 136'
 
-// ============================================
-// TEMPLATES HTML (inline styles para email)
-// ============================================
-
 function baseLayout(content: string) {
-  return `
-<!DOCTYPE html>
-<html lang="es">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
-<body style="margin:0;padding:0;background:#000;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
-<table width="100%" cellpadding="0" cellspacing="0" style="background:#000;padding:40px 20px;">
-<tr><td align="center">
-<table width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background:#0a0a0f;border-radius:20px;overflow:hidden;border:1px solid rgba(255,255,255,0.06);box-shadow:0 20px 60px rgba(0,0,0,0.5);">
-  <tr><td style="background:linear-gradient(135deg,#0a0a1a 0%,#0f0f1a 50%,#0a0a1a 100%);padding:36px 40px 28px;text-align:center;border-bottom:1px solid rgba(0,255,136,0.08);">
-    <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:16px;"><tr><td align="center">
-      <table cellpadding="0" cellspacing="0"><tr>
-        <td style="width:40px;height:2px;background:rgba(0,255,136,0.15);border-radius:2px;"></td>
-        <td style="width:40px;height:2px;background:${primaryColor};border-radius:2px;box-shadow:0 0 8px rgba(0,255,136,0.5);"></td>
-        <td style="width:40px;height:2px;background:rgba(0,255,136,0.15);border-radius:2px;"></td>
-      </tr></table>
-    </td></tr></table>
-    <table cellpadding="0" cellspacing="0" style="margin:0 auto;"><tr>
-      <td style="text-align:center;">
-        <span style="color:#ffffff;font-size:36px;font-weight:900;letter-spacing:3px;text-transform:uppercase;">PAPORLA</span>
-        <span style="color:${primaryColor};font-size:36px;font-weight:300;letter-spacing:-1px;">.</span>
-      </td>
-    </tr><tr>
-      <td style="text-align:center;padding-top:4px;">
-        <span style="color:#555;font-size:12px;letter-spacing:5px;text-transform:uppercase;">Rescate Alimentario</span>
-      </td>
-    </tr></table>
-  </td></tr>
-  <tr><td style="padding:30px 40px 20px;">
-    ${content}
-  </td></tr>
-  <tr><td style="padding:20px 40px 28px;text-align:center;border-top:1px solid rgba(255,255,255,0.04);">
-    <table cellpadding="0" cellspacing="0" style="margin:0 auto 14px;"><tr><td style="width:30px;height:2px;background:rgba(0,255,136,0.2);border-radius:2px;"></td></tr></table>
-    <p style="color:#333;font-size:10px;margin:0 0 2px;letter-spacing:1px;text-transform:uppercase;">Paporla &mdash; Rescate Alimentario</p>
-    <p style="color:#2a2a2a;font-size:10px;margin:0 0 8px;">Caracas, Venezuela</p>
-    <p style="color:#222;font-size:9px;margin:0;">&copy; 2026 Paporla. Todos los derechos reservados.</p>
-  </td></tr>
-</table>
-<p style="color:#222;font-size:10px;margin:16px 0 0;text-align:center;">
-  ¿Tienes dudas? Escribinos a <a href="mailto:hola@paporla.com" style="color:${primaryColor};text-decoration:none;">hola@paporla.com</a>
-</p>
-</td></tr>
-</table>
-</body>
-</html>`
+  return `<!DOCTYPE html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head><body style="margin:0;padding:0;background:#000;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;"><table width="100%" cellpadding="0" cellspacing="0" style="background:#000;padding:40px 20px;"><tr><td align="center"><table width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background:#0a0a0f;border-radius:20px;overflow:hidden;border:1px solid rgba(255,255,255,0.06);box-shadow:0 20px 60px rgba(0,0,0,0.5);"><tr><td style="background:linear-gradient(135deg,#0a0a1a 0%,#0f0f1a 50%,#0a0a1a 100%);padding:36px 40px 28px;text-align:center;border-bottom:1px solid rgba(0,255,136,0.08);"><table cellpadding="0" cellspacing="0" style="margin:0 auto;"><tr><td style="text-align:center;"><span style="color:#ffffff;font-size:36px;font-weight:900;letter-spacing:3px;text-transform:uppercase;">PAPORLA</span><span style="color:${primaryColor};font-size:36px;font-weight:300;letter-spacing:-1px;">.</span></td></tr><tr><td style="text-align:center;padding-top:4px;"><span style="color:#555;font-size:12px;letter-spacing:5px;text-transform:uppercase;">Rescate Alimentario</span></td></tr></table></td></tr><tr><td style="padding:30px 40px 20px;">${content}</td></tr><tr><td style="padding:20px 40px 28px;text-align:center;border-top:1px solid rgba(255,255,255,0.04);"><p style="color:#333;font-size:10px;margin:0 0 2px;letter-spacing:1px;text-transform:uppercase;">Paporla - Rescate Alimentario</p><p style="color:#2a2a2a;font-size:10px;margin:0 0 8px;">Caracas, Venezuela</p><p style="color:#222;font-size:9px;margin:0;">2026 Paporla. Todos los derechos reservados.</p></td></tr></table></td></tr></table></body></html>`
 }
 
 function button(href: string, text: string) {
-  return `<table cellpadding="0" cellspacing="0" style="margin:0 auto;"><tr><td align="center" style="background:${primaryColor};border-radius:50px;">
-<a href="${href}" style="display:inline-block;padding:14px 40px;background:${primaryColor};color:#000;text-decoration:none;border-radius:50px;font-size:15px;font-weight:700;letter-spacing:0.5px;box-shadow:0 4px 24px rgba(${primaryRgb},0.35);">${text}</a>
-</td></tr></table>`
+  return `<table cellpadding="0" cellspacing="0" style="margin:0 auto;"><tr><td align="center" style="background:${primaryColor};border-radius:50px;"><a href="${href}" style="display:inline-block;padding:14px 40px;background:${primaryColor};color:#000;text-decoration:none;border-radius:50px;font-size:15px;font-weight:700;letter-spacing:0.5px;box-shadow:0 4px 24px rgba(${primaryRgb},0.35);">${text}</a></td></tr></table>`
 }
 
 function welcomeTemplate(name: string) {
-  return baseLayout(`
-<h2 style="color:#fff;font-size:24px;margin:0 0 6px;text-align:center;">\u00A1Bienvenido, ${name}!</h2>
-<p style="color:#999;font-size:14px;line-height:1.7;margin:0 0 8px;text-align:center;">Gracias por unirte a <strong style="color:${primaryColor};">Paporla</strong>.<br>Ahora formas parte del cambio para reducir el desperdicio alimentario.</p>
-<div style="background:rgba(255,255,255,0.03);border-radius:12px;padding:20px;margin:20px 0;">
-  <p style="margin:0 0 12px;color:#ccc;font-size:14px;font-weight:600;">\u00BFC\u00F3mo funciona?</p>
-  <table cellpadding="0" cellspacing="0">
-    <tr><td style="width:28px;vertical-align:top;padding-right:10px;"><span style="display:inline-block;width:24px;height:24px;background:rgba(${primaryRgb},0.2);border-radius:50%;text-align:center;line-height:24px;color:${primaryColor};font-size:12px;font-weight:700;">1</span></td><td style="padding-bottom:12px;"><p style="margin:0;color:#aaa;font-size:13px;line-height:1.5;"><strong style="color:#fff;">Explora</strong> packs sorpresa de comercios locales</p></td></tr>
-    <tr><td style="width:28px;vertical-align:top;padding-right:10px;"><span style="display:inline-block;width:24px;height:24px;background:rgba(${primaryRgb},0.2);border-radius:50%;text-align:center;line-height:24px;color:${primaryColor};font-size:12px;font-weight:700;">2</span></td><td style="padding-bottom:12px;"><p style="margin:0;color:#aaa;font-size:13px;line-height:1.5;"><strong style="color:#fff;">Reserva</strong> el que m\u00E1s te guste</p></td></tr>
-    <tr><td style="width:28px;vertical-align:top;padding-right:10px;"><span style="display:inline-block;width:24px;height:24px;background:rgba(${primaryRgb},0.2);border-radius:50%;text-align:center;line-height:24px;color:${primaryColor};font-size:12px;font-weight:700;">3</span></td><td><p style="margin:0;color:#aaa;font-size:13px;line-height:1.5;"><strong style="color:#fff;">Recoge</strong> tu pedido y disfruta</p></td></tr>
-  </table>
-</div>
-<div style="text-align:center;margin:24px 0 8px;">${button(`${baseUrl}/packs`, 'Explorar packs disponibles')}</div>
-`)
+  return baseLayout(`<h2 style="color:#fff;font-size:24px;margin:0 0 6px;text-align:center;">Bienvenido, ${name}!</h2><p style="color:#999;font-size:14px;line-height:1.7;margin:0 0 8px;text-align:center;">Gracias por unirte a <strong style="color:${primaryColor};">Paporla</strong>. Ahora formas parte del cambio para reducir el desperdicio alimentario.</p><div style="text-align:center;margin:24px 0 8px;">${button(`${baseUrl}/packs`, 'Explorar packs')}</div>`)
 }
 
-function reservationTemplate(data: {
-  userName: string
-  packTitle: string
-  shopName: string
-  pickupCode: string
-  price: string
-}) {
-  return baseLayout(`
-<h2 style="color:#fff;font-size:24px;margin:0 0 6px;text-align:center;">\u2705 \u00A1Reserva Confirmada!</h2>
-<p style="color:#999;font-size:14px;margin:0 0 4px;text-align:center;">Hola ${data.userName}, tu reserva est\u00E1 lista.</p>
-<p style="color:#666;font-size:13px;margin:0;text-align:center;">Presenta tu c\u00F3digo de recogida en el comercio.</p>
-<div style="background:rgba(${primaryRgb},0.08);border:1px solid rgba(${primaryRgb},0.2);border-radius:12px;padding:16px 20px;text-align:center;margin:20px 0;">
-  <p style="margin:0 0 6px;color:#666;font-size:11px;text-transform:uppercase;letter-spacing:1.5px;font-weight:600;">C\u00F3digo de recogida</p>
-  <p style="margin:0;color:${primaryColor};font-size:30px;font-weight:700;font-family:'Courier New',Courier,monospace;letter-spacing:4px;">${data.pickupCode}</p>
-</div>
-<table width="100%" cellpadding="0" cellspacing="0" style="margin:20px 0;">
-  <tr><td style="padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.05);"><span style="color:#888;font-size:13px;">Pack</span></td><td style="padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.05);text-align:right;"><span style="color:#fff;font-size:14px;">${data.packTitle}</span></td></tr>
-  <tr><td style="padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.05);"><span style="color:#888;font-size:13px;">Comercio</span></td><td style="padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.05);text-align:right;"><span style="color:#fff;font-size:14px;">${data.shopName}</span></td></tr>
-  <tr><td style="padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.05);"><span style="color:#888;font-size:13px;">Total</span></td><td style="padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.05);text-align:right;"><span style="color:${primaryColor};font-size:14px;font-weight:700;">${data.price}</span></td></tr>
-</table>
-<div style="text-align:center;margin:24px 0 8px;">${button(`${baseUrl}/dashboard`, 'Ver mis reservas')}</div>
-`)
+function reservationTemplate(data: { userName: string; packTitle: string; shopName: string; pickupCode: string; price: string }) {
+  return baseLayout(`<h2 style="color:#fff;font-size:24px;margin:0 0 6px;text-align:center;">Reserva Confirmada!</h2><p style="color:#999;font-size:14px;margin:0 0 4px;text-align:center;">Hola ${data.userName}, tu reserva esta lista.</p><div style="background:rgba(${primaryRgb},0.08);border:1px solid rgba(${primaryRgb},0.2);border-radius:12px;padding:16px 20px;text-align:center;margin:20px 0;"><p style="margin:0 0 6px;color:#666;font-size:11px;text-transform:uppercase;letter-spacing:1.5px;font-weight:600;">Codigo de recogida</p><p style="margin:0;color:${primaryColor};font-size:30px;font-weight:700;font-family:'Courier New',Courier,monospace;letter-spacing:4px;">${data.pickupCode}</p></div><div style="text-align:center;margin:24px 0 8px;">${button(`${baseUrl}/dashboard`, 'Ver mis reservas')}</div>`)
 }
 
 function passwordResetTemplate(resetLink: string) {
-  return baseLayout(`
-<h2 style="color:#fff;font-size:24px;margin:0 0 6px;text-align:center;">\u{1F512} Restablece tu contrase\u00F1a</h2>
-<p style="color:#999;font-size:14px;line-height:1.7;margin:0 0 20px;text-align:center;">Recibimos una solicitud para restablecer la contrase\u00F1a de tu cuenta en <strong style="color:${primaryColor};">Paporla</strong>.</p>
-<div style="background:rgba(255,255,255,0.03);border-radius:12px;padding:20px;margin:20px 0;text-align:center;">
-  <p style="margin:0 0 16px;color:#aaa;font-size:13px;line-height:1.6;">Haz clic en el bot\u00F3n de abajo para crear una nueva contrase\u00F1a.<br>Este enlace es seguro y expirar\u00E1 en <strong style="color:#fff;">1 hora</strong>.</p>
-  ${button(resetLink, 'Restablecer contrase\u00F1a')}
-</div>
-<div style="background:rgba(255,200,0,0.06);border:1px solid rgba(255,200,0,0.15);border-radius:10px;padding:14px 18px;margin:20px 0;">
-  <p style="margin:0;color:#cc9;font-size:12px;line-height:1.6;">\u26A0\uFE0F Si no solicitaste este cambio, ignora este mensaje.<br>Nadie puede acceder a tu cuenta sin tu correo y contrase\u00F1a.</p>
-</div>
-<p style="color:#555;font-size:12px;text-align:center;margin:16px 0 0;">\u00BFTienes problemas? <a href="mailto:hola@paporla.com" style="color:${primaryColor};text-decoration:none;">Cont\u00E1ctanos</a></p>
-`)
+  return baseLayout(`<h2 style="color:#fff;font-size:24px;margin:0 0 6px;text-align:center;">Restablece tu contraseña</h2><p style="color:#999;font-size:14px;line-height:1.7;margin:0 0 20px;text-align:center;">Haz clic en el boton de abajo para crear una nueva contraseña. Este enlace expirara en 1 hora.</p><div style="text-align:center;margin:24px 0 8px;">${button(resetLink, 'Restablecer contraseña')}</div>`)
 }
-
-// ============================================
-// HANDLER PRINCIPAL
-// ============================================
 
 export async function POST(request: Request) {
   try {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (!user) {
+      return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
+    }
+
     const body = await request.json()
     const { type, email, data } = body
 
@@ -133,27 +44,29 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Faltan campos: email y type son requeridos' }, { status: 400 })
     }
 
+    const { data: profile } = await supabase.from('user_profiles').select('role').eq('id', user.id).maybeSingle()
+    const isSystemEmail = email === user.email
+    const isAdmin = profile?.role === 'admin' || profile?.role === 'super_admin'
+    const isBusiness = profile?.role === 'comercio'
+
+    if (!isSystemEmail && !isAdmin && !isBusiness) {
+      return NextResponse.json({ error: 'No tienes permiso para enviar emails a otros usuarios' }, { status: 403 })
+    }
+
     let subject = ''
     let html = ''
 
-    switch (type) {
-      case 'welcome': {
-        subject = '\u00A1Bienvenido a Paporla!'
-        html = welcomeTemplate(data?.name || 'Usuario')
-        break
-      }
-      case 'reservation': {
-        subject = `\u2705 Reserva confirmada - ${data?.packTitle || ''}`
-        html = reservationTemplate(data)
-        break
-      }
-      case 'password_reset': {
-        subject = 'Restablece tu contrase\u00F1a en Paporla'
-        html = passwordResetTemplate(data?.resetLink || '')
-        break
-      }
-      default:
-        return NextResponse.json({ error: 'Tipo de correo no v\u00E1lido' }, { status: 400 })
+    if (type === 'welcome') {
+      subject = 'Bienvenido a Paporla!'
+      html = welcomeTemplate(data?.name || 'Usuario')
+    } else if (type === 'reservation') {
+      subject = `Reserva confirmada - ${data?.packTitle || ''}`
+      html = reservationTemplate(data)
+    } else if (type === 'password_reset') {
+      subject = 'Restablece tu contraseña en Paporla'
+      html = passwordResetTemplate(data?.resetLink || '')
+    } else {
+      return NextResponse.json({ error: 'Tipo de correo no valido' }, { status: 400 })
     }
 
     const { data: res, error } = await resend.emails.send({
@@ -175,4 +88,3 @@ export async function POST(request: Request) {
     return NextResponse.json({ success: false, error: err.message }, { status: 500 })
   }
 }
-

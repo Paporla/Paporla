@@ -1,25 +1,29 @@
-﻿'use client'
+﻿// src/hooks/useAuth.ts
+
+'use client'
 
 import { useEffect, useState } from 'react'
 import { supabaseBrowser } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 
-type UserProfile = {
+export type UserRole = 'user' | 'comercio' | 'admin' | 'super_admin'
+
+export type UserProfile = {
   id: string
   email: string | null
   name: string | null
   phone: string | null
-  role: 'user' | 'comercio' | 'admin' | 'super_admin'
-  avatar_url?: string | null
-  email_confirmed?: boolean | null
-  created_at?: string | null
-  country?: string | null
-  city?: string | null
+  role: UserRole
+  avatar_url: string | null
+  email_confirmed: boolean | null
+  created_at: string | null
+  country: string | null
+  city: string | null
 }
 
-type SignUpRole = 'user' | 'comercio'
+export type SignUpRole = 'user' | 'comercio'
 
-type ShopData = {
+export type ShopData = {
   name?: string
   description?: string | null
   address?: string | null
@@ -34,7 +38,7 @@ export function useAuth() {
   const [user, setUser] = useState<UserProfile | null>(null)
   const [loading, setLoading] = useState(true)
 
-    const redirectByRole = (role?: string | null) => {
+  const redirectByRole = (role?: string | null) => {
     let target = '/dashboard'
     if (role === 'comercio') target = '/business'
     else if (role === 'admin' || role === 'super_admin') target = '/admin'
@@ -170,30 +174,30 @@ export function useAuth() {
       throw new Error('Error al crear usuario')
     }
 
-      // NOTIFICAR A ADMINS: Nuevo usuario registrado
-      const baseUrl = window.location.origin
-      ;(async () => {
-        try {
-          const { data: admins } = await supabase
-            .from('user_profiles')
-            .select('id')
-            .in('role', ['admin', 'super_admin'])
-          if (admins && admins.length > 0) {
-            const notifications = admins.map((admin: any) => ({
-              userId: admin.id,
-              type: 'new_user',
-              message: `${name || 'Usuario'} se registro como ${role === 'comercio' ? 'comercio' : 'usuario'}${role === 'comercio' && shopData?.name ? ' - ' + shopData.name : ''}`,
-            }))
-            await fetch(baseUrl + '/api/notifications', {
-              method: 'PUT',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ notifications }),
-            })
-          }
-        } catch (err) {
-          console.error('[Notifications] Error:', err)
+    // NOTIFICAR A ADMINS: Nuevo usuario registrado
+    const baseUrl = window.location.origin
+    ;(async () => {
+      try {
+        const { data: admins } = await supabase
+          .from('user_profiles')
+          .select('id')
+          .in('role', ['admin', 'super_admin'])
+        if (admins && admins.length > 0) {
+          const notifications = admins.map((admin: any) => ({
+            userId: admin.id,
+            type: 'new_user',
+            message: `${name || 'Usuario'} se registro como ${role === 'comercio' ? 'comercio' : 'usuario'}${role === 'comercio' && shopData?.name ? ' - ' + shopData.name : ''}`,
+          }))
+          await fetch(baseUrl + '/api/notifications', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ notifications }),
+          })
         }
-      })()
+      } catch (err) {
+        console.error('[Notifications] Error:', err)
+      }
+    })()
 
     if (!data.session) {
       router.replace('/login?registered=true')

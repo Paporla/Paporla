@@ -5,6 +5,7 @@ import RouteLoader from '@/components/RouteLoader'
 import Providers from './providers'
 import GoogleAnalytics from '@/components/GoogleAnalytics'
 import GoogleTagManager from '@/components/GoogleTagManager'
+import { ThemeProvider } from '@/context/ThemeContext'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -62,7 +63,7 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
-  maximumScale: 1,
+  maximumScale: 5,
   userScalable: true,
   themeColor: '#00ff88',
 }
@@ -76,11 +77,13 @@ export default function RootLayout({
     <html lang="es">
       <body className={`${inter.className} bg-black text-white min-h-screen`}>
         <GoogleTagManager />
-        <Providers>
-          <RouteLoader />
-          {children}
-          <GoogleAnalytics />
-        </Providers>
+        <ThemeProvider>
+          <Providers>
+            <RouteLoader />
+            {children}
+            <GoogleAnalytics />
+          </Providers>
+        </ThemeProvider>
       </body>
     </html>
   )
