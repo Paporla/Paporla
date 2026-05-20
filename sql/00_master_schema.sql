@@ -295,6 +295,7 @@ WHERE p.is_active = true
 -- ========================================================
 
 -- 10.1 Rol de usuario activo
+DROP FUNCTION IF EXISTS public.get_user_role() CASCADE;
 CREATE OR REPLACE FUNCTION public.get_user_role()
 RETURNS TEXT
 LANGUAGE plpgsql
@@ -309,6 +310,7 @@ END;
 $$;
 
 -- 10.2 Generación de código de recogida
+DROP FUNCTION IF EXISTS public.generate_pickup_code() CASCADE;
 CREATE OR REPLACE FUNCTION public.generate_pickup_code()
 RETURNS TEXT
 LANGUAGE plpgsql
@@ -332,6 +334,7 @@ $$;
 -- ========================================================
 
 -- 11.1 Trigger: Calcular ends_at, descuento y status del pack
+DROP FUNCTION IF EXISTS public.calculate_pack_ends_at() CASCADE;
 CREATE OR REPLACE FUNCTION public.calculate_pack_ends_at()
 RETURNS TRIGGER
 LANGUAGE plpgsql
@@ -362,6 +365,7 @@ CREATE TRIGGER trigger_pack_before_save
   EXECUTE FUNCTION public.calculate_pack_ends_at();
 
 -- 11.2 Trigger: updated_at automático para packs
+DROP FUNCTION IF EXISTS public.update_updated_at_column() CASCADE;
 CREATE OR REPLACE FUNCTION public.update_updated_at_column()
 RETURNS TRIGGER
 LANGUAGE plpgsql
@@ -400,6 +404,7 @@ CREATE TRIGGER trigger_user_profiles_updated_at
   EXECUTE FUNCTION public.update_updated_at_column();
 
 -- 11.6 Trigger: Creación automática de perfil para nuevos usuarios
+DROP FUNCTION IF EXISTS public.handle_new_user() CASCADE;
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER
 LANGUAGE plpgsql
@@ -426,6 +431,7 @@ CREATE TRIGGER on_auth_user_created
   EXECUTE FUNCTION public.handle_new_user();
 
 -- 11.7 Trigger: Sincronizar email_confirmed cuando el usuario confirma email en Auth
+DROP FUNCTION IF EXISTS public.sync_email_confirmed() CASCADE;
 CREATE OR REPLACE FUNCTION public.sync_email_confirmed()
 RETURNS TRIGGER
 LANGUAGE plpgsql
@@ -453,6 +459,7 @@ CREATE TRIGGER on_auth_email_confirmed
 -- ========================================================
 
 -- 12.1 CREAR RESERVA ATÓMICA (evita race conditions)
+DROP FUNCTION IF EXISTS public.create_reservation_atomic(uuid, integer, text) CASCADE;
 CREATE OR REPLACE FUNCTION public.create_reservation_atomic(
   p_pack_id UUID,
   p_quantity INTEGER,
@@ -556,6 +563,7 @@ END;
 $$;
 
 -- 12.2 CANCELAR RESERVA (reintegra stock)
+DROP FUNCTION IF EXISTS public.cancel_reservation(uuid, text) CASCADE;
 CREATE OR REPLACE FUNCTION public.cancel_reservation(
   p_reservation_id UUID,
   p_cancel_reason TEXT DEFAULT NULL
@@ -618,6 +626,7 @@ END;
 $$;
 
 -- 12.3 VALIDAR RECOGIDA (solo comercio/admin)
+DROP FUNCTION IF EXISTS public.validate_pickup(text) CASCADE;
 CREATE OR REPLACE FUNCTION public.validate_pickup(
   p_pickup_code TEXT
 )
@@ -684,6 +693,7 @@ END;
 $$;
 
 -- 12.4 EXPIRACIÓN AUTOMÁTICA (para cron job)
+DROP FUNCTION IF EXISTS public.expire_reservations() CASCADE;
 CREATE OR REPLACE FUNCTION public.expire_reservations()
 RETURNS JSONB
 LANGUAGE plpgsql
@@ -742,6 +752,7 @@ END;
 $$;
 
 -- 12.5 LIMPIEZA DE RESERVAS PENDIENTES (la que faltaba)
+DROP FUNCTION IF EXISTS public.cleanup_pending_reservations(integer) CASCADE;
 CREATE OR REPLACE FUNCTION public.cleanup_pending_reservations(
   p_minutes_ago INTEGER DEFAULT 30
 )
@@ -768,6 +779,7 @@ END;
 $$;
 
 -- 12.6 ACTUALIZAR RATING DEL COMERCIO
+DROP FUNCTION IF EXISTS public.update_shop_rating(uuid, double precision) CASCADE;
 CREATE OR REPLACE FUNCTION public.update_shop_rating(
   p_shop_id UUID,
   p_new_rating DOUBLE PRECISION
@@ -809,6 +821,7 @@ END;
 $$;
 
 -- 12.7 ELIMINAR USUARIO (ADMIN) - Elimina todo el historial
+DROP FUNCTION IF EXISTS public.admin_delete_user(uuid) CASCADE;
 CREATE OR REPLACE FUNCTION public.admin_delete_user(
   p_user_id UUID
 )
@@ -856,6 +869,7 @@ END;
 $$;
 
 -- 12.8 ELIMINAR COMERCIO (ADMIN) - Elimina todo el historial del comercio
+DROP FUNCTION IF EXISTS public.admin_delete_shop(uuid) CASCADE;
 CREATE OR REPLACE FUNCTION public.admin_delete_shop(
   p_shop_id UUID
 )
