@@ -208,6 +208,23 @@ CREATE TABLE public.activity_logs (
 );
 
 -- ========================================================
+-- 7b. COLUMNAS FALTANTES (para tablas que ya existían)
+-- ========================================================
+
+ALTER TABLE public.user_profiles ADD COLUMN IF NOT EXISTS total_reservations INTEGER DEFAULT 0;
+ALTER TABLE public.user_profiles ADD COLUMN IF NOT EXISTS total_pickups INTEGER DEFAULT 0;
+ALTER TABLE public.user_profiles ADD COLUMN IF NOT EXISTS total_cancellations INTEGER DEFAULT 0;
+ALTER TABLE public.user_profiles ADD COLUMN IF NOT EXISTS total_no_shows INTEGER DEFAULT 0;
+ALTER TABLE public.user_profiles ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT NOW();
+
+ALTER TABLE public.shops ADD COLUMN IF NOT EXISTS total_packs_sold INTEGER DEFAULT 0;
+ALTER TABLE public.shops ADD COLUMN IF NOT EXISTS total_revenue_cents INTEGER DEFAULT 0;
+ALTER TABLE public.shops ADD COLUMN IF NOT EXISTS active_packs_count INTEGER DEFAULT 0;
+ALTER TABLE public.shops ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT NOW();
+
+ALTER TABLE public.packs ADD COLUMN IF NOT EXISTS image_gallery JSONB DEFAULT '[]'::jsonb;
+
+-- ========================================================
 -- 8. ÍNDICES DE PERFORMANCE
 -- ========================================================
 
