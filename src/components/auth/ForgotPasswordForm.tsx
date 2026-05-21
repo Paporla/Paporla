@@ -23,7 +23,7 @@ export default function ForgotPasswordForm() {
     setSuccess(false)
 
     if (!email) {
-      setError('Por favor, ingresa tu correo electrónico')
+      setError('Por favor, ingresa tu correo electronico')
       setLoading(false)
       return
     }
@@ -50,13 +50,13 @@ export default function ForgotPasswordForm() {
         <div className="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mx-auto">
           <CheckCircle className="w-8 h-8 text-green-400" />
         </div>
-        <h2 className="text-2xl font-bold text-white">¡Revisa tu correo!</h2>
-        <p className="text-gray-400">
-          Te hemos enviado un enlace para restablecer tu contraseña a{' '}
+        <h2 className="text-2xl font-bold dark:text-white text-gray-900">Revisa tu correo!</h2>
+        <p className="dark:text-gray-400 text-gray-600">
+          Te hemos enviado un enlace para restablecer tu contrasena a{' '}
           <strong className="text-primary">{email}</strong>
         </p>
-        <p className="text-sm text-gray-500">
-          ¿No recibiste el correo?{' '}
+        <p className="text-sm dark:text-gray-500 text-gray-400">
+          No recibiste el correo?{' '}
           <button
             onClick={() => setSuccess(false)}
             className="text-primary hover:underline"
@@ -65,9 +65,9 @@ export default function ForgotPasswordForm() {
           </button>
         </p>
         <div className="pt-4">
-          <Link href="/login" className="text-gray-400 hover:text-primary transition-colors inline-flex items-center gap-1">
+          <Link href="/login" className="dark:text-gray-400 text-gray-600 hover:text-primary transition-colors inline-flex items-center gap-1">
             <ArrowLeft className="w-4 h-4" />
-            Volver al inicio de sesión
+            Volver al inicio de sesion
           </Link>
         </div>
       </motion.div>
@@ -80,12 +80,12 @@ export default function ForgotPasswordForm() {
       animate={{ opacity: 1, y: 0 }}
     >
       <form onSubmit={handleSubmit} className="space-y-6">
-        <p className="text-gray-400 text-sm text-center mb-4">
-          Ingresa tu correo electrónico y te enviaremos un enlace para restablecer tu contraseña.
+        <p className="dark:text-gray-400 text-gray-600 text-sm text-center mb-4">
+          Ingresa tu correo electronico y te enviaremos un enlace para restablecer tu contrasena.
         </p>
         
         <Input
-          label="Correo electrónico"
+          label="Correo electronico"
           type="email"
           placeholder="tu@email.com"
           value={email}
@@ -96,13 +96,13 @@ export default function ForgotPasswordForm() {
         />
         
         <Button type="submit" loading={loading} className="w-full">
-          {loading ? 'Enviando...' : 'Enviar enlace de recuperación'}
+          {loading ? 'Enviando...' : 'Enviar enlace de recuperacion'}
         </Button>
         
         <div className="text-center">
-          <Link href="/login" className="text-sm text-gray-400 hover:text-primary transition-colors inline-flex items-center gap-1">
+          <Link href="/login" className="text-sm dark:text-gray-400 text-gray-600 hover:text-primary transition-colors inline-flex items-center gap-1">
             <ArrowLeft className="w-4 h-4" />
-            Volver al inicio de sesión
+            Volver al inicio de sesion
           </Link>
         </div>
       </form>

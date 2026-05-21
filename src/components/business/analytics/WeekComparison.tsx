@@ -29,34 +29,34 @@ export default function WeekComparison({ comparison }: Props) {
     >
       <div className="flex items-center gap-2 mb-5">
         <Calendar className="w-5 h-5 text-primary" />
-        <h3 className="font-bold text-white">Comparativa semanal</h3>
+        <h3 className="font-bold dark:text-white text-gray-900">Comparativa semanal</h3>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
         {/* Reservas */}
         <div>
-          <p className="text-sm text-gray-400 mb-3">Reservas</p>
+          <p className="text-sm dark:text-gray-400 text-gray-600 mb-3">Reservas</p>
           <div className="grid grid-cols-2 gap-4">
-            <div className="bg-dark-muted/50 rounded-xl p-3">
-              <p className="text-xs text-gray-500">Esta semana</p>
+            <div className="dark:bg-dark-muted/50 bg-gray-50 rounded-xl p-3">
+              <p className="text-xs dark:text-gray-500 text-gray-400">Esta semana</p>
               <div className="flex items-center gap-2 mt-1">
-                <span className="text-2xl font-bold text-white">{comparison.currentWeek.reservations}</span>
+                <span className="text-2xl font-bold dark:text-white text-gray-900">{comparison.currentWeek.reservations}</span>
                 <ChangeBadge value={comparison.reservationChange} />
               </div>
             </div>
-            <div className="bg-dark-muted/50 rounded-xl p-3">
-              <p className="text-xs text-gray-500">Semana anterior</p>
-              <p className="text-2xl font-bold text-gray-400 mt-1">{comparison.lastWeek.reservations}</p>
+            <div className="dark:bg-dark-muted/50 bg-gray-50 rounded-xl p-3">
+              <p className="text-xs dark:text-gray-500 text-gray-400">Semana anterior</p>
+              <p className="text-2xl font-bold dark:text-gray-400 text-gray-500 mt-1">{comparison.lastWeek.reservations}</p>
             </div>
           </div>
         </div>
 
         {/* Ingresos */}
         <div>
-          <p className="text-sm text-gray-400 mb-3">Ingresos</p>
+          <p className="text-sm dark:text-gray-400 text-gray-600 mb-3">Ingresos</p>
           <div className="grid grid-cols-2 gap-4">
-            <div className="bg-dark-muted/50 rounded-xl p-3">
-              <p className="text-xs text-gray-500">Esta semana</p>
+            <div className="dark:bg-dark-muted/50 bg-gray-50 rounded-xl p-3">
+              <p className="text-xs dark:text-gray-500 text-gray-400">Esta semana</p>
               <div className="flex items-center gap-2 mt-1">
                 <span className="text-2xl font-bold text-green-400">
                   ${comparison.currentWeek.revenue.toFixed(2)}
@@ -64,9 +64,9 @@ export default function WeekComparison({ comparison }: Props) {
                 <ChangeBadge value={comparison.revenueChange} />
               </div>
             </div>
-            <div className="bg-dark-muted/50 rounded-xl p-3">
-              <p className="text-xs text-gray-500">Semana anterior</p>
-              <p className="text-2xl font-bold text-gray-400 mt-1">${comparison.lastWeek.revenue.toFixed(2)}</p>
+            <div className="dark:bg-dark-muted/50 bg-gray-50 rounded-xl p-3">
+              <p className="text-xs dark:text-gray-500 text-gray-400">Semana anterior</p>
+              <p className="text-2xl font-bold dark:text-gray-400 text-gray-500 mt-1">${comparison.lastWeek.revenue.toFixed(2)}</p>
             </div>
           </div>
         </div>

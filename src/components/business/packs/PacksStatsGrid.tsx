@@ -35,7 +35,7 @@ export default function PacksStatsGrid({ stats }: Props) {
           <Card glass className="p-4 text-center">
             <item.icon className={`w-5 h-5 ${item.color} mx-auto mb-2`} />
             <p className={`text-2xl font-bold ${item.color}`}>{stats[item.key]}</p>
-            <p className="text-xs text-gray-400">{item.label}</p>
+            <p className="text-xs dark:text-gray-400 text-gray-600">{item.label}</p>
           </Card>
         </motion.div>
       ))}

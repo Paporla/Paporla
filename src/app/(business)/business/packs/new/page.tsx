@@ -65,7 +65,7 @@ export default async function NewPackPage() {
           <div className="relative">
             <Link
               href="/business/packs"
-              className="inline-flex items-center gap-2 text-sm text-gray-400 hover:text-white transition-colors mb-6"
+              className="inline-flex items-center gap-2 text-sm dark:text-gray-400 text-gray-600 dark:hover:text-white hover:text-gray-900 transition-colors mb-6"
             >
               <ArrowLeft className="w-4 h-4" />
               Volver a packs
@@ -77,10 +77,10 @@ export default async function NewPackPage() {
               </div>
 
               <div>
-                <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">
+                <h1 className="text-3xl md:text-4xl font-bold dark:text-white text-gray-900 mb-2">
                   Comercio suspendido
                 </h1>
-                <p className="text-gray-400 max-w-2xl">
+                <p className="dark:text-gray-400 text-gray-600 max-w-2xl">
                   Tu comercio esta suspendido temporalmente. No puedes crear
                   nuevos packs en este momento. Contacta con soporte si crees
                   que se trata de un error.
@@ -112,16 +112,16 @@ export default async function NewPackPage() {
               </div>
 
               <div className="flex-1">
-                <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">
-                  Verificacion pendiente
-                </h1>
+                  <h1 className="text-3xl md:text-4xl font-bold dark:text-white text-gray-900 mb-2">
+                    Verificacion pendiente
+                  </h1>
 
-                <p className="text-gray-400 max-w-2xl mb-6">
-                  Tu comercio todavia no esta verificado. Puedes completar o
-                  revisar la informacion de tu perfil mientras esperas la
-                  aprobacion. Cuando el administrador verifique tu comercio,
-                  podras publicar packs.
-                </p>
+                  <p className="dark:text-gray-400 text-gray-600 max-w-2xl mb-6">
+                    Tu comercio todavia no esta verificado. Puedes completar o
+                    revisar la informacion de tu perfil mientras esperas la
+                    aprobacion. Cuando el administrador verifique tu comercio,
+                    podras publicar packs.
+                  </p>
 
                 <Link href="/business/profile">
                   <Button variant="outline">
@@ -142,7 +142,7 @@ export default async function NewPackPage() {
         <div className="relative">
           <Link
             href="/business/packs"
-            className="inline-flex items-center gap-2 text-sm text-gray-400 hover:text-white transition-colors mb-6"
+            className="inline-flex items-center gap-2 text-sm dark:text-gray-400 text-gray-600 dark:hover:text-white hover:text-gray-900 transition-colors mb-6"
           >
             <ArrowLeft className="w-4 h-4" />
             Volver a packs
@@ -155,20 +155,20 @@ export default async function NewPackPage() {
                   <PackagePlus className="w-5 h-5 text-primary" />
                 </div>
 
-                <h1 className="text-3xl md:text-4xl font-bold text-white">
+                <h1 className="text-3xl md:text-4xl font-bold dark:text-white text-gray-900">
                   Crear nuevo pack
                 </h1>
               </div>
 
-              <p className="text-gray-400 max-w-2xl">
+              <p className="dark:text-gray-400 text-gray-600 max-w-2xl">
                 Publica un pack sorpresa para que los usuarios puedan
                 reservarlo y recogerlo dentro del horario establecido.
               </p>
             </div>
 
-            <div className="text-sm text-gray-400 bg-white/5 border border-white/10 rounded-2xl px-4 py-3">
+            <div className="text-sm dark:text-gray-400 text-gray-600 dark:bg-white/5 bg-gray-100 dark:border-white/10 border-gray-200 rounded-2xl px-4 py-3">
               Comercio:{' '}
-              <span className="text-white font-medium">
+              <span className="dark:text-white text-gray-900 font-medium">
                 {shop.name}
               </span>
             </div>

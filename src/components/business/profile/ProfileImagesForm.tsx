@@ -19,8 +19,8 @@ export default function ProfileImagesForm({
   shopId,
 }: ProfileImagesFormProps) {
   return (
-    <div className="bg-black/40 backdrop-blur-sm border border-white/10 rounded-2xl p-6 lg:p-8 space-y-8">
-      <h2 className="text-lg font-bold text-white flex items-center gap-2">
+    <div className="dark:bg-black/40 bg-white dark:backdrop-blur-sm backdrop-blur-sm border dark:border-white/10 border-gray-200 rounded-2xl p-6 lg:p-8 space-y-8">
+      <h2 className="text-lg font-bold dark:text-white text-gray-900 flex items-center gap-2">
         <Image className="w-5 h-5 text-primary" />
         Imágenes del comercio
       </h2>
@@ -43,8 +43,8 @@ export default function ProfileImagesForm({
         label="Imagen de portada"
       />
 
-      <div className="bg-black/40 border border-white/10 rounded-xl p-4">
-        <p className="text-xs text-gray-500 flex items-center gap-2">
+      <div className="dark:bg-black/40 bg-gray-50 border dark:border-white/10 border-gray-200 rounded-xl p-4">
+        <p className="text-xs dark:text-gray-500 text-gray-400 flex items-center gap-2">
           <AlertTriangle className="w-4 h-4 text-yellow-400" />
           Las imágenes de alta calidad aumentan las reservas un 40%. Usa fotos reales de tu local.
         </p>

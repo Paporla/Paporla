@@ -19,7 +19,7 @@ export default function NotificationList() {
       <div className="space-y-3">
         {[...Array(5)].map((_, i) => (
           <div key={i} className="animate-pulse">
-            <div className="h-20 bg-dark-card border border-dark-border rounded-xl" />
+            <div className="h-20 dark:bg-gray-900 bg-white dark:border-gray-700 border-gray-200 rounded-xl" />
           </div>
         ))}
       </div>
@@ -48,7 +48,7 @@ export default function NotificationList() {
             className={`px-3 py-1.5 rounded-lg text-sm transition-all ${
               filter === 'all' 
                 ? 'bg-primary/20 text-primary' 
-                : 'text-gray-500 hover:text-white'
+                : 'dark:text-gray-500 text-gray-400 dark:hover:text-white hover:text-gray-900'
             }`}
           >
             Todas
@@ -58,14 +58,14 @@ export default function NotificationList() {
             className={`px-3 py-1.5 rounded-lg text-sm transition-all ${
               filter === 'unread' 
                 ? 'bg-primary/20 text-primary' 
-                : 'text-gray-500 hover:text-white'
+                : 'dark:text-gray-500 text-gray-400 dark:hover:text-white hover:text-gray-900'
             }`}
           >
-            No leídas
+            No leidas
           </button>
         </div>
         <Button variant="outline" size="sm" onClick={markAllAsRead}>
-          Marcar todas como leídas
+          Marcar todas como leidas
         </Button>
       </div>
 

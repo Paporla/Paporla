@@ -81,7 +81,7 @@ export default function PacksPage() {
   if (loading) return <PacksLoadingGrid />;
 
   return (
-    <div className="min-h-screen bg-black">
+    <div className="min-h-screen dark:bg-black bg-gray-50">
       <PacksHeroSection count={packs.length} />
 
       <div className="container mx-auto px-4 py-8">

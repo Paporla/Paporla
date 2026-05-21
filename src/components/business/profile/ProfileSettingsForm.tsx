@@ -18,17 +18,17 @@ export default function ProfileSettingsForm({ onDelete }: ProfileSettingsFormPro
   return (
     <>
       <div className="space-y-6">
-        <div className="bg-black/40 backdrop-blur-sm border border-red-500/20 rounded-2xl p-6 lg:p-8">
+        <div className="dark:bg-black/40 bg-white dark:backdrop-blur-sm backdrop-blur-sm border border-red-500/20 rounded-2xl p-6 lg:p-8">
           <h2 className="text-lg font-bold text-red-400 flex items-center gap-2 mb-4">
             <AlertTriangle className="w-5 h-5" />
             Zona de peligro
           </h2>
 
           <div className="space-y-4">
-            <div className="flex items-center justify-between p-4 bg-black/40 rounded-xl">
+            <div className="flex items-center justify-between p-4 dark:bg-black/40 bg-gray-50 rounded-xl">
               <div>
-                <p className="text-sm font-medium text-white">Desactivar comercio</p>
-                <p className="text-xs text-gray-500 mt-0.5">Tu comercio dejará de ser visible para los usuarios</p>
+                <p className="text-sm font-medium dark:text-white text-gray-900">Desactivar comercio</p>
+                <p className="text-xs dark:text-gray-500 text-gray-400 mt-0.5">Tu comercio dejara de ser visible para los usuarios</p>
               </div>
               <button
                 onClick={handleDeleteClick}
@@ -39,12 +39,12 @@ export default function ProfileSettingsForm({ onDelete }: ProfileSettingsFormPro
               </button>
             </div>
 
-            <div className="flex items-center justify-between p-4 bg-black/40 rounded-xl">
+            <div className="flex items-center justify-between p-4 dark:bg-black/40 bg-gray-50 rounded-xl">
               <div>
-                <p className="text-sm font-medium text-white">Transferir propiedad</p>
-                <p className="text-xs text-gray-500 mt-0.5">Transfiere este comercio a otro usuario</p>
+                <p className="text-sm font-medium dark:text-white text-gray-900">Transferir propiedad</p>
+                <p className="text-xs dark:text-gray-500 text-gray-400 mt-0.5">Transfiere este comercio a otro usuario</p>
               </div>
-              <button className="flex items-center gap-2 text-sm text-gray-400 border border-white/10 hover:border-white/30 px-4 py-2 rounded-xl transition-all">
+              <button className="flex items-center gap-2 text-sm dark:text-gray-400 text-gray-600 border dark:border-white/10 border-gray-200 dark:hover:border-white/30 hover:border-gray-300 px-4 py-2 rounded-xl transition-all">
                 <ChevronRight className="w-4 h-4" />
                 Transferir
               </button>
@@ -52,8 +52,8 @@ export default function ProfileSettingsForm({ onDelete }: ProfileSettingsFormPro
           </div>
         </div>
 
-        <div className="bg-black/40 border border-white/10 rounded-xl p-4">
-          <p className="text-xs text-gray-500 flex items-center gap-2">
+        <div className="dark:bg-black/40 bg-gray-50 border dark:border-white/10 border-gray-200 rounded-xl p-4">
+          <p className="text-xs dark:text-gray-500 text-gray-400 flex items-center gap-2">
             <CheckCircle className="w-4 h-4 text-primary" />
             ¿Necesitas ayuda? Contacta a{' '}
             <a href="mailto:soporte@paporla.com" className="text-primary hover:underline">

@@ -22,11 +22,11 @@ export default function AdminStatCards({ stats }: Props) {
         <motion.div key={item.key} initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.3 + index * 0.05 }}>
           <Link href="/admin/shops">
-            <Card glass className="p-4 cursor-pointer group hover:bg-white/5 transition-colors">
+            <Card glass className="p-4 cursor-pointer group dark:hover:bg-white/5 hover:bg-gray-100 transition-colors">
               <div className="flex items-center justify-between">
                 <div>
                   <div className={`text-2xl font-bold ${item.color}`}>{stats[item.key].toLocaleString()}</div>
-                  <div className="text-xs text-gray-400 mt-1">{item.label}</div>
+                  <div className="text-xs dark:text-gray-400 text-gray-600 mt-1">{item.label}</div>
                 </div>
                 <div className={`p-2 rounded-lg ${item.bg}`}><item.icon className={`w-5 h-5 ${item.color}`} /></div>
               </div>

@@ -119,13 +119,13 @@ export default function UserDashboardPage() {
           <div className="space-y-4">
             <div className="flex items-center gap-2">
               <div className="w-1 h-5 bg-primary rounded-full" />
-              <h2 className="text-lg font-semibold text-white">Proxima recogida</h2>
+              <h2 className="text-lg font-semibold dark:text-white text-gray-900">Proxima recogida</h2>
             </div>
             <NextPickupCard reservation={nextReservation} />
           </div>
         ) : (
-          <div className="bg-dark-card border border-dashed border-primary/30 rounded-2xl p-8 text-center">
-            <p className="text-gray-400">No tienes reservas activas</p>
+          <div className="dark:bg-dark-card bg-white border dark:border-dark-border border-gray-200 border-dashed border-primary/30 rounded-2xl p-8 text-center">
+            <p className="dark:text-gray-400 text-gray-600">No tienes reservas activas</p>
             <Link href="/packs" className="text-primary text-sm hover:underline inline-block mt-2">
               Explora packs disponibles
             </Link>

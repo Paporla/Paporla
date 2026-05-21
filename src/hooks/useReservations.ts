@@ -1,5 +1,3 @@
-// src/hooks/useReservations.ts
-
 'use client'
 
 import { useEffect, useState } from 'react'
@@ -18,7 +16,6 @@ export function useReservations() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  // Cargar reservas cuando hay un usuario logueado
   useEffect(() => {
     if (user) {
       loadReservations()
@@ -28,9 +25,25 @@ export function useReservations() {
     }
   }, [user])
 
-  /**
-   * Carga todas las reservas del usuario actual
-   */
+  useEffect(() => {
+    if (!user) return
+
+    const channel = supabase
+      .channel('reservations-changes')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'reservations', filter: `user_id=eq.${user.id}` },
+        () => {
+          loadReservations()
+        }
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [user])
+
   const loadReservations = async () => {
     if (!user) return
 
@@ -79,12 +92,6 @@ export function useReservations() {
     }
   }
 
-  /**
-   * Crea una reserva usando la función RPC atómica
-   * @param packId - ID del pack a reservar
-   * @param quantity - Cantidad de packs (default: 1)
-   * @param paymentMethod - Método de pago ('demo' por ahora)
-   */
   const createReservation = async (
     packId: string,
     quantity: number = 1,
@@ -95,7 +102,6 @@ export function useReservations() {
     }
 
     try {
-      // ✅ USAR RPC ATÓMICA EN LUGAR DE INSERT DIRECTO
       const { data, error } = await supabase.rpc('create_reservation_atomic', {
         p_pack_id: packId,
         p_quantity: quantity,
@@ -110,7 +116,6 @@ export function useReservations() {
         throw new Error(result.error || 'Error al crear reserva')
       }
 
-      // Recargar lista de reservas
       await loadReservations()
 
       return result
@@ -120,11 +125,6 @@ export function useReservations() {
     }
   }
 
-  /**
-   * Cancela una reserva usando la función RPC que reintegra stock
-   * @param reservationId - ID de la reserva a cancelar
-   * @param reason - Motivo de la cancelación (opcional)
-   */
   const cancelReservation = async (
     reservationId: string,
     reason?: string
@@ -134,7 +134,6 @@ export function useReservations() {
     }
 
     try {
-      // ✅ USAR RPC QUE REINTEGRA STOCK AUTOMÁTICAMENTE
       const { data, error } = await supabase.rpc('cancel_reservation', {
         p_reservation_id: reservationId,
         p_cancel_reason: reason || null,
@@ -148,7 +147,6 @@ export function useReservations() {
         throw new Error(result.error || 'Error al cancelar reserva')
       }
 
-      // Recargar lista de reservas
       await loadReservations()
 
       return result
@@ -158,10 +156,6 @@ export function useReservations() {
     }
   }
 
-  /**
-   * Valida el código de recogida (solo para dueños del comercio)
-   * @param pickupCode - Código de recogida del usuario
-   */
   const validatePickup = async (
     pickupCode: string
   ): Promise<ReservationActionResult> => {
@@ -182,7 +176,6 @@ export function useReservations() {
         throw new Error(result.error || 'Código inválido o no se puede validar')
       }
 
-      // Recargar reservas si es necesario
       await loadReservations()
 
       return result
@@ -192,10 +185,6 @@ export function useReservations() {
     }
   }
 
-  /**
-   * Obtiene todas las reservas de un comercio específico (para el dashboard del dueño)
-   * @param shopId - ID del comercio
-   */
   const getBusinessReservations = async (
     shopId: string
   ): Promise<ReservationWithDetails[]> => {
@@ -234,9 +223,6 @@ export function useReservations() {
     }
   }
 
-  /**
-   * Obtiene una reserva específica por ID
-   */
   const getReservationById = async (
     reservationId: string
   ): Promise<ReservationWithDetails | null> => {
@@ -285,12 +271,9 @@ export function useReservations() {
   }
 
   return {
-    // Estado
     reservations,
     loading,
     error,
-
-    // Acciones
     loadReservations,
     createReservation,
     cancelReservation,

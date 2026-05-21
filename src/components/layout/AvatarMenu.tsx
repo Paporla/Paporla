@@ -35,7 +35,7 @@ export default function AvatarMenu() {
     return '/dashboard'
   }
 
-  // 🔴 NOMBRE DEL ROL PARA MOSTRAR
+  // NOMBRE DEL ROL PARA MOSTRAR
   const getRoleName = () => {
     const role = user?.role
     if (role === 'super_admin') return 'Super Admin'
@@ -46,7 +46,7 @@ export default function AvatarMenu() {
 
   return (
     <div className="flex items-center gap-3">
-            {/* Botón Panel - usa button + router para navegacion controlada */}
+            {/* Boton Panel - usa button + router para navegacion controlada */}
       <button
         onClick={() => {
           setIsOpen(false)
@@ -70,7 +70,7 @@ export default function AvatarMenu() {
         <LayoutDashboard className="w-4 h-4" />
       </button>
 
-      {/* Avatar con menú desplegable */}
+      {/* Avatar con menu desplegable */}
       <div className="relative" ref={menuRef}>
         <button
           onClick={() => setIsOpen(!isOpen)}
@@ -100,13 +100,13 @@ export default function AvatarMenu() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
               transition={{ duration: 0.2 }}
-              className="absolute right-0 mt-2 w-56 bg-gray-900/95 backdrop-blur-md rounded-xl border border-gray-800 shadow-xl z-50 overflow-hidden"
+              className="absolute right-0 mt-2 w-56 dark:bg-gray-900/95 bg-white backdrop-blur-md rounded-xl dark:border-gray-800 border-gray-200 shadow-xl z-50 overflow-hidden"
             >
               <div className="p-2">
-                {/* Información del usuario */}
-                <div className="px-3 py-3 border-b border-gray-800 mb-2">
-                  <p className="text-sm font-semibold text-white truncate">{user?.name}</p>
-                  <p className="text-xs text-gray-400 truncate mt-0.5">{user?.email}</p>
+                {/* Informacion del usuario */}
+                <div className="px-3 py-3 dark:border-gray-800 border-gray-200 mb-2">
+                  <p className="text-sm font-semibold dark:text-white text-gray-900 truncate">{user?.name}</p>
+                  <p className="text-xs dark:text-gray-400 text-gray-600 truncate mt-0.5">{user?.email}</p>
                   <div className="mt-2">
                     <span className="text-xs bg-primary/20 text-primary px-2 py-0.5 rounded-full">
                       {getRoleName()}
@@ -122,7 +122,7 @@ export default function AvatarMenu() {
                     else if (role === 'admin' || role === 'super_admin') router.push('/admin')
                     else router.push('/profile')
                   }}
-                  className="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-gray-300 hover:bg-gray-800 rounded-lg transition-all duration-200 group"
+                  className="w-full flex items-center gap-3 px-3 py-2.5 text-sm dark:text-gray-300 text-gray-700 dark:hover:bg-gray-800 hover:bg-gray-100 rounded-lg transition-all duration-200 group"
                 >
                   <UserCircle className="w-5 h-5 text-primary group-hover:scale-110 transition-transform" />
                   <span>Mi Perfil</span>
@@ -136,7 +136,7 @@ export default function AvatarMenu() {
                   className="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-red-400 hover:bg-red-500/10 rounded-lg transition-all duration-200 group"
                 >
                   <LogOut className="w-5 h-5 group-hover:scale-110 transition-transform" />
-                  <span>Cerrar Sesión</span>
+                  <span>Cerrar Sesion</span>
                 </button>
               </div>
             </motion.div>

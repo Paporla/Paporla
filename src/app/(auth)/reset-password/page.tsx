@@ -23,7 +23,7 @@ export default function ResetPasswordPage() {
   useEffect(() => {
     const hash = window.location.hash;
     if (!hash.includes('access_token')) {
-      setError('Enlace inválido o expirado. Por favor, solicita un nuevo enlace de recuperación.');
+      setError('Enlace invalido o expirado. Por favor, solicita un nuevo enlace de recuperacion.');
     }
   }, []);
 
@@ -33,13 +33,13 @@ export default function ResetPasswordPage() {
     setError('');
 
     if (password !== confirmPassword) {
-      setError('Las contraseñas no coinciden');
+      setError('Las contrasenas no coinciden');
       setLoading(false);
       return;
     }
 
     if (password.length < 6) {
-      setError('La contraseña debe tener al menos 6 caracteres');
+      setError('La contrasena debe tener al menos 6 caracteres');
       setLoading(false);
       return;
     }
@@ -62,14 +62,14 @@ export default function ResetPasswordPage() {
         animate={{ opacity: 1, y: 0 }}
         className="text-center space-y-4"
       >
-        <div className="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mx-auto">
-          <CheckCircle className="w-8 h-8 text-green-400" />
+        <div className="w-16 h-16 dark:bg-green-500/20 bg-green-100 rounded-full flex items-center justify-center mx-auto">
+          <CheckCircle className="w-8 h-8 dark:text-green-400 text-green-600" />
         </div>
         <h2 className="text-2xl font-bold">
-          <span className="text-gradient">¡Contraseña actualizada!</span>
+          <span className="text-gradient">Contrasena actualizada!</span>
         </h2>
-        <p className="text-gray-400">Tu contraseña ha sido cambiada exitosamente.</p>
-        <p className="text-sm text-gray-500">Serás redirigido al inicio de sesión...</p>
+        <p className="dark:text-gray-400 text-gray-600">Tu contrasena ha sido cambiada exitosamente.</p>
+        <p className="text-sm dark:text-gray-500 text-gray-400">Seras redirigido al inicio de sesion...</p>
         <Link href="/login" className="text-primary hover:underline inline-flex items-center gap-1 mt-2">
           Ir ahora <ArrowLeft className="w-4 h-4" />
         </Link>
@@ -83,13 +83,13 @@ export default function ResetPasswordPage() {
       animate={{ opacity: 1, y: 0 }}
     >
       <form onSubmit={handleSubmit} className="space-y-6">
-        <p className="text-gray-400 text-sm text-center">
-          Ingresa tu nueva contraseña.
+        <p className="dark:text-gray-400 text-gray-600 text-sm text-center">
+          Ingresa tu nueva contrasena.
         </p>
         
         <div className="relative">
           <Input
-            label="Nueva contraseña"
+            label="Nueva contrasena"
             type={showPassword ? "text" : "password"}
             placeholder="••••••••"
             value={password}
@@ -100,14 +100,14 @@ export default function ResetPasswordPage() {
           <button
             type="button"
             onClick={() => setShowPassword(!showPassword)}
-            className="absolute right-3 top-9 text-gray-400 hover:text-primary"
+            className="absolute right-3 top-9 dark:text-gray-400 text-gray-500 hover:text-primary"
           >
             {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
           </button>
         </div>
         
         <Input
-          label="Confirmar nueva contraseña"
+          label="Confirmar nueva contrasena"
           type="password"
           placeholder="••••••••"
           value={confirmPassword}
@@ -116,21 +116,21 @@ export default function ResetPasswordPage() {
           required
         />
         
-        <div className="text-sm text-gray-400 space-y-1">
-          <p>La contraseña debe tener:</p>
+        <div className="text-sm dark:text-gray-400 text-gray-600 space-y-1">
+          <p>La contrasena debe tener:</p>
           <ul className="list-disc list-inside ml-2">
             <li>Al menos 6 caracteres</li>
           </ul>
         </div>
         
         <Button type="submit" className="w-full" disabled={loading}>
-          {loading ? 'Cargando...' : 'Actualizar contraseña'}
+          {loading ? 'Cargando...' : 'Actualizar contrasena'}
         </Button>
         
         <div className="text-center">
-          <Link href="/login" className="text-sm text-gray-400 hover:text-primary inline-flex items-center gap-1">
+          <Link href="/login" className="text-sm dark:text-gray-400 text-gray-600 hover:text-primary inline-flex items-center gap-1">
             <ArrowLeft className="w-4 h-4" />
-            Volver al inicio de sesión
+            Volver al inicio de sesion
           </Link>
         </div>
       </form>

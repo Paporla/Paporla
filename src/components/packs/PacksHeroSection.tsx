@@ -14,10 +14,10 @@ export default function PacksHeroSection({ count }: Props) {
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4 leading-tight">
             <span className="text-gradient">Packs Disponibles</span>
           </h1>
-          <p className="text-gray-400 text-lg max-w-2xl mx-auto">
+          <p className="dark:text-gray-400 text-gray-600 text-lg max-w-2xl mx-auto">
             Descubre comida deliciosa a precios increibles mientras ayudas a reducir el desperdicio alimentario.
           </p>
-          <div className="mt-4 text-sm text-gray-500">
+          <div className="mt-4 text-sm dark:text-gray-500 text-gray-400">
             <span className="text-primary font-semibold">{count}</span> packs disponibles para rescatar
           </div>
         </motion.div>

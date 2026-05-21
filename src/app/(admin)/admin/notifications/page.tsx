@@ -24,8 +24,8 @@ export default function AdminNotificationsPage() {
             <Bell className="w-7 h-7 text-primary" />
           </div>
           <div>
-            <h1 className="text-3xl md:text-4xl font-bold text-white">Notificaciones</h1>
-            <p className="text-gray-400 text-sm mt-1">Actividad del sistema en tiempo real</p>
+            <h1 className="text-3xl md:text-4xl font-bold dark:text-white text-gray-900">Notificaciones</h1>
+            <p className="dark:text-gray-400 text-gray-600 text-sm mt-1">Actividad del sistema en tiempo real</p>
           </div>
         </div>
       </div>

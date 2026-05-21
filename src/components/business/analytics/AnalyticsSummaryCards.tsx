@@ -44,7 +44,7 @@ export default function AnalyticsSummaryCards({ summary }: AnalyticsSummaryCards
           transition={{ delay: idx * 0.05 }}
         >
           <Link href={card.link}>
-            <div className="group bg-dark-card border border-dark-border hover:border-primary/30 rounded-2xl p-4 transition-all duration-300 hover:-translate-y-1 cursor-pointer">
+            <div className="group bg-dark-card dark:bg-white dark:border-gray-200 border border-dark-border hover:border-primary/30 rounded-2xl p-4 transition-all duration-300 hover:-translate-y-1 cursor-pointer">
               <div className={`p-2 rounded-xl ${card.bg} inline-flex mb-3 group-hover:scale-110 transition-transform`}>
                 <card.icon className={`w-4 h-4 ${card.color}`} />
               </div>

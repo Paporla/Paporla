@@ -34,7 +34,7 @@ export default class ErrorBoundary extends Component<Props, State> {
       }
 
       return (
-        <div className="min-h-screen bg-[#0a0a0f] flex items-center justify-center px-4">
+        <div className="min-h-screen dark:bg-[#0a0a0f] bg-gray-50 flex items-center justify-center px-4">
           <div className="text-center max-w-md">
             <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-red-500/10 border border-red-500/20 flex items-center justify-center">
               <svg className="w-10 h-10 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -42,14 +42,14 @@ export default class ErrorBoundary extends Component<Props, State> {
               </svg>
             </div>
 
-            <h1 className="text-2xl font-bold text-white mb-3">
-              Algo salió mal
+            <h1 className="text-2xl font-bold dark:text-white text-gray-900 mb-3">
+              Algo salio mal
             </h1>
-            <p className="text-gray-400 mb-2">
-              Ocurrió un error inesperado. Ya estamos al tanto.
+            <p className="dark:text-gray-400 text-gray-600 mb-2">
+              Ocurrio un error inesperado. Ya estamos al tanto.
             </p>
             {this.state.error && (
-              <p className="text-xs text-gray-600 mb-8 font-mono bg-white/5 rounded-lg p-3 break-all">
+              <p className="text-xs dark:text-gray-600 text-gray-400 mb-8 font-mono dark:bg-white/5 bg-gray-100 rounded-lg p-3 break-all">
                 {this.state.error.message}
               </p>
             )}
@@ -66,7 +66,7 @@ export default class ErrorBoundary extends Component<Props, State> {
               </button>
               <Link
                 href="/"
-                className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-white/5 border border-white/10 text-white font-medium hover:bg-white/10 transition-all"
+                className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl dark:bg-white/5 bg-gray-100 dark:border-white/10 border-gray-200 dark:text-white text-gray-900 font-medium hover:dark:bg-white/10 hover:bg-gray-200 transition-all"
               >
                 Ir al inicio
               </Link>

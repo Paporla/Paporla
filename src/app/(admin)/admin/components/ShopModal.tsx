@@ -50,52 +50,52 @@ export default function ShopModal({ isOpen, shop, onClose, onVerify, onBan }: Sh
               exit={{ opacity: 0, scale: 0.9 }}
               className="pointer-events-auto w-full max-w-md mx-4"
             >
-              <div className="bg-black/90 backdrop-blur-xl rounded-2xl border border-white/10 shadow-2xl overflow-hidden">
+              <div className="dark:bg-black/90 bg-white backdrop-blur-xl rounded-2xl dark:border-white/10 border-gray-200 shadow-2xl overflow-hidden">
                 {/* Header */}
-                <div className="flex items-center justify-between p-5 border-b border-white/10">
+                <div className="flex items-center justify-between p-5 border-b dark:border-white/10 border-gray-200">
                   <div className="flex items-center gap-3">
                     <div className="p-2 rounded-lg bg-primary/10">
                       <Store className="w-5 h-5 text-primary" />
                     </div>
-                    <h2 className="text-xl font-bold text-white">Editar Comercio</h2>
+                    <h2 className="text-xl font-bold dark:text-white text-gray-900">Editar Comercio</h2>
                   </div>
                   <button
                     onClick={onClose}
-                    className="p-1 rounded-lg hover:bg-white/10 transition-colors"
+                    className="p-1 rounded-lg dark:hover:bg-white/10 hover:bg-gray-100 transition-colors"
                   >
-                    <X className="w-5 h-5 text-gray-400" />
+                    <X className="w-5 h-5 dark:text-gray-400 text-gray-600" />
                   </button>
                 </div>
 
                 {/* Body */}
                 <div className="p-5 space-y-5">
                   <div>
-                    <label className="block text-sm font-medium text-gray-400 mb-1">
+                    <label className="block text-sm font-medium dark:text-gray-400 text-gray-600 mb-1">
                       Nombre del comercio
                     </label>
-                    <p className="text-white font-medium">{shop.name}</p>
+                    <p className="dark:text-white text-gray-900 font-medium">{shop.name}</p>
                   </div>
 
                   {shop.owner_id && (
                     <div>
-                      <label className="block text-sm font-medium text-gray-400 mb-1">
+                      <label className="block text-sm font-medium dark:text-gray-400 text-gray-600 mb-1">
                         ID del propietario
                       </label>
-                      <p className="text-gray-300 text-sm font-mono break-all">{shop.owner_id}</p>
+                      <p className="dark:text-gray-300 text-gray-700 text-sm font-mono break-all">{shop.owner_id}</p>
                     </div>
                   )}
 
                   {shop.address && (
                     <div>
-                      <label className="block text-sm font-medium text-gray-400 mb-1">
-                        Dirección
+                      <label className="block text-sm font-medium dark:text-gray-400 text-gray-600 mb-1">
+                        Direccion
                       </label>
-                      <p className="text-gray-300">{shop.address}</p>
+                      <p className="dark:text-gray-300 text-gray-700">{shop.address}</p>
                     </div>
                   )}
 
-                  <div className="border-t border-white/10 pt-4 space-y-3">
-                    <p className="text-sm text-gray-400 mb-2">Acciones</p>
+                  <div className="border-t dark:border-white/10 border-gray-200 pt-4 space-y-3">
+                    <p className="text-sm dark:text-gray-400 text-gray-600 mb-2">Acciones</p>
                     
                     <div className="flex gap-3">
                       {!shop.verified ? (

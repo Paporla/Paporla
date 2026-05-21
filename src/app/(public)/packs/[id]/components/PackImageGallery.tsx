@@ -35,7 +35,7 @@ export default function PackImageGallery({
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/20 to-secondary/20">
-            <Package className="w-20 h-20 text-gray-500" />
+            <Package className="w-20 h-20 dark:text-gray-500 text-gray-400" />
           </div>
         )}
         {discount && (
@@ -44,14 +44,14 @@ export default function PackImageGallery({
           </div>
         )}
         {!isAvailable && (
-          <div className="absolute inset-0 bg-black/60 flex items-center justify-center backdrop-blur-sm">
+          <div className="absolute inset-0 dark:bg-black/60 bg-black/40 flex items-center justify-center backdrop-blur-sm">
             <span className="text-2xl font-bold text-white">Agotado</span>
           </div>
         )}
       </div>
 
       <div className="flex gap-2 mt-4">
-        <div className="w-20 h-20 rounded-lg overflow-hidden bg-gray-800 cursor-pointer hover:opacity-80 transition relative">
+        <div className="w-20 h-20 rounded-lg overflow-hidden dark:bg-gray-800 bg-gray-200 cursor-pointer hover:opacity-80 transition relative">
           {imageUrl ? (
             <Image src={imageUrl} alt="Thumb" fill className="object-cover" sizes="80px" />
           ) : (

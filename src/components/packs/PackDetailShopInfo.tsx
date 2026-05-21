@@ -1,6 +1,6 @@
 'use client';
 
-import { Star, MapPin, Phone, CheckCircle, Clock } from 'lucide-react';
+import { Star, MapPin, Phone, CheckCircle, Clock, Store } from 'lucide-react';
 
 interface PackDetailShopInfoProps {
   shopName: string;
@@ -31,19 +31,19 @@ export default function PackDetailShopInfo({
 
   return (
     <div className="space-y-4">
-      {/* Información del comercio */}
+      {/* Informacion del comercio */}
       <div className="flex items-center gap-3">
-        <div className="w-12 h-12 rounded-xl bg-dark-muted flex items-center justify-center text-2xl">
-          🏪
+        <div className="w-12 h-12 rounded-xl dark:bg-dark-muted bg-gray-200 flex items-center justify-center">
+          <Store className="w-6 h-6 dark:text-gray-400 text-gray-600" />
         </div>
         <div className="flex-1">
           <div className="flex items-center gap-2">
-            <h2 className="font-bold text-white">{shopName}</h2>
+            <h2 className="font-bold dark:text-white text-gray-900">{shopName}</h2>
             {shopVerified && (
               <CheckCircle className="w-4 h-4 text-primary" />
             )}
           </div>
-          <div className="flex items-center gap-2 text-xs text-gray-500">
+          <div className="flex items-center gap-2 text-xs dark:text-gray-500 text-gray-400">
             <div className="flex items-center gap-0.5">
               <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
               <span>{shopRating.toFixed(1)}</span>
@@ -61,19 +61,19 @@ export default function PackDetailShopInfo({
         </div>
       </div>
 
-      {/* Dirección y teléfono */}
+      {/* Direccion y telefono */}
       {(shopAddress || shopPhone) && (
-        <div className="bg-dark-muted rounded-xl p-4 space-y-2">
+        <div className="dark:bg-dark-muted bg-gray-100 rounded-xl p-4 space-y-2">
           {shopAddress && (
             <div className="flex items-start gap-2 text-sm">
               <MapPin className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
-              <span className="text-gray-400">{shopAddress}</span>
+              <span className="dark:text-gray-400 text-gray-600">{shopAddress}</span>
             </div>
           )}
           {shopPhone && (
             <div className="flex items-center gap-2 text-sm">
               <Phone className="w-4 h-4 text-primary" />
-              <span className="text-gray-400">{shopPhone}</span>
+              <span className="dark:text-gray-400 text-gray-600">{shopPhone}</span>
             </div>
           )}
         </div>
@@ -81,13 +81,13 @@ export default function PackDetailShopInfo({
 
       {/* Horario de recogida */}
       {(pickupDate || pickupTime) && (
-        <div className="bg-dark-muted rounded-xl p-4">
-          <h3 className="text-sm font-bold text-white mb-2 flex items-center gap-2">
+        <div className="dark:bg-dark-muted bg-gray-100 rounded-xl p-4">
+          <h3 className="text-sm font-bold dark:text-white text-gray-900 mb-2 flex items-center gap-2">
             <Clock className="w-4 h-4 text-primary" />
             Recogida
           </h3>
           {pickupDate && (
-            <p className="text-sm text-gray-400">
+            <p className="text-sm dark:text-gray-400 text-gray-600">
               {new Date(pickupDate).toLocaleDateString('es-ES', {
                 weekday: 'long',
                 year: 'numeric',

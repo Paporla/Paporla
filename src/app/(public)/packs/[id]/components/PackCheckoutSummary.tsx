@@ -38,18 +38,18 @@ export default function PackCheckoutSummary({
   reserving,
 }: PackCheckoutSummaryProps) {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm" onClick={onClose}>
-      <div className="relative max-w-md w-full bg-black/90 backdrop-blur-xl rounded-2xl border border-white/10 shadow-2xl overflow-hidden" onClick={(e) => e.stopPropagation()}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 dark:bg-black/80 bg-black/40 backdrop-blur-sm" onClick={onClose}>
+      <div className="relative max-w-md w-full dark:bg-black/90 bg-white backdrop-blur-xl rounded-2xl dark:border-white/10 border-gray-200 shadow-2xl overflow-hidden" onClick={(e) => e.stopPropagation()}>
         <div className="text-center pt-8 pb-4 bg-gradient-to-b from-primary/10 to-transparent">
           <CreditCard className="w-12 h-12 text-primary mx-auto mb-3" />
-          <h2 className="text-2xl font-bold text-white">Confirmar Reserva</h2>
-          <p className="text-gray-400 text-sm mt-1">Revisa los detalles antes de confirmar</p>
+          <h2 className="text-2xl font-bold dark:text-white text-gray-900">Confirmar Reserva</h2>
+          <p className="dark:text-gray-400 text-gray-600 text-sm mt-1">Revisa los detalles antes de confirmar</p>
         </div>
 
         <div className="p-6 space-y-4">
           {/* Pack info */}
-          <div className="flex gap-3 p-3 bg-white/5 rounded-xl">
-            <div className="w-16 h-16 rounded-lg overflow-hidden bg-gray-800 flex-shrink-0 relative">
+          <div className="flex gap-3 p-3 dark:bg-white/5 bg-gray-100 rounded-xl">
+            <div className="w-16 h-16 rounded-lg overflow-hidden dark:bg-gray-800 bg-gray-200 flex-shrink-0 relative">
               {pack.image_url ? (
                 <Image src={pack.image_url} alt={pack.title} fill className="object-cover" sizes="64px" />
               ) : (
@@ -59,27 +59,27 @@ export default function PackCheckoutSummary({
               )}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-white font-medium truncate">{pack.title}</p>
-              <p className="text-xs text-gray-400">{pack.shop.name}</p>
+              <p className="dark:text-white text-gray-900 font-medium truncate">{pack.title}</p>
+              <p className="text-xs dark:text-gray-400 text-gray-600">{pack.shop.name}</p>
               <p className="text-sm text-primary font-bold mt-1">{formatPrice(pack.price_cents)} x {quantity}</p>
             </div>
           </div>
 
           {/* Total */}
           <div className="flex justify-between items-center p-3 bg-primary/5 border border-primary/20 rounded-xl">
-            <span className="text-white font-semibold">Total a pagar</span>
+            <span className="dark:text-white text-gray-900 font-semibold">Total a pagar</span>
             <span className="text-xl font-bold text-primary">{formatPrice(pack.price_cents * quantity)}</span>
           </div>
 
-          {/* Método de pago */}
-          <div className="flex items-center gap-2 text-sm text-gray-400">
+          {/* Metodo de pago */}
+          <div className="flex items-center gap-2 text-sm dark:text-gray-400 text-gray-600">
             <CreditCard className="w-4 h-4 text-primary" />
-            <span>Método de pago: <strong className="text-white">{paymentMethod === 'cash' ? 'Efectivo' : 'Demo'}</strong></span>
+            <span>Metodo de pago: <strong className="dark:text-white text-gray-900">{paymentMethod === 'cash' ? 'Efectivo' : 'Demo'}</strong></span>
           </div>
 
           {/* Info de recogida */}
           {(pack.pickup_date || pack.pickup_start_time) && (
-            <div className="text-sm text-gray-400 space-y-1">
+            <div className="text-sm dark:text-gray-400 text-gray-600 space-y-1">
               <Calendar className="w-4 h-4 text-primary inline mr-1" />
               {pack.pickup_date && <span>{formatDate(pack.pickup_date)}</span>}
               {(pack.pickup_start_time || pack.pickup_end_time) && (
@@ -89,7 +89,7 @@ export default function PackCheckoutSummary({
           )}
 
           {pack.shop.address && (
-            <div className="flex items-center gap-2 text-sm text-gray-400">
+            <div className="flex items-center gap-2 text-sm dark:text-gray-400 text-gray-600">
               <MapPin className="w-4 h-4 text-primary" />
               <span>{pack.shop.address}</span>
             </div>

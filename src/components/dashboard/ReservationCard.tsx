@@ -11,15 +11,15 @@ import { formatPrice } from '@/lib/utils/formatPrice';
 import { formatDate } from '@/lib/utils/formatDate';
 import { Reservation } from '@/types/reservation';
 
-// Función de ordenamiento para reservas por fecha de recogida más cercana
+// Funcion de ordenamiento para reservas por fecha de recogida mas cercana
 export const sortReservationsByPickupTime = (reservations: Reservation[]) => {
   return [...reservations].sort((a, b) => {
-    // Primero las que están por expirar (confirmed)
+    // Primero las que estan por expirar (confirmed)
     const aPriority = a.status === 'confirmed' ? 0 : 1;
     const bPriority = b.status === 'confirmed' ? 0 : 1;
     if (aPriority !== bPriority) return aPriority - bPriority;
     
-    // Luego por fecha de recogida más cercana
+    // Luego por fecha de recogida mas cercana
     const aDate = a.pickup_date ? new Date(a.pickup_date).getTime() : Infinity;
     const bDate = b.pickup_date ? new Date(b.pickup_date).getTime() : Infinity;
     return aDate - bDate;
@@ -84,14 +84,14 @@ export default function ReservationCard({
         
         <div className="flex-1 min-w-0">
           <div className="flex flex-wrap items-start justify-between gap-2 mb-2">
-            <Link href={`/packs/${reservation.pack.id}`} className="text-lg font-semibold text-white hover:text-primary transition-colors truncate block">
+            <Link href={`/packs/${reservation.pack.id}`} className="text-lg font-semibold dark:text-white text-gray-900 hover:text-primary transition-colors truncate block">
               {reservation.pack.title}
             </Link>
             {getStatusBadge(reservation.status)}
           </div>
         
-          <Link href={`/shops/${reservation.shop.id}`} className="text-gray-400 text-sm mb-2 block hover:text-primary transition-colors">
-            🏪 {reservation.shop.name}
+          <Link href={`/shops/${reservation.shop.id}`} className="dark:text-gray-400 text-gray-600 text-sm mb-2 block hover:text-primary transition-colors">
+            {reservation.shop.name}
           </Link>
           
           {reservation.shop.address && (
@@ -112,7 +112,7 @@ export default function ReservationCard({
             </span>
           </div>
 
-          {/* Hora límite de recogida + countdown */}
+          {/* Hora limite de recogida + countdown */}
           {hasPickupInfo && isActive && (
             <div className="flex flex-wrap items-center gap-3 mb-3">
               <div className="flex items-center gap-1 text-xs text-gray-500">
@@ -126,11 +126,11 @@ export default function ReservationCard({
             </div>
           )}
           
-          {/* Código de recogida */}
+          {/* Codigo de recogida */}
           {isActive && reservation.pickup_code && (
             <div className="bg-primary/10 border border-primary/30 rounded-lg p-2 mb-3 inline-flex items-center gap-3">
               <div>
-                <p className="text-xs text-gray-400">Código de recogida</p>
+                <p className="text-xs dark:text-gray-400 text-gray-600">Codigo de recogida</p>
                 <p className="text-xl font-bold text-primary tracking-wider font-mono">
                   {reservation.pickup_code}
                 </p>
@@ -150,7 +150,7 @@ export default function ReservationCard({
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-lg bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
               >
                 <Navigation className="w-3 h-3" />
-                Cómo llegar
+                Como llegar
               </a>
             )}
           

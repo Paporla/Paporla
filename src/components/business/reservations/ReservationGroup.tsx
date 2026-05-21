@@ -28,15 +28,15 @@ export default function ReservationGroup({
   if (reservations.length === 0) return null;
 
   return (
-    <div className="bg-dark-card/30 rounded-2xl border border-dark-border overflow-hidden">
+    <div className="bg-dark-card/30 dark:bg-white/50 rounded-2xl border border-dark-border dark:border-gray-200 overflow-hidden">
       {/* Header del grupo */}
       <button
         onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full flex items-center justify-between p-4 bg-dark-card/50 hover:bg-dark-card transition-colors"
+        className="w-full flex items-center justify-between p-4 dark:bg-dark-card/50 bg-gray-50 dark:hover:bg-dark-card hover:bg-gray-100 transition-colors"
       >
         <div className="flex items-center gap-3">
           <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-          <h3 className="font-semibold text-white">{title}</h3>
+          <h3 className="font-semibold dark:text-white text-gray-900">{title}</h3>
           <span className="text-xs bg-primary/20 text-primary px-2 py-0.5 rounded-full">
             {reservations.length}
           </span>

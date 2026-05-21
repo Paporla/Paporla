@@ -42,9 +42,9 @@ export default function ProfileLocationForm({
   };
 
   return (
-    <div className="bg-black/40 backdrop-blur-sm border border-white/10 rounded-2xl p-6 lg:p-8 space-y-6">
+    <div className="dark:bg-black/40 bg-white dark:backdrop-blur-sm backdrop-blur-sm border dark:border-white/10 border-gray-200 rounded-2xl p-6 lg:p-8 space-y-6">
       <div className="flex items-center justify-between">
-        <label className="text-sm font-medium text-gray-300 flex items-center gap-2">
+        <label className="text-sm font-medium dark:text-gray-300 text-gray-700 flex items-center gap-2">
           <Navigation className="w-4 h-4 text-primary" />
           Ubicación
         </label>
@@ -59,7 +59,7 @@ export default function ProfileLocationForm({
       </div>
 
       {isValid ? (
-        <div className="relative rounded-2xl overflow-hidden border border-white/10 h-40 bg-black/40">
+        <div className="relative rounded-2xl overflow-hidden border dark:border-white/10 border-gray-200 h-40 dark:bg-black/40 bg-gray-50">
           <div
             className="absolute inset-0 opacity-20"
             style={{
@@ -75,8 +75,8 @@ export default function ProfileLocationForm({
               <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-3 h-1.5 bg-primary/30 rounded-full blur-[2px]" />
             </div>
           </div>
-          <div className="absolute bottom-3 left-3 bg-black/60 backdrop-blur-sm border border-white/10 rounded-lg px-3 py-1.5">
-            <p className="text-[10px] text-gray-400 font-mono">
+          <div className="absolute bottom-3 left-3 dark:bg-black/60 bg-white/80 backdrop-blur-sm border dark:border-white/10 border-gray-200 rounded-lg px-3 py-1.5">
+            <p className="text-[10px] dark:text-gray-400 text-gray-600 font-mono">
               {lat.toFixed(4)}, {lng.toFixed(4)}
             </p>
           </div>
@@ -84,15 +84,15 @@ export default function ProfileLocationForm({
             href={`https://www.google.com/maps?q=${lat},${lng}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="absolute bottom-3 right-3 bg-black/60 backdrop-blur-sm border border-white/10 rounded-lg px-3 py-1.5 text-[10px] text-primary hover:text-primary/80 transition-colors"
+            className="absolute bottom-3 right-3 dark:bg-black/60 bg-white/80 backdrop-blur-sm border dark:border-white/10 border-gray-200 rounded-lg px-3 py-1.5 text-[10px] text-primary hover:text-primary/80 transition-colors"
           >
             Abrir en Maps →
           </a>
         </div>
       ) : (
-        <div className="rounded-2xl border border-dashed border-white/10 h-40 bg-black/40 flex flex-col items-center justify-center gap-2">
-          <MapPin className="w-6 h-6 text-gray-600" />
-          <p className="text-xs text-gray-500">Ingresa coordenadas para ver el mapa</p>
+        <div className="rounded-2xl border border-dashed dark:border-white/10 border-gray-200 h-40 dark:bg-black/40 bg-gray-50 flex flex-col items-center justify-center gap-2">
+          <MapPin className="w-6 h-6 dark:text-gray-600 text-gray-400" />
+          <p className="text-xs dark:text-gray-500 text-gray-400">Ingresa coordenadas para ver el mapa</p>
         </div>
       )}
 
@@ -115,8 +115,8 @@ export default function ProfileLocationForm({
         />
       </div>
 
-      <div className="bg-black/40 border border-white/10 rounded-xl p-4">
-        <p className="text-xs text-gray-500">
+      <div className="dark:bg-black/40 bg-gray-50 border dark:border-white/10 border-gray-200 rounded-xl p-4">
+        <p className="text-xs dark:text-gray-500 text-gray-400">
           <strong>Ejemplo:</strong> Caracas → Lat: 10.4961, Lng: -66.8983. Puedes obtener coordenadas desde Google Maps.
         </p>
       </div>

@@ -60,11 +60,11 @@ export default function PackFilters({
                 <button
                   key={filter.id}
                   onClick={() => onStatusChange(filter.id as any)}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                    filterStatus === filter.id
-                      ? 'bg-primary/20 text-primary border border-primary/30'
-                      : 'bg-dark-muted text-gray-400 hover:text-white hover:bg-white/5'
-                  }`}
+          className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+            filterStatus === filter.id
+              ? 'bg-primary/20 text-primary border border-primary/30'
+              : 'dark:bg-dark-muted bg-gray-100 dark:text-gray-400 text-gray-600 dark:hover:text-white hover:text-gray-900 dark:hover:bg-white/5 hover:bg-gray-200'
+          }`}
                 >
                   {filter.label}
                 </button>

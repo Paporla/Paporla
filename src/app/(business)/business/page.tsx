@@ -20,12 +20,12 @@ export default function BusinessDashboard() {
   if (!shop) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
-        <div className="bg-black/40 backdrop-blur-sm rounded-2xl p-8 max-w-md border border-white/10">
+        <div className="bg-black/40 dark:bg-white/60 backdrop-blur-sm rounded-2xl p-8 max-w-md border dark:border-white/10 border-gray-200">
           <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-primary/10 flex items-center justify-center">
             <Store className="w-8 h-8 text-primary" />
           </div>
-          <h2 className="text-2xl font-bold text-white mb-2">¡Bienvenido a Paporla!</h2>
-          <p className="text-gray-400 mb-6">Para comenzar a vender packs, primero debes registrar tu comercio.</p>
+          <h2 className="text-2xl font-bold dark:text-white text-gray-900 mb-2">Bienvenido a Paporla!</h2>
+          <p className="dark:text-gray-400 text-gray-600 mb-6">Para comenzar a vender packs, primero debes registrar tu comercio.</p>
           <Link href="/business/profile">
             <Button>Completar mi perfil de comercio</Button>
           </Link>

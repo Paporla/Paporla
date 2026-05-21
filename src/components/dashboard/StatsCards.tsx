@@ -75,8 +75,8 @@ export default function StatsCards({
                 </div>
               )}
             </div>
-            <div className="text-2xl font-bold text-white">{card.value}</div>
-            <div className="text-sm text-gray-400">{card.label}</div>
+            <div className="text-2xl font-bold dark:text-white text-gray-900">{card.value}</div>
+            <div className="text-sm dark:text-gray-400 text-gray-600">{card.label}</div>
             <div className="text-xs text-primary mt-2 opacity-0 group-hover:opacity-100 transition-opacity">
               {card.action} →
             </div>

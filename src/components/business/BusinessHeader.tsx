@@ -26,7 +26,7 @@ export default function BusinessHeader({ shop }: BusinessHeaderProps) {
             </div>
           )}
           <div>
-            <h1 className="text-3xl md:text-4xl font-bold text-white">
+            <h1 className="text-3xl md:text-4xl font-bold dark:text-white text-gray-900">
               {shop.name}
             </h1>
             <div className="flex items-center gap-2 mt-1">
@@ -42,7 +42,7 @@ export default function BusinessHeader({ shop }: BusinessHeaderProps) {
             </div>
           </div>
         </div>
-        <p className="text-gray-400 mt-2">
+        <p className="dark:text-gray-400 text-gray-600 mt-2">
           Gestiona tus packs y reservas desde aquí
         </p>
       </div>

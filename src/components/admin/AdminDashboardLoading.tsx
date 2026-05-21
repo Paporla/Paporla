@@ -5,7 +5,7 @@ export default function AdminDashboardLoading() {
     <div className="flex items-center justify-center min-h-[60vh]">
       <div className="text-center">
         <div className="w-12 h-12 border-4 border-primary/30 border-t-primary rounded-full animate-spin mx-auto mb-4" />
-        <p className="text-gray-400">Cargando...</p>
+        <p className="dark:text-gray-400 text-gray-600">Cargando...</p>
       </div>
     </div>
   )

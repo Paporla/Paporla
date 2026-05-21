@@ -4,7 +4,7 @@ import Skeleton from '@/components/ui/Skeleton';
 
 export default function PackFormSkeleton() {
   return (
-    <div className="bg-black/40 backdrop-blur-sm rounded-2xl p-6 md:p-8 border border-white/10">
+    <div className="dark:bg-black/40 bg-white dark:backdrop-blur-sm backdrop-blur-sm rounded-2xl p-6 md:p-8 border dark:border-white/10 border-gray-200">
       <div className="space-y-6">
         {/* Título de sección */}
         <div className="flex items-center gap-2 mb-4">

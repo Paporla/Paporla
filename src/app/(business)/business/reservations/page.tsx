@@ -75,9 +75,9 @@ export default function BusinessReservationsPage() {
             <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
               <Calendar className="w-5 h-5 text-primary" />
             </div>
-            <h1 className="text-3xl md:text-4xl font-bold text-white">Reservas</h1>
+            <h1 className="text-3xl md:text-4xl font-bold dark:text-white text-gray-900">Reservas</h1>
           </div>
-          <p className="text-gray-400">Gestiona todas las reservas de tus packs</p>
+          <p className="dark:text-gray-400 text-gray-600">Gestiona todas las reservas de tus packs</p>
         </div>
       </div>
 
@@ -105,7 +105,7 @@ export default function BusinessReservationsPage() {
         {/* Listas para recoger */}
         {grouped.ready_pickup.length > 0 && (
           <ReservationGroup
-            title="📦 Listas para recoger"
+            title="Listas para recoger"
             reservations={grouped.ready_pickup}
             updating={updating}
             onValidate={(id) => updateStatus(id, 'picked_up')}
@@ -117,7 +117,7 @@ export default function BusinessReservationsPage() {
         {/* Pendientes */}
         {grouped.pending.length > 0 && (
           <ReservationGroup
-            title="⏳ Pendientes"
+            title="Pendientes"
             reservations={grouped.pending}
             updating={updating}
             onValidate={(id) => updateStatus(id, 'confirmed')}
@@ -129,7 +129,7 @@ export default function BusinessReservationsPage() {
         {/* Confirmadas */}
         {grouped.confirmed.length > 0 && (
           <ReservationGroup
-            title="✅ Confirmadas"
+            title="Confirmadas"
             reservations={grouped.confirmed}
             updating={updating}
             onValidate={(id) => updateStatus(id, 'picked_up')}
@@ -142,20 +142,20 @@ export default function BusinessReservationsPage() {
         {(grouped.picked_up.length > 0 || grouped.no_show.length > 0 || grouped.cancelled.length > 0) && (
           <div className="space-y-4">
             <div className="flex items-center gap-2 mt-6 pt-4 border-t border-dark-border">
-              <div className="w-1 h-5 bg-gray-600 rounded-full" />
-              <h2 className="text-lg font-semibold text-gray-400">Historial</h2>
+              <div className="w-1 h-5 dark:bg-gray-600 bg-gray-300 rounded-full" />
+              <h2 className="text-lg font-semibold dark:text-gray-400 text-gray-500">Historial</h2>
             </div>
 
             {grouped.picked_up.length > 0 && (
-              <ReservationGroup title="🎉 Recogidas" reservations={grouped.picked_up} updating={updating} />
+              <ReservationGroup title="Recogidas" reservations={grouped.picked_up} updating={updating} />
             )}
 
             {grouped.no_show.length > 0 && (
-              <ReservationGroup title="😔 No retiradas" reservations={grouped.no_show} updating={updating} />
+              <ReservationGroup title="No retiradas" reservations={grouped.no_show} updating={updating} />
             )}
 
             {grouped.cancelled.length > 0 && (
-              <ReservationGroup title="❌ Canceladas" reservations={grouped.cancelled} updating={updating} />
+              <ReservationGroup title="Canceladas" reservations={grouped.cancelled} updating={updating} />
             )}
           </div>
         )}

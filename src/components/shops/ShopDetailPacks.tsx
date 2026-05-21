@@ -34,13 +34,13 @@ export default function ShopDetailPacks({ packs, shopName, shopAddress }: ShopDe
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-black/40 backdrop-blur-sm border border-white/10 rounded-2xl p-10 text-center"
+        className="dark:bg-black/40 bg-white backdrop-blur-sm dark:border-white/10 border-gray-200 rounded-2xl p-10 text-center"
       >
-        <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-white/5 flex items-center justify-center">
-          <Package className="w-8 h-8 text-gray-600" />
+        <div className="w-16 h-16 mx-auto mb-4 rounded-full dark:bg-white/5 bg-gray-100 flex items-center justify-center">
+          <Package className="w-8 h-8 dark:text-gray-600 text-gray-400" />
         </div>
-        <p className="text-gray-400 font-medium">No hay packs disponibles</p>
-        <p className="text-xs text-gray-500 mt-1">Vuelve mas tarde para ver nuevas opciones</p>
+        <p className="dark:text-gray-400 text-gray-600 font-medium">No hay packs disponibles</p>
+        <p className="text-xs dark:text-gray-500 text-gray-400 mt-1">Vuelve mas tarde para ver nuevas opciones</p>
       </motion.div>
     );
   }
@@ -48,11 +48,11 @@ export default function ShopDetailPacks({ packs, shopName, shopAddress }: ShopDe
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-xl font-bold text-white flex items-center gap-2">
+        <h2 className="text-xl font-bold dark:text-white text-gray-900 flex items-center gap-2">
           <Package className="w-5 h-5 text-primary" />
           Packs disponibles
         </h2>
-        <span className="text-xs text-gray-500 bg-white/5 border border-white/10 px-3 py-1 rounded-full">
+        <span className="text-xs dark:text-gray-500 text-gray-400 dark:bg-white/5 bg-gray-100 dark:border-white/10 border-gray-200 px-3 py-1 rounded-full">
           {packs.length} pack{packs.length !== 1 ? 's' : ''}
         </span>
       </div>
@@ -78,9 +78,9 @@ export default function ShopDetailPacks({ packs, shopName, shopAddress }: ShopDe
               transition={{ delay: idx * 0.08 }}
             >
               <Link href={'/packs/' + pack.id}>
-                <div className="group bg-black/40 backdrop-blur-sm border border-white/10 hover:border-primary/30 rounded-2xl overflow-hidden transition-all duration-300 h-full">
+                <div className="group dark:bg-black/40 bg-white backdrop-blur-sm dark:border-white/10 border-gray-200 hover:border-primary/30 rounded-2xl overflow-hidden transition-all duration-300 h-full">
                   {/* Imagen */}
-                  <div className="relative h-36 md:h-44 overflow-hidden bg-[#0a0a1a]">
+                  <div className="relative h-36 md:h-44 overflow-hidden dark:bg-[#0a0a1a] bg-gray-100">
                     {hasImage ? (
                       <Image
                         src={pack.image_url!}
@@ -91,7 +91,7 @@ export default function ShopDetailPacks({ packs, shopName, shopAddress }: ShopDe
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center">
-                        <Package className="w-12 h-12 text-gray-700" />
+                        <Package className="w-12 h-12 dark:text-gray-700 text-gray-400" />
                       </div>
                     )}
                     {/* Overlay gradient */}
@@ -116,7 +116,7 @@ export default function ShopDetailPacks({ packs, shopName, shopAddress }: ShopDe
                       <div className="flex items-baseline gap-1 bg-black/70 backdrop-blur-sm rounded-xl px-3 py-1.5">
                         <span className="text-lg font-bold text-primary">{formatPrice(pack.price_cents)}</span>
                         {pack.original_price_cents && (
-                          <span className="text-xs text-gray-500 line-through">{formatPrice(pack.original_price_cents)}</span>
+                          <span className="text-xs dark:text-gray-500 text-gray-400 line-through">{formatPrice(pack.original_price_cents)}</span>
                         )}
                       </div>
                     </div>
@@ -124,15 +124,15 @@ export default function ShopDetailPacks({ packs, shopName, shopAddress }: ShopDe
 
                   {/* Info */}
                   <div className="p-4 space-y-2">
-                    <h3 className="font-semibold text-white group-hover:text-primary transition-colors line-clamp-1">
+                    <h3 className="font-semibold dark:text-white text-gray-900 group-hover:text-primary transition-colors line-clamp-1">
                       {pack.title}
                     </h3>
 
                     {pack.description && (
-                      <p className="text-sm text-gray-500 line-clamp-2 leading-relaxed">{pack.description}</p>
+                      <p className="text-sm dark:text-gray-500 text-gray-400 line-clamp-2 leading-relaxed">{pack.description}</p>
                     )}
 
-                    <div className="flex flex-wrap items-center gap-3 text-xs text-gray-500 pt-1">
+                    <div className="flex flex-wrap items-center gap-3 text-xs dark:text-gray-500 text-gray-400 pt-1">
                       <span className="flex items-center gap-1">
                         <Package className="w-3 h-3 text-primary" />
                         Stock: {pack.remaining_stock}/{pack.total_stock}

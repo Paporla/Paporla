@@ -37,7 +37,7 @@ export default function CancellationRate({ data }: Props) {
       <div className="flex items-center justify-between mb-5">
         <div className="flex items-center gap-2">
           <AlertTriangle className="w-5 h-5 text-amber-400" />
-          <h3 className="font-bold text-white">Tasa de exito</h3>
+          <h3 className="font-bold dark:text-white text-gray-900">Tasa de exito</h3>
         </div>
         <div className={`text-2xl font-bold ${successRate >= 80 ? 'text-green-400' : successRate >= 60 ? 'text-amber-400' : 'text-red-400'}`}>
           {successRate}%
@@ -76,11 +76,11 @@ export default function CancellationRate({ data }: Props) {
             <div key={item.name} className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <div className="w-3 h-3 rounded-full" style={{ backgroundColor: item.color }} />
-                <span className="text-sm text-gray-400">{item.name}</span>
+                <span className="text-sm dark:text-gray-400 text-gray-600">{item.name}</span>
               </div>
               <div className="flex items-center gap-2">
-                <span className="text-sm font-medium text-white">{item.value}</span>
-                <span className="text-xs text-gray-500">({Math.round(item.value / total * 100)}%)</span>
+                <span className="text-sm font-medium dark:text-white text-gray-900">{item.value}</span>
+                <span className="text-xs dark:text-gray-500 text-gray-400">({Math.round(item.value / total * 100)}%)</span>
               </div>
             </div>
           ))}

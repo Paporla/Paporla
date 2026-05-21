@@ -20,7 +20,7 @@ export default function Modal({ isOpen, onClose, children, title }: ModalProps) 
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50"
+            className="fixed inset-0 dark:bg-black/70 bg-black/50 backdrop-blur-sm z-50"
           />
           <motion.div
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
@@ -28,17 +28,17 @@ export default function Modal({ isOpen, onClose, children, title }: ModalProps) 
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
             className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-md"
           >
-            <div className="bg-gray-900 rounded-xl border border-gray-800 shadow-2xl">
+            <div className="dark:bg-gray-900 bg-white rounded-xl border dark:border-gray-700 border-gray-200 shadow-2xl">
               {title && (
-                <div className="px-6 py-4 border-b border-gray-800">
-                  <h2 className="text-xl font-bold text-white">{title}</h2>
+                <div className="px-6 py-4 border-b dark:border-gray-700 border-gray-200">
+                  <h2 className="text-xl font-bold dark:text-white text-gray-900">{title}</h2>
                 </div>
               )}
               <div className="p-6">{children}</div>
-              <div className="px-6 py-4 border-t border-gray-800 flex justify-end">
+              <div className="px-6 py-4 border-t dark:border-gray-700 border-gray-200 flex justify-end">
                 <button
                   onClick={onClose}
-                  className="px-4 py-2 text-gray-400 hover:text-white transition-colors"
+                  className="px-4 py-2 dark:text-gray-400 text-gray-600 dark:hover:text-white hover:text-gray-900 transition-colors"
                 >
                   Cerrar
                 </button>

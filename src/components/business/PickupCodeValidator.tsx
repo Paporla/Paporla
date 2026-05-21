@@ -81,8 +81,8 @@ export default function PickupCodeValidator() {
             <QrCode className="w-5 h-5 text-primary" />
           </div>
           <div>
-            <h3 className="font-bold text-white">Validar codigo de recogida</h3>
-            <p className="text-xs text-gray-500">Ingresa el codigo P4P-XXXX del usuario</p>
+            <h3 className="font-bold dark:text-white text-gray-900">Validar codigo de recogida</h3>
+            <p className="text-xs dark:text-gray-500 text-gray-400">Ingresa el codigo P4P-XXXX del usuario</p>
           </div>
         </div>
       </div>
@@ -98,7 +98,7 @@ export default function PickupCodeValidator() {
               onKeyDown={handleKeyDown}
               placeholder="P4P-XXXX"
               maxLength={10}
-              className="w-full pl-11 pr-4 py-3 bg-dark-muted border border-dark-border rounded-xl text-white font-mono text-lg tracking-widest placeholder-gray-600 focus:border-primary focus:ring-1 focus:ring-primary/20 focus:outline-none transition-all"
+              className="w-full pl-11 pr-4 py-3 dark:bg-dark-muted bg-gray-50 border dark:border-dark-border border-gray-200 rounded-xl dark:text-white text-gray-900 font-mono text-lg tracking-widest dark:placeholder-gray-600 placeholder-gray-400 focus:border-primary focus:ring-1 focus:ring-primary/20 focus:outline-none transition-all"
               autoComplete="off"
             />
           </div>
@@ -117,8 +117,8 @@ export default function PickupCodeValidator() {
           </button>
         </div>
 
-        <p className="text-xs text-gray-600 mt-3 flex items-center gap-1">
-          <span className="inline-block w-1.5 h-1.5 rounded-full bg-gray-600" />
+        <p className="text-xs dark:text-gray-600 text-gray-400 mt-3 flex items-center gap-1">
+          <span className="inline-block w-1.5 h-1.5 rounded-full dark:bg-gray-600 bg-gray-400" />
           Los codigos aparecen en cada reserva confirmada
         </p>
       </div>
@@ -145,9 +145,9 @@ export default function PickupCodeValidator() {
                 <p className={`font-bold text-sm ${result.state === 'success' ? 'text-green-400' : 'text-red-400'}`}>
                   {result.state === 'success' ? 'Recogida validada!' : 'Error'}
                 </p>
-                <p className="text-sm text-gray-400 mt-0.5">{result.message}</p>
+                <p className="text-sm dark:text-gray-400 text-gray-600 mt-0.5">{result.message}</p>
                 {result.userName && result.packTitle && (
-                  <div className="mt-2 text-xs text-gray-500 space-y-0.5">
+                  <div className="mt-2 text-xs dark:text-gray-500 text-gray-400 space-y-0.5">
                     <p>Usuario: {result.userName}</p>
                     <p>Pack: {result.packTitle}</p>
                     {result.quantity && result.quantity > 1 && <p>Cantidad: {result.quantity}</p>}

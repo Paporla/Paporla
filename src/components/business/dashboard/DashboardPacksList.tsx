@@ -15,7 +15,7 @@ export default function DashboardPacksList({ packs }: Props) {
   return (
     <Card glass className="p-6">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-xl font-semibold text-white flex items-center gap-2">
+        <h2 className="text-xl font-semibold dark:text-white text-gray-900 flex items-center gap-2">
           <Package className="w-5 h-5 text-primary" />
           Mis Packs
         </h2>
@@ -42,10 +42,10 @@ export default function DashboardPacksList({ packs }: Props) {
               transition={{ delay: idx * 0.05 }}
             >
               <Link href={`/business/packs/${pack.id}`}>
-                <div className="flex items-center justify-between p-3 rounded-xl bg-white/5 hover:bg-white/10 transition-all cursor-pointer group">
+                <div className="flex items-center justify-between p-3 rounded-xl dark:bg-white/5 bg-gray-50 dark:hover:bg-white/10 hover:bg-gray-100 transition-all cursor-pointer group">
                   <div>
-                    <p className="font-medium text-white group-hover:text-primary transition-colors">{pack.title}</p>
-                    <p className="text-xs text-gray-500 mt-0.5">
+                    <p className="font-medium dark:text-white text-gray-900 group-hover:text-primary transition-colors">{pack.title}</p>
+                    <p className="text-xs dark:text-gray-500 text-gray-400 mt-0.5">
                       Stock: {pack.remaining_stock} | {pack.is_active ? 'Activo' : 'Inactivo'}
                     </p>
                   </div>

@@ -25,7 +25,7 @@ export default function UnsavedChangesBar({ isDirty, onSave, onDiscard, saving }
             <span className="text-sm text-primary font-medium">Tienes cambios sin guardar</span>
           </div>
           <div className="flex items-center gap-3">
-            <button onClick={onDiscard} className="text-xs text-gray-400 hover:text-white transition-colors">
+            <button onClick={onDiscard} className="text-xs dark:text-gray-400 text-gray-600 dark:hover:text-white hover:text-gray-900 transition-colors">
               Descartar
             </button>
             <button

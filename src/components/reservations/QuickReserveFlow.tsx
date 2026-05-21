@@ -98,7 +98,7 @@ export default function QuickReserveFlow({ pack, onClose, onSuccess }: QuickRese
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 dark:bg-black/80 bg-black/40 backdrop-blur-sm"
       onClick={step !== 'reserving' ? onClose : undefined}>
       <div className="relative max-w-sm w-full" onClick={e => e.stopPropagation()}>
         <AnimatePresence mode="wait">
@@ -107,29 +107,29 @@ export default function QuickReserveFlow({ pack, onClose, onSuccess }: QuickRese
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="bg-gradient-to-b from-gray-900 to-black border border-white/10 rounded-2xl overflow-hidden shadow-2xl">
+              className="dark:bg-gradient-to-b dark:from-gray-900 dark:to-black bg-white border dark:border-white/10 border-gray-200 rounded-2xl overflow-hidden shadow-2xl">
               <div className="relative h-48 bg-gradient-to-br from-primary/20 to-secondary/20">
                 {pack.image_url ? <Image src={pack.image_url} alt={pack.title} fill className="object-cover" sizes="400px" /> : null}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
-                <button onClick={onClose} className="absolute top-3 right-3 p-2 rounded-full bg-black/40 text-white hover:bg-black/60">
+                <button onClick={onClose} className="absolute top-3 right-3 p-2 rounded-full dark:bg-black/40 bg-black/20 dark:text-white text-gray-900 hover:dark:bg-black/60 hover:bg-black/30">
                   <X className="w-4 h-4" />
                 </button>
               </div>
               <div className="p-5 space-y-4">
-                <h2 className="text-xl font-bold text-white">{pack.title}</h2>
-                <p className="text-gray-400 text-sm">{pack.shop.name}</p>
+                <h2 className="text-xl font-bold dark:text-white text-gray-900">{pack.title}</h2>
+                <p className="dark:text-gray-400 text-gray-600 text-sm">{pack.shop.name}</p>
                 <div className="flex items-center justify-between p-3 bg-primary/10 border border-primary/20 rounded-xl">
-                  <span className="text-gray-300 text-sm">Total</span>
+                  <span className="dark:text-gray-300 text-gray-700 text-sm">Total</span>
                   <span className="text-2xl font-bold text-primary">{formatPrice(pack.price_cents)}</span>
                 </div>
                 {pack.pickup_date && (
-                  <div className="flex items-center gap-2 text-sm text-gray-400">
+                  <div className="flex items-center gap-2 text-sm dark:text-gray-400 text-gray-600">
                     <Clock className="w-4 h-4 text-primary" />
                     <span>{formatDate(pack.pickup_date)} {pack.pickup_start_time?.slice(0,5)} - {pack.pickup_end_time?.slice(0,5)}</span>
                   </div>
                 )}
                 {pack.shop.address && (
-                  <div className="flex items-center gap-2 text-sm text-gray-400">
+                  <div className="flex items-center gap-2 text-sm dark:text-gray-400 text-gray-600">
                     <MapPin className="w-4 h-4 text-primary" />
                     <span>{pack.shop.address}</span>
                   </div>
@@ -143,32 +143,32 @@ export default function QuickReserveFlow({ pack, onClose, onSuccess }: QuickRese
 
           {step === 'reserving' && (
             <motion.div key="reserving" initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-              className="bg-gradient-to-b from-gray-900 to-black border border-white/10 rounded-2xl p-10 text-center shadow-2xl">
+              className="dark:bg-gradient-to-b dark:from-gray-900 dark:to-black bg-white dark:border-white/10 border-gray-200 rounded-2xl p-10 text-center shadow-2xl">
               <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-primary/20 flex items-center justify-center">
                 <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
               </div>
-              <p className="text-lg font-semibold text-white">Reservando tu pack...</p>
+              <p className="text-lg font-semibold dark:text-white text-gray-900">Reservando tu pack...</p>
             </motion.div>
           )}
 
           {step === 'confirmed' && confirmedData && (
             <motion.div key="confirmed" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}
-              className="bg-gradient-to-b from-gray-900 to-black border border-primary/30 rounded-2xl overflow-hidden shadow-2xl shadow-primary/10">
+              className="dark:bg-gradient-to-b dark:from-gray-900 dark:to-black bg-white border border-primary/30 rounded-2xl overflow-hidden shadow-2xl shadow-primary/10">
               <div className="p-6 text-center space-y-4">
                 <div className="w-20 h-20 mx-auto rounded-full bg-green-500/20 flex items-center justify-center">
                   <CheckCircle className="w-10 h-10 text-green-400" />
                 </div>
-                <h2 className="text-2xl font-bold text-white">&iexcl;Reserva Confirmada!</h2>
-                <p className="text-gray-400">Tu pack te espera en {pack.shop.name}</p>
+                <h2 className="text-2xl font-bold dark:text-white text-gray-900">Reserva Confirmada!</h2>
+                <p className="dark:text-gray-400 text-gray-600">Tu pack te espera en {pack.shop.name}</p>
                 <div className="bg-gradient-to-r from-primary/10 to-primary/5 border border-primary/30 rounded-xl p-5">
-                  <p className="text-xs text-gray-400 uppercase tracking-wider">C&oacute;digo de recogida</p>
+                  <p className="text-xs dark:text-gray-400 text-gray-600 uppercase tracking-wider">Codigo de recogida</p>
                   <p className="text-4xl font-bold text-primary tracking-[0.3em] font-mono py-2">{confirmedData.pickup_code}</p>
-                  <CopyButton text={confirmedData.pickup_code} label="Copiar c&oacute;digo" />
+                  <CopyButton text={confirmedData.pickup_code} label="Copiar codigo" />
                 </div>
                 {getMapsUrl() && (
                   <a href={getMapsUrl()!} target="_blank" rel="noopener noreferrer"
                     className="flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-primary/10 text-primary hover:bg-primary/20 transition-colors text-sm font-medium">
-                    <Navigation className="w-4 h-4" /> C&oacute;mo llegar
+                    <Navigation className="w-4 h-4" /> Como llegar
                   </a>
                 )}
                 <div className="flex gap-3">
@@ -183,11 +183,11 @@ export default function QuickReserveFlow({ pack, onClose, onSuccess }: QuickRese
 
           {step === 'error' && (
             <motion.div key="error" initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-              className="bg-gradient-to-b from-gray-900 to-black border border-red-500/30 rounded-2xl p-6 text-center shadow-2xl">
+              className="dark:bg-gradient-to-b dark:from-gray-900 dark:to-black bg-white border border-red-500/30 rounded-2xl p-6 text-center shadow-2xl">
               <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-red-500/20 flex items-center justify-center">
                 <X className="w-8 h-8 text-red-400" />
               </div>
-              <h2 className="text-xl font-bold text-white mb-2">Error</h2>
+              <h2 className="text-xl font-bold dark:text-white text-gray-900 mb-2">Error</h2>
               <p className="text-red-400 text-sm mb-4">{error}</p>
               <Button variant="outline" className="w-full" onClick={onClose}>Cerrar</Button>
             </motion.div>

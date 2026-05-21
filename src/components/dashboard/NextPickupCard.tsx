@@ -45,22 +45,22 @@ export default function NextPickupCard({ reservation }: NextPickupCardProps) {
             </div>
           )}
 
-          {/* Información principal */}
+          {/* Informacion principal */}
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-1">
               <span className="text-xs font-bold text-primary uppercase tracking-wider">
-                Próxima recogida
+                Proxima recogida
               </span>
               <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
             </div>
             <Link href={`/packs/${reservation.pack.id}`}>
-              <h3 className="text-lg font-bold text-white hover:text-primary transition-colors line-clamp-1">
+              <h3 className="text-lg font-bold dark:text-white text-gray-900 hover:text-primary transition-colors line-clamp-1">
                 {reservation.pack.title}
               </h3>
             </Link>
             <Link href={`/shops/${reservation.shop.id}`}>
-              <p className="text-sm text-gray-400 hover:text-primary transition-colors">
-                🏪 {reservation.shop.name}
+              <p className="text-sm dark:text-gray-400 text-gray-600 hover:text-primary transition-colors">
+                {reservation.shop.name}
               </p>
             </Link>
             
@@ -85,10 +85,10 @@ export default function NextPickupCard({ reservation }: NextPickupCardProps) {
             )}
           </div>
 
-          {/* Código y acciones */}
+          {/* Codigo y acciones */}
           <div className="flex flex-col items-center gap-2">
             <div className="bg-primary/10 border border-primary/30 rounded-xl px-4 py-2 text-center">
-              <p className="text-[10px] text-gray-400">Código</p>
+              <p className="text-[10px] dark:text-gray-400 text-gray-600">Codigo</p>
               <div className="flex items-center gap-2">
                 <p className="text-xl font-bold text-primary tracking-wider font-mono">
                   {reservation.pickup_code}
@@ -106,7 +106,7 @@ export default function NextPickupCard({ reservation }: NextPickupCardProps) {
                   className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-lg bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
                 >
                   <Navigation className="w-3 h-3" />
-                  Cómo llegar
+                  Como llegar
                 </a>
               )}
               <Link href={`/packs/${reservation.pack.id}`}>

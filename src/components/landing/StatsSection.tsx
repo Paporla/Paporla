@@ -47,7 +47,7 @@ export default function StatsSection() {
   const isInView = useInView(ref, { once: true, margin: "-100px" });
 
   return (
-    <section className="py-20 bg-gradient-to-b from-black via-black to-gray-950">
+    <section className="py-20 dark:bg-gradient-to-b dark:from-black dark:via-black dark:to-gray-950 bg-gradient-to-b from-gray-50 via-white to-gray-100">
       <div className="max-w-6xl mx-auto px-4">
         
         <motion.div
@@ -58,12 +58,12 @@ export default function StatsSection() {
         >
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-red-500/10 border border-red-500/20 text-red-400 mb-4 animate-pulse">
             <Eye className="w-4 h-4" />
-            <span className="text-sm font-medium">⚠️ El problema es real ⚠️</span>
+            <span className="text-sm font-medium">El problema es real</span>
           </div>
-          <h2 className="text-3xl md:text-4xl font-bold text-white">
+          <h2 className="text-3xl md:text-4xl font-bold dark:text-white text-gray-900">
             El mundo pierde comida a <span className="text-primary">escala masiva</span>
           </h2>
-          <p className="text-gray-500 text-sm mt-2">Datos de la FAO, Banco Mundial y Naciones Unidas</p>
+          <p className="dark:text-gray-500 text-gray-400 text-sm mt-2">Datos de la FAO, Banco Mundial y Naciones Unidas</p>
         </motion.div>
 
         <div ref={ref} className="grid md:grid-cols-3 gap-6">
@@ -75,7 +75,7 @@ export default function StatsSection() {
               viewport={{ once: true }}
               transition={{ delay: idx * 0.1 }}
               whileHover={{ y: -5 }}
-              className={`group relative text-center p-6 rounded-2xl bg-gradient-to-br ${stat.gradient} border border-white/10 ${stat.border} transition-all duration-300 hover:-translate-y-2 hover:shadow-xl`}
+              className={`group relative text-center p-6 rounded-2xl dark:bg-gradient-to-br bg-white border dark:border-white/10 border-gray-200 ${stat.border} transition-all duration-300 hover:-translate-y-2 hover:shadow-xl`}
             >
               <div className="absolute inset-0 rounded-2xl bg-gradient-to-t from-transparent via-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
               
@@ -83,7 +83,7 @@ export default function StatsSection() {
                 <stat.icon className={`w-7 h-7 ${stat.iconColor}`} />
               </div>
               
-              <p className="text-4xl font-bold text-white group-hover:scale-105 transition-transform duration-300">
+              <p className="text-4xl font-bold dark:text-white text-gray-900 group-hover:scale-105 transition-transform duration-300">
                 {isInView ? (
                   <AnimatedCounter 
                     value={stat.value} 
@@ -95,8 +95,8 @@ export default function StatsSection() {
                   <span>0{stat.suffix}</span>
                 )}
               </p>
-              <p className="text-gray-300 text-sm mt-2 font-medium">{stat.label}</p>
-              <p className="text-gray-500 text-xs mt-2">{stat.source}</p>
+              <p className="dark:text-gray-300 text-gray-600 text-sm mt-2 font-medium">{stat.label}</p>
+              <p className="dark:text-gray-500 text-gray-400 text-xs mt-2">{stat.source}</p>
             </motion.div>
           ))}
         </div>
@@ -108,9 +108,9 @@ export default function StatsSection() {
           transition={{ delay: 0.3 }}
           className="mt-12 text-center"
         >
-          <p className="text-gray-500 text-sm max-w-2xl mx-auto">
-            Cada año, más de <span className="text-primary font-bold">1.300 millones de toneladas</span> de comida terminan en la basura. 
-            <span className="block mt-1">Paporla es parte de la solución. <span className="text-primary">¿Te sumas?</span></span>
+          <p className="dark:text-gray-500 text-gray-400 text-sm max-w-2xl mx-auto">
+            Cada ano, mas de <span className="text-primary font-bold">1.300 millones de toneladas</span> de comida terminan en la basura. 
+            <span className="block mt-1">Paporla es parte de la solucion. <span className="text-primary">Te sumas?</span></span>
           </p>
         </motion.div>
       </div>

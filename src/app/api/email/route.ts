@@ -1,32 +1,10 @@
 ﻿import { NextResponse } from 'next/server'
 import { Resend } from 'resend'
 import { createClient } from '@/lib/supabase/server'
+import { welcomeTemplate, reservationConfirmationTemplate, passwordResetTemplate, pickupReminderTemplate } from '@/lib/email/templates'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 const senderEmail = process.env.RESEND_FROM_EMAIL || 'noreply@paporla.com'
-const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://paporla.vercel.app'
-const primaryColor = '#00ff88'
-const primaryRgb = '0, 255, 136'
-
-function baseLayout(content: string) {
-  return `<!DOCTYPE html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head><body style="margin:0;padding:0;background:#000;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;"><table width="100%" cellpadding="0" cellspacing="0" style="background:#000;padding:40px 20px;"><tr><td align="center"><table width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background:#0a0a0f;border-radius:20px;overflow:hidden;border:1px solid rgba(255,255,255,0.06);box-shadow:0 20px 60px rgba(0,0,0,0.5);"><tr><td style="background:linear-gradient(135deg,#0a0a1a 0%,#0f0f1a 50%,#0a0a1a 100%);padding:36px 40px 28px;text-align:center;border-bottom:1px solid rgba(0,255,136,0.08);"><table cellpadding="0" cellspacing="0" style="margin:0 auto;"><tr><td style="text-align:center;"><span style="color:#ffffff;font-size:36px;font-weight:900;letter-spacing:3px;text-transform:uppercase;">PAPORLA</span><span style="color:${primaryColor};font-size:36px;font-weight:300;letter-spacing:-1px;">.</span></td></tr><tr><td style="text-align:center;padding-top:4px;"><span style="color:#555;font-size:12px;letter-spacing:5px;text-transform:uppercase;">Rescate Alimentario</span></td></tr></table></td></tr><tr><td style="padding:30px 40px 20px;">${content}</td></tr><tr><td style="padding:20px 40px 28px;text-align:center;border-top:1px solid rgba(255,255,255,0.04);"><p style="color:#333;font-size:10px;margin:0 0 2px;letter-spacing:1px;text-transform:uppercase;">Paporla - Rescate Alimentario</p><p style="color:#2a2a2a;font-size:10px;margin:0 0 8px;">Caracas, Venezuela</p><p style="color:#222;font-size:9px;margin:0;">2026 Paporla. Todos los derechos reservados.</p></td></tr></table></td></tr></table></body></html>`
-}
-
-function button(href: string, text: string) {
-  return `<table cellpadding="0" cellspacing="0" style="margin:0 auto;"><tr><td align="center" style="background:${primaryColor};border-radius:50px;"><a href="${href}" style="display:inline-block;padding:14px 40px;background:${primaryColor};color:#000;text-decoration:none;border-radius:50px;font-size:15px;font-weight:700;letter-spacing:0.5px;box-shadow:0 4px 24px rgba(${primaryRgb},0.35);">${text}</a></td></tr></table>`
-}
-
-function welcomeTemplate(name: string) {
-  return baseLayout(`<h2 style="color:#fff;font-size:24px;margin:0 0 6px;text-align:center;">Bienvenido, ${name}!</h2><p style="color:#999;font-size:14px;line-height:1.7;margin:0 0 8px;text-align:center;">Gracias por unirte a <strong style="color:${primaryColor};">Paporla</strong>. Ahora formas parte del cambio para reducir el desperdicio alimentario.</p><div style="text-align:center;margin:24px 0 8px;">${button(`${baseUrl}/packs`, 'Explorar packs')}</div>`)
-}
-
-function reservationTemplate(data: { userName: string; packTitle: string; shopName: string; pickupCode: string; price: string }) {
-  return baseLayout(`<h2 style="color:#fff;font-size:24px;margin:0 0 6px;text-align:center;">Reserva Confirmada!</h2><p style="color:#999;font-size:14px;margin:0 0 4px;text-align:center;">Hola ${data.userName}, tu reserva esta lista.</p><div style="background:rgba(${primaryRgb},0.08);border:1px solid rgba(${primaryRgb},0.2);border-radius:12px;padding:16px 20px;text-align:center;margin:20px 0;"><p style="margin:0 0 6px;color:#666;font-size:11px;text-transform:uppercase;letter-spacing:1.5px;font-weight:600;">Codigo de recogida</p><p style="margin:0;color:${primaryColor};font-size:30px;font-weight:700;font-family:'Courier New',Courier,monospace;letter-spacing:4px;">${data.pickupCode}</p></div><div style="text-align:center;margin:24px 0 8px;">${button(`${baseUrl}/dashboard`, 'Ver mis reservas')}</div>`)
-}
-
-function passwordResetTemplate(resetLink: string) {
-  return baseLayout(`<h2 style="color:#fff;font-size:24px;margin:0 0 6px;text-align:center;">Restablece tu contraseña</h2><p style="color:#999;font-size:14px;line-height:1.7;margin:0 0 20px;text-align:center;">Haz clic en el boton de abajo para crear una nueva contraseña. Este enlace expirara en 1 hora.</p><div style="text-align:center;margin:24px 0 8px;">${button(resetLink, 'Restablecer contraseña')}</div>`)
-}
 
 export async function POST(request: Request) {
   try {
@@ -55,16 +33,41 @@ export async function POST(request: Request) {
 
     let subject = ''
     let html = ''
+    let text = ''
 
     if (type === 'welcome') {
-      subject = 'Bienvenido a Paporla!'
+      subject = 'Bienvenido a Paporla - Rescate Alimentario'
       html = welcomeTemplate(data?.name || 'Usuario')
+      text = `Bienvenido a Paporla, ${data?.name || 'Usuario'}!\n\nGracias por unirte a la comunidad que esta cambiando la forma de alimentarnos.\n\nExplora packs disponibles en nuestra web.`
     } else if (type === 'reservation') {
-      subject = `Reserva confirmada - ${data?.packTitle || ''}`
-      html = reservationTemplate(data)
+      subject = `Tu reserva de ${data?.packTitle || 'Pack'} esta confirmada - Paporla`
+      html = reservationConfirmationTemplate({
+        userName: data?.userName || 'Usuario',
+        packTitle: data?.packTitle || 'Pack',
+        shopName: data?.shopName || 'Comercio',
+        shopAddress: data?.shopAddress || null,
+        pickupCode: data?.pickupCode || 'XXXXXX',
+        pickupDate: data?.pickupDate || null,
+        pickupTime: data?.pickupTime || null,
+        price: data?.price || '',
+      })
+      text = `Tu reserva esta confirmada.\n\nPack: ${data?.packTitle || 'Pack'}\nComercio: ${data?.shopName || 'Comercio'}\nCodigo de recogida: ${data?.pickupCode || 'XXXXXX'}\n\nPresenta este codigo al llegar al comercio.`
     } else if (type === 'password_reset') {
-      subject = 'Restablece tu contraseña en Paporla'
+      subject = 'Restablece tu contrasena - Paporla'
       html = passwordResetTemplate(data?.resetLink || '')
+      text = `Recibimos una solicitud para restablecer tu contrasena.\n\nHaz clic en este enlace: ${data?.resetLink || ''}\n\nSi no solicitaste este cambio, ignora este mensaje.`
+    } else if (type === 'pickup_reminder') {
+      subject = `Recuerda recoger tu pack de ${data?.packTitle || 'Pack'} hoy - Paporla`
+      html = pickupReminderTemplate({
+        userName: data?.userName || 'Usuario',
+        packTitle: data?.packTitle || 'Pack',
+        shopName: data?.shopName || 'Comercio',
+        shopAddress: data?.shopAddress || null,
+        pickupCode: data?.pickupCode || 'XXXXXX',
+        pickupDate: data?.pickupDate || '',
+        pickupTime: data?.pickupTime || null,
+      })
+      text = `Recuerda recoger tu pack hoy.\n\nPack: ${data?.packTitle || 'Pack'}\nComercio: ${data?.shopName || 'Comercio'}\nCodigo: ${data?.pickupCode || 'XXXXXX'}`
     } else {
       return NextResponse.json({ error: 'Tipo de correo no valido' }, { status: 400 })
     }
@@ -74,6 +77,11 @@ export async function POST(request: Request) {
       to: email,
       subject,
       html,
+      text,
+      headers: {
+        'X-Priority': '3',
+        'X-Mailer': 'Paporla',
+      },
     })
 
     if (error) {

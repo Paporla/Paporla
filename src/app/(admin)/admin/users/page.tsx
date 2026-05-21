@@ -139,7 +139,7 @@ export default function AdminUsersPage() {
             <h1 className="text-3xl md:text-4xl font-bold text-gradient">
               Gestión de Usuarios
             </h1>
-            <p className="text-gray-400 mt-1">
+            <p className="dark:text-gray-400 text-gray-600 mt-1">
               Administra los usuarios de la plataforma. Puedes cambiar roles, editar o eliminar.
             </p>
           </div>
@@ -149,7 +149,7 @@ export default function AdminUsersPage() {
       {/* Barra de búsqueda */}
       <div className="flex flex-col sm:flex-row gap-4 justify-between">
         <div className="relative flex-1 max-w-md">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 dark:text-gray-500 text-gray-400" />
           <Input
             placeholder="Buscar por nombre o email..."
             value={searchTerm}
@@ -157,7 +157,7 @@ export default function AdminUsersPage() {
             className="pl-10"
           />
         </div>
-        <div className="text-sm text-gray-400 flex items-center gap-2">
+        <div className="text-sm dark:text-gray-400 text-gray-600 flex items-center gap-2">
           <Filter className="w-4 h-4" />
           Total: {filteredUsers.length} usuarios
         </div>

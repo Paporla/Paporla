@@ -17,9 +17,9 @@ const actions = [
 export default function QuickActions() {
   return (
     <div>
-      <h2 className="text-xl font-semibold text-white mb-4 flex items-center gap-2">
+      <h2 className="text-xl font-semibold dark:text-white text-gray-900 mb-4 flex items-center gap-2">
         <span className="w-1 h-6 bg-primary rounded-full" />
-        Acciones Rápidas
+        Acciones Rapidas
       </h2>
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
         {actions.map((action, idx) => (
@@ -34,8 +34,8 @@ export default function QuickActions() {
                 <div className={`w-12 h-12 mx-auto mb-3 rounded-xl bg-gradient-to-br ${action.color} flex items-center justify-center group-hover:scale-110 transition-transform`}>
                   <action.icon className="w-6 h-6 text-white" />
                 </div>
-                <p className="text-white font-medium text-sm">{action.label}</p>
-                <p className="text-xs text-gray-500 mt-0.5">{action.description}</p>
+                <p className="dark:text-white text-gray-900 font-medium text-sm">{action.label}</p>
+                <p className="text-xs dark:text-gray-500 text-gray-400 mt-0.5">{action.description}</p>
               </Card>
             </Link>
           </motion.div>

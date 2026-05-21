@@ -44,7 +44,7 @@ export default function PackInfo({
       className="space-y-6"
     >
       <div>
-        <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">
+        <h1 className="text-3xl md:text-4xl font-bold dark:text-white text-gray-900 mb-2">
           {title}
         </h1>
         <div className="flex items-baseline gap-2">
@@ -52,7 +52,7 @@ export default function PackInfo({
             {formatPrice(priceCents)}
           </span>
           {originalPriceCents && (
-            <span className="text-lg text-gray-500 line-through">
+            <span className="text-lg dark:text-gray-500 text-gray-400 line-through">
               {formatPrice(originalPriceCents)}
             </span>
           )}
@@ -65,34 +65,34 @@ export default function PackInfo({
       </div>
 
       <div className="flex items-center gap-2 text-sm">
-        <Package className="w-4 h-4 text-gray-400" />
-        <span className="text-gray-400">
+        <Package className="w-4 h-4 dark:text-gray-400 text-gray-600" />
+        <span className="dark:text-gray-400 text-gray-600">
           Stock disponible: <span className="text-primary font-semibold">{remainingStock}</span> / {totalStock} unidades
         </span>
       </div>
 
       {description && (
         <div className="p-4 glass-card rounded-xl">
-          <h3 className="font-semibold text-white mb-2">Descripción</h3>
-          <p className="text-gray-400 text-sm leading-relaxed">{description}</p>
+          <h3 className="font-semibold dark:text-white text-gray-900 mb-2">Descripcion</h3>
+          <p className="dark:text-gray-400 text-gray-600 text-sm leading-relaxed">{description}</p>
         </div>
       )}
 
       {(pickupDate || pickupStartTime) && (
         <div className="p-4 glass-card rounded-xl">
-          <h3 className="font-semibold text-white mb-3 flex items-center gap-2">
+          <h3 className="font-semibold dark:text-white text-gray-900 mb-3 flex items-center gap-2">
             <Clock className="w-4 h-4 text-primary" />
-            Información de recogida
+            Informacion de recogida
           </h3>
           <div className="space-y-2 text-sm">
             {pickupDate && (
-              <div className="flex items-center gap-2 text-gray-400">
+              <div className="flex items-center gap-2 dark:text-gray-400 text-gray-600">
                 <Calendar className="w-4 h-4" />
                 <span>{formatDate(pickupDate)}</span>
               </div>
             )}
             {(pickupStartTime || pickupEndTime) && (
-              <div className="flex items-center gap-2 text-gray-400">
+              <div className="flex items-center gap-2 dark:text-gray-400 text-gray-600">
                 <Clock className="w-4 h-4" />
                 <span>
                   {pickupStartTime?.slice(0,5)} - {pickupEndTime?.slice(0,5)}

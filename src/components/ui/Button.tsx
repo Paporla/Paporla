@@ -17,10 +17,10 @@ interface ButtonProps extends MotionProps {
 
 const variants = {
   primary: 'bg-gradient-to-r from-primary to-primary/80 text-dark font-bold hover:shadow-lg hover:shadow-primary/25',
-  secondary: 'bg-dark-muted text-white hover:bg-dark-hover',
+  secondary: 'dark:bg-gray-800 bg-gray-200 dark:text-white text-gray-900 dark:hover:bg-gray-700 hover:bg-gray-300',
   outline: 'border border-primary/30 text-primary hover:bg-primary/10 hover:border-primary/60',
-  ghost: 'text-gray-400 hover:text-white hover:bg-white/5',
-  danger: 'bg-red-500/80 text-white hover:bg-red-600 border border-red-500/20',
+  ghost: 'dark:text-gray-400 text-gray-600 dark:hover:text-white hover:text-gray-900 dark:hover:bg-white/5 hover:bg-gray-100',
+  danger: 'bg-red-500/80 dark:text-white text-gray-900 hover:bg-red-600 border border-red-500/20',
 };
 
 const sizes = {

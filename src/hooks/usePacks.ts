@@ -14,6 +14,23 @@ export function usePacks(shopId?: string) {
     loadPacks()
   }, [shopId])
 
+  useEffect(() => {
+    const channel = supabase
+      .channel('packs-changes')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'packs' },
+        () => {
+          loadPacks()
+        }
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [shopId])
+
   const loadPacks = async () => {
     setLoading(true)
     setError(null)
@@ -60,7 +77,7 @@ export function usePacks(shopId?: string) {
         )
       `)
       .eq('id', id)
-      .maybeSingle()  // ← CAMBIADO de .single() a .maybeSingle()
+      .maybeSingle()
 
     if (error) throw error
     return data as PackWithShop

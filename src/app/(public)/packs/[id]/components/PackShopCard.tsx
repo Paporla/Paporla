@@ -34,7 +34,7 @@ export default function PackShopCard({ shop }: PackShopCardProps) {
           )}
           <div className="flex-1">
             <div className="flex items-center gap-2">
-              <p className="font-semibold text-white group-hover:text-primary transition-colors">
+              <p className="font-semibold dark:text-white text-gray-900 group-hover:text-primary transition-colors">
                 {shop.name}
               </p>
               {shop.verified && (
@@ -42,14 +42,14 @@ export default function PackShopCard({ shop }: PackShopCardProps) {
               )}
             </div>
             {shop.address && (
-              <p className="text-xs text-gray-400 flex items-center gap-1">
+              <p className="text-xs dark:text-gray-400 text-gray-600 flex items-center gap-1">
                 <MapPin className="w-3 h-3" />
                 {shop.address}
-                {shop.city && <span className="text-gray-500">({shop.city})</span>}
+                {shop.city && <span className="dark:text-gray-500 text-gray-400">({shop.city})</span>}
               </p>
             )}
           </div>
-          <ExternalLink className="w-4 h-4 text-gray-400 group-hover:text-primary transition-colors" />
+          <ExternalLink className="w-4 h-4 dark:text-gray-400 text-gray-600 group-hover:text-primary transition-colors" />
         </div>
       </div>
     </Link>

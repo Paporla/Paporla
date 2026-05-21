@@ -180,42 +180,42 @@ export default function UserReservationsPage() {
             <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
               <Calendar className="w-5 h-5 text-primary" />
             </div>
-            <h1 className="text-3xl md:text-4xl font-bold text-white">Mis Reservas</h1>
+            <h1 className="text-3xl md:text-4xl font-bold dark:text-white text-gray-900">Mis Reservas</h1>
           </div>
-          <p className="text-gray-400">Gestiona todos tus packs reservados</p>
+          <p className="dark:text-gray-400 text-gray-600">Gestiona todos tus packs reservados</p>
         </div>
       </div>
 
-      {/* Stats rápidas */}
+      {/* Stats rapidas */}
       <div className="flex gap-4 flex-wrap">
-        <div className="bg-black/40 border border-white/10 rounded-xl px-4 py-2">
+        <div className="dark:bg-black/40 bg-gray-100 border dark:border-white/10 border-gray-200 rounded-xl px-4 py-2">
           <span className="text-2xl font-bold text-primary">{activeReservations.length}</span>
-          <span className="text-sm text-gray-400 ml-2">Activas</span>
+          <span className="text-sm dark:text-gray-400 text-gray-600 ml-2">Activas</span>
         </div>
-        <div className="bg-black/40 border border-white/10 rounded-xl px-4 py-2">
+        <div className="dark:bg-black/40 bg-gray-100 border dark:border-white/10 border-gray-200 rounded-xl px-4 py-2">
           <span className="text-2xl font-bold text-green-400">{completedReservations.length}</span>
-          <span className="text-sm text-gray-400 ml-2">Completadas</span>
+          <span className="text-sm dark:text-gray-400 text-gray-600 ml-2">Completadas</span>
         </div>
-        <div className="bg-black/40 border border-white/10 rounded-xl px-4 py-2">
+        <div className="dark:bg-black/40 bg-gray-100 border dark:border-white/10 border-gray-200 rounded-xl px-4 py-2">
           <span className="text-2xl font-bold text-orange-400">{noShowReservations.length}</span>
-          <span className="text-sm text-gray-400 ml-2">No retiradas</span>
+          <span className="text-sm dark:text-gray-400 text-gray-600 ml-2">No retiradas</span>
         </div>
-        <div className="bg-black/40 border border-white/10 rounded-xl px-4 py-2">
+        <div className="dark:bg-black/40 bg-gray-100 border dark:border-white/10 border-gray-200 rounded-xl px-4 py-2">
           <span className="text-2xl font-bold text-red-400">{cancelledReservations.length}</span>
-          <span className="text-sm text-gray-400 ml-2">Canceladas</span>
+          <span className="text-sm dark:text-gray-400 text-gray-600 ml-2">Canceladas</span>
         </div>
       </div>
 
       {/* Grupo 1: Reservas Activas */}
       {activeReservations.length > 0 && (
-        <div className="bg-dark-card/30 rounded-2xl border border-dark-border overflow-hidden">
+        <div className="dark:bg-dark-card/30 bg-gray-50 rounded-2xl border dark:border-dark-border border-gray-200 overflow-hidden">
           <button
             onClick={() => toggleGroup('activas')}
-            className="w-full flex items-center justify-between p-4 bg-dark-card/50 hover:bg-dark-card transition-colors"
+            className="w-full flex items-center justify-between p-4 dark:bg-dark-card/50 bg-gray-100 hover:dark:bg-dark-card hover:bg-gray-200 transition-colors"
           >
             <div className="flex items-center gap-3">
               <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-              <h3 className="font-semibold text-white">Reservas Activas</h3>
+              <h3 className="font-semibold dark:text-white text-gray-900">Reservas Activas</h3>
               <span className="text-xs bg-primary/20 text-primary px-2 py-0.5 rounded-full">
                 {activeReservations.length}
               </span>
@@ -245,7 +245,7 @@ export default function UserReservationsPage() {
                         <div className="flex flex-col md:flex-row justify-between gap-4">
                           <div className="flex-1">
                             <div className="flex items-center gap-2 mb-2 flex-wrap">
-                              <h3 className="text-lg font-semibold text-white group-hover:text-primary transition-colors">
+                               <h3 className="text-lg font-semibold dark:text-white text-gray-900 group-hover:text-primary transition-colors">
                                 {reservation.pack?.title || 'Pack'}
                               </h3>
                               <span className={`text-xs px-2 py-0.5 rounded-full flex items-center gap-1 ${config.bg} ${config.color}`}>
@@ -254,11 +254,11 @@ export default function UserReservationsPage() {
                               </span>
                             </div>
 
-                            <Link href={`/shops/${reservation.shop?.id}`}>
-                              <p className="text-sm text-gray-400 hover:text-primary transition-colors">
-                                🏪 {reservation.shop?.name || 'Comercio'}
-                              </p>
-                            </Link>
+                              <Link href={`/shops/${reservation.shop?.id}`}>
+                                <p className="text-sm dark:text-gray-400 text-gray-600 hover:text-primary transition-colors">
+                                  {reservation.shop?.name || 'Comercio'}
+                                </p>
+                              </Link>
 
                             {reservation.shop?.address && (
                               <p className="text-xs text-gray-500 flex items-center gap-1 mt-1">
@@ -267,16 +267,16 @@ export default function UserReservationsPage() {
                               </p>
                             )}
 
-                            <div className="flex flex-wrap gap-3 text-xs text-gray-500 mt-2">
-                              <span>📅 {formatDate(reservation.created_at)}</span>
-                              <span>💰 {formatPrice(reservation.total_price_cents)} ({reservation.quantity || 1}x)</span>
+                            <div className="flex flex-wrap gap-3 text-xs dark:text-gray-500 text-gray-400 mt-2">
+                              <span>{formatDate(reservation.created_at)}</span>
+                              <span>{formatPrice(reservation.total_price_cents)} ({reservation.quantity || 1}x)</span>
                             </div>
                           </div>
 
                           <div className="flex flex-col items-end gap-2">
                             {reservation.pickup_code && (
                               <div className="bg-primary/10 border border-primary/30 rounded-lg px-3 py-1.5">
-                                <p className="text-[10px] text-gray-400">Código</p>
+                                <p className="text-[10px] dark:text-gray-400 text-gray-600">Codigo</p>
                                 <div className="flex items-center gap-2">
                                   <p className="text-lg font-bold text-primary tracking-wider font-mono">
                                     {reservation.pickup_code}
@@ -321,14 +321,14 @@ export default function UserReservationsPage() {
 
       {/* Grupo 2: Completadas */}
       {completedReservations.length > 0 && (
-        <div className="bg-dark-card/30 rounded-2xl border border-dark-border overflow-hidden">
+        <div className="dark:bg-dark-card/30 bg-gray-50 rounded-2xl border dark:border-dark-border border-gray-200 overflow-hidden">
           <button
             onClick={() => toggleGroup('completadas')}
-            className="w-full flex items-center justify-between p-4 bg-dark-card/50 hover:bg-dark-card transition-colors"
+            className="w-full flex items-center justify-between p-4 dark:bg-dark-card/50 bg-gray-100 hover:dark:bg-dark-card hover:bg-gray-200 transition-colors"
           >
             <div className="flex items-center gap-3">
               <div className="w-2 h-2 rounded-full bg-green-400" />
-              <h3 className="font-semibold text-white">Completadas</h3>
+              <h3 className="font-semibold dark:text-white text-gray-900">Completadas</h3>
               <span className="text-xs bg-green-500/20 text-green-400 px-2 py-0.5 rounded-full">
                 {completedReservations.length}
               </span>
@@ -357,7 +357,7 @@ export default function UserReservationsPage() {
                       <Card key={reservation.id} glass className="p-4 opacity-70">
                         <div className="flex justify-between items-center">
                           <div>
-                            <h3 className="font-bold text-white">{reservation.pack?.title || 'Pack'}</h3>
+                            <h3 className="font-bold dark:text-white text-gray-900">{reservation.pack?.title || 'Pack'}</h3>
                             <p className="text-sm text-gray-400">{reservation.shop?.name || 'Comercio'}</p>
                             <p className="text-xs text-gray-500 mt-1">{formatPrice(reservation.total_price_cents)}</p>
                           </div>
@@ -378,14 +378,14 @@ export default function UserReservationsPage() {
 
       {/* Grupo 3: No retiradas / Caducadas */}
       {noShowReservations.length > 0 && (
-        <div className="bg-dark-card/30 rounded-2xl border border-dark-border overflow-hidden">
+        <div className="dark:bg-dark-card/30 bg-gray-50 rounded-2xl border dark:border-dark-border border-gray-200 overflow-hidden">
           <button
             onClick={() => toggleGroup('noRetiradas')}
-            className="w-full flex items-center justify-between p-4 bg-dark-card/50 hover:bg-dark-card transition-colors"
+            className="w-full flex items-center justify-between p-4 dark:bg-dark-card/50 bg-gray-100 hover:dark:bg-dark-card hover:bg-gray-200 transition-colors"
           >
             <div className="flex items-center gap-3">
               <div className="w-2 h-2 rounded-full bg-orange-400" />
-              <h3 className="font-semibold text-white">No retiradas / Caducadas</h3>
+              <h3 className="font-semibold dark:text-white text-gray-900">No retiradas / Caducadas</h3>
               <span className="text-xs bg-orange-500/20 text-orange-400 px-2 py-0.5 rounded-full">
                 {noShowReservations.length}
               </span>
@@ -414,12 +414,12 @@ export default function UserReservationsPage() {
                       <Card key={reservation.id} glass className="p-4 opacity-60 border-l-2 border-orange-500/30">
                         <div className="flex justify-between items-center">
                           <div>
-                            <h3 className="font-bold text-white">{reservation.pack?.title || 'Pack'}</h3>
+                            <h3 className="font-bold dark:text-white text-gray-900">{reservation.pack?.title || 'Pack'}</h3>
                             <p className="text-sm text-gray-400">{reservation.shop?.name || 'Comercio'}</p>
                             <p className="text-xs text-gray-500 mt-1">{formatPrice(reservation.total_price_cents)}</p>
                             {reservation.pickup_date && (
                               <p className="text-[10px] text-orange-400 mt-1">
-                                Vencía: {new Date(reservation.pickup_date).toLocaleDateString()}
+                                Vencia: {new Date(reservation.pickup_date).toLocaleDateString()}
                               </p>
                             )}
                           </div>
@@ -440,14 +440,14 @@ export default function UserReservationsPage() {
 
       {/* Grupo 4: Canceladas */}
       {cancelledReservations.length > 0 && (
-        <div className="bg-dark-card/30 rounded-2xl border border-dark-border overflow-hidden">
+        <div className="dark:bg-dark-card/30 bg-gray-50 rounded-2xl border dark:border-dark-border border-gray-200 overflow-hidden">
           <button
             onClick={() => toggleGroup('canceladas')}
-            className="w-full flex items-center justify-between p-4 bg-dark-card/50 hover:bg-dark-card transition-colors"
+            className="w-full flex items-center justify-between p-4 dark:bg-dark-card/50 bg-gray-100 hover:dark:bg-dark-card hover:bg-gray-200 transition-colors"
           >
             <div className="flex items-center gap-3">
               <div className="w-2 h-2 rounded-full bg-red-400" />
-              <h3 className="font-semibold text-white">Canceladas</h3>
+              <h3 className="font-semibold dark:text-white text-gray-900">Canceladas</h3>
               <span className="text-xs bg-red-500/20 text-red-400 px-2 py-0.5 rounded-full">
                 {cancelledReservations.length}
               </span>
@@ -476,7 +476,7 @@ export default function UserReservationsPage() {
                       <Card key={reservation.id} glass className="p-4 opacity-50">
                         <div className="flex justify-between items-center">
                           <div>
-                            <h3 className="font-bold text-white">{reservation.pack?.title || 'Pack'}</h3>
+                            <h3 className="font-bold dark:text-white text-gray-900">{reservation.pack?.title || 'Pack'}</h3>
                             <p className="text-sm text-gray-400">{reservation.shop?.name || 'Comercio'}</p>
                             <p className="text-xs text-gray-500 mt-1">{formatPrice(reservation.total_price_cents)}</p>
                           </div>
@@ -500,8 +500,8 @@ export default function UserReservationsPage() {
         onClose={() => setModalOpen(false)}
         onConfirm={handleConfirmCancel}
         title="Cancelar reserva"
-        message="¿Estás seguro de que quieres cancelar esta reserva? Esta acción no se puede deshacer."
-        confirmText="Sí, cancelar"
+        message="Estas seguro de que quieres cancelar esta reserva? Esta accion no se puede deshacer."
+        confirmText="Si, cancelar"
         cancelText="Volver"
       />
 

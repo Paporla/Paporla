@@ -21,13 +21,13 @@ export default function MantenimientoPage() {
           </div>
         </div>
 
-        <h1 className="text-3xl font-bold text-white mb-3">
+        <h1 className="text-3xl font-bold dark:text-white text-gray-900 mb-3">
           Estamos en mantenimiento
         </h1>
-        <p className="text-gray-400 mb-2 leading-relaxed">
+        <p className="dark:text-gray-400 text-gray-600 mb-2 leading-relaxed">
           Estamos realizando mejoras para brindarte una mejor experiencia.
         </p>
-        <p className="text-gray-500 text-sm mb-8">
+        <p className="dark:text-gray-500 text-gray-400 text-sm mb-8">
           Volveremos en unos minutos. Si es urgente, escríbenos a{' '}
           <a href="mailto:hola@paporla.com" className="text-primary hover:underline">
             hola@paporla.com
@@ -35,20 +35,20 @@ export default function MantenimientoPage() {
         </p>
 
         <div className="flex flex-col items-center gap-3">
-          <div className="flex items-center gap-2 text-sm text-gray-600">
+          <div className="flex items-center gap-2 text-sm dark:text-gray-600 text-gray-400">
             <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
             <span>Revisando sistemas...</span>
           </div>
           <Link
             href="/"
-            className="text-sm text-gray-500 hover:text-primary transition-colors"
+            className="text-sm dark:text-gray-500 text-gray-400 hover:text-primary transition-colors"
           >
             Intentar de nuevo →
           </Link>
         </div>
 
-        <div className="mt-12 p-4 rounded-xl bg-dark-muted/50 border border-dark-border">
-          <p className="text-xs text-gray-600">
+        <div className="mt-12 p-4 rounded-xl dark:bg-dark-muted/50 bg-gray-100 dark:border-dark-border border-gray-200">
+          <p className="text-xs dark:text-gray-600 text-gray-400">
             Paporla — Rescate Alimentario
           </p>
         </div>

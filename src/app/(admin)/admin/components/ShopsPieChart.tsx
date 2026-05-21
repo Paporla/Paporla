@@ -25,12 +25,12 @@ export default function ShopsPieChart({ verified, pending, banned, total }: Shop
   if (total === 0) {
     return (
       <Card glass className="p-6">
-        <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+        <h3 className="text-lg font-semibold dark:text-white text-gray-900 mb-4 flex items-center gap-2">
           <Store className="w-5 h-5 text-primary" />
           Estado de Comercios
         </h3>
         <div className="flex items-center justify-center h-32">
-          <p className="text-gray-400">No hay comercios registrados</p>
+          <p className="dark:text-gray-400 text-gray-600">No hay comercios registrados</p>
         </div>
       </Card>
     );
@@ -38,7 +38,7 @@ export default function ShopsPieChart({ verified, pending, banned, total }: Shop
 
   return (
     <Card glass className="p-6">
-      <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+      <h3 className="text-lg font-semibold dark:text-white text-gray-900 mb-4 flex items-center gap-2">
         <Store className="w-5 h-5 text-primary" />
         Estado de Comercios
       </h3>
@@ -51,14 +51,14 @@ export default function ShopsPieChart({ verified, pending, banned, total }: Shop
                 <div className={`p-1 rounded-lg ${stat.bg}`}>
                   <stat.icon className={`w-3 h-3 ${stat.color}`} />
                 </div>
-                <span className="text-gray-400">{stat.label}</span>
+                <span className="dark:text-gray-400 text-gray-600">{stat.label}</span>
               </div>
               <div className="flex items-center gap-2">
                 <span className={`font-semibold ${stat.color}`}>{stat.value}</span>
-                <span className="text-gray-500 text-xs">({stat.percentage}%)</span>
+                <span className="dark:text-gray-500 text-gray-400 text-xs">({stat.percentage}%)</span>
               </div>
             </div>
-            <div className="h-1.5 bg-gray-800 rounded-full overflow-hidden">
+            <div className="h-1.5 dark:bg-gray-800 bg-gray-200 rounded-full overflow-hidden">
               <div 
                 className={`h-full ${stat.barColor} rounded-full transition-all duration-500`}
                 style={{ width: `${stat.percentage}%` }}
@@ -68,10 +68,10 @@ export default function ShopsPieChart({ verified, pending, banned, total }: Shop
         ))}
       </div>
 
-      <div className="mt-4 pt-3 border-t border-white/10">
+      <div className="mt-4 pt-3 border-t dark:border-white/10 border-gray-200">
         <div className="flex justify-between text-sm">
-          <span className="text-gray-500">Total comercios</span>
-          <span className="text-white font-semibold">{total}</span>
+          <span className="dark:text-gray-500 text-gray-400">Total comercios</span>
+          <span className="dark:text-white text-gray-900 font-semibold">{total}</span>
         </div>
       </div>
     </Card>

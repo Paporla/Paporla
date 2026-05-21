@@ -26,7 +26,7 @@ export default function ReservationFilters({ activeFilter, onFilterChange, count
           className={`relative px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
             activeFilter === filter.value
               ? 'text-primary'
-              : 'text-gray-400 hover:text-white'
+              : 'dark:text-gray-400 text-gray-600 hover:dark:text-white hover:text-gray-900'
           }`}
         >
           {activeFilter === filter.value && (

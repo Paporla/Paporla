@@ -57,14 +57,14 @@ export default function ReservationCard({
 
   const isActive = ['confirmed', 'pending'].includes(status)
   const canCancel = ['confirmed', 'pending'].includes(status)
-  const canConfirm = false // Auto-confirmado en demo
+  const canConfirm = false
   const canComplete = status === 'confirmed'
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className={`bg-dark-card border ${colors.border} rounded-2xl overflow-hidden transition-all duration-300`}
+      className={`dark:bg-dark-card bg-white border ${colors.border} rounded-2xl overflow-hidden transition-all duration-300`}
     >
       {/* Header */}
       <div className="p-4">
@@ -82,20 +82,20 @@ export default function ReservationCard({
           </div>
           <button
             onClick={() => setIsExpanded(!isExpanded)}
-            className="text-gray-500 hover:text-primary transition-colors"
+            className="dark:text-gray-500 text-gray-400 hover:text-primary transition-colors"
           >
             <ChevronRight className={`w-5 h-5 transition-transform ${isExpanded ? 'rotate-90' : ''}`} />
           </button>
         </div>
 
-        <h3 className="font-bold text-white mt-2">{reservation.pack.title}</h3>
-        <p className="text-sm text-gray-400">{reservation.shop.name}</p>
+        <h3 className="font-bold dark:text-white text-gray-900 mt-2">{reservation.pack.title}</h3>
+        <p className="text-sm dark:text-gray-400 text-gray-600">{reservation.shop.name}</p>
         
         <div className="flex items-center justify-between mt-3">
           <span className="text-lg font-black text-primary">
             {formatPrice(reservation.total_price_cents)}
           </span>
-          <span className="text-xs text-gray-500">
+          <span className="text-xs dark:text-gray-500 text-gray-400">
             Cantidad: {reservation.quantity || 1}
           </span>
         </div>
@@ -106,13 +106,13 @@ export default function ReservationCard({
         <motion.div
           initial={{ opacity: 0, height: 0 }}
           animate={{ opacity: 1, height: 'auto' }}
-          className="px-4 pb-4 space-y-3 border-t border-dark-border pt-3"
+          className="px-4 pb-4 space-y-3 border-t dark:border-dark-border border-gray-200 pt-3"
         >
-          {/* Código de recogida */}
+          {/* Codigo de recogida */}
           {reservation.pickup_code && isActive && (
             <div className="bg-primary/5 border border-primary/20 rounded-xl p-3 flex items-center justify-between">
               <div>
-                <p className="text-[10px] text-gray-500 uppercase">Código de recogida</p>
+                <p className="text-[10px] dark:text-gray-500 text-gray-400 uppercase">Codigo de recogida</p>
                 <p className="text-lg font-bold text-primary tracking-wider font-mono">
                   {reservation.pickup_code}
                 </p>
@@ -125,13 +125,13 @@ export default function ReservationCard({
           {(reservation.pickup_date || pickupTime) && (
             <div className="space-y-2">
               {reservation.pickup_date && (
-                <div className="flex items-center gap-2 text-sm text-gray-400">
+                <div className="flex items-center gap-2 text-sm dark:text-gray-400 text-gray-600">
                   <Calendar className="w-4 h-4 text-primary" />
                   <span>{formatDate(reservation.pickup_date)}</span>
                 </div>
               )}
               {pickupTime && (
-                <div className="flex items-center gap-2 text-sm text-gray-400">
+                <div className="flex items-center gap-2 text-sm dark:text-gray-400 text-gray-600">
                   <Clock className="w-4 h-4 text-primary" />
                   <span>{pickupTime}</span>
                 </div>
@@ -139,9 +139,9 @@ export default function ReservationCard({
             </div>
           )}
 
-          {/* Dirección */}
+          {/* Direccion */}
           {reservation.shop.address && (
-            <div className="flex items-start gap-2 text-sm text-gray-400">
+            <div className="flex items-start gap-2 text-sm dark:text-gray-400 text-gray-600">
               <MapPin className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
               <span>{reservation.shop.address}</span>
             </div>
@@ -149,17 +149,17 @@ export default function ReservationCard({
 
           {/* Datos del usuario (para vista comercio) */}
           {showUserDetails && reservation.user && (
-            <div className="bg-dark-muted rounded-xl p-3 space-y-1">
-              <p className="text-xs text-gray-500 uppercase">Datos del cliente</p>
-              <p className="text-sm text-white">{reservation.user.name || 'Usuario'}</p>
-              <p className="text-xs text-gray-400">{reservation.user.email}</p>
+            <div className="dark:bg-dark-muted bg-gray-100 rounded-xl p-3 space-y-1">
+              <p className="text-xs dark:text-gray-500 text-gray-400 uppercase">Datos del cliente</p>
+              <p className="text-sm dark:text-white text-gray-900">{reservation.user.name || 'Usuario'}</p>
+              <p className="text-xs dark:text-gray-400 text-gray-600">{reservation.user.email}</p>
               {reservation.user.phone && (
-                <p className="text-xs text-gray-400">📞 {reservation.user.phone}</p>
+                <p className="text-xs dark:text-gray-400 text-gray-600">{reservation.user.phone}</p>
               )}
             </div>
           )}
 
-          {/* Botones de acción */}
+          {/* Botones de accion */}
           <div className="flex gap-2 pt-2">
             {canConfirm && onConfirm && (
               <Button size="sm" onClick={() => onConfirm(reservation.id)} className="flex-1">
@@ -186,7 +186,7 @@ export default function ReservationCard({
       )}
 
       {/* Fecha de reserva */}
-      <div className="px-4 py-2 bg-dark-muted/50 text-[10px] text-gray-600 border-t border-dark-border">
+      <div className="px-4 py-2 dark:bg-dark-muted/50 bg-gray-50 text-[10px] dark:text-gray-600 text-gray-400 border-t dark:border-dark-border border-gray-200">
         Reservado el {formatDate(reservation.created_at)}
       </div>
     </motion.div>

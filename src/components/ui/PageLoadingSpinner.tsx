@@ -6,7 +6,7 @@ import { useEffect, useState } from 'react';
 export default function PageLoadingSpinner({ message = 'Cargando...' }: { message?: string }) {
   const [show, setShow] = useState(false);
 
-  // Pequeño delay para evitar parpadeo si carga muy rápido
+  // Pequeno delay para evitar parpadeo si carga muy rapido
   useEffect(() => {
     const timer = setTimeout(() => setShow(true), 50);
     return () => clearTimeout(timer);
@@ -22,8 +22,8 @@ export default function PageLoadingSpinner({ message = 'Cargando...' }: { messag
           animate={{ rotate: 360 }}
           transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
         />
-        <p className="text-gray-400 text-lg font-medium">{message}</p>
-        <p className="text-gray-600 text-sm mt-1">Por favor espera</p>
+        <p className="dark:text-gray-400 text-gray-600 text-lg font-medium">{message}</p>
+        <p className="dark:text-gray-600 text-gray-400 text-sm mt-1">Por favor espera</p>
       </div>
     </div>
   );

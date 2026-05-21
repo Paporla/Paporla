@@ -6,13 +6,16 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
+import { useTheme } from '@/context/ThemeContext';
 import { Menu, X } from 'lucide-react';
 import AvatarMenu from './AvatarMenu';
 import NotificationBell from '@/components/notifications/NotificationBell';
+import ThemeToggle from './ThemeToggle';
 
 export default function Header() {
   const pathname = usePathname();
   const { user, loading } = useAuth();
+  const { theme } = useTheme();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [mounted, setMounted] = useState(false);
@@ -29,7 +32,6 @@ export default function Header() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Links para usuarios NO logueados
   const publicLinks = [
     { href: '/packs', label: 'Packs' },
     { href: '/shops', label: 'Comercios' },
@@ -39,14 +41,16 @@ export default function Header() {
 
   const navLinks = user ? publicLinks : publicLinks;
 
+  const isDark = theme === 'dark';
+
   if (!mounted || loading) {
     return (
-      <nav className="fixed top-0 left-0 right-0 z-[60] bg-black/80 backdrop-blur-xl border-b border-dark-border h-16" />
+      <nav className={`fixed top-0 left-0 right-0 z-[60] h-16 ${isDark ? 'bg-black/80 backdrop-blur-xl border-b border-gray-800' : 'bg-white/80 backdrop-blur-xl border-b border-gray-200'}`} />
     );
   }
 
   return (
-    <nav className={`fixed top-0 left-0 right-0 z-[60] transition-all duration-300 ${isScrolled ? 'bg-black/80 backdrop-blur-xl border-b border-dark-border' : 'bg-transparent'}`}>
+    <nav className={`fixed top-0 left-0 right-0 z-[60] transition-all duration-300 ${isScrolled ? (isDark ? 'bg-black/80 backdrop-blur-xl border-b border-gray-800' : 'bg-white/80 backdrop-blur-xl border-b border-gray-200') : 'bg-transparent'}`}>
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
 
@@ -59,7 +63,7 @@ export default function Header() {
               height={32}
               className="w-8 h-8 object-contain group-hover:scale-105 transition-transform duration-300"
             />
-            <span className="font-bold text-xl text-white" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+            <span className={`font-bold text-xl ${isDark ? 'text-white' : 'text-gray-900'}`} style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
               Paporla
             </span>
           </Link>
@@ -70,7 +74,7 @@ export default function Header() {
               <Link
                 key={link.href}
                 href={link.href}
-                className={`text-gray-300 hover:text-primary transition-colors relative group ${pathname === link.href ? 'text-primary' : ''}`}
+                className={`${isDark ? 'text-gray-300 hover:text-primary' : 'text-gray-600 hover:text-primary'} transition-colors relative group ${pathname === link.href ? 'text-primary' : ''}`}
               >
                 {link.label}
                 <span className={`absolute -bottom-1 left-0 w-0 h-0.5 bg-primary group-hover:w-full transition-all duration-300 ${pathname === link.href ? 'w-full' : ''}`} />
@@ -78,7 +82,7 @@ export default function Header() {
             ))}
           </div>
 
-          {/* Avatar / Autenticación + Notificaciones */}
+          {/* Avatar / Autenticacion + Notificaciones */}
           <div className="flex items-center gap-3">
             {user ? (
               <>
@@ -90,29 +94,31 @@ export default function Header() {
                 href="/login"
                 className="px-5 py-2 rounded-full bg-primary text-black font-medium hover:bg-primary/90 transition-all shadow-lg shadow-primary/20"
               >
-                Iniciar Sesión
+                Iniciar Sesion
               </Link>
             )}
 
+            <ThemeToggle />
+
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="md:hidden p-2 rounded-lg bg-white/5"
-              aria-label="Menú"
+              className={`md:hidden p-2 rounded-lg ${isDark ? 'bg-white/5' : 'bg-gray-100'}`}
+              aria-label="Menu"
             >
-              {isMenuOpen ? <X className="w-5 h-5 text-white" /> : <Menu className="w-5 h-5 text-white" />}
+              {isMenuOpen ? <X className={`w-5 h-5 ${isDark ? 'text-white' : 'text-gray-900'}`} /> : <Menu className={`w-5 h-5 ${isDark ? 'text-white' : 'text-gray-900'}`} />}
             </button>
           </div>
         </div>
       </div>
 
-      {/* Menú móvil */}
+      {/* Menu movil */}
       <AnimatePresence>
         {isMenuOpen && (
           <motion.div
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
-            className="md:hidden bg-black/95 backdrop-blur-xl border-t border-dark-border"
+            className={`md:hidden ${isDark ? 'bg-black/95 backdrop-blur-xl border-t border-gray-800' : 'bg-white/95 backdrop-blur-xl border-t border-gray-200'}`}
           >
             <div className="px-4 py-4 flex flex-col gap-3">
               {navLinks.map((link) => (
@@ -120,7 +126,7 @@ export default function Header() {
                   key={link.href}
                   href={link.href}
                   onClick={() => setIsMenuOpen(false)}
-                  className={`px-4 py-2 text-gray-300 hover:text-primary rounded-lg ${pathname === link.href ? 'text-primary bg-primary/10' : ''}`}
+                  className={`px-4 py-2 ${isDark ? 'text-gray-300 hover:text-primary' : 'text-gray-600 hover:text-primary'} rounded-lg ${pathname === link.href ? 'text-primary bg-primary/10' : ''}`}
                 >
                   {link.label}
                 </Link>

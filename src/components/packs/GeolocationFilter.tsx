@@ -95,7 +95,7 @@ export default function GeolocationFilter({ onLocationChange, defaultRadius = 10
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <label className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2">
+        <label className="text-sm font-medium dark:text-gray-300 text-gray-700 flex items-center gap-2">
           <MapPin className="w-4 h-4 text-primary" />
           Packs cercanos
         </label>
@@ -167,7 +167,7 @@ export default function GeolocationFilter({ onLocationChange, defaultRadius = 10
               max={50}
               value={radius}
               onChange={(e) => handleRadiusChange(Number(e.target.value))}
-              className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer accent-primary"
+              className="w-full h-2 dark:bg-gray-700 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-primary"
             />
             <div className="flex justify-between text-xs text-gray-500 mt-1">
               <span>1 km</span>

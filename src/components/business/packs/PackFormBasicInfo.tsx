@@ -28,8 +28,8 @@ export default function PackFormBasicInfo({ data, onChange, shopId, onError }: P
     ? Math.round((1 - data.price_cents / data.original_price_cents) * 100) : null;
 
   return (
-    <div className="bg-black/40 backdrop-blur-sm rounded-2xl p-6 border border-white/10">
-      <h2 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+    <div className="dark:bg-black/40 bg-white dark:backdrop-blur-sm backdrop-blur-sm rounded-2xl p-6 border dark:border-white/10 border-gray-200">
+      <h2 className="text-lg font-semibold dark:text-white text-gray-900 mb-4 flex items-center gap-2">
         <Package className="w-5 h-5 text-primary" />
         Información del Pack
       </h2>
@@ -45,12 +45,12 @@ export default function PackFormBasicInfo({ data, onChange, shopId, onError }: P
         />
 
         <div>
-          <label className="block text-sm font-medium text-gray-400 mb-2">Descripción (opcional)</label>
+          <label className="block text-sm font-medium dark:text-gray-400 text-gray-600 mb-2">Descripcion (opcional)</label>
           <textarea
             value={data.description}
             onChange={(e) => update({ description: e.target.value })}
             rows={3}
-            className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-gray-500 focus:border-primary focus:outline-none transition-all"
+            className="w-full px-4 py-3 rounded-xl dark:bg-white/5 bg-gray-50 border dark:border-white/10 border-gray-200 dark:text-white text-gray-900 dark:placeholder-gray-500 placeholder-gray-400 focus:border-primary focus:outline-none transition-all"
             placeholder="Describe lo que incluye el pack..."
           />
         </div>

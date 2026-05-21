@@ -52,22 +52,22 @@ export default function ReservationCard({
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: index * 0.03 }}
-        className={`bg-dark-card border ${config.borderColor} border-l-4 rounded-xl p-3 hover:bg-white/5 transition-colors`}
+        className={`bg-dark-card dark:bg-white border ${config.borderColor} border-l-4 rounded-xl p-3 dark:hover:bg-gray-50 hover:bg-gray-50 transition-colors`}
       >
         <div className="flex items-center justify-between gap-3">
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
-              <p className="text-sm font-medium text-white truncate">{reservation.pack.title}</p>
+              <p className="text-sm font-medium dark:text-white text-gray-900 truncate">{reservation.pack.title}</p>
               <span className={`text-[10px] px-2 py-0.5 rounded-full flex items-center gap-1 ${config.bg} ${config.color}`}>
                 <StatusIcon className="w-3 h-3" />
                 {config.label}
               </span>
             </div>
-            <p className="text-xs text-gray-500 mt-1 flex items-center gap-1">
+              <p className="text-xs dark:text-gray-500 text-gray-400 mt-1 flex items-center gap-1">
               <User className="w-3 h-3" />
               {reservation.user.name}
             </p>
-            <p className="text-[10px] text-gray-600 mt-0.5">
+            <p className="text-[10px] dark:text-gray-600 text-gray-400 mt-0.5">
               {formatPrice(reservation.total_price_cents)} • {reservation.quantity}x
             </p>
           </div>
@@ -99,7 +99,7 @@ export default function ReservationCard({
           {/* Columna izquierda - Info */}
           <div className="flex-1">
             <div className="flex items-center gap-2 mb-2 flex-wrap">
-              <h3 className="text-lg font-semibold text-white group-hover:text-primary transition-colors">
+              <h3 className="text-lg font-semibold dark:text-white text-gray-900 group-hover:text-primary transition-colors">
                 {reservation.pack.title}
               </h3>
               <span className={`text-xs px-2 py-0.5 rounded-full flex items-center gap-1 ${config.bg} ${config.color}`}>
@@ -108,23 +108,23 @@ export default function ReservationCard({
               </span>
               {isReady && (
                 <span className="text-xs bg-green-500/20 text-green-400 px-2 py-0.5 rounded-full animate-pulse">
-                  ¡Listo para recoger!
+                  Listo para recoger!
                 </span>
               )}
             </div>
 
             <div className="space-y-1.5">
-              <p className="text-sm text-gray-300 flex items-center gap-2">
-                <User className="w-4 h-4 text-gray-500" />
+              <p className="text-sm dark:text-gray-300 text-gray-700 flex items-center gap-2">
+                <User className="w-4 h-4 dark:text-gray-500 text-gray-400" />
                 {reservation.user.name} ({reservation.user.email})
               </p>
               {reservation.user.phone && (
-                <p className="text-xs text-gray-500 flex items-center gap-1">
+                <p className="text-xs dark:text-gray-500 text-gray-400 flex items-center gap-1">
                   <Phone className="w-3 h-3" />
                   {reservation.user.phone}
                 </p>
               )}
-              <p className="text-xs text-gray-500 flex items-center gap-2">
+              <p className="text-xs dark:text-gray-500 text-gray-400 flex items-center gap-2">
                 <Calendar className="w-3 h-3" />
                 {formatDate(reservation.created_at)}
               </p>
@@ -142,7 +142,7 @@ export default function ReservationCard({
                   <CopyButton text={reservation.pickup_code} label="Copiar" />
                 </div>
                 {reservation.pickup_date && reservation.pickup_end_time && (
-                  <div className="text-xs text-gray-500 flex items-center gap-1">
+                  <div className="text-xs dark:text-gray-500 text-gray-400 flex items-center gap-1">
                     <Clock className="w-3 h-3" />
                     Recoge antes de: {new Date(reservation.pickup_date).toLocaleDateString()} {reservation.pickup_end_time?.slice(0,5)}
                   </div>
@@ -159,8 +159,8 @@ export default function ReservationCard({
               </Button>
             )}
             {isActive && onNoShow && (
-              <Button variant="outline" size="sm" onClick={() => onNoShow(reservation.id)} disabled={updating === reservation.id} className="flex items-center gap-1 text-gray-400 hover:text-white border-gray-600">
-                <Ban className="w-4 h-4" /> No retiró
+              <Button variant="outline" size="sm" onClick={() => onNoShow(reservation.id)} disabled={updating === reservation.id} className="flex items-center gap-1 dark:text-gray-400 text-gray-600 dark:hover:text-white hover:text-gray-900 border-gray-600 dark:border-gray-600 border-gray-300">
+                <Ban className="w-4 h-4" /> No retiro
               </Button>
             )}
             {isActive && onCancelClick && (

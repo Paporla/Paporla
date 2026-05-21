@@ -38,7 +38,7 @@ export default function PackCard({ pack, index, deleting, onDeleteClick }: Props
         <div className="flex flex-col md:flex-row justify-between gap-4">
           <div className="flex-1">
             <div className="flex items-center gap-2 mb-2 flex-wrap">
-              <h3 className="text-lg font-semibold text-white group-hover:text-primary transition-colors">
+              <h3 className="text-lg font-semibold dark:text-white text-gray-900 group-hover:text-primary transition-colors">
                 {pack.title}
               </h3>
               {pack.is_active ? (
@@ -56,7 +56,7 @@ export default function PackCard({ pack, index, deleting, onDeleteClick }: Props
             </div>
 
             {pack.description && (
-              <p className="text-sm text-gray-400 mb-2 line-clamp-1">{pack.description}</p>
+              <p className="text-sm dark:text-gray-400 text-gray-600 mb-2 line-clamp-1">{pack.description}</p>
             )}
 
             <div className="flex flex-wrap gap-4 text-sm">
@@ -89,12 +89,12 @@ export default function PackCard({ pack, index, deleting, onDeleteClick }: Props
           </div>
         </div>
 
-        <div className="mt-3">
-          <div className="flex justify-between text-xs text-gray-500 mb-1">
+          <div className="mt-3">
+          <div className="flex justify-between text-xs dark:text-gray-500 text-gray-400 mb-1">
             <span>Stock restante</span>
             <span>{pct}%</span>
           </div>
-          <div className="h-1.5 bg-gray-700 rounded-full overflow-hidden">
+          <div className="h-1.5 dark:bg-gray-700 bg-gray-200 rounded-full overflow-hidden">
             <div className="h-full bg-gradient-to-r from-primary to-primary/60 rounded-full transition-all duration-500"
               style={{ width: `${pct}%` }} />
           </div>

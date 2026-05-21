@@ -30,43 +30,36 @@ export default function ReservationStatus({
     pending: {
       label: 'Pendiente',
       color: 'bg-yellow-500/20 text-yellow-400',
-      icon: '⏳',
-      message: 'Esperando confirmación del comercio'
+      message: 'Esperando confirmacion del comercio'
     },
     confirmed: {
       label: 'Confirmada',
       color: 'bg-blue-500/20 text-blue-400',
-      icon: '💰',
       message: 'Pago confirmado. Espera la hora de recogida'
     },
     ready_pickup: {
       label: 'Lista para recoger',
       color: 'bg-primary/20 text-primary',
-      icon: '📦',
-      message: '¡Tu pack está listo! Pasa a recogerlo'
+      message: 'Tu pack esta listo! Pasa a recogerlo'
     },
     completed: {
       label: 'Completada',
       color: 'bg-green-500/20 text-green-400',
-      icon: '🎉',
-      message: '¡Gracias por recoger tu pack!'
+      message: 'Gracias por recoger tu pack!'
     },
     cancelled: {
       label: 'Cancelada',
       color: 'bg-red-500/20 text-red-400',
-      icon: '❌',
       message: 'Reserva cancelada'
     },
     no_show: {
       label: 'No retirada',
       color: 'bg-gray-500/20 text-gray-400',
-      icon: '😔',
       message: 'No recogiste el pack a tiempo'
     },
     expired: {
       label: 'Expirada',
       color: 'bg-orange-500/20 text-orange-400',
-      icon: '⏰',
       message: 'El tiempo para recoger ha expirado'
     }
   }
@@ -84,18 +77,17 @@ export default function ReservationStatus({
       className="space-y-4"
     >
       <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full ${current.color}`}>
-        <span className="text-lg">{current.icon}</span>
         <span className="font-semibold">{current.label}</span>
       </div>
 
-      <p className="text-gray-400">{current.message}</p>
+      <p className="dark:text-gray-400 text-gray-600">{current.message}</p>
 
       {/* Horario de recogida */}
       {(pickupDate || pickupTime) && status === 'ready_pickup' && (
         <div className="p-3 bg-primary/5 border border-primary/20 rounded-lg">
-          <p className="text-sm text-gray-400">Recoge tu pack:</p>
+          <p className="text-sm dark:text-gray-400 text-gray-600">Recoge tu pack:</p>
           {pickupDate && (
-            <p className="text-white font-medium">
+            <p className="dark:text-white text-gray-900 font-medium">
               {new Date(pickupDate).toLocaleDateString()}
             </p>
           )}
@@ -105,24 +97,24 @@ export default function ReservationStatus({
         </div>
       )}
 
-      {/* Código de recogida */}
+      {/* Codigo de recogida */}
       {pickupCode && (status === 'confirmed' || status === 'ready_pickup') && (
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           className="mt-4 p-4 bg-primary/10 border border-primary/30 rounded-lg text-center"
         >
-          <p className="text-sm text-gray-400 mb-1">Código de recogida</p>
+          <p className="text-sm dark:text-gray-400 text-gray-600 mb-1">Codigo de recogida</p>
           <p className="text-3xl font-bold text-primary tracking-wider font-mono">{pickupCode}</p>
-          <p className="text-xs text-gray-500 mt-2">Presenta este código al recoger tu pedido</p>
+          <p className="text-xs dark:text-gray-500 text-gray-400 mt-2">Presenta este codigo al recoger tu pedido</p>
         </motion.div>
       )}
 
-      {/* Advertencia de expiración */}
+      {/* Advertencia de expiracion */}
       {status === 'confirmed' && (
         <div className="mt-4 p-3 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
           <p className="text-sm text-yellow-400">
-            ⚠️ La reserva está pendiente de confirmación por el comercio
+            La reserva esta pendiente de confirmacion por el comercio
           </p>
         </div>
       )}
@@ -130,7 +122,7 @@ export default function ReservationStatus({
       {status === 'confirmed' && pickupDate && (
         <div className="mt-4 p-3 bg-blue-500/10 border border-blue-500/30 rounded-lg">
           <p className="text-sm text-blue-400">
-            💡 Recuerda: Puedes cancelar hasta 2 horas antes de la recogida
+            Recuerda: Puedes cancelar hasta 2 horas antes de la recogida
           </p>
         </div>
       )}

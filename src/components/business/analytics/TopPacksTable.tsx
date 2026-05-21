@@ -19,14 +19,14 @@ interface TopPacksTableProps {
 export default function TopPacksTable({ packs }: TopPacksTableProps) {
   if (packs.length === 0) {
     return (
-      <div className="bg-dark-card border border-dark-border rounded-2xl p-6">
+      <div className="bg-dark-card dark:bg-white dark:border-gray-200 border border-dark-border rounded-2xl p-6">
         <div className="flex items-center gap-2 mb-4">
           <Package className="w-5 h-5 text-primary" />
-          <h3 className="font-bold text-white">Top packs vendidos</h3>
+          <h3 className="font-bold dark:text-white text-gray-900">Top packs vendidos</h3>
         </div>
         <div className="text-center py-8">
-          <p className="text-gray-500 text-sm">No hay datos suficientes</p>
-          <p className="text-xs text-gray-600 mt-1">Los packs aparecerán aquí cuando tengas ventas</p>
+          <p className="dark:text-gray-500 text-gray-400 text-sm">No hay datos suficientes</p>
+          <p className="text-xs dark:text-gray-600 text-gray-400 mt-1">Los packs apareceran aqui cuando tengas ventas</p>
         </div>
       </div>
     );
@@ -38,17 +38,17 @@ export default function TopPacksTable({ packs }: TopPacksTableProps) {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-dark-card border border-dark-border rounded-2xl p-6"
+      className="bg-dark-card dark:bg-white dark:border-gray-200 border border-dark-border rounded-2xl p-6"
     >
       <div className="flex items-center gap-2 mb-5">
         <Package className="w-5 h-5 text-primary" />
-        <h3 className="font-bold text-white">Top packs vendidos</h3>
+        <h3 className="font-bold dark:text-white text-gray-900">Top packs vendidos</h3>
       </div>
 
       <div className="space-y-3">
         {packs.map((pack, idx) => (
           <Link key={pack.id} href={`/business/packs/${pack.id}`} className="block group">
-            <div className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-white/5 transition-colors">
+            <div className="flex items-center gap-3 p-2.5 rounded-xl dark:hover:bg-white/5 hover:bg-gray-50 transition-colors">
               {/* Posición */}
               <div className={`w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold ${
                 idx === 0 ? 'bg-amber-500/20 text-amber-400' :
@@ -61,11 +61,11 @@ export default function TopPacksTable({ packs }: TopPacksTableProps) {
 
               {/* Info */}
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-white group-hover:text-primary transition-colors truncate">
+                <p className="text-sm font-medium dark:text-white text-gray-900 group-hover:text-primary transition-colors truncate">
                   {pack.title}
                 </p>
                 <div className="flex items-center gap-3 mt-1">
-                  <span className="text-xs text-gray-500">{pack.totalSold} vendidos</span>
+                  <span className="text-xs dark:text-gray-500 text-gray-400">{pack.totalSold} vendidos</span>
                   <span className="text-xs text-green-400">${pack.revenue.toFixed(2)}</span>
                 </div>
               </div>

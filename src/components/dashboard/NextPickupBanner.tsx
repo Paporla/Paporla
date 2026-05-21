@@ -18,7 +18,7 @@ export default function NextPickupBanner({ reservation }: NextPickupBannerProps)
 
   const pickupDateTime = reservation.pickup_date 
     ? `${formatDate(reservation.pickup_date)} ${reservation.pickup_end_time?.slice(0,5) || ''}`
-    : 'Próximamente'
+    : 'Proximamente'
 
   const mapsUrl = reservation.shop.address
     ? `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(reservation.shop.address)}`
@@ -39,7 +39,7 @@ export default function NextPickupBanner({ reservation }: NextPickupBannerProps)
         <div className="flex items-center gap-2">
           <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
           <span className="text-xs font-bold text-green-400 uppercase tracking-wider">
-            Próxima recogida
+            Proxima recogida
           </span>
         </div>
 
@@ -56,11 +56,11 @@ export default function NextPickupBanner({ reservation }: NextPickupBannerProps)
           </div>
 
           <div className="flex-1 min-w-0">
-            <Link href={`/packs/${reservation.pack_id}`} className="text-lg font-bold text-white hover:text-primary transition-colors">
+            <Link href={`/packs/${reservation.pack_id}`} className="text-lg font-bold dark:text-white text-gray-900 hover:text-primary transition-colors">
               {reservation.pack.title}
             </Link>
-            <Link href={`/shops/${reservation.shop.id}`} className="text-sm text-gray-400 hover:text-primary transition-colors block">
-              🏪 {reservation.shop.name}
+            <Link href={`/shops/${reservation.shop.id}`} className="text-sm dark:text-gray-400 text-gray-600 hover:text-primary transition-colors block">
+              {reservation.shop.name}
             </Link>
 
             {/* Cuenta regresiva */}
@@ -76,10 +76,10 @@ export default function NextPickupBanner({ reservation }: NextPickupBannerProps)
           </div>
         </div>
 
-        {/* Código de recogida */}
-        <div className="flex items-center justify-between bg-black/40 rounded-xl p-3 border border-white/5">
+        {/* Codigo de recogida */}
+        <div className="flex items-center justify-between dark:bg-black/40 bg-gray-100 rounded-xl p-3 border dark:border-white/5 border-gray-200">
           <div>
-            <p className="text-xs text-gray-500">Código de recogida</p>
+            <p className="text-xs dark:text-gray-500 text-gray-400">Codigo de recogida</p>
             <p className="text-xl font-bold text-primary tracking-wider font-mono">
               {reservation.pickup_code}
             </p>
@@ -105,7 +105,7 @@ export default function NextPickupBanner({ reservation }: NextPickupBannerProps)
               className="inline-flex items-center gap-1 ml-auto text-primary hover:text-primary/80 transition-colors font-medium"
             >
               <Navigation className="w-3 h-3" />
-              Cómo llegar
+              Como llegar
             </a>
           )}
         </div>

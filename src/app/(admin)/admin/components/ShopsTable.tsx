@@ -20,8 +20,8 @@ export default function ShopsTable({ shops, onEdit, onVerify, onBan, onDelete }:
     <Card glass className="overflow-hidden">
       <div className="overflow-x-auto">
         <table className="w-full">
-          <thead className="border-b border-gray-800">
-            <tr className="text-left text-gray-400 text-sm">
+          <thead className="border-b dark:border-gray-800 border-gray-200">
+            <tr className="text-left dark:text-gray-400 text-gray-600 text-sm">
               <th className="px-4 py-3">Comercio</th>
               <th className="px-4 py-3">Dirección</th>
               <th className="px-4 py-3">Estado</th>
@@ -36,18 +36,18 @@ export default function ShopsTable({ shops, onEdit, onVerify, onBan, onDelete }:
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.05 }}
-                className="border-b border-gray-800/50 hover:bg-gray-800/30 transition-colors"
+                className="border-b dark:border-gray-800/50 border-gray-200 dark:hover:bg-gray-800/30 hover:bg-gray-100 transition-colors"
               >
                 <td className="px-4 py-3">
                   <div>
-                    <p className="font-medium text-white">{shop.name}</p>
+                    <p className="font-medium dark:text-white text-gray-900">{shop.name}</p>
                     {shop.phone && (
-                      <p className="text-xs text-gray-500 mt-0.5">📞 {shop.phone}</p>
+                      <p className="text-xs dark:text-gray-500 text-gray-400 mt-0.5">{shop.phone}</p>
                     )}
                   </div>
                 </td>
                 <td className="px-4 py-3">
-                  <span className="text-gray-400 text-sm">{shop.address || '—'}</span>
+                  <span className="dark:text-gray-400 text-gray-600 text-sm">{shop.address || '—'}</span>
                 </td>
                 <td className="px-4 py-3">
                   <div className="flex gap-2 flex-wrap">
@@ -68,7 +68,7 @@ export default function ShopsTable({ shops, onEdit, onVerify, onBan, onDelete }:
                   </div>
                 </td>
                 <td className="px-4 py-3">
-                  <div className="flex items-center gap-1 text-xs text-gray-500">
+                  <div className="flex items-center gap-1 text-xs dark:text-gray-500 text-gray-400">
                     <Calendar className="w-3 h-3" />
                     {formatDate(shop.created_at)}
                   </div>
@@ -128,8 +128,8 @@ export default function ShopsTable({ shops, onEdit, onVerify, onBan, onDelete }:
       
       {shops.length === 0 && (
         <div className="text-center py-12">
-          <Store className="w-12 h-12 text-gray-600 mx-auto mb-3" />
-          <p className="text-gray-400">No hay comercios registrados</p>
+          <Store className="w-12 h-12 dark:text-gray-600 text-gray-400 mx-auto mb-3" />
+          <p className="dark:text-gray-400 text-gray-600">No hay comercios registrados</p>
         </div>
       )}
     </Card>

@@ -85,15 +85,15 @@ export default function PickupCard({ pickup, index, validating, onValidate }: Pr
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: 20, height: 0, marginBottom: 0 }}
       transition={{ delay: index * 0.05 }}
-      className={'bg-gradient-to-r from-white/5 to-transparent border rounded-xl p-4 transition-all ' + (
-        afterWindow ? 'border-red-500/30 bg-red-500/5' : inWindow ? 'border-primary/30' : 'border-white/10'
+      className={'dark:bg-gradient-to-r dark:from-white/5 from-gray-50 to-transparent border rounded-xl p-4 transition-all ' + (
+        afterWindow ? 'border-red-500/30 dark:bg-red-500/5 bg-red-500/5' : inWindow ? 'border-primary/30' : 'dark:border-white/10 border-gray-200'
       )}
     >
       <div className="flex items-start justify-between gap-4">
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-1 flex-wrap">
             <User className="w-4 h-4 text-gray-500 flex-shrink-0" />
-            <span className="font-semibold text-white truncate">{pickup.user_name}</span>
+            <span className="font-semibold dark:text-white text-gray-900 truncate">{pickup.user_name}</span>
             {afterWindow && (
               <span className="text-xs bg-red-500/20 text-red-400 px-2 py-0.5 rounded-full flex items-center gap-1">
                 <Ban className="w-3 h-3" /> Vencida
@@ -105,7 +105,7 @@ export default function PickupCard({ pickup, index, validating, onValidate }: Pr
               </span>
             )}
           </div>
-          <div className="flex items-center gap-2 text-sm text-gray-400">
+          <div className="flex items-center gap-2 text-sm dark:text-gray-400 text-gray-600">
             <Package className="w-3 h-3" />
             <span className="truncate">{pickup.pack_title}</span>
           </div>
@@ -121,7 +121,7 @@ export default function PickupCard({ pickup, index, validating, onValidate }: Pr
         </div>
 
         <div className="flex-shrink-0 text-right">
-          <p className="text-xs text-gray-500">Codigo</p>
+          <p className="text-xs dark:text-gray-500 text-gray-400">Codigo</p>
           <p className="text-lg font-bold text-primary tracking-wider font-mono">{pickup.pickup_code}</p>
           <div className="flex gap-1 mt-1 justify-end">
             <CopyButton text={pickup.pickup_code} label="" />
@@ -130,14 +130,14 @@ export default function PickupCard({ pickup, index, validating, onValidate }: Pr
       </div>
 
       {showInput ? (
-        <div className="mt-3 pt-3 border-t border-white/10">
-          <p className="text-xs text-gray-400 mb-2">Ingresa el codigo de recogida para confirmar:</p>
+        <div className="mt-3 pt-3 border-t dark:border-white/10 border-gray-200">
+          <p className="text-xs dark:text-gray-400 text-gray-600 mb-2">Ingresa el codigo de recogida para confirmar:</p>
           <div className="flex gap-2">
             <input
               type="text" value={codeInput}
               onChange={(e) => setCodeInput(e.target.value)}
               placeholder="Ej: P4P-XXX-XXX"
-              className="flex-1 px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-white text-sm font-mono uppercase placeholder:text-gray-600 focus:border-primary focus:outline-none"
+              className="flex-1 px-3 py-2 dark:bg-white/5 bg-gray-50 border dark:border-white/10 border-gray-200 rounded-lg dark:text-white text-gray-900 text-sm font-mono uppercase dark:placeholder:text-gray-600 placeholder:text-gray-400 focus:border-primary focus:outline-none"
               autoFocus
               onKeyDown={(e) => e.key === 'Enter' && handleVerify()}
             />
@@ -147,14 +147,14 @@ export default function PickupCard({ pickup, index, validating, onValidate }: Pr
               ) : <CheckCircle className="w-4 h-4" />}
               Validar
             </Button>
-            <button onClick={() => { setShowInput(false); setError('') }} className="p-2 text-gray-500 hover:text-white transition-colors">
+            <button onClick={() => { setShowInput(false); setError('') }} className="p-2 dark:text-gray-500 text-gray-400 dark:hover:text-white hover:text-gray-900 transition-colors">
               <X className="w-4 h-4" />
             </button>
           </div>
           {error && <p className="text-xs text-red-400 mt-1">{error}</p>}
         </div>
       ) : (
-        <div className="mt-3 pt-3 border-t border-white/10 flex justify-end">
+        <div className="mt-3 pt-3 border-t dark:border-white/10 border-gray-200 flex justify-end">
           <Button size="sm" onClick={handleStart} disabled={validating === pickup.id || afterWindow}
             className={'flex items-center gap-1 ' + (afterWindow ? 'opacity-50 cursor-not-allowed' : '')}>
             <CheckCircle className="w-4 h-4" /> Validar recogida

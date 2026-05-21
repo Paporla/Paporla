@@ -63,17 +63,17 @@ export default function BusinessNotificationsPage() {
     return (
       <div className="space-y-8 pb-8">
         <div className="relative overflow-hidden bg-gradient-to-br from-primary/5 via-transparent to-secondary/5 -mt-8 -mx-4 px-4 py-8 rounded-b-3xl">
-          <h1 className="text-3xl md:text-4xl font-bold text-white">Notificaciones</h1>
-          <p className="text-gray-400 mt-1">Mantente al día con la actividad de tu comercio</p>
+          <h1 className="text-3xl md:text-4xl font-bold dark:text-white text-gray-900">Notificaciones</h1>
+          <p className="dark:text-gray-400 text-gray-600 mt-1">Mantente al dia con la actividad de tu comercio</p>
         </div>
         <div className="animate-pulse space-y-4">
           {[...Array(5)].map((_, i) => (
-            <div key={i} className="bg-dark-card border border-dark-border rounded-2xl p-5">
+              <div key={i} className="bg-dark-card dark:bg-white dark:border-gray-200 border border-dark-border rounded-2xl p-5">
               <div className="flex gap-4">
-                <div className="w-12 h-12 rounded-xl bg-gray-800" />
+                <div className="w-12 h-12 rounded-xl dark:bg-gray-800 bg-gray-200" />
                 <div className="flex-1">
-                  <div className="h-5 w-48 bg-gray-800 rounded mb-2" />
-                  <div className="h-3 w-64 bg-gray-800 rounded" />
+                  <div className="h-5 w-48 dark:bg-gray-800 bg-gray-200 rounded mb-2" />
+                  <div className="h-3 w-64 dark:bg-gray-800 bg-gray-200 rounded" />
                 </div>
               </div>
             </div>
@@ -93,14 +93,14 @@ export default function BusinessNotificationsPage() {
               <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
                 <Bell className="w-5 h-5 text-primary" />
               </div>
-              <h1 className="text-3xl md:text-4xl font-bold text-white">Notificaciones</h1>
+              <h1 className="text-3xl md:text-4xl font-bold dark:text-white text-gray-900">Notificaciones</h1>
               {unreadCount > 0 && (
                 <span className="text-sm bg-primary/20 text-primary px-2.5 py-1 rounded-full">
                   {unreadCount} nuevas
                 </span>
               )}
             </div>
-            <p className="text-gray-400">Mantente al día con la actividad de tu comercio</p>
+            <p className="dark:text-gray-400 text-gray-600">Mantente al dia con la actividad de tu comercio</p>
           </div>
           {unreadCount > 0 && (
             <Button variant="outline" size="sm" onClick={handleMarkAll} className="flex items-center gap-1">
@@ -118,7 +118,7 @@ export default function BusinessNotificationsPage() {
           className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
             filter === 'all'
               ? 'bg-primary/20 text-primary border border-primary/30'
-              : 'bg-dark-muted text-gray-400 hover:text-white'
+              : 'dark:bg-dark-muted bg-gray-100 dark:text-gray-400 text-gray-600 dark:hover:text-white hover:text-gray-900'
           }`}
         >
           Todas
@@ -128,10 +128,10 @@ export default function BusinessNotificationsPage() {
           className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
             filter === 'unread'
               ? 'bg-primary/20 text-primary border border-primary/30'
-              : 'bg-dark-muted text-gray-400 hover:text-white'
+              : 'dark:bg-dark-muted bg-gray-100 dark:text-gray-400 text-gray-600 dark:hover:text-white hover:text-gray-900'
           }`}
         >
-          No leídas
+          No leidas
           {unreadCount > 0 && (
             <span className="ml-1.5 text-xs bg-primary/30 px-1.5 py-0.5 rounded-full">
               {unreadCount}
@@ -172,7 +172,7 @@ export default function BusinessNotificationsPage() {
                       <Icon className={`w-5 h-5 ${color}`} />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className={`text-sm ${isUnread ? 'text-white font-medium' : 'text-gray-400'}`}>
+                      <p className={`text-sm ${isUnread ? 'dark:text-white text-gray-900 font-medium' : 'dark:text-gray-400 text-gray-600'}`}>
                         {notification.message}
                       </p>
                       <div className="flex items-center gap-3 mt-2">

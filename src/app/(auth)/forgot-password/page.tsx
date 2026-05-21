@@ -42,18 +42,18 @@ export default function ForgotPasswordPage() {
         animate={{ opacity: 1, y: 0 }}
         className="text-center space-y-4"
       >
-        <div className="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mx-auto">
-          <CheckCircle className="w-8 h-8 text-green-400" />
+        <div className="w-16 h-16 dark:bg-green-500/20 bg-green-100 rounded-full flex items-center justify-center mx-auto">
+          <CheckCircle className="w-8 h-8 dark:text-green-400 text-green-600" />
         </div>
         <h2 className="text-2xl font-bold">
           <span className="text-gradient">Revisa tu correo</span>
         </h2>
-        <p className="text-gray-400">
-          Te enviamos un enlace a <strong className="text-primary">{email}</strong> para restablecer tu contraseña.
+        <p className="dark:text-gray-400 text-gray-600">
+          Te enviamos un enlace a <strong className="text-primary">{email}</strong> para restablecer tu contrasena.
         </p>
         <Link href="/login" className="text-primary hover:underline inline-flex items-center gap-1 mt-4">
           <ArrowLeft className="w-4 h-4" />
-          Volver al inicio de sesión
+          Volver al inicio de sesion
         </Link>
       </motion.div>
     );
@@ -65,12 +65,12 @@ export default function ForgotPasswordPage() {
       animate={{ opacity: 1, y: 0 }}
     >
       <form onSubmit={handleSubmit} className="space-y-6">
-        <p className="text-gray-400 text-sm text-center">
-          Ingresa tu correo electrónico y te enviaremos un enlace para restablecer tu contraseña.
+        <p className="dark:text-gray-400 text-gray-600 text-sm text-center">
+          Ingresa tu correo electronico y te enviaremos un enlace para restablecer tu contrasena.
         </p>
         
         <Input
-          label="Correo electrónico"
+          label="Correo electronico"
           type="email"
           placeholder="tu@email.com"
           value={email}
@@ -84,9 +84,9 @@ export default function ForgotPasswordPage() {
         </Button>
         
         <div className="text-center">
-          <Link href="/login" className="text-sm text-gray-400 hover:text-primary inline-flex items-center gap-1">
+          <Link href="/login" className="text-sm dark:text-gray-400 text-gray-600 hover:text-primary inline-flex items-center gap-1">
             <ArrowLeft className="w-4 h-4" />
-            Volver al inicio de sesión
+            Volver al inicio de sesion
           </Link>
         </div>
       </form>

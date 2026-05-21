@@ -53,11 +53,11 @@ export default function PackFiltersAdvanced({ onFilterChange, initialFilters = {
           <input type="text" value={filters.search}
             onChange={(e) => update('search', e.target.value)}
             placeholder="Buscar packs por nombre o descripcion..."
-            className="w-full px-4 py-3 rounded-xl bg-white/10 border border-gray-300 dark:border-gray-600 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all" />
+            className="w-full px-4 py-3 rounded-xl dark:bg-white/5 bg-white dark:border-gray-600 border-gray-200 dark:text-white text-gray-900 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all" />
         </div>
         <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
           onClick={() => setIsOpen(!isOpen)}
-          className="relative px-4 py-3 rounded-xl bg-white/10 border border-gray-300 dark:border-gray-600 hover:border-primary transition-all">
+          className="relative px-4 py-3 rounded-xl dark:bg-white/5 bg-white dark:border-gray-600 border-gray-200 dark:text-white text-gray-900 hover:border-primary transition-all">
           <Filter className="w-5 h-5" />
           {activeCount > 0 && <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-primary text-white text-xs flex items-center justify-center">{activeCount}</span>}
         </motion.button>
@@ -75,9 +75,9 @@ export default function PackFiltersAdvanced({ onFilterChange, initialFilters = {
                 <PriceRangeFilter minPrice={filters.minPrice} maxPrice={filters.maxPrice}
                   onPriceChange={(min, max) => { update('minPrice', min); update('maxPrice', max) }} />
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Ciudad</label>
+                  <label className="block text-sm font-medium dark:text-gray-300 text-gray-700 mb-2">Ciudad</label>
                   <select value={filters.city} onChange={(e) => { update('city', e.target.value); if (e.target.value) update('location', null) }}
-                    className="w-full px-4 py-2 rounded-lg bg-white/10 border border-gray-300 dark:border-gray-600 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all">
+                    className="w-full px-4 py-2 rounded-lg dark:bg-white/5 bg-white dark:border-gray-600 border-gray-200 dark:text-white text-gray-900 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all">
                     <option value="">Todas las ciudades</option>
                     {cities.map(c => <option key={c} value={c}>{c}</option>)}
                   </select>
@@ -89,7 +89,7 @@ export default function PackFiltersAdvanced({ onFilterChange, initialFilters = {
                   <input type="checkbox" id="availableOnly" checked={filters.showAvailableOnly}
                     onChange={(e) => update('showAvailableOnly', e.target.checked)}
                     className="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary/20" />
-                  <label htmlFor="availableOnly" className="text-sm text-gray-700 dark:text-gray-300">Mostrar solo packs con stock disponible</label>
+                  <label htmlFor="availableOnly" className="text-sm dark:text-gray-300 text-gray-700">Mostrar solo packs con stock disponible</label>
                 </div>
               </div>
               <motion.button whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.99 }}

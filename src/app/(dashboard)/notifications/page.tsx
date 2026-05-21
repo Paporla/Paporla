@@ -53,7 +53,7 @@ export default function NotificationsPage() {
         setUnreadCount(data?.filter(n => !n.is_read).length || 0);
       }
       
-      // Delay mínimo de 300ms para que el spinner sea visible
+      // Delay minimo de 300ms para que el spinner sea visible
       setTimeout(() => setLoading(false), 300);
     };
     
@@ -72,7 +72,7 @@ export default function NotificationsPage() {
     await supabase.from('notifications').update({ is_read: true }).in('id', unreadIds);
     setNotifications(prev => prev.map(n => ({ ...n, is_read: true })));
     setUnreadCount(0);
-    setToast({ message: 'Todas marcadas como leídas', type: 'success' });
+    setToast({ message: 'Todas marcadas como leidas', type: 'success' });
     setTimeout(() => setToast(null), 2000);
   };
 
@@ -81,7 +81,7 @@ export default function NotificationsPage() {
     const deleted = notifications.find(n => n.id === id);
     setNotifications(prev => prev.filter(n => n.id !== id));
     if (deleted && !deleted.is_read) setUnreadCount(prev => Math.max(0, prev - 1));
-    setToast({ message: 'Notificación eliminada', type: 'success' });
+    setToast({ message: 'Notificacion eliminada', type: 'success' });
     setTimeout(() => setToast(null), 2000);
   };
 
@@ -103,8 +103,8 @@ export default function NotificationsPage() {
       <div className="flex items-center justify-center min-h-[60vh]">
         <div className="text-center">
           <div className="w-14 h-14 rounded-full border-4 border-primary/30 border-t-primary animate-spin mx-auto mb-4" />
-          <p className="text-gray-400 text-lg font-medium">Cargando notificaciones...</p>
-          <p className="text-gray-600 text-sm mt-1">Por favor espera</p>
+          <p className="dark:text-gray-400 text-gray-600 text-lg font-medium">Cargando notificaciones...</p>
+          <p className="dark:text-gray-600 text-gray-400 text-sm mt-1">Por favor espera</p>
         </div>
       </div>
     );
@@ -123,14 +123,14 @@ export default function NotificationsPage() {
               <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
                 <Bell className="w-5 h-5 text-primary" />
               </div>
-              <h1 className="text-3xl md:text-4xl font-bold text-white">Notificaciones</h1>
+              <h1 className="text-3xl md:text-4xl font-bold dark:text-white text-gray-900">Notificaciones</h1>
               {unreadCount > 0 && (
                 <span className="text-sm bg-primary/20 text-primary px-2.5 py-1 rounded-full">
                   {unreadCount} nuevas
                 </span>
               )}
             </div>
-            <p className="text-gray-400">Mantente al día con tus reservas y novedades</p>
+            <p className="dark:text-gray-400 text-gray-600">Mantente al dia con tus reservas y novedades</p>
           </div>
           {unreadCount > 0 && (
             <Button variant="outline" size="sm" onClick={markAllAsRead} className="flex items-center gap-1">
@@ -147,7 +147,7 @@ export default function NotificationsPage() {
           className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
             filter === 'all'
               ? 'bg-primary/20 text-primary border border-primary/30'
-              : 'bg-dark-muted text-gray-400 hover:text-white'
+              : 'dark:bg-dark-muted bg-gray-100 dark:text-gray-400 text-gray-600 hover:dark:text-white hover:text-gray-900'
           }`}
         >
           Todas
@@ -157,10 +157,10 @@ export default function NotificationsPage() {
           className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
             filter === 'unread'
               ? 'bg-primary/20 text-primary border border-primary/30'
-              : 'bg-dark-muted text-gray-400 hover:text-white'
+              : 'dark:bg-dark-muted bg-gray-100 dark:text-gray-400 text-gray-600 hover:dark:text-white hover:text-gray-900'
           }`}
         >
-          No leídas
+          No leidas
           {unreadCount > 0 && (
             <span className="ml-1.5 text-xs bg-primary/30 px-1.5 py-0.5 rounded-full">
               {unreadCount}
@@ -192,7 +192,7 @@ export default function NotificationsPage() {
                       <Icon className={`w-5 h-5 ${color}`} />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className={`text-sm ${isUnread ? 'text-white font-medium' : 'text-gray-400'}`}>
+                      <p className={`text-sm ${isUnread ? 'dark:text-white text-gray-900 font-medium' : 'dark:text-gray-400 text-gray-600'}`}>
                         {notification.message}
                       </p>
                       <div className="flex items-center gap-3 mt-2">

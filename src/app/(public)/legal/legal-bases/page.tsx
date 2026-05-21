@@ -26,11 +26,11 @@ export default function LegalBasesPage() {
           
           <section>
             <h2 className="text-2xl font-bold text-gradient mb-4">1. Base Constitucional</h2>
-            <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
+            <p className="dark:text-gray-300 text-gray-700 leading-relaxed">
               Paporla se fundamenta en los siguientes artículos de la 
               <strong> Constitución de la República Bolivariana de Venezuela</strong>:
             </p>
-            <ul className="list-disc pl-6 mt-3 space-y-2 text-gray-700 dark:text-gray-300">
+            <ul className="list-disc pl-6 mt-3 space-y-2 dark:text-gray-300 text-gray-700">
               <li>
                 <strong>Artículo 305:</strong> Promueve la seguridad alimentaria y la soberanía 
                 agroalimentaria como parte fundamental del desarrollo económico y social.
@@ -48,14 +48,14 @@ export default function LegalBasesPage() {
 
           <section>
             <h2 className="text-2xl font-bold text-gradient mb-4">2. Ley Orgánica de Protección al Consumidor</h2>
-            <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
+            <p className="dark:text-gray-300 text-gray-700 leading-relaxed">
               Nos regimos por la <strong>Ley Orgánica de Protección al Consumidor y Usuario</strong> 
               (Gaceta Oficial N° 39.358 del 18 de noviembre de 2011), que establece:
             </p>
             <div className="mt-4 space-y-4">
               <div>
                 <h3 className="text-xl font-semibold text-primary mb-2">Derechos que garantizamos:</h3>
-                <ul className="list-disc pl-6 space-y-1 text-gray-700 dark:text-gray-300">
+                <ul className="list-disc pl-6 space-y-1 dark:text-gray-300 text-gray-700">
                   <li>Información veraz y oportuna sobre los packs ofrecidos.</li>
                   <li>Protección contra prácticas engañosas o abusivas.</li>
                   <li>Calidad y seguridad en los productos alimenticios.</li>
@@ -64,7 +64,7 @@ export default function LegalBasesPage() {
               </div>
               <div>
                 <h3 className="text-xl font-semibold text-primary mb-2">Obligaciones que exigimos:</h3>
-                <ul className="list-disc pl-6 space-y-1 text-gray-700 dark:text-gray-300">
+                <ul className="list-disc pl-6 space-y-1 dark:text-gray-300 text-gray-700">
                   <li>Los comercios deben exhibir precios claros y visibles.</li>
                   <li>Las ofertas deben respetar los términos promocionados.</li>
                   <li>Los productos deben cumplir con estándares sanitarios.</li>
@@ -72,7 +72,7 @@ export default function LegalBasesPage() {
               </div>
             </div>
             <div className="mt-4 p-4 rounded-lg bg-primary/5 border border-primary/20">
-              <p className="text-sm text-gray-700 dark:text-gray-300">
+              <p className="text-sm dark:text-gray-300 text-gray-700">
                 📞 <strong>Para denuncias:</strong> Puedes contactar al 
                 <strong> INDEPABIS (Instituto para la Defensa de las Personas en el Acceso a los Bienes y Servicios)</strong> 
                 o a nuestro equipo de soporte en <strong>soporte@paporla.com</strong>
@@ -82,11 +82,11 @@ export default function LegalBasesPage() {
 
           <section>
             <h2 className="text-2xl font-bold text-gradient mb-4">3. Ley Infogobierno y Protección de Datos</h2>
-            <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
+            <p className="dark:text-gray-300 text-gray-700 leading-relaxed">
               En cumplimiento de la <strong>Ley Orgánica de Protección de Datos Personales e Infogobierno</strong> 
               (Gaceta Oficial N° 39.060 del 13 de enero de 2011), Paporla:
             </p>
-            <ul className="list-disc pl-6 mt-3 space-y-2 text-gray-700 dark:text-gray-300">
+            <ul className="list-disc pl-6 mt-3 space-y-2 dark:text-gray-300 text-gray-700">
               <li>Solo recopila datos con consentimiento explícito y para fines legítimos.</li>
               <li>Utiliza los datos exclusivamente para operar la plataforma.</li>
               <li>Solicita información estrictamente necesaria.</li>
@@ -94,7 +94,7 @@ export default function LegalBasesPage() {
               <li>Implementa medidas técnicas para proteger la información.</li>
             </ul>
             <div className="mt-4 p-4 rounded-lg bg-blue-500/10 border border-blue-500/20">
-              <p className="text-sm text-gray-700 dark:text-gray-300">
+              <p className="text-sm dark:text-gray-300 text-gray-700">
                 🔒 <strong>Tus derechos ARCO:</strong> Puedes ejercer tus derechos de Acceso, Rectificación, 
                 Cancelación y Oposición enviando un email a <strong>datos@paporla.com</strong>
               </p>
@@ -103,11 +103,11 @@ export default function LegalBasesPage() {
 
           <section>
             <h2 className="text-2xl font-bold text-gradient mb-4">4. Ley sobre Mensajes de Datos y Firmas Electrónicas</h2>
-            <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
+            <p className="dark:text-gray-300 text-gray-700 leading-relaxed">
               Nos regimos por la <strong>Ley sobre Mensajes de Datos y Firmas Electrónicas</strong> 
               (Gaceta Oficial N° 37.148 del 28 de febrero de 2001), que otorga:
             </p>
-            <ul className="list-disc pl-6 mt-3 space-y-2 text-gray-700 dark:text-gray-300">
+            <ul className="list-disc pl-6 mt-3 space-y-2 dark:text-gray-300 text-gray-700">
               <li>
                 <strong>Valor legal:</strong> Los mensajes de datos (reservas, confirmaciones) tienen el 
                 mismo valor que los documentos físicos.
@@ -124,10 +124,10 @@ export default function LegalBasesPage() {
 
           <section>
             <h2 className="text-2xl font-bold text-gradient mb-4">5. Normativas Sanitarias</h2>
-            <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
+            <p className="dark:text-gray-300 text-gray-700 leading-relaxed">
               Los comercios registrados en Paporla deben cumplir con las siguientes normativas:
             </p>
-            <ul className="list-disc pl-6 mt-3 space-y-2 text-gray-700 dark:text-gray-300">
+            <ul className="list-disc pl-6 mt-3 space-y-2 dark:text-gray-300 text-gray-700">
               <li>
                 <strong>Reglamento General de la Ley de Salud:</strong> Normas sanitarias para 
                 establecimientos de alimentos.
@@ -141,7 +141,7 @@ export default function LegalBasesPage() {
               </li>
             </ul>
             <div className="mt-4 p-4 rounded-lg bg-yellow-500/10 border border-yellow-500/20">
-              <p className="text-sm text-gray-700 dark:text-gray-300">
+              <p className="text-sm dark:text-gray-300 text-gray-700">
                 ⚠️ <strong>Responsabilidad:</strong> Paporla verifica la documentación sanitaria inicial, 
                 pero los comercios son los únicos responsables ante las autoridades sanitarias por el 
                 cumplimiento continuo de las normas.
@@ -151,10 +151,10 @@ export default function LegalBasesPage() {
 
           <section>
             <h2 className="text-2xl font-bold text-gradient mb-4">6. Marco Internacional</h2>
-            <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
+            <p className="dark:text-gray-300 text-gray-700 leading-relaxed">
               Paporla se alinea con los <strong>Objetivos de Desarrollo Sostenible (ODS)</strong> de la ONU:
             </p>
-            <ul className="list-disc pl-6 mt-3 space-y-2 text-gray-700 dark:text-gray-300">
+            <ul className="list-disc pl-6 mt-3 space-y-2 dark:text-gray-300 text-gray-700">
               <li>
                 <strong>ODS 2 - Hambre Cero:</strong> Reducir el desperdicio alimentario.
               </li>
@@ -165,7 +165,7 @@ export default function LegalBasesPage() {
                 <strong>ODS 17 - Alianzas:</strong> Colaboración multisectorial.
               </li>
             </ul>
-            <p className="mt-4 text-gray-700 dark:text-gray-300">
+            <p className="mt-4 dark:text-gray-300 text-gray-700">
               Al expandirnos a otros países de Latinoamérica, Paporla se registrará ante las autoridades 
               locales (RNE, CNPD, ARCSA, etc.) y adaptará sus términos a la legislación específica de 
               cada jurisdicción.
@@ -174,13 +174,13 @@ export default function LegalBasesPage() {
 
           <section>
             <h2 className="text-2xl font-bold text-gradient mb-4">7. Contacto Legal</h2>
-            <div className="space-y-2 text-gray-700 dark:text-gray-300">
+            <div className="space-y-2 dark:text-gray-300 text-gray-700">
               <p>📧 <strong>Email:</strong> legal@paporla.com</p>
               <p>📍 <strong>Dirección:</strong> Caracas, Venezuela</p>
               <p>🌐 <strong>Web:</strong> <a href="/contacto" className="text-primary hover:underline">paporla.com/contacto</a></p>
             </div>
             <div className="mt-4 p-4 rounded-lg bg-green-500/10 border border-green-500/20">
-              <p className="text-sm text-gray-700 dark:text-gray-300">
+              <p className="text-sm dark:text-gray-300 text-gray-700">
                 📄 <strong>Nota:</strong> Este documento está en cumplimiento con el marco legal venezolano. 
                 Para operaciones internacionales, se aplicarán las leyes locales correspondientes.
               </p>

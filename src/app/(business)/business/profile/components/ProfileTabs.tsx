@@ -18,7 +18,7 @@ const iconMap = { Store, Image, MapPin, Clock, Settings };
 
 export default function ProfileTabs({ activeTab, onTabChange, tabs }: ProfileTabsProps) {
   return (
-    <div className="flex gap-1 bg-black/40 p-1 rounded-xl overflow-x-auto">
+    <div className="flex gap-1 dark:bg-black/40 bg-gray-100 p-1 rounded-xl overflow-x-auto">
       {tabs.map(tab => {
         const Icon = iconMap[tab.icon as keyof typeof iconMap];
         return (
@@ -26,7 +26,7 @@ export default function ProfileTabs({ activeTab, onTabChange, tabs }: ProfileTab
             key={tab.id}
             onClick={() => onTabChange(tab.id)}
             className={`flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-all whitespace-nowrap flex-1 justify-center ${
-              activeTab === tab.id ? 'bg-black/60 text-white shadow-lg border border-white/10' : 'text-gray-500 hover:text-gray-300'
+              activeTab === tab.id ? 'dark:bg-black/60 bg-white dark:text-white text-gray-900 shadow-lg dark:border-white/10 border-gray-200 border' : 'dark:text-gray-500 text-gray-400 hover:dark:text-gray-300 hover:text-gray-600'
             }`}
           >
             <Icon className="w-4 h-4" />

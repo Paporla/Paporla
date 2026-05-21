@@ -6,6 +6,7 @@ import Providers from './providers'
 import GoogleAnalytics from '@/components/GoogleAnalytics'
 import GoogleTagManager from '@/components/GoogleTagManager'
 import { ThemeProvider } from '@/context/ThemeContext'
+import { PWAProvider } from '@/components/ui/PWAProvider'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -65,7 +66,10 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 5,
   userScalable: true,
-  themeColor: '#00ff88',
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#ffffff' },
+    { media: '(prefers-color-scheme: dark)', color: '#0a0a1a' },
+  ],
 }
 
 export default function RootLayout({
@@ -75,11 +79,12 @@ export default function RootLayout({
 }) {
   return (
     <html lang="es">
-      <body className={`${inter.className} bg-black text-white min-h-screen`}>
+      <body className={inter.className}>
         <GoogleTagManager />
         <ThemeProvider>
           <Providers>
             <RouteLoader />
+            <PWAProvider />
             {children}
             <GoogleAnalytics />
           </Providers>

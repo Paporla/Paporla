@@ -19,7 +19,7 @@ export default function HistoryReservations({ reservations, historyRef }: Histor
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.3 }}
     >
-      <h2 className="text-2xl font-semibold text-white mb-4">
+      <h2 className="text-2xl font-semibold dark:text-white text-gray-900 mb-4">
         Historial
       </h2>
       {reservations.map(reservation => (

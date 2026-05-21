@@ -37,12 +37,12 @@ export default function DashboardHeader({ impactStats }: DashboardHeaderProps) {
     }
   }
 
-  const getLevel = (packs: number) => {
-    if (packs >= 50) return { name: 'Rescatador Élite', emoji: '🏆', nextThreshold: null };
-    if (packs >= 20) return { name: 'Rescatador Pro', emoji: '⭐', nextThreshold: 50 };
-    if (packs >= 10) return { name: 'Rescatador Avanzado', emoji: '🌟', nextThreshold: 20 };
-    if (packs >= 5) return { name: 'Rescatador', emoji: '🌱', nextThreshold: 10 };
-    return { name: 'Aprendiz', emoji: '🌿', nextThreshold: 5 };
+    const getLevel = (packs: number) => {
+    if (packs >= 50) return { name: 'Rescatador Elite', emoji: '', nextThreshold: null };
+    if (packs >= 20) return { name: 'Rescatador Pro', emoji: '', nextThreshold: 50 };
+    if (packs >= 10) return { name: 'Rescatador Avanzado', emoji: '', nextThreshold: 20 };
+    if (packs >= 5) return { name: 'Rescatador', emoji: '', nextThreshold: 10 };
+    return { name: 'Aprendiz', emoji: '', nextThreshold: 5 };
   };
 
   const level = getLevel(impactStats?.totalPacks || 0);
@@ -55,19 +55,19 @@ export default function DashboardHeader({ impactStats }: DashboardHeaderProps) {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl md:text-4xl font-bold text-gradient mb-2">
-            ¡Hola, {user?.name || 'Usuario'}!
+            Hola, {user?.name || 'Usuario'}!
           </h1>
           <div className="flex items-center gap-2">
-            <span className="text-sm text-gray-400">Nivel</span>
+            <span className="text-sm dark:text-gray-400 text-gray-600">Nivel</span>
             <span className="text-xs bg-primary/20 text-primary px-2 py-0.5 rounded-full flex items-center gap-1">
-              <span>{level.emoji}</span> {level.name}
+              <span>{level.name}</span>
             </span>
           </div>
         </div>
         
-        {/* Botón de notificaciones */}
+        {/* Boton de notificaciones */}
         <button className="relative">
-          <Bell className="w-6 h-6 text-gray-400 hover:text-primary transition-colors" />
+          <Bell className="w-6 h-6 dark:text-gray-400 text-gray-600 hover:text-primary transition-colors" />
           {unreadCount > 0 && (
             <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full text-[9px] font-bold text-white flex items-center justify-center animate-pulse">
               {unreadCount > 9 ? '9+' : unreadCount}
@@ -77,19 +77,19 @@ export default function DashboardHeader({ impactStats }: DashboardHeaderProps) {
       </div>
 
       {level.nextThreshold && (
-        <div className="bg-black/40 rounded-xl p-3">
-          <div className="flex items-center justify-between text-xs text-gray-400 mb-1">
-            <span>Progreso a {level.name === 'Rescatador' ? 'Rescatador' : level.nextThreshold === 50 ? 'Rescatador Élite' : 'Rescatador Pro'}</span>
+        <div className="dark:bg-black/40 bg-gray-100 rounded-xl p-3">
+          <div className="flex items-center justify-between text-xs dark:text-gray-400 text-gray-600 mb-1">
+            <span>Progreso a {level.name === 'Rescatador' ? 'Rescatador' : level.nextThreshold === 50 ? 'Rescatador Elite' : 'Rescatador Pro'}</span>
             <span>{points}/{level.nextThreshold} pts</span>
           </div>
-          <div className="h-2 bg-gray-800 rounded-full overflow-hidden">
+          <div className="h-2 dark:bg-gray-800 bg-gray-200 rounded-full overflow-hidden">
             <div className="h-full bg-gradient-to-r from-primary to-primary/60 rounded-full transition-all duration-500" style={{ width: `${progress}%` }} />
           </div>
         </div>
       )}
 
-      <p className="text-gray-400">
-        Bienvenido a tu panel. Aquí puedes ver y gestionar tus reservas.
+      <p className="dark:text-gray-400 text-gray-600">
+        Bienvenido a tu panel. Aqui puedes ver y gestionar tus reservas.
       </p>
     </motion.div>
   );

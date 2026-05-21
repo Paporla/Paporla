@@ -9,16 +9,16 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
   const pathname = usePathname()
 
   const titles: Record<string, { title: string; subtitle: string }> = {
-    '/login': { title: 'Bienvenido de vuelta', subtitle: 'Inicia sesión para continuar' },
-    '/register': { title: 'Crea tu cuenta', subtitle: 'Únete a la comunidad que rescata comida' },
-    '/forgot-password': { title: '¿Olvidaste tu contraseña?', subtitle: 'Te ayudamos a recuperarla' },
-    '/reset-password': { title: 'Nueva contraseña', subtitle: 'Ingresa tu nueva contraseña' },
+    '/login': { title: 'Bienvenido de vuelta', subtitle: 'Inicia sesion para continuar' },
+    '/register': { title: 'Crea tu cuenta', subtitle: 'Unete a la comunidad que rescata comida' },
+    '/forgot-password': { title: 'Olvidaste tu contrasena?', subtitle: 'Te ayudamos a recuperarla' },
+    '/reset-password': { title: 'Nueva contrasena', subtitle: 'Ingresa tu nueva contrasena' },
   }
 
   const current = titles[pathname] || titles['/login']
 
   return (
-    <div className="min-h-screen bg-black flex items-center justify-center py-20 px-4">
+    <div className="min-h-screen dark:bg-black bg-gray-50 flex items-center justify-center py-20 px-4">
       {/* Fondo decorativo */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-20 left-10 w-72 h-72 bg-primary/10 rounded-full blur-3xl animate-pulse" />
@@ -48,14 +48,14 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
           <h1 className="text-3xl md:text-4xl font-bold mb-2">
             <span className="text-gradient">{current.title}</span>
           </h1>
-          <p className="text-gray-400 text-sm mb-4">{current.subtitle}</p>
+          <p className="dark:text-gray-400 text-gray-600 text-sm mb-4">{current.subtitle}</p>
         </motion.div>
 
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="bg-black/40 backdrop-blur-sm rounded-2xl p-6 md:p-8 border border-white/10"
+          className="dark:bg-black/40 bg-white/80 backdrop-blur-sm rounded-2xl p-6 md:p-8 dark:border-white/10 border-gray-200"
         >
           {children}
         </motion.div>

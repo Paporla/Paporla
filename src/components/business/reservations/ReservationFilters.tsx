@@ -70,7 +70,7 @@ export default function ReservationFilters({
                   className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
                     statusFilter === option.value
                       ? `${option.color} bg-primary/10 border border-primary/30`
-                      : 'text-gray-400 hover:text-white hover:bg-white/5'
+                      : 'dark:text-gray-400 text-gray-600 dark:hover:text-white hover:text-gray-900 dark:hover:bg-white/5 hover:bg-gray-200'
                   }`}
                 >
                   {option.label}

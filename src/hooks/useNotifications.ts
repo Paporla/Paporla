@@ -33,7 +33,6 @@ export function useNotifications() {
       return;
     }
 
-    // Solo mostrar loading en la primera carga
     if (isFirstLoad.current) {
       setLoading(true);
     }
@@ -57,35 +56,54 @@ export function useNotifications() {
     isFirstLoad.current = false;
   }, [user, supabase]);
 
-  // Cargar al inicio
   useEffect(() => {
     loadNotifications();
   }, [loadNotifications]);
 
-  // Polling cada 30 segundos (sin mostrar loading)
   useEffect(() => {
-    if (!user) return;
-    
-    const interval = setInterval(() => {
-      // Recarga silenciosa - no afecta loading
-      (async () => {
-        if (!user) return;
-        
-        const { data, error } = await supabase
-          .from('notifications')
-          .select('*')
-          .eq('user_id', user.id)
-          .order('created_at', { ascending: false });
+    if (!user) return
 
-        if (!error && data) {
-          setNotifications(data);
-          setUnreadCount(data.filter(n => !n.is_read).length);
+    const channel = supabase
+      .channel('notifications-changes')
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'notifications', filter: `user_id=eq.${user.id}` },
+        (payload) => {
+          const newNotification = payload.new as Notification
+          setNotifications(prev => [newNotification, ...prev])
+          setUnreadCount(prev => prev + 1)
         }
-      })();
-    }, 30000);
-    
-    return () => clearInterval(interval);
-  }, [user, supabase]);
+      )
+      .on(
+        'postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'notifications', filter: `user_id=eq.${user.id}` },
+        (payload) => {
+          const updated = payload.new as Notification
+          setNotifications(prev => {
+            const updatedList = prev.map(n => n.id === updated.id ? updated : n)
+            setUnreadCount(updatedList.filter(n => !n.is_read).length)
+            return updatedList
+          })
+        }
+      )
+      .on(
+        'postgres_changes',
+        { event: 'DELETE', schema: 'public', table: 'notifications', filter: `user_id=eq.${user.id}` },
+        (payload) => {
+          const deletedId = payload.old.id as string
+          setNotifications(prev => {
+            const wasUnread = prev.find(n => n.id === deletedId)?.is_read === false
+            if (wasUnread) setUnreadCount(c => Math.max(0, c - 1))
+            return prev.filter(n => n.id !== deletedId)
+          })
+        }
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [user])
 
   const markAsRead = useCallback(async (notificationId: string) => {
     const { error } = await supabase

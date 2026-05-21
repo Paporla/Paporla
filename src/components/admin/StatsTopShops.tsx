@@ -12,11 +12,11 @@ export default function StatsTopShops({ data }: Props) {
     <Card glass className="p-6">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h3 className="text-lg font-semibold text-white">Top 5 Comercios</h3>
-          <p className="text-xs text-gray-500 mt-0.5">Con mas reservas</p>
+          <h3 className="text-lg font-semibold dark:text-white text-gray-900">Top 5 Comercios</h3>
+          <p className="text-xs dark:text-gray-500 text-gray-400 mt-0.5">Con mas reservas</p>
         </div>
         {data.length > 0 && (
-          <div className="flex items-center gap-1.5 text-xs text-gray-500 bg-white/5 px-3 py-1.5 rounded-lg">
+          <div className="flex items-center gap-1.5 text-xs dark:text-gray-500 text-gray-400 dark:bg-white/5 bg-gray-100 px-3 py-1.5 rounded-lg">
             <UserCheck className="w-3.5 h-3.5" />
             Total: {data.reduce((s, d) => s + d.reservations, 0)} reservas
           </div>
@@ -40,8 +40,8 @@ export default function StatsTopShops({ data }: Props) {
       ) : (
         <div className="text-center py-16">
           <Calendar className="w-12 h-12 text-gray-700 mx-auto mb-3" />
-          <p className="text-gray-500 text-sm">No hay datos suficientes</p>
-          <p className="text-xs text-gray-600 mt-1">Las estadisticas apareceran cuando haya reservas</p>
+          <p className="dark:text-gray-500 text-gray-400 text-sm">No hay datos suficientes</p>
+          <p className="text-xs dark:text-gray-600 text-gray-500 mt-1">Las estadisticas apareceran cuando haya reservas</p>
         </div>
       )}
     </Card>

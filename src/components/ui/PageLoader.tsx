@@ -11,7 +11,7 @@ export default function PageLoader({ message = 'Cargando...' }: { message?: stri
           animate={{ rotate: 360 }}
           transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
         />
-        <p className="text-gray-400">{message}</p>
+        <p className="dark:text-gray-400 text-gray-600">{message}</p>
       </div>
     </div>
   );

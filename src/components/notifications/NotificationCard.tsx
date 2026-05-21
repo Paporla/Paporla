@@ -70,7 +70,7 @@ export default function NotificationCard({ notification, onMarkAsRead, onDelete 
       exit={{ opacity: 0, y: -10 }}
       onClick={handleClick}
       className={`p-4 rounded-xl cursor-pointer transition-all duration-200 ${
-        isUnread ? 'bg-primary/5 border-l-2 border-primary' : 'hover:bg-white/5'
+        isUnread ? 'bg-primary/5 border-l-2 border-primary' : 'dark:hover:bg-white/5 hover:bg-gray-100'
       }`}
     >
       <div className="flex gap-3">
@@ -78,10 +78,10 @@ export default function NotificationCard({ notification, onMarkAsRead, onDelete 
           <Icon className={`w-4 h-4 ${config.color}`} />
         </div>
         <div className="flex-1 min-w-0">
-          <p className={`text-sm ${isUnread ? 'text-white font-medium' : 'text-gray-400'}`}>
+          <p className={`text-sm ${isUnread ? 'dark:text-white text-gray-900 font-medium' : 'dark:text-gray-400 text-gray-600'}`}>
             {notification.message}
           </p>
-          <p className="text-[10px] text-gray-500 mt-1">
+          <p className="text-[10px] dark:text-gray-500 text-gray-400 mt-1">
             {timeAgo(notification.created_at)}
           </p>
         </div>

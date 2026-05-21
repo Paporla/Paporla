@@ -63,47 +63,47 @@ export default function UserModal({ isOpen, user, onClose, onSave }: UserModalPr
               exit={{ opacity: 0, scale: 0.9 }}
               className="pointer-events-auto w-full max-w-md mx-4"
             >
-              <div className="bg-black/90 backdrop-blur-xl rounded-2xl border border-white/10 shadow-2xl overflow-hidden">
+              <div className="dark:bg-black/90 bg-white backdrop-blur-xl rounded-2xl dark:border-white/10 border-gray-200 shadow-2xl overflow-hidden">
                 {/* Header */}
-                <div className="flex items-center justify-between p-5 border-b border-white/10">
+                <div className="flex items-center justify-between p-5 border-b dark:border-white/10 border-gray-200">
                   <div className="flex items-center gap-3">
                     <div className="p-2 rounded-lg bg-primary/10">
                       <Shield className="w-5 h-5 text-primary" />
                     </div>
-                    <h2 className="text-xl font-bold text-white">Editar Usuario</h2>
+                    <h2 className="text-xl font-bold dark:text-white text-gray-900">Editar Usuario</h2>
                   </div>
                   <button
                     onClick={onClose}
-                    className="p-1 rounded-lg hover:bg-white/10 transition-colors"
+                    className="p-1 rounded-lg dark:hover:bg-white/10 hover:bg-gray-100 transition-colors"
                   >
-                    <X className="w-5 h-5 text-gray-400" />
+                    <X className="w-5 h-5 dark:text-gray-400 text-gray-600" />
                   </button>
                 </div>
 
                 {/* Body */}
                 <form onSubmit={handleSave} className="p-5 space-y-5">
                   <div>
-                    <label className="block text-sm font-medium text-gray-400 mb-1">
+                    <label className="block text-sm font-medium dark:text-gray-400 text-gray-600 mb-1">
                       Nombre
                     </label>
-                    <p className="text-white font-medium">{user.name || 'Sin nombre'}</p>
+                    <p className="dark:text-white text-gray-900 font-medium">{user.name || 'Sin nombre'}</p>
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-400 mb-1">
+                    <label className="block text-sm font-medium dark:text-gray-400 text-gray-600 mb-1">
                       Email
                     </label>
-                    <p className="text-white font-medium">{user.email}</p>
+                    <p className="dark:text-white text-gray-900 font-medium">{user.email}</p>
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-400 mb-2">
+                    <label className="block text-sm font-medium dark:text-gray-400 text-gray-600 mb-2">
                       Rol
                     </label>
                     <select
                       name="role"
                       defaultValue={user.role}
-                      className="w-full px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-white focus:border-primary focus:outline-none transition-all"
+                      className="w-full px-4 py-2 rounded-xl dark:bg-white/5 bg-gray-100 dark:border-white/10 border-gray-200 dark:text-white text-gray-900 focus:border-primary focus:outline-none transition-all"
                     >
                       {roles.map((role) => (
                         <option key={role.value} value={role.value} className={role.color}>

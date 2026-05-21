@@ -28,7 +28,7 @@ export default function LoginForm() {
     // Mensaje de registro exitoso
     const params = new URLSearchParams(window.location.search)
     if (params.get('registered') === 'true') {
-      setSuccess('✅ ¡Registro exitoso! Revisa tu email para confirmar tu cuenta.')
+      setSuccess('Registro exitoso! Revisa tu email para confirmar tu cuenta.')
     }
   }, [])
 
@@ -47,7 +47,7 @@ export default function LoginForm() {
         localStorage.removeItem('remembered_email')
       }
     } catch (err: any) {
-      setError(err.message || 'Error al iniciar sesión')
+      setError(err.message || 'Error al iniciar sesion')
     } finally {
       setLoading(false)
     }
@@ -56,7 +56,7 @@ export default function LoginForm() {
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
       <Input
-        label="Correo electrónico"
+        label="Correo electronico"
         type="email"
         placeholder="tu@email.com"
         value={email}
@@ -67,7 +67,7 @@ export default function LoginForm() {
       
       <div className="relative">
         <Input
-          label="Contraseña"
+          label="Contrasena"
           type={showPassword ? "text" : "password"}
           placeholder="••••••••"
           value={password}
@@ -78,7 +78,7 @@ export default function LoginForm() {
         <button
           type="button"
           onClick={() => setShowPassword(!showPassword)}
-          className="absolute right-3 top-9 text-gray-400 hover:text-primary transition-colors"
+          className="absolute right-3 top-9 dark:text-gray-400 text-gray-500 hover:text-primary transition-colors"
         >
           {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
         </button>
@@ -90,27 +90,27 @@ export default function LoginForm() {
             type="checkbox"
             checked={rememberMe}
             onChange={(e) => setRememberMe(e.target.checked)}
-            className="w-4 h-4 rounded border-white/20 bg-white/5 text-primary focus:ring-primary focus:ring-offset-0"
+            className="w-4 h-4 rounded dark:border-white/20 border-gray-300 dark:bg-white/5 bg-gray-100 text-primary focus:ring-primary focus:ring-offset-0"
           />
-          <span className="text-sm text-gray-400">Recordarme</span>
+          <span className="text-sm dark:text-gray-400 text-gray-600">Recordarme</span>
         </label>
         
         <Link 
           href="/forgot-password" 
           className="text-sm text-primary hover:underline transition-colors"
         >
-          ¿Olvidaste tu contraseña?
+          Olvidaste tu contrasena?
         </Link>
       </div>
       
       <Button type="submit" className="w-full py-2.5" disabled={loading}>
-        {loading ? 'Iniciando sesión...' : 'Iniciar Sesión'}
+        {loading ? 'Iniciando sesion...' : 'Iniciar Sesion'}
       </Button>
       
-      <div className="text-center text-sm text-gray-400">
-        ¿No tienes cuenta?{' '}
+      <div className="text-center text-sm dark:text-gray-400 text-gray-600">
+        No tienes cuenta?{' '}
         <Link href="/register" className="text-primary hover:underline font-medium">
-          Regístrate aquí
+          Registrate aqui
         </Link>
       </div>
       

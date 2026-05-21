@@ -79,7 +79,7 @@ export default async function EditPackPage({ params }: EditPackPageProps) {
           <div className="relative">
             <Link
               href="/business/packs"
-              className="inline-flex items-center gap-2 text-sm text-gray-400 hover:text-white transition-colors mb-6"
+              className="inline-flex items-center gap-2 text-sm dark:text-gray-400 text-gray-600 dark:hover:text-white hover:text-gray-900 transition-colors mb-6"
             >
               <ArrowLeft className="w-4 h-4" />
               Volver a packs
@@ -91,11 +91,11 @@ export default async function EditPackPage({ params }: EditPackPageProps) {
               </div>
 
               <div>
-                <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">
+                <h1 className="text-3xl md:text-4xl font-bold dark:text-white text-gray-900 mb-2">
                   Comercio suspendido
                 </h1>
-                <p className="text-gray-400 max-w-2xl">
-                  Tu comercio está suspendido temporalmente. No puedes editar
+                <p className="dark:text-gray-400 text-gray-600 max-w-2xl">
+                  Tu comercio esta suspendido temporalmente. No puedes editar
                   packs en este momento. Contacta con soporte si crees que se
                   trata de un error.
                 </p>
@@ -131,7 +131,7 @@ export default async function EditPackPage({ params }: EditPackPageProps) {
           <div className="relative">
             <Link
               href="/business/packs"
-              className="inline-flex items-center gap-2 text-sm text-gray-400 hover:text-white transition-colors mb-6"
+              className="inline-flex items-center gap-2 text-sm dark:text-gray-400 text-gray-600 dark:hover:text-white hover:text-gray-900 transition-colors mb-6"
             >
               <ArrowLeft className="w-4 h-4" />
               Volver a packs
@@ -143,13 +143,13 @@ export default async function EditPackPage({ params }: EditPackPageProps) {
               </div>
 
               <div className="flex-1">
-                <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">
-                  Verificación pendiente
+                <h1 className="text-3xl md:text-4xl font-bold dark:text-white text-gray-900 mb-2">
+                  Verificacion pendiente
                 </h1>
 
-                <p className="text-gray-400 max-w-2xl mb-6">
-                  Tu comercio todavía no está verificado. Puedes editar
-                  información básica, pero no podrás publicar packs activos
+                <p className="dark:text-gray-400 text-gray-600 max-w-2xl mb-6">
+                  Tu comercio todavia no esta verificado. Puedes editar
+                  informacion basica, pero no podras publicar packs activos
                   hasta que el administrador apruebe tu comercio.
                 </p>
 
@@ -181,7 +181,7 @@ export default async function EditPackPage({ params }: EditPackPageProps) {
         <div className="relative">
           <Link
             href="/business/packs"
-            className="inline-flex items-center gap-2 text-sm text-gray-400 hover:text-white transition-colors mb-6"
+            className="inline-flex items-center gap-2 text-sm dark:text-gray-400 text-gray-600 dark:hover:text-white hover:text-gray-900 transition-colors mb-6"
           >
             <ArrowLeft className="w-4 h-4" />
             Volver a packs
@@ -195,33 +195,33 @@ export default async function EditPackPage({ params }: EditPackPageProps) {
                 </div>
 
                 <div>
-                  <h1 className="text-3xl md:text-4xl font-bold text-white">
+                  <h1 className="text-3xl md:text-4xl font-bold dark:text-white text-gray-900">
                     Editar pack
                   </h1>
-                  <p className="text-gray-400 mt-1">
-                    Modifica la información de tu pack
+                  <p className="dark:text-gray-400 text-gray-600 mt-1">
+                    Modifica la informacion de tu pack
                   </p>
                 </div>
               </div>
 
               <div className="flex flex-wrap gap-2 mt-4">
-                <span className="inline-flex items-center rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-gray-300">
+                <span className="inline-flex items-center rounded-full border dark:border-white/10 border-gray-200 dark:bg-white/5 bg-gray-100 px-3 py-1 text-xs dark:text-gray-300 text-gray-700">
                   Estado:{' '}
-                  <span className="ml-1 text-white font-medium">
+                  <span className="ml-1 dark:text-white text-gray-900 font-medium">
                     {pack.status || 'active'}
                   </span>
                 </span>
 
-                <span className="inline-flex items-center rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-gray-300">
+                <span className="inline-flex items-center rounded-full border dark:border-white/10 border-gray-200 dark:bg-white/5 bg-gray-100 px-3 py-1 text-xs dark:text-gray-300 text-gray-700">
                   Stock:{' '}
-                  <span className="ml-1 text-white font-medium">
+                  <span className="ml-1 dark:text-white text-gray-900 font-medium">
                     {pack.remaining_stock}/{pack.total_stock}
                   </span>
                 </span>
 
-                <span className="inline-flex items-center rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-gray-300">
+                <span className="inline-flex items-center rounded-full border dark:border-white/10 border-gray-200 dark:bg-white/5 bg-gray-100 px-3 py-1 text-xs dark:text-gray-300 text-gray-700">
                   Comercio:{' '}
-                  <span className="ml-1 text-white font-medium">
+                  <span className="ml-1 dark:text-white text-gray-900 font-medium">
                     {shop.name}
                   </span>
                 </span>

@@ -79,7 +79,7 @@ export default function TerminosPage() {
                   <a
                     key={section.id}
                     href={`#${section.id}`}
-                    className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-gray-600 dark:text-gray-400 hover:bg-primary/10 hover:text-primary transition-all duration-300"
+                    className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm dark:text-gray-400 text-gray-600 hover:bg-primary/10 hover:text-primary transition-all duration-300"
                   >
                     <section.icon className="w-3 h-3" />
                     {section.title}
@@ -97,7 +97,7 @@ export default function TerminosPage() {
                   <FileText className="w-6 h-6 text-primary" />
                   1. Aceptación de los Términos
                 </h2>
-                <div className="space-y-3 text-gray-700 dark:text-gray-300 leading-relaxed">
+                <div className="space-y-3 dark:text-gray-300 text-gray-700 leading-relaxed">
                   <p>Al acceder y utilizar la plataforma Paporla (incluyendo el sitio web y aplicaciones móviles), usted acepta cumplir con estos Términos y Condiciones. Si no está de acuerdo con alguna parte de estos términos, no debe utilizar nuestros servicios.</p>
                   <p>Estos términos constituyen un acuerdo legal entre usted y Paporla, aplicable tanto en Venezuela como en los demás países de Latinoamérica donde operemos.</p>
                   <div className="p-4 rounded-lg bg-yellow-500/10 border border-yellow-500/20 mt-4">
@@ -114,12 +114,12 @@ export default function TerminosPage() {
                   2. Definiciones
                 </h2>
                 <div className="grid gap-4">
-                  <div className="p-3 rounded-lg bg-white/5"><strong className="text-primary">Paporla:</strong> Plataforma tecnológica que conecta comercios con excedentes alimentarios y usuarios interesados en rescatarlos.</div>
-                  <div className="p-3 rounded-lg bg-white/5"><strong className="text-primary">Pack:</strong> Producto o conjunto de productos alimenticios ofrecidos por un comercio a través de la plataforma.</div>
-                  <div className="p-3 rounded-lg bg-white/5"><strong className="text-primary">Comercio:</strong> Establecimiento comercial registrado en Paporla que ofrece packs.</div>
-                  <div className="p-3 rounded-lg bg-white/5"><strong className="text-primary">Usuario:</strong> Persona natural que utiliza la plataforma para reservar packs.</div>
-                  <div className="p-3 rounded-lg bg-white/5"><strong className="text-primary">Reserva:</strong> Acción mediante la cual un usuario aparta un pack para su recogida.</div>
-                  <div className="p-3 rounded-lg bg-white/5"><strong className="text-primary">Código de recogida:</strong> Identificador único generado al reservar, necesario para retirar el pack.</div>
+                  <div className="p-3 rounded-lg dark:bg-white/5 bg-gray-100"><strong className="text-primary">Paporla:</strong> Plataforma tecnológica que conecta comercios con excedentes alimentarios y usuarios interesados en rescatarlos.</div>
+                  <div className="p-3 rounded-lg dark:bg-white/5 bg-gray-100"><strong className="text-primary">Pack:</strong> Producto o conjunto de productos alimenticios ofrecidos por un comercio a través de la plataforma.</div>
+                  <div className="p-3 rounded-lg dark:bg-white/5 bg-gray-100"><strong className="text-primary">Comercio:</strong> Establecimiento comercial registrado en Paporla que ofrece packs.</div>
+                  <div className="p-3 rounded-lg dark:bg-white/5 bg-gray-100"><strong className="text-primary">Usuario:</strong> Persona natural que utiliza la plataforma para reservar packs.</div>
+                  <div className="p-3 rounded-lg dark:bg-white/5 bg-gray-100"><strong className="text-primary">Reserva:</strong> Acción mediante la cual un usuario aparta un pack para su recogida.</div>
+                  <div className="p-3 rounded-lg dark:bg-white/5 bg-gray-100"><strong className="text-primary">Código de recogida:</strong> Identificador único generado al reservar, necesario para retirar el pack.</div>
                 </div>
               </div>
             </motion.section>
@@ -130,7 +130,7 @@ export default function TerminosPage() {
                   <Users className="w-6 h-6 text-primary" />
                   3. Obligaciones del Usuario
                 </h2>
-                <p className="text-gray-700 dark:text-gray-300 mb-3">Como usuario de Paporla, usted se compromete a:</p>
+                <p className="dark:text-gray-300 text-gray-700 mb-3">Como usuario de Paporla, usted se compromete a:</p>
                 <ul className="list-none space-y-2">
                   <li className="flex items-start gap-2"><CheckCircle className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />Proporcionar información veraz, precisa y actualizada durante el registro.</li>
                   <li className="flex items-start gap-2"><CheckCircle className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />Mantener la confidencialidad de sus credenciales de acceso.</li>
@@ -149,7 +149,7 @@ export default function TerminosPage() {
                   <Store className="w-6 h-6 text-primary" />
                   4. Obligaciones del Comercio
                 </h2>
-                <p className="text-gray-700 dark:text-gray-300 mb-3">Los comercios registrados en Paporla se comprometen a:</p>
+                <p className="dark:text-gray-300 text-gray-700 mb-3">Los comercios registrados en Paporla se comprometen a:</p>
                 <ul className="list-none space-y-2">
                   <li className="flex items-start gap-2"><CheckCircle className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />Ofrecer productos en condiciones aptas para el consumo humano.</li>
                   <li className="flex items-start gap-2"><CheckCircle className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />Respetar las fechas y horarios de recogida acordados.</li>
@@ -168,7 +168,7 @@ export default function TerminosPage() {
                   <Calendar className="w-6 h-6 text-primary" />
                   5. Política de Reservas
                 </h2>
-                <p className="text-gray-700 dark:text-gray-300 mb-3">Las reservas en Paporla se realizan de forma gratuita y se confirman de inmediato. Al realizar una reserva, usted acepta:</p>
+                <p className="dark:text-gray-300 text-gray-700 mb-3">Las reservas en Paporla se realizan de forma gratuita y se confirman de inmediato. Al realizar una reserva, usted acepta:</p>
                 <ul className="list-none space-y-2">
                   <li className="flex items-start gap-2"><CheckCircle className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />Recoger el pack dentro del horario establecido por el comercio.</li>
                   <li className="flex items-start gap-2"><CheckCircle className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />Presentar el código de recogida generado por la plataforma.</li>
@@ -187,7 +187,7 @@ export default function TerminosPage() {
                   <CreditCard className="w-6 h-6 text-primary" />
                   6. Pagos y Reembolsos
                 </h2>
-                <p className="text-gray-700 dark:text-gray-300">Paporla no procesa pagos directamente. El pago del pack se realiza en efectivo directamente al comercio al momento de la recogida. En caso de que un pack no esté disponible o no cumpla con lo ofrecido, el usuario no está obligado a realizar el pago y debe reportar la situación a Paporla para la correspondiente sanción al comercio.</p>
+                <p className="dark:text-gray-300 text-gray-700">Paporla no procesa pagos directamente. El pago del pack se realiza en efectivo directamente al comercio al momento de la recogida. En caso de que un pack no esté disponible o no cumpla con lo ofrecido, el usuario no está obligado a realizar el pago y debe reportar la situación a Paporla para la correspondiente sanción al comercio.</p>
                 <div className="mt-4 p-4 rounded-lg bg-green-500/10 border border-green-500/20">
                   <p className="text-sm">💰 <strong>Consejo:</strong> Lleva el cambio exacto para agilizar el proceso de recogida.</p>
                 </div>
@@ -200,8 +200,8 @@ export default function TerminosPage() {
                   <XCircle className="w-6 h-6 text-primary" />
                   7. Cancelaciones
                 </h2>
-                <p className="text-gray-700 dark:text-gray-300">Los usuarios pueden cancelar sus reservas hasta 2 horas antes del horario límite de recogida. Las cancelaciones tardías o no presentarse sin cancelar afectarán la reputación del usuario y pueden resultar en la suspensión temporal o permanente de la cuenta.</p>
-                <p className="text-gray-700 dark:text-gray-300 mt-3">Los comercios pueden cancelar reservas por causas de fuerza mayor, debiendo notificar inmediatamente a los usuarios afectados.</p>
+                <p className="dark:text-gray-300 text-gray-700">Los usuarios pueden cancelar sus reservas hasta 2 horas antes del horario límite de recogida. Las cancelaciones tardías o no presentarse sin cancelar afectarán la reputación del usuario y pueden resultar en la suspensión temporal o permanente de la cuenta.</p>
+                <p className="dark:text-gray-300 text-gray-700 mt-3">Los comercios pueden cancelar reservas por causas de fuerza mayor, debiendo notificar inmediatamente a los usuarios afectados.</p>
               </div>
             </motion.section>
 
@@ -211,7 +211,7 @@ export default function TerminosPage() {
                   <AlertCircle className="w-6 h-6 text-primary" />
                   8. Limitación de Responsabilidad
                 </h2>
-                <p className="text-gray-700 dark:text-gray-300">Paporla actúa únicamente como intermediario tecnológico entre comercios y usuarios. No somos responsables por:</p>
+                <p className="dark:text-gray-300 text-gray-700">Paporla actúa únicamente como intermediario tecnológico entre comercios y usuarios. No somos responsables por:</p>
                 <ul className="list-none space-y-2 mt-3">
                   <li className="flex items-start gap-2"><AlertCircle className="w-4 h-4 text-yellow-500 mt-0.5 flex-shrink-0" />La calidad, cantidad o seguridad de los productos ofrecidos por los comercios.</li>
                   <li className="flex items-start gap-2"><AlertCircle className="w-4 h-4 text-yellow-500 mt-0.5 flex-shrink-0" />Retrasos o problemas en la recogida causados por los comercios.</li>
@@ -227,7 +227,7 @@ export default function TerminosPage() {
                   <Shield className="w-6 h-6 text-primary" />
                   9. Privacidad y Protección de Datos
                 </h2>
-                <p className="text-gray-700 dark:text-gray-300">En cumplimiento de la Ley Orgánica de Protección de Datos e Infogobierno de Venezuela y legislaciones similares en Latinoamérica, Paporla:</p>
+                <p className="dark:text-gray-300 text-gray-700">En cumplimiento de la Ley Orgánica de Protección de Datos e Infogobierno de Venezuela y legislaciones similares en Latinoamérica, Paporla:</p>
                 <ul className="list-none space-y-2 mt-3">
                   <li className="flex items-start gap-2"><CheckCircle className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />Recopila únicamente los datos necesarios para el funcionamiento de la plataforma.</li>
                   <li className="flex items-start gap-2"><CheckCircle className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />No comparte datos personales con terceros sin consentimiento explícito.</li>
@@ -244,7 +244,7 @@ export default function TerminosPage() {
                   <Bell className="w-6 h-6 text-primary" />
                   10. Modificaciones
                 </h2>
-                <p className="text-gray-700 dark:text-gray-300">Paporla se reserva el derecho de modificar estos términos en cualquier momento. Las modificaciones entrarán en vigor inmediatamente después de su publicación en la plataforma. Es responsabilidad del usuario revisar periódicamente los términos actualizados.</p>
+                <p className="dark:text-gray-300 text-gray-700">Paporla se reserva el derecho de modificar estos términos en cualquier momento. Las modificaciones entrarán en vigor inmediatamente después de su publicación en la plataforma. Es responsabilidad del usuario revisar periódicamente los términos actualizados.</p>
               </div>
             </motion.section>
 
@@ -254,8 +254,8 @@ export default function TerminosPage() {
                   <Scale className="w-6 h-6 text-primary" />
                   11. Jurisdicción y Ley Aplicable
                 </h2>
-                <p className="text-gray-700 dark:text-gray-300">Para operaciones en Venezuela, estos términos se rigen por las leyes de la República Bolivariana de Venezuela. Cualquier controversia será sometida a los tribunales competentes de Caracas.</p>
-                <p className="text-gray-700 dark:text-gray-300 mt-3">Para operaciones en otros países de Latinoamérica, se aplicarán las leyes locales correspondientes y la jurisdicción de los tribunales de cada país.</p>
+                <p className="dark:text-gray-300 text-gray-700">Para operaciones en Venezuela, estos términos se rigen por las leyes de la República Bolivariana de Venezuela. Cualquier controversia será sometida a los tribunales competentes de Caracas.</p>
+                <p className="dark:text-gray-300 text-gray-700 mt-3">Para operaciones en otros países de Latinoamérica, se aplicarán las leyes locales correspondientes y la jurisdicción de los tribunales de cada país.</p>
               </div>
             </motion.section>
 

@@ -79,7 +79,7 @@ export default function EmptyState({ type, icon: customIcon, title: customTitle,
         <div className="p-3 rounded-full bg-primary/10 mb-3">
           <Icon className="w-6 h-6 text-primary" />
         </div>
-        <p className="text-sm text-gray-400">{description}</p>
+        <p className="text-sm dark:text-gray-400 text-gray-600">{description}</p>
       </motion.div>
     );
   }
@@ -95,11 +95,11 @@ export default function EmptyState({ type, icon: customIcon, title: customTitle,
           <Icon className="w-10 h-10 text-primary" />
         </div>
         
-        <h3 className="text-xl font-bold text-white mb-2">
+        <h3 className="text-xl font-bold dark:text-white text-gray-900 mb-2">
           {title}
         </h3>
         
-        <p className="text-gray-400 mb-6 text-sm">
+        <p className="dark:text-gray-400 text-gray-600 mb-6 text-sm">
           {description}
         </p>
         

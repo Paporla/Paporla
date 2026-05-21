@@ -41,7 +41,7 @@ export default function RegisterFormFields({ formData, onChange, agreedToTerms, 
           <Input label="Contrasena" type={showPassword ? 'text' : 'password'} placeholder="******" value={formData.password}
             onChange={(e) => update({ password: e.target.value })} icon={<Lock className="w-4 h-4" />} required />
           <button type="button" onClick={() => setShowPassword(!showPassword)}
-            className="absolute right-3 top-9 text-gray-400 hover:text-primary transition-colors">
+            className="absolute right-3 top-9 dark:text-gray-400 text-gray-500 hover:text-primary transition-colors">
             {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
           </button>
         </div>
@@ -61,15 +61,15 @@ export default function RegisterFormFields({ formData, onChange, agreedToTerms, 
           <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }}>
             <Input label="Nombre del comercio" placeholder="Mi Restaurante" value={formData.shopName}
               onChange={(e) => update({ shopName: e.target.value })} icon={<Store className="w-4 h-4" />} required />
-            <p className="text-xs text-gray-500 mt-1 ml-10">Puedes completar el resto despues en tu panel</p>
+            <p className="text-xs dark:text-gray-500 text-gray-400 mt-1 ml-10">Puedes completar el resto despues en tu panel</p>
           </motion.div>
         )}
       </AnimatePresence>
 
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }} className="flex items-start gap-3">
         <input type="checkbox" id="terms" checked={agreedToTerms} onChange={(e) => onTermsChange(e.target.checked)}
-          className="mt-1 w-4 h-4 rounded border-gray-700 bg-gray-800 text-primary focus:ring-primary" />
-        <label htmlFor="terms" className="text-sm text-gray-400 leading-relaxed">
+          className="mt-1 w-4 h-4 rounded dark:border-gray-700 border-gray-300 dark:bg-gray-800 bg-gray-100 text-primary focus:ring-primary" />
+        <label htmlFor="terms" className="text-sm dark:text-gray-400 text-gray-600 leading-relaxed">
           Acepto los <Link href="/legal/terminos" className="text-primary hover:underline">Terminos y Condiciones</Link> y la{' '}
           <Link href="/legal/privacidad" className="text-primary hover:underline">Politica de Privacidad</Link>
         </label>

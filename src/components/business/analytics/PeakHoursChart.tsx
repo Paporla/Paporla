@@ -18,9 +18,9 @@ export default function PeakHoursChart({ data }: Props) {
       >
         <div className="flex items-center gap-2 mb-4">
           <Clock className="w-5 h-5 text-amber-400" />
-          <h3 className="font-bold text-white">Horarios de recogida</h3>
+          <h3 className="font-bold dark:text-white text-gray-900">Horarios de recogida</h3>
         </div>
-        <p className="text-gray-500 text-sm py-8 text-center">Sin datos de horarios disponibles</p>
+        <p className="dark:text-gray-500 text-gray-400 text-sm py-8 text-center">Sin datos de horarios disponibles</p>
       </motion.div>
     )
   }
@@ -35,7 +35,7 @@ export default function PeakHoursChart({ data }: Props) {
       <div className="flex items-center justify-between mb-5">
         <div className="flex items-center gap-2">
           <Clock className="w-5 h-5 text-amber-400" />
-          <h3 className="font-bold text-white">Horarios de recogida</h3>
+          <h3 className="font-bold dark:text-white text-gray-900">Horarios de recogida</h3>
         </div>
       </div>
       <div className="h-52">

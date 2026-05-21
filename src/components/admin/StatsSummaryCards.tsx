@@ -38,8 +38,8 @@ export default function StatsSummaryCards({ summary, growth }: Props) {
                   </span>
                 )}
               </div>
-              <p className="text-2xl font-black text-white tabular-nums">{value.toLocaleString()}</p>
-              <p className="text-xs text-gray-500 mt-0.5">{card.label}</p>
+              <p className="text-2xl font-black dark:text-white text-gray-900 tabular-nums">{value.toLocaleString()}</p>
+              <p className="text-xs dark:text-gray-500 text-gray-400 mt-0.5">{card.label}</p>
             </Card>
           </motion.div>
         )

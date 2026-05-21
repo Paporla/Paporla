@@ -5,7 +5,7 @@ import { applyRateLimit } from '@/lib/middleware/rateLimit'
 export async function middleware(request: NextRequest) {
   // Rate limiting para API routes
   if (request.nextUrl.pathname.startsWith('/api')) {
-    const rateLimitResponse = applyRateLimit(request)
+    const rateLimitResponse = await applyRateLimit(request)
     if (rateLimitResponse) return rateLimitResponse
   }
 

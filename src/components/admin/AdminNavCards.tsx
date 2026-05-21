@@ -30,8 +30,8 @@ export default function AdminNavCards({ stats }: Props) {
               <div className="flex items-center justify-between">
                 <div>
                   <div className={`text-3xl font-bold ${item.color} mb-2`}>{getValue(stats, item.key as any)}</div>
-                  <div className="text-gray-400 text-sm font-medium">{item.label}</div>
-                  <div className="text-xs text-gray-500 mt-1">{item.description}</div>
+                  <div className="dark:text-gray-400 text-gray-600 text-sm font-medium">{item.label}</div>
+                  <div className="text-xs dark:text-gray-500 text-gray-400 mt-1">{item.description}</div>
                 </div>
                 <div className={`p-3 rounded-xl ${item.bg} group-hover:scale-110 transition-transform`}>
                   <item.icon className={`w-6 h-6 ${item.color}`} />

@@ -68,22 +68,22 @@ export default function TodayPickups({ shopId }: Props) {
 
   if (loading) return (
     <div className="animate-pulse space-y-3">
-      {[1, 2, 3].map(i => <div key={i} className="h-24 bg-white/5 rounded-xl" />)}
+      {[1, 2, 3].map(i => <div key={i} className="h-24 dark:bg-white/5 bg-gray-100 rounded-xl" />)}
     </div>
   )
 
   if (pickups.length === 0) return (
-    <div className="text-center py-8 px-4 bg-white/5 rounded-xl border border-dashed border-white/10">
-      <Clock className="w-10 h-10 text-gray-600 mx-auto mb-2" />
-      <p className="text-gray-400 font-medium">No hay recogidas programadas para hoy</p>
-      <p className="text-xs text-gray-600 mt-1">Las reservas apareceran aqui automaticamente</p>
+    <div className="text-center py-8 px-4 dark:bg-white/5 bg-gray-50 rounded-xl border border-dashed dark:border-white/10 border-gray-200">
+      <Clock className="w-10 h-10 dark:text-gray-600 text-gray-400 mx-auto mb-2" />
+      <p className="dark:text-gray-400 text-gray-600 font-medium">No hay recogidas programadas para hoy</p>
+      <p className="text-xs dark:text-gray-600 text-gray-400 mt-1">Las reservas apareceran aqui automaticamente</p>
     </div>
   )
 
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-bold text-white flex items-center gap-2">
+        <h2 className="text-lg font-bold dark:text-white text-gray-900 flex items-center gap-2">
           <Clock className="w-5 h-5 text-primary" />
           Recogidas de Hoy
           <span className="text-sm bg-primary/20 text-primary px-2 py-0.5 rounded-full">{pickups.length}</span>

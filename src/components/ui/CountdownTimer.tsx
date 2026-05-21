@@ -59,14 +59,14 @@ export default function CountdownTimer({ targetDate, targetEndTime, onExpired }:
         animate={{ opacity: 1, scale: 1 }}
         className="text-red-400 text-xs font-medium"
       >
-        ⏰ Tiempo de recogida vencido
+        Tiempo de recogida vencido
       </motion.span>
     );
   }
 
   return (
     <span className="text-primary text-sm font-mono font-bold tabular-nums">
-      ⏱ {timeLeft}
+      {timeLeft}
     </span>
   );
 }

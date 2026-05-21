@@ -21,8 +21,8 @@ export default function AdminStatsPage() {
         <div className="flex items-center gap-4 mb-1">
           <div className="p-3 bg-primary/20 rounded-xl"><Activity className="w-8 h-8 text-primary" /></div>
           <div>
-            <h1 className="text-3xl md:text-4xl font-bold text-white">Estadisticas</h1>
-            <p className="text-gray-400 mt-1">Analisis detallado del crecimiento y actividad de la plataforma.</p>
+            <h1 className="text-3xl md:text-4xl font-bold dark:text-white text-gray-900">Estadisticas</h1>
+            <p className="dark:text-gray-400 text-gray-600 mt-1">Analisis detallado del crecimiento y actividad de la plataforma.</p>
           </div>
         </div>
       </motion.div>

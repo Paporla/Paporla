@@ -50,50 +50,50 @@ export default function ProfileMenu() {
       {menuSections.map((section, si) => (
         <div key={si} className="space-y-2">
           {section.title && (
-            <p className="text-xs font-bold text-gray-500 uppercase tracking-wider px-1 mb-2">
+            <p className="text-xs font-bold dark:text-gray-500 text-gray-400 uppercase tracking-wider px-1 mb-2">
               {section.title}
             </p>
           )}
-          <div className="bg-dark-card border border-dark-border rounded-2xl overflow-hidden divide-y divide-dark-border">
+          <div className="dark:bg-dark-card bg-white dark:border-dark-border border-gray-200 rounded-2xl overflow-hidden divide-y dark:divide-dark-border divide-gray-200">
             {section.items.map((item, ii) => (
               <Link
                 key={ii}
                 href={item.href}
-                className="flex items-center gap-3 px-4 py-3.5 hover:bg-white/[0.02] transition-colors group"
+                className="flex items-center gap-3 px-4 py-3.5 hover:dark:bg-white/[0.02] hover:bg-gray-50 transition-colors group"
               >
-                <div className="w-9 h-9 rounded-xl bg-dark-muted flex items-center justify-center group-hover:bg-primary/10 transition-colors">
-                  <item.icon className="w-4 h-4 text-gray-400 group-hover:text-primary transition-colors" />
+                <div className="w-9 h-9 rounded-xl dark:bg-dark-muted bg-gray-100 flex items-center justify-center group-hover:bg-primary/10 transition-colors">
+                  <item.icon className="w-4 h-4 dark:text-gray-400 text-gray-600 group-hover:text-primary transition-colors" />
                 </div>
-                <span className="flex-1 text-sm text-white">{item.label}</span>
+                <span className="flex-1 text-sm dark:text-white text-gray-900">{item.label}</span>
                 {item.value && (
-                  <span className="text-xs text-gray-500">{item.value}</span>
+                  <span className="text-xs dark:text-gray-500 text-gray-400">{item.value}</span>
                 )}
-                <ChevronRight className="w-4 h-4 text-gray-600 group-hover:text-gray-400 transition-colors" />
+                <ChevronRight className="w-4 h-4 dark:text-gray-600 text-gray-400 group-hover:dark:text-gray-400 group-hover:text-gray-600 transition-colors" />
               </Link>
             ))}
           </div>
         </div>
       ))}
 
-      {/* Botón de cerrar sesión */}
+      {/* Boton de cerrar sesion */}
       <button
         onClick={() => setIsLogoutModalOpen(true)}
-        className="w-full flex items-center gap-3 px-4 py-3.5 bg-dark-card border border-dark-border rounded-2xl hover:border-red-500/20 group transition-all"
+        className="w-full flex items-center gap-3 px-4 py-3.5 dark:bg-dark-card bg-white dark:border-dark-border border-gray-200 rounded-2xl hover:border-red-500/20 group transition-all"
       >
         <div className="w-9 h-9 rounded-xl bg-red-500/10 flex items-center justify-center">
           <LogOut className="w-4 h-4 text-red-400" />
         </div>
-        <span className="text-sm text-red-400 font-medium">Cerrar sesión</span>
+        <span className="text-sm text-red-400 font-medium">Cerrar sesion</span>
       </button>
 
-      {/* Modal de confirmación */}
+      {/* Modal de confirmacion */}
       <ConfirmModal
         isOpen={isLogoutModalOpen}
         onClose={() => setIsLogoutModalOpen(false)}
         onConfirm={handleLogout}
-        title="Cerrar sesión"
-        message="¿Estás seguro de que quieres cerrar sesión?"
-        confirmText="Sí, cerrar sesión"
+        title="Cerrar sesion"
+        message="Estas seguro de que quieres cerrar sesion?"
+        confirmText="Si, cerrar sesion"
         cancelText="Cancelar"
       />
     </>

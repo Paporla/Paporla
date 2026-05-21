@@ -34,15 +34,15 @@ export default function UserWelcomeBanner({
               Panel de Control
             </span>
           </div>
-          <h1 className="text-2xl lg:text-3xl font-bold text-white">
-            ¡Hola, <span className="text-primary">{userName}</span>!
+          <h1 className="text-2xl lg:text-3xl font-bold dark:text-white text-gray-900">
+            Hola, <span className="text-primary">{userName}</span>!
           </h1>
-          <p className="text-gray-400 text-sm mt-1">
-            Has rescatado <span className="text-primary font-bold">{packsRescued}</span> packs. 
-            ¡Sigue salvando comida! 🌱
+          <p className="dark:text-gray-400 text-gray-600 text-sm mt-1">
+            Has rescatado <span className="text-primary font-bold">{packsRescued}</span> packs.
+            Sigue salvando comida!
           </p>
           
-          {/* Enlaces rápidos a explorar */}
+          {/* Enlaces rapidos a explorar */}
           <div className="flex gap-3 mt-4">
             <Link
               href="/packs"
@@ -63,23 +63,23 @@ export default function UserWelcomeBanner({
         </div>
 
         <div className="flex items-center gap-3">
-          <div className="flex items-center gap-3 px-4 py-2 rounded-xl bg-black/40 backdrop-blur-sm border border-white/10">
+          <div className="flex items-center gap-3 px-4 py-2 rounded-xl dark:bg-black/40 bg-gray-100 backdrop-blur-sm border dark:border-white/10 border-gray-200">
             <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
               <Package className="w-5 h-5 text-primary" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-white">{packsRescued}</p>
-              <p className="text-[10px] text-gray-500">Packs salvados</p>
+              <p className="text-2xl font-bold dark:text-white text-gray-900">{packsRescued}</p>
+              <p className="text-[10px] dark:text-gray-500 text-gray-400">Packs salvados</p>
             </div>
           </div>
 
-          <div className="flex items-center gap-3 px-4 py-2 rounded-xl bg-black/40 backdrop-blur-sm border border-white/10">
+          <div className="flex items-center gap-3 px-4 py-2 rounded-xl dark:bg-black/40 bg-gray-100 backdrop-blur-sm border dark:border-white/10 border-gray-200">
             <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
               <Award className="w-5 h-5 text-primary" />
             </div>
             <div>
-              <p className="text-lg font-bold text-white">{level}</p>
-              <p className="text-[10px] text-gray-500">{points} pts</p>
+              <p className="text-lg font-bold dark:text-white text-gray-900">{level}</p>
+              <p className="text-[10px] dark:text-gray-500 text-gray-400">{points} pts</p>
             </div>
           </div>
         </div>

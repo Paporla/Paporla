@@ -40,23 +40,23 @@ export default function ProfileHeader({ name, email, avatarUrl, memberSince }: P
           )}
         </motion.div>
 
-        {/* Información */}
+        {/* Informacion */}
         <div className="flex-1 text-center sm:text-left">
           <div className="flex items-center gap-2 justify-center sm:justify-start flex-wrap">
-            <h1 className="text-2xl font-bold text-white">{displayName}</h1>
+            <h1 className="text-2xl font-bold dark:text-white text-gray-900">{displayName}</h1>
             <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full">
               Miembro desde {memberSince}
             </span>
           </div>
-          <p className="text-sm text-gray-400 mt-1">{email}</p>
+          <p className="text-sm dark:text-gray-400 text-gray-600 mt-1">{email}</p>
         </div>
 
-        {/* Botón editar perfil */}
+        {/* Boton editar perfil */}
         <Link href="/profile/edit">
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-dark-muted border border-dark-border text-gray-400 hover:text-white hover:border-primary/30 transition-all"
+            className="flex items-center gap-2 px-4 py-2 rounded-xl dark:bg-dark-muted bg-gray-100 dark:border-dark-border border-gray-200 dark:text-gray-400 text-gray-600 hover:dark:text-white hover:text-gray-900 hover:border-primary/30 transition-all"
           >
             <Settings className="w-4 h-4" />
             <span className="text-sm hidden sm:inline">Editar perfil</span>

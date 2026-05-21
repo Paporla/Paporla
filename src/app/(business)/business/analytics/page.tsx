@@ -31,10 +31,10 @@ export default function BusinessAnalyticsPage() {
   if (!shop) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
-        <div className="bg-black/40 backdrop-blur-sm rounded-2xl p-8 max-w-md border border-white/10">
+        <div className="bg-black/40 dark:bg-white/60 backdrop-blur-sm rounded-2xl p-8 max-w-md border dark:border-white/10 border-gray-200">
           <BarChart3 className="w-16 h-16 text-primary mx-auto mb-4" />
-          <h2 className="text-2xl font-bold text-white mb-2">Estadísticas</h2>
-          <p className="text-gray-400">Registra tu comercio para ver las estadísticas.</p>
+          <h2 className="text-2xl font-bold dark:text-white text-gray-900 mb-2">Estadisticas</h2>
+          <p className="dark:text-gray-400 text-gray-600">Registra tu comercio para ver las estadisticas.</p>
         </div>
       </div>
     );
@@ -75,8 +75,8 @@ export default function BusinessAnalyticsPage() {
         <div className="flex items-start gap-3">
           <TrendingUp className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
           <div>
-            <p className="text-sm font-medium text-white">Datos actualizados en tiempo real</p>
-            <p className="text-xs text-gray-500 mt-1">
+            <p className="text-sm font-medium dark:text-white text-gray-900">Datos actualizados en tiempo real</p>
+            <p className="text-xs dark:text-gray-500 text-gray-400 mt-1">
               Las estadísticas se actualizan automáticamente. Los datos reflejan la actividad general de tu comercio.
             </p>
           </div>

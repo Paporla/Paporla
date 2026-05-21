@@ -66,19 +66,19 @@ export default function ContactoPage() {
             <div className="glass-card rounded-2xl p-6 backdrop-blur-sm">
               <h2 className="text-2xl font-bold mb-6 text-gradient">Información</h2>
               <div className="space-y-4">
-                <div className="flex items-start gap-4 p-3 rounded-xl hover:bg-white/5 transition-all">
+                <div className="flex items-start gap-4 p-3 rounded-xl dark:hover:bg-white/5 hover:bg-gray-100 transition-all">
                   <div className="p-3 rounded-xl bg-primary/10"><MapPin className="w-5 h-5 text-primary" /></div>
                   <div><h3 className="font-semibold">Dirección</h3><p className="text-gray-600 dark:text-gray-300">Caracas, Venezuela</p></div>
                 </div>
-                <div className="flex items-start gap-4 p-3 rounded-xl hover:bg-white/5 transition-all">
+                <div className="flex items-start gap-4 p-3 rounded-xl dark:hover:bg-white/5 hover:bg-gray-100 transition-all">
                   <div className="p-3 rounded-xl bg-primary/10"><Phone className="w-5 h-5 text-primary" /></div>
                   <div><h3 className="font-semibold">Teléfono</h3><p className="text-gray-600 dark:text-gray-300">+58 212 555 1234</p></div>
                 </div>
-                <div className="flex items-start gap-4 p-3 rounded-xl hover:bg-white/5 transition-all">
+                <div className="flex items-start gap-4 p-3 rounded-xl dark:hover:bg-white/5 hover:bg-gray-100 transition-all">
                   <div className="p-3 rounded-xl bg-primary/10"><Mail className="w-5 h-5 text-primary" /></div>
                   <div><h3 className="font-semibold">Email</h3><p className="text-gray-600 dark:text-gray-300">hola@paporla.com</p></div>
                 </div>
-                <div className="flex items-start gap-4 p-3 rounded-xl hover:bg-white/5 transition-all">
+                <div className="flex items-start gap-4 p-3 rounded-xl dark:hover:bg-white/5 hover:bg-gray-100 transition-all">
                   <div className="p-3 rounded-xl bg-primary/10"><Clock className="w-5 h-5 text-primary" /></div>
                   <div><h3 className="font-semibold">Horario</h3><p className="text-gray-600 dark:text-gray-300">Lun - Vie: 9am - 6pm</p></div>
                 </div>
@@ -112,31 +112,31 @@ export default function ContactoPage() {
               <form onSubmit={handleSubmit} className="space-y-5">
                 <div className="grid md:grid-cols-2 gap-5">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Nombre completo *</label>
+                    <label className="block text-sm font-medium dark:text-gray-300 text-gray-700 mb-2">Nombre completo *</label>
                     <input type="text" name="name" value={formData.name} onChange={handleChange} required
-                      className="w-full px-4 py-3 rounded-xl bg-white/10 border border-gray-300 dark:border-gray-600 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
+                      className="w-full px-4 py-3 rounded-xl dark:bg-white/10 bg-white dark:border-gray-600 border-gray-200 dark:text-white text-gray-900 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
                       placeholder="Tu nombre" />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Email *</label>
+                    <label className="block text-sm font-medium dark:text-gray-300 text-gray-700 mb-2">Email *</label>
                     <input type="email" name="email" value={formData.email} onChange={handleChange} required
-                      className="w-full px-4 py-3 rounded-xl bg-white/10 border border-gray-300 dark:border-gray-600 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
+                      className="w-full px-4 py-3 rounded-xl dark:bg-white/10 bg-white dark:border-gray-600 border-gray-200 dark:text-white text-gray-900 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
                       placeholder="tu@email.com" />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Asunto *</label>
+                  <label className="block text-sm font-medium dark:text-gray-300 text-gray-700 mb-2">Asunto *</label>
                   <input type="text" name="subject" value={formData.subject} onChange={handleChange} required
-                    className="w-full px-4 py-3 rounded-xl bg-white/10 border border-gray-300 dark:border-gray-600 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
-                    placeholder="¿Sobre qué quieres hablar?" />
+                    className="w-full px-4 py-3 rounded-xl dark:bg-white/10 bg-white dark:border-gray-600 border-gray-200 dark:text-white text-gray-900 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
+                    placeholder="Sobre que quieres hablar?" />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Mensaje *</label>
+                  <label className="block text-sm font-medium dark:text-gray-300 text-gray-700 mb-2">Mensaje *</label>
                   <textarea name="message" rows={6} value={formData.message} onChange={handleChange} required
-                    className="w-full px-4 py-3 rounded-xl bg-white/10 border border-gray-300 dark:border-gray-600 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all resize-none"
-                    placeholder="Cuéntanos detalladamente tu mensaje..." />
+                    className="w-full px-4 py-3 rounded-xl dark:bg-white/10 bg-white dark:border-gray-600 border-gray-200 dark:text-white text-gray-900 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all resize-none"
+                    placeholder="Cuentanos detalladamente tu mensaje..." />
                 </div>
 
                 <motion.button

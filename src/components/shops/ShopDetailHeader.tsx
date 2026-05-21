@@ -56,7 +56,7 @@ export default function ShopDetailHeader({ shop }: ShopDetailHeaderProps) {
       )}
 
       {/* Overlay gradiente */}
-      <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a1a] via-[#0a0a1a]/70 to-transparent" />
+      <div className="absolute inset-0 dark:bg-gradient-to-t dark:from-[#0a0a1a] dark:via-[#0a0a1a]/70 dark:to-transparent bg-gradient-to-t from-gray-50 via-gray-50/70 to-transparent" />
 
       {/* Boton volver */}
       <button
@@ -80,7 +80,7 @@ export default function ShopDetailHeader({ shop }: ShopDetailHeaderProps) {
           className="flex flex-col md:flex-row items-start md:items-end gap-6"
         >
           {/* Logo */}
-          <div className="w-20 h-20 md:w-24 md:h-24 rounded-2xl overflow-hidden border-2 border-white/10 bg-[#0a0a1a] flex-shrink-0 shadow-xl">
+          <div className="w-20 h-20 md:w-24 md:h-24 rounded-2xl overflow-hidden border-2 dark:border-white/10 border-gray-200 dark:bg-[#0a0a1a] bg-white flex-shrink-0 shadow-xl">
             {hasLogo ? (
               <Image src={shop.logo_url!} alt={shop.name} width={96} height={96} className="object-cover w-full h-full" />
             ) : (
@@ -93,7 +93,7 @@ export default function ShopDetailHeader({ shop }: ShopDetailHeaderProps) {
           {/* Info */}
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-3 flex-wrap mb-2">
-              <h1 className="text-2xl md:text-3xl font-bold text-white truncate">
+              <h1 className="text-2xl md:text-3xl font-bold dark:text-white text-gray-900 truncate">
                 {shop.name}
               </h1>
               {shop.verified && (
@@ -111,7 +111,7 @@ export default function ShopDetailHeader({ shop }: ShopDetailHeaderProps) {
             </div>
 
             {shop.description && (
-              <p className="text-gray-400 text-sm md:text-base line-clamp-2 mb-3 max-w-2xl">
+              <p className="dark:text-gray-400 text-gray-600 text-sm md:text-base line-clamp-2 mb-3 max-w-2xl">
                 {shop.description}
               </p>
             )}
@@ -119,24 +119,24 @@ export default function ShopDetailHeader({ shop }: ShopDetailHeaderProps) {
             {/* Info chips */}
             <div className="flex flex-wrap gap-2">
               {(shop.address || shop.city) && (
-                <span className="inline-flex items-center gap-1 px-3 py-1.5 bg-white/5 border border-white/10 rounded-lg text-gray-400 text-xs">
+                <span className="inline-flex items-center gap-1 px-3 py-1.5 dark:bg-white/5 bg-gray-100 dark:border-white/10 border-gray-200 rounded-lg dark:text-gray-400 text-gray-600 text-xs">
                   <MapPin className="w-3.5 h-3.5 text-primary" />
                   {shop.address}{shop.city ? `, ${shop.city}` : ''}
                 </span>
               )}
               {shop.phone && (
-                <a href={`tel:${shop.phone}`} className="inline-flex items-center gap-1 px-3 py-1.5 bg-white/5 border border-white/10 rounded-lg text-gray-400 text-xs hover:text-primary hover:border-primary/30 transition-all">
+                <a href={`tel:${shop.phone}`} className="inline-flex items-center gap-1 px-3 py-1.5 dark:bg-white/5 bg-gray-100 dark:border-white/10 border-gray-200 rounded-lg dark:text-gray-400 text-gray-600 text-xs hover:text-primary hover:border-primary/30 transition-all">
                   <Phone className="w-3.5 h-3.5 text-primary" />
                   {shop.phone}
                 </a>
               )}
               {shop.website && (
-                <a href={shop.website.startsWith('http') ? shop.website : 'https://' + shop.website} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 px-3 py-1.5 bg-white/5 border border-white/10 rounded-lg text-gray-400 text-xs hover:text-primary hover:border-primary/30 transition-all">
+                <a href={shop.website.startsWith('http') ? shop.website : 'https://' + shop.website} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 px-3 py-1.5 dark:bg-white/5 bg-gray-100 dark:border-white/10 border-gray-200 rounded-lg dark:text-gray-400 text-gray-600 text-xs hover:text-primary hover:border-primary/30 transition-all">
                   <Globe className="w-3.5 h-3.5 text-primary" />
                   {shop.website.replace(/^https?:\/\//, '').replace(/\/$/, '').slice(0, 20)}
                 </a>
               )}
-              <span className="inline-flex items-center gap-1 px-3 py-1.5 bg-white/5 border border-white/10 rounded-lg text-gray-400 text-xs">
+              <span className="inline-flex items-center gap-1 px-3 py-1.5 dark:bg-white/5 bg-gray-100 dark:border-white/10 border-gray-200 rounded-lg dark:text-gray-400 text-gray-600 text-xs">
                 <Clock className="w-3.5 h-3.5 text-primary" />
                 {shop.packsCount} pack{shop.packsCount !== 1 ? 's' : ''} disponible{shop.packsCount !== 1 ? 's' : ''}
               </span>

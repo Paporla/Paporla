@@ -35,15 +35,15 @@ export default function ReservationChart({ data, title = 'Reservas', trend = 0 }
 
   if (data.length === 0) {
     return (
-      <div className="bg-dark-card border border-dark-border rounded-2xl p-6">
+      <div className="bg-dark-card dark:bg-white dark:border-gray-200 border border-dark-border rounded-2xl p-6">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
             <Calendar className="w-5 h-5 text-primary" />
-            <h3 className="font-bold text-white">{title}</h3>
+            <h3 className="font-bold dark:text-white text-gray-900">{title}</h3>
           </div>
         </div>
         <div className="h-64 flex items-center justify-center">
-          <p className="text-gray-500 text-sm">No hay datos disponibles</p>
+          <p className="dark:text-gray-500 text-gray-400 text-sm">No hay datos disponibles</p>
         </div>
       </div>
     );
@@ -53,17 +53,17 @@ export default function ReservationChart({ data, title = 'Reservas', trend = 0 }
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-dark-card border border-dark-border rounded-2xl p-6"
+      className="bg-dark-card dark:bg-white dark:border-gray-200 border border-dark-border rounded-2xl p-6"
     >
       <div className="flex items-center justify-between mb-6">
         <div>
           <div className="flex items-center gap-2 mb-1">
             <Calendar className="w-5 h-5 text-primary" />
-            <h3 className="font-bold text-white">{title}</h3>
+            <h3 className="font-bold dark:text-white text-gray-900">{title}</h3>
           </div>
           <div className="flex items-baseline gap-2">
-            <span className="text-2xl font-bold text-white">{total}</span>
-            <span className="text-sm text-gray-500">total</span>
+            <span className="text-2xl font-bold dark:text-white text-gray-900">{total}</span>
+            <span className="text-sm dark:text-gray-500 text-gray-400">total</span>
             {trend !== 0 && (
               <div className={`flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full ${isPositive ? 'text-green-400 bg-green-500/10' : 'text-red-400 bg-red-500/10'}`}>
                 {isPositive ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}

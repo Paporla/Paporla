@@ -54,7 +54,7 @@ export default function BusinessMobileNav() {
               />
               <span
                 className={`text-[10px] relative z-10 transition-colors ${
-                  active ? 'text-primary font-medium' : 'text-gray-500'
+                  active ? 'text-primary font-medium' : 'dark:text-gray-500 text-gray-400'
                 }`}
               >
                 {item.label === 'Stats' ? 'Estad' : item.label}

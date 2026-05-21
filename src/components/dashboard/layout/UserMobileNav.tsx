@@ -49,12 +49,12 @@ export default function UserMobileNav() {
               )}
               <Icon
                 className={`w-5 h-5 relative z-10 transition-colors ${
-                  active ? 'text-primary' : 'text-gray-500'
+                  active ? 'text-primary' : 'dark:text-gray-500 text-gray-400'
                 }`}
               />
               <span
                 className={`text-[10px] relative z-10 transition-colors ${
-                  active ? 'text-primary font-medium' : 'text-gray-500'
+                  active ? 'text-primary font-medium' : 'dark:text-gray-500 text-gray-400'
                 }`}
               >
                 {item.label === 'Dashboard' ? 'Inicio' : item.label}

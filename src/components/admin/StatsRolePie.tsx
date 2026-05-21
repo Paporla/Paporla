@@ -11,7 +11,7 @@ interface Props { data: Array<{ name: string; value: number }> }
 export default function StatsRolePie({ data }: Props) {
   return (
     <Card glass className="p-6">
-      <h3 className="text-lg font-semibold text-white mb-6">Distribucion por Rol</h3>
+      <h3 className="text-lg font-semibold dark:text-white text-gray-900 mb-6">Distribucion por Rol</h3>
       <div className="flex items-center justify-center">
         <ResponsiveContainer width="100%" height={280}>
           <PieChart>
@@ -27,8 +27,8 @@ export default function StatsRolePie({ data }: Props) {
         {data.map((d, i) => (
           <div key={d.name} className="flex items-center gap-2 text-xs">
             <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: COLORS[i] }} />
-            <span className="text-gray-400">{d.name}</span>
-            <span className="text-white font-medium ml-auto">{d.value}</span>
+            <span className="dark:text-gray-400 text-gray-600">{d.name}</span>
+            <span className="dark:text-white text-gray-900 font-medium ml-auto">{d.value}</span>
           </div>
         ))}
       </div>

@@ -32,14 +32,14 @@ export default function HeroSection() {
               className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/30 text-primary mb-6"
             >
               <Sparkles className="w-4 h-4" />
-              <span className="text-sm font-medium">✨ Lanzando en Caracas · 2026 ✨</span>
+              <span className="text-sm font-medium">Lanzando en Caracas - 2026</span>
             </motion.div>
 
             <motion.h1 
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
-              className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6 leading-tight"
+              className="text-4xl md:text-5xl lg:text-6xl font-bold dark:text-white text-gray-900 mb-6 leading-tight"
             >
               Comida de calidad.
               <br />
@@ -47,16 +47,16 @@ export default function HeroSection() {
                 Sin desperdiciar.
               </span>
               <br />
-              Sin pagar de más.
+              Sin pagar de mas.
             </motion.h1>
 
             <motion.p
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.4 }}
-              className="text-gray-400 text-lg max-w-md mb-8 leading-relaxed"
+              className="dark:text-gray-400 text-gray-600 text-lg max-w-md mb-8 leading-relaxed"
             >
-              Paporla conecta comercios con excedentes del día y personas como tú. 
+              Paporla conecta comercios con excedentes del dia y personas como tu. 
               Reserva, recoge y disfruta mientras ayudas al planeta.
             </motion.p>
 
@@ -70,13 +70,13 @@ export default function HeroSection() {
                 href="/packs" 
                 className="group relative overflow-hidden inline-flex items-center justify-center gap-2 px-8 py-3 rounded-full bg-primary text-black font-semibold transition-all shadow-lg shadow-primary/30 hover:shadow-xl text-center"
               >
-                <span className="relative z-10">Ver packs cerca de mí</span>
+                <span className="relative z-10">Ver packs cerca de mi</span>
                 <ArrowRight className="w-4 h-4 relative z-10 group-hover:translate-x-1 transition" />
                 <div className="absolute inset-0 bg-white/20 translate-x-full group-hover:translate-x-0 transition-transform duration-300" />
               </Link>
               <Link 
                 href="/shops" 
-                className="inline-flex items-center justify-center px-8 py-3 rounded-full border border-primary/40 text-white font-semibold hover:bg-primary/10 transition text-center"
+                className="inline-flex items-center justify-center px-8 py-3 rounded-full border border-primary/40 dark:text-white text-gray-900 font-semibold hover:bg-primary/10 transition text-center"
               >
                 Soy comercio
               </Link>
@@ -86,15 +86,15 @@ export default function HeroSection() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.6 }}
-              className="flex items-center justify-start gap-8 pt-4 border-t border-white/10"
+              className="flex items-center justify-start gap-8 pt-4 border-t dark:border-white/10 border-gray-300"
             >
               <div className="flex items-center gap-2">
                 <ShieldCheckIcon className="w-5 h-5 text-primary" />
-                <span className="text-sm text-gray-300">Comercios verificados</span>
+                <span className="text-sm dark:text-gray-300 text-gray-600">Comercios verificados</span>
               </div>
               <div className="flex items-center gap-2">
                 <ArrowPathIcon className="w-5 h-5 text-primary" />
-                <span className="text-sm text-gray-300">Reserva inmediata</span>
+                <span className="text-sm dark:text-gray-300 text-gray-600">Reserva inmediata</span>
               </div>
             </motion.div>
           </motion.div>

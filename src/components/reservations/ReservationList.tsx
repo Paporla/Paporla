@@ -76,22 +76,22 @@ export default function ReservationList({
       {/* Filtros */}
       <div className="flex flex-col sm:flex-row gap-3">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 dark:text-gray-500 text-gray-400" />
           <input
             type="text"
             placeholder="Buscar por pack o comercio..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 bg-dark-muted border border-dark-border rounded-xl text-sm text-white placeholder-gray-500 focus:border-primary focus:outline-none transition-all"
+            className="w-full pl-10 pr-4 py-2.5 dark:bg-dark-muted bg-gray-50 dark:border-dark-border border-gray-200 rounded-xl text-sm dark:text-white text-gray-900 placeholder-gray-500 focus:border-primary focus:outline-none transition-all"
           />
         </div>
 
         <div className="flex items-center gap-2">
-          <Filter className="w-4 h-4 text-gray-500" />
+          <Filter className="w-4 h-4 dark:text-gray-500 text-gray-400" />
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="px-4 py-2.5 bg-dark-muted border border-dark-border rounded-xl text-sm text-white focus:border-primary focus:outline-none transition-all"
+            className="px-4 py-2.5 dark:bg-dark-muted bg-gray-50 dark:border-dark-border border-gray-200 rounded-xl text-sm dark:text-white text-gray-900 focus:border-primary focus:outline-none transition-all"
           >
             {statusOptions.map((opt) => (
               <option key={opt.value} value={opt.value}>{opt.label}</option>

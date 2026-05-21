@@ -65,9 +65,9 @@ export default function BusinessPacksPage() {
                 <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
                   <Package className="w-5 h-5 text-primary" />
                 </div>
-                <h1 className="text-3xl md:text-4xl font-bold text-white">Mis Packs</h1>
+                <h1 className="text-3xl md:text-4xl font-bold dark:text-white text-gray-900">Mis Packs</h1>
               </div>
-              <p className="text-gray-400">Gestiona todos tus packs de rescate alimentario</p>
+              <p className="dark:text-gray-400 text-gray-600">Gestiona todos tus packs de rescate alimentario</p>
             </div>
             <Link href="/business/packs/new">
               <Button className="flex items-center gap-2">
@@ -93,7 +93,7 @@ export default function BusinessPacksPage() {
       {/* Packs Activos */}
       {filteredActive.length > 0 && (
         <PackGroup
-          title="📦 Packs Activos"
+          title="Packs Activos"
           packs={filteredActive}
           deleting={deleting}
           onDeleteClick={onDeleteClick}
@@ -104,12 +104,12 @@ export default function BusinessPacksPage() {
       {filteredInactive.length > 0 && (
         <div className="space-y-4">
           <div className="flex items-center gap-2 pt-4">
-            <div className="w-1 h-5 bg-gray-600 rounded-full" />
-            <h2 className="text-lg font-semibold text-gray-400">Historial</h2>
+            <div className="w-1 h-5 dark:bg-gray-600 bg-gray-300 rounded-full" />
+            <h2 className="text-lg font-semibold dark:text-gray-400 text-gray-500">Historial</h2>
           </div>
 
           <PackGroup
-            title="📦 Packs Inactivos"
+            title="Packs Inactivos"
             packs={filteredInactive}
             deleting={deleting}
             onDeleteClick={onDeleteClick}
@@ -120,12 +120,12 @@ export default function BusinessPacksPage() {
 
       {/* Sin packs */}
       {filteredActive.length === 0 && filteredInactive.length === 0 && packs.length === 0 && (
-        <div className="bg-dark-card border border-dark-border rounded-2xl p-12 text-center">
+        <div className="bg-dark-card dark:bg-white dark:border-gray-200 border dark:border-white/10 rounded-2xl p-12 text-center">
           <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-primary/10 flex items-center justify-center">
             <Package className="w-10 h-10 text-primary" />
           </div>
-          <p className="text-gray-400">No tienes packs creados</p>
-          <p className="text-xs text-gray-500 mt-1">Comienza a crear tu primer pack de rescate alimentario</p>
+          <p className="dark:text-gray-400 text-gray-600">No tienes packs creados</p>
+          <p className="text-xs dark:text-gray-500 text-gray-400 mt-1">Comienza a crear tu primer pack de rescate alimentario</p>
           <Link href="/business/packs/new">
             <Button className="mt-4">Crear mi primer pack</Button>
           </Link>

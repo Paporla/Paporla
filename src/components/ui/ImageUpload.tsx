@@ -34,11 +34,11 @@ export default function ImageUpload({
 
     // Validar tipo de archivo
     if (!file.type.startsWith('image/')) {
-      onError?.('Solo se permiten imágenes');
+      onError?.('Solo se permiten imagenes');
       return;
     }
 
-    // Validar tamaño (máx 5MB)
+    // Validar tamano (max 5MB)
     if (file.size > 5 * 1024 * 1024) {
       onError?.('La imagen no debe superar los 5MB');
       return;
@@ -47,7 +47,7 @@ export default function ImageUpload({
     setUploading(true);
 
     try {
-      // Generar nombre único
+      // Generar nombre unico
       const fileExt = file.name.split('.').pop();
       const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
       const filePath = `${path}/${fileName}`;
@@ -62,7 +62,7 @@ export default function ImageUpload({
 
       if (uploadError) throw uploadError;
 
-      // Obtener URL pública
+      // Obtener URL publica
       const { data: { publicUrl } } = supabase.storage
         .from(bucket)
         .getPublicUrl(filePath);
@@ -87,7 +87,7 @@ export default function ImageUpload({
 
   return (
     <div className="space-y-2">
-      <label className="block text-sm font-medium text-gray-400">
+      <label className="block text-sm font-medium dark:text-gray-400 text-gray-600">
         {label}
       </label>
       
@@ -110,7 +110,7 @@ export default function ImageUpload({
               exit={{ opacity: 0, scale: 0.9 }}
               className="relative group"
             >
-                            <div className="relative w-full h-40 rounded-xl overflow-hidden bg-gray-800">
+              <div className="relative w-full h-40 rounded-xl overflow-hidden dark:bg-gray-800 bg-gray-100">
                 <Image 
                   src={preview} 
                   alt="Preview" 
@@ -118,7 +118,7 @@ export default function ImageUpload({
                   className="object-cover"
                   sizes="(max-width: 768px) 100vw, 400px"
                 />
-                <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                <div className="absolute inset-0 dark:bg-black/50 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
                   <button
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
@@ -137,7 +137,7 @@ export default function ImageUpload({
                 </div>
               </div>
               {uploading && (
-                <div className="absolute inset-0 bg-black/70 rounded-xl flex items-center justify-center">
+                <div className="absolute inset-0 dark:bg-black/70 bg-black/50 rounded-xl flex items-center justify-center">
                   <Loader2 className="w-8 h-8 text-primary animate-spin" />
                 </div>
               )}
@@ -149,15 +149,15 @@ export default function ImageUpload({
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.9 }}
               onClick={() => fileInputRef.current?.click()}
-              className="w-full h-40 rounded-xl border-2 border-dashed border-white/20 bg-white/5 hover:border-primary/50 hover:bg-white/10 transition-all cursor-pointer flex flex-col items-center justify-center gap-2"
+              className="w-full h-40 rounded-xl border-2 border-dashed dark:border-gray-600 border-gray-300 dark:bg-gray-50 bg-gray-50 hover:border-primary/50 dark:hover:bg-gray-100 hover:bg-gray-100 transition-all cursor-pointer flex flex-col items-center justify-center gap-2"
             >
               {uploading ? (
                 <Loader2 className="w-8 h-8 text-primary animate-spin" />
               ) : (
                 <>
-                  <ImageIcon className="w-8 h-8 text-gray-500" />
-                  <p className="text-sm text-gray-500">Haz clic para subir imagen</p>
-                  <p className="text-xs text-gray-600">JPG, PNG, GIF hasta 5MB</p>
+                  <ImageIcon className="w-8 h-8 dark:text-gray-500 text-gray-400" />
+                  <p className="text-sm dark:text-gray-500 text-gray-400">Haz clic para subir imagen</p>
+                  <p className="text-xs dark:text-gray-600 text-gray-500">JPG, PNG, GIF hasta 5MB</p>
                 </>
               )}
             </motion.div>

@@ -27,18 +27,18 @@ export default function ActiveReservations({
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.2 }}
     >
-      <h2 className="text-2xl font-semibold text-white mb-4 flex items-center gap-2">
+      <h2 className="text-2xl font-semibold dark:text-white text-gray-900 mb-4 flex items-center gap-2">
         <Clock className="w-5 h-5 text-primary" />
         Reservas Activas
         {reservations.length > 0 && (
-          <span className="text-sm text-gray-400 ml-2">({reservations.length})</span>
+          <span className="text-sm dark:text-gray-400 text-gray-600 ml-2">({reservations.length})</span>
         )}
       </h2>
       
       {reservations.length === 0 ? (
         <Card glass className="text-center py-8">
-          <Package className="w-12 h-12 text-gray-600 mx-auto mb-3" />
-          <p className="text-gray-400">No tienes reservas activas</p>
+          <Package className="w-12 h-12 dark:text-gray-600 text-gray-400 mx-auto mb-3" />
+          <p className="dark:text-gray-400 text-gray-600">No tienes reservas activas</p>
           <Link href="/packs" className="text-primary hover:underline text-sm mt-2 inline-block">
             Explorar packs disponibles →
           </Link>

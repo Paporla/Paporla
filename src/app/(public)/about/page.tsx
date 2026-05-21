@@ -26,7 +26,7 @@ export default function AboutPage() {
             <h1 className="text-4xl md:text-6xl font-bold text-gradient mb-4">
               Sobre Paporla
             </h1>
-            <p className="text-gray-400 text-lg max-w-2xl mx-auto">
+            <p className="dark:text-gray-400 text-gray-600 text-lg max-w-2xl mx-auto">
               Transformando el desperdicio alimentario en oportunidades para todos
             </p>
           </motion.div>
@@ -47,8 +47,8 @@ export default function AboutPage() {
                   <Target className="w-8 h-8 text-primary" />
                 </div>
               </div>
-              <h2 className="text-2xl font-bold text-white mb-4">Nuestra Misión</h2>
-              <p className="text-gray-400 leading-relaxed">
+              <h2 className="text-2xl font-bold dark:text-white text-gray-900 mb-4">Nuestra Mision</h2>
+              <p className="dark:text-gray-400 text-gray-600 leading-relaxed">
                 En Paporla, nuestra misión es reducir el desperdicio alimentario 
                 conectando comercios con excedentes de comida. 
                 Creemos que ningún alimento debería terminar en la basura.
@@ -70,8 +70,8 @@ export default function AboutPage() {
                   <Globe className="w-8 h-8 text-primary" />
                 </div>
               </div>
-              <h2 className="text-2xl font-bold text-white mb-4">Nuestra Visión</h2>
-              <p className="text-gray-400 leading-relaxed">
+              <h2 className="text-2xl font-bold dark:text-white text-gray-900 mb-4">Nuestra Vision</h2>
+              <p className="dark:text-gray-400 text-gray-600 leading-relaxed">
                 Aspiramos a ser la plataforma líder de rescate alimentario en Latinoamérica, 
                 creando un ecosistema donde comercios, consumidores y comunidades trabajen 
                 juntos para eliminar el desperdicio de alimentos.
@@ -87,7 +87,7 @@ export default function AboutPage() {
             transition={{ delay: 0.2 }}
             className="mt-8"
           >
-            <h2 className="text-2xl font-bold text-white text-center mb-8">Nuestros Valores</h2>
+            <h2 className="text-2xl font-bold dark:text-white text-gray-900 text-center mb-8">Nuestros Valores</h2>
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
               {[
                 { icon: Leaf, title: 'Sostenibilidad', desc: 'Comprometidos con el medio ambiente reduciendo el desperdicio', color: 'text-green-400', bgColor: 'bg-green-400/10' },
@@ -108,8 +108,8 @@ export default function AboutPage() {
                     <div className={`p-3 ${value.bgColor} rounded-xl inline-flex mb-3`}>
                       <value.icon className={`w-6 h-6 ${value.color}`} />
                     </div>
-                    <h3 className="font-semibold text-white mb-2">{value.title}</h3>
-                    <p className="text-gray-400 text-sm">{value.desc}</p>
+                    <h3 className="font-semibold dark:text-white text-gray-900 mb-2">{value.title}</h3>
+                    <p className="dark:text-gray-400 text-gray-600 text-sm">{value.desc}</p>
                   </Card>
                 </motion.div>
               ))}
@@ -125,23 +125,23 @@ export default function AboutPage() {
             className="mt-16"
           >
             <div className="glass-card rounded-2xl p-8">
-              <h2 className="text-2xl font-bold text-white text-center mb-8">Nuestro Impacto</h2>
+              <h2 className="text-2xl font-bold dark:text-white text-gray-900 text-center mb-8">Nuestro Impacto</h2>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
                 <div>
                   <div className="text-3xl font-bold text-primary">50+</div>
-                  <div className="text-xs text-gray-400 mt-1">Comercios aliados</div>
+                  <div className="text-xs dark:text-gray-400 text-gray-600 mt-1">Comercios aliados</div>
                 </div>
                 <div>
                   <div className="text-3xl font-bold text-primary">1,200+</div>
-                  <div className="text-xs text-gray-400 mt-1">Packs vendidos</div>
+                  <div className="text-xs dark:text-gray-400 text-gray-600 mt-1">Packs vendidos</div>
                 </div>
                 <div>
                   <div className="text-3xl font-bold text-primary">2,500kg</div>
-                  <div className="text-xs text-gray-400 mt-1">Comida rescatada</div>
+                  <div className="text-xs dark:text-gray-400 text-gray-600 mt-1">Comida rescatada</div>
                 </div>
                 <div>
                   <div className="text-3xl font-bold text-primary">800+</div>
-                  <div className="text-xs text-gray-400 mt-1">Usuarios activos</div>
+                  <div className="text-xs dark:text-gray-400 text-gray-600 mt-1">Usuarios activos</div>
                 </div>
               </div>
             </div>
@@ -159,10 +159,10 @@ export default function AboutPage() {
               <div className="absolute inset-0 bg-gradient-to-r from-primary/20 via-secondary/20 to-primary/20" />
               <div className="absolute inset-0 backdrop-blur-sm" />
               <div className="relative">
-                <h3 className="text-2xl font-bold text-white mb-3">
-                  ¿Quieres ser parte del cambio?
+                <h3 className="text-2xl font-bold dark:text-white text-gray-900 mb-3">
+                  Quieres ser parte del cambio?
                 </h3>
-                <p className="text-gray-300 mb-6 max-w-md mx-auto">
+                <p className="dark:text-gray-300 text-gray-700 mb-6 max-w-md mx-auto">
                   Únete a Paporla y comienza a rescatar comida hoy mismo
                 </p>
                 <div className="flex flex-col sm:flex-row gap-4 justify-center">

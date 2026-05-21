@@ -81,12 +81,12 @@ export default function AlertsPanel() {
 
   if (loading) {
     return (
-      <div className="bg-black/40 backdrop-blur-sm border border-white/10 rounded-2xl p-6">
+      <div className="dark:bg-black/40 bg-gray-50 backdrop-blur-sm dark:border-white/10 border-gray-200 rounded-2xl p-6">
         <div className="animate-pulse space-y-4">
-          <div className="h-6 w-32 bg-gray-800 rounded" />
+          <div className="h-6 w-32 dark:bg-gray-800 bg-gray-200 rounded" />
           <div className="space-y-3">
             {[...Array(3)].map((_, i) => (
-              <div key={i} className="h-20 bg-gray-800 rounded-xl" />
+              <div key={i} className="h-20 dark:bg-gray-800 bg-gray-200 rounded-xl" />
             ))}
           </div>
         </div>
@@ -95,17 +95,17 @@ export default function AlertsPanel() {
   }
 
   return (
-    <div className="bg-black/40 backdrop-blur-sm border border-white/10 rounded-2xl p-6">
+    <div className="dark:bg-black/40 bg-gray-50 backdrop-blur-sm dark:border-white/10 border-gray-200 rounded-2xl p-6">
       <div className="mb-6">
-        <h3 className="text-lg font-semibold text-white">Alertas</h3>
-        <p className="text-xs text-gray-500 mt-1">Eventos que requieren atencion</p>
+        <h3 className="text-lg font-semibold dark:text-white text-gray-900">Alertas</h3>
+        <p className="text-xs dark:text-gray-500 text-gray-400 mt-1">Eventos que requieren atencion</p>
       </div>
 
       {alerts.length === 0 ? (
         <div className="text-center py-10">
           <CheckCircle className="w-10 h-10 text-green-500/50 mx-auto mb-3" />
-          <p className="text-gray-500 text-sm">No hay alertas activas</p>
-          <p className="text-xs text-gray-600 mt-1">Todo esta funcionando correctamente.</p>
+          <p className="dark:text-gray-500 text-gray-400 text-sm">No hay alertas activas</p>
+          <p className="text-xs dark:text-gray-600 text-gray-500 mt-1">Todo esta funcionando correctamente.</p>
         </div>
       ) : (
         <div className="space-y-3">
@@ -124,15 +124,15 @@ export default function AlertsPanel() {
                   <Icon className={'w-4 h-4 ' + styles.iconColor} />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-white">{alert.title}</p>
-                  <p className="text-xs text-gray-500 mt-0.5">{alert.description}</p>
+                  <p className="text-sm font-medium dark:text-white text-gray-900">{alert.title}</p>
+                  <p className="text-xs dark:text-gray-500 text-gray-400 mt-0.5">{alert.description}</p>
                   <div className="flex items-center gap-3 mt-2">
                     {alert.action && alert.actionLink && (
                       <a href={alert.actionLink} className={'text-[10px] font-semibold ' + styles.actionText + ' ' + styles.actionBg + ' px-3 py-1 rounded-lg transition-colors'}>
                         {alert.action}
                       </a>
                     )}
-                    <span className="flex items-center gap-1 text-[10px] text-gray-600">
+                    <span className="flex items-center gap-1 text-[10px] dark:text-gray-600 text-gray-500">
                       <Clock className="w-3 h-3" />
                       {alert.time}
                     </span>

@@ -40,32 +40,32 @@ export default function PackPaymentPanel({
     <div className="space-y-5">
       {/* Selector de cantidad */}
       <div className="flex items-center gap-4">
-        <span className="text-gray-300">Cantidad:</span>
+        <span className="dark:text-gray-300 text-gray-700">Cantidad:</span>
         <div className="flex items-center gap-2">
           <button
             onClick={() => setQuantity(Math.max(1, quantity - 1))}
-            className="w-8 h-8 rounded-lg bg-gray-800 hover:bg-gray-700 text-white transition-colors"
+            className="w-8 h-8 rounded-lg dark:bg-gray-800 bg-gray-200 dark:hover:bg-gray-700 hover:bg-gray-300 dark:text-white text-gray-900 transition-colors"
           >
             -
           </button>
-          <span className="w-12 text-center text-white font-semibold">{quantity}</span>
+          <span className="w-12 text-center dark:text-white text-gray-900 font-semibold">{quantity}</span>
           <button
             onClick={() => setQuantity(Math.min(remainingStock, quantity + 1))}
-            className="w-8 h-8 rounded-lg bg-gray-800 hover:bg-gray-700 text-white transition-colors"
+            className="w-8 h-8 rounded-lg dark:bg-gray-800 bg-gray-200 dark:hover:bg-gray-700 hover:bg-gray-300 dark:text-white text-gray-900 transition-colors"
           >
             +
           </button>
         </div>
       </div>
 
-      {/* Método de pago */}
+      {/* Metodo de pago */}
       <div className="p-4 glass-card rounded-xl">
-        <h3 className="font-semibold text-white mb-3 flex items-center gap-2">
+        <h3 className="font-semibold dark:text-white text-gray-900 mb-3 flex items-center gap-2">
           <CreditCard className="w-4 h-4 text-primary" />
-          Método de pago
+          Metodo de pago
         </h3>
         <div className="space-y-2">
-          <label className="flex items-center gap-3 p-3 rounded-xl bg-white/5 border border-white/10 cursor-pointer hover:border-primary/50 transition-all has-checked:border-primary has-checked:bg-primary/10">
+          <label className="flex items-center gap-3 p-3 rounded-xl dark:bg-white/5 bg-gray-100 dark:border-white/10 border-gray-200 cursor-pointer hover:border-primary/50 transition-all has-checked:border-primary has-checked:bg-primary/10">
             <input
               type="radio"
               name="payment"
@@ -75,11 +75,11 @@ export default function PackPaymentPanel({
               className="w-4 h-4 accent-primary"
             />
             <div className="flex-1">
-              <p className="text-white text-sm font-medium">Efectivo</p>
-              <p className="text-xs text-gray-500">Paga al recoger en el comercio</p>
+              <p className="dark:text-white text-gray-900 text-sm font-medium">Efectivo</p>
+              <p className="text-xs dark:text-gray-500 text-gray-400">Paga al recoger en el comercio</p>
             </div>
           </label>
-          <label className="flex items-center gap-3 p-3 rounded-xl bg-white/5 border border-white/10 cursor-pointer hover:border-primary/50 transition-all has-checked:border-primary has-checked:bg-primary/10">
+          <label className="flex items-center gap-3 p-3 rounded-xl dark:bg-white/5 bg-gray-100 dark:border-white/10 border-gray-200 cursor-pointer hover:border-primary/50 transition-all has-checked:border-primary has-checked:bg-primary/10">
             <input
               type="radio"
               name="payment"
@@ -89,14 +89,14 @@ export default function PackPaymentPanel({
               className="w-4 h-4 accent-primary"
             />
             <div className="flex-1">
-              <p className="text-white text-sm font-medium">Demo</p>
-              <p className="text-xs text-gray-500">Confirmación de prueba (sin pago real)</p>
+              <p className="dark:text-white text-gray-900 text-sm font-medium">Demo</p>
+              <p className="text-xs dark:text-gray-500 text-gray-400">Confirmacion de prueba (sin pago real)</p>
             </div>
           </label>
         </div>
       </div>
 
-      {/* Políticas */}
+      {/* Politicas */}
       <label className="flex items-start gap-3 cursor-pointer group">
         <input
           type="checkbox"
@@ -104,12 +104,12 @@ export default function PackPaymentPanel({
           onChange={() => setAcceptedPolicies(!acceptedPolicies)}
           className="mt-1 w-4 h-4 accent-primary rounded"
         />
-        <div className="text-xs text-gray-400 group-hover:text-gray-300 transition-colors">
+        <div className="text-xs dark:text-gray-400 text-gray-600 group-hover:dark:text-gray-300 group-hover:text-gray-500 transition-colors">
           Acepto las{' '}
           <Link href="/legal/politicas-retiro" target="_blank" className="text-primary hover:underline">
-            políticas de retiro y cancelación
+            politicas de retiro y cancelacion
           </Link>
-          . Confirmo que podré recoger el pedido en la fecha y hora indicadas.
+          . Confirmo que podre recoger el pedido en la fecha y hora indicadas.
         </div>
       </label>
 

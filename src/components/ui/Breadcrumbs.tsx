@@ -68,7 +68,7 @@ export default function Breadcrumbs() {
   if (breadcrumbs.length <= 2 && breadcrumbs[1]?.href === '/') return null
 
   return (
-    <div className="border-b border-dark-border">
+    <div className="border-b dark:border-gray-700 border-gray-200">
       <div className="container mx-auto px-4">
         <div className="py-2.5">
           <nav className="flex items-center gap-1 text-xs md:text-sm overflow-x-auto whitespace-nowrap scrollbar-hide">
@@ -80,7 +80,7 @@ export default function Breadcrumbs() {
                   {!isLast ? (
                     <Link
                       href={item.href}
-                      className="flex items-center gap-1 text-gray-400 hover:text-primary transition-colors"
+                      className="flex items-center gap-1 dark:text-gray-400 text-gray-600 hover:text-primary transition-colors"
                     >
                       {index === 0 && <Home className="w-3 h-3" />}
                       <span>{item.label}</span>
@@ -91,7 +91,7 @@ export default function Breadcrumbs() {
                       <span>{item.label}</span>
                     </span>
                   )}
-                  {!isLast && <ChevronRight className="w-3 h-3 text-gray-600 mx-1 flex-shrink-0" />}
+                  {!isLast && <ChevronRight className="w-3 h-3 dark:text-gray-600 text-gray-400 mx-1 flex-shrink-0" />}
                 </div>
               )
             })}

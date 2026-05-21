@@ -61,11 +61,11 @@ export default function ReservationsList({
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2 }}
       >
-        <h2 className="text-2xl font-semibold text-white mb-4 flex items-center gap-2">
+        <h2 className="text-2xl font-semibold dark:text-white text-gray-900 mb-4 flex items-center gap-2">
           <Icon className="w-5 h-5 text-primary" />
           {title}
           {reservations.length > 0 && (
-            <span className="text-sm text-gray-400 ml-2">({reservations.length})</span>
+            <span className="text-sm dark:text-gray-400 text-gray-600 ml-2">({reservations.length})</span>
           )}
         </h2>
 
@@ -93,8 +93,8 @@ export default function ReservationsList({
         onClose={() => setModalOpen(false)}
         onConfirm={handleConfirmCancel}
         title="Cancelar reserva"
-        message="¿Estás seguro de que quieres cancelar esta reserva? Esta acción no se puede deshacer."
-        confirmText="Sí, cancelar"
+        message="Estas seguro de que quieres cancelar esta reserva? Esta accion no se puede deshacer."
+        confirmText="Si, cancelar"
         cancelText="Volver"
       />
     </>

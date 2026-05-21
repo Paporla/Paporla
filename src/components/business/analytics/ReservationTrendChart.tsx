@@ -20,7 +20,7 @@ export default function ReservationTrendChart({ data }: Props) {
       <div className="flex items-center justify-between mb-5">
         <div className="flex items-center gap-2">
           <TrendingUp className="w-5 h-5 text-primary" />
-          <h3 className="font-bold text-white">Reservas (7 dias)</h3>
+          <h3 className="font-bold dark:text-white text-gray-900">Reservas (7 dias)</h3>
         </div>
       </div>
       <div className="h-52">

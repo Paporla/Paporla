@@ -46,7 +46,7 @@ export default function PriceRangeFilter({
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <label className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2">
+        <label className="text-sm font-medium dark:text-gray-300 text-gray-700 flex items-center gap-2">
           <DollarSign className="w-4 h-4 text-primary" />
           Rango de precio
         </label>
@@ -56,7 +56,7 @@ export default function PriceRangeFilter({
       </div>
 
       <div className="relative pt-4 pb-2">
-        <div className="relative h-2 bg-gray-200 dark:bg-gray-700 rounded-full">
+        <div className="relative h-2 dark:bg-gray-700 bg-gray-200 rounded-full">
           <div
             className="absolute h-2 bg-gradient-to-r from-primary to-primary/60 rounded-full"
             style={{
@@ -110,7 +110,7 @@ export default function PriceRangeFilter({
             type="number"
             value={localMin / 100}
             onChange={(e) => handleMinChange(Number(e.target.value) * 100)}
-            className="w-full px-3 py-2 rounded-lg bg-white/10 border border-gray-300 dark:border-gray-600 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
+            className="w-full px-3 py-2 rounded-lg dark:bg-white/10 bg-white dark:border-gray-600 border-gray-200 dark:text-white text-gray-900 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
             placeholder="Mínimo"
           />
         </div>
@@ -119,7 +119,7 @@ export default function PriceRangeFilter({
             type="number"
             value={localMax / 100}
             onChange={(e) => handleMaxChange(Number(e.target.value) * 100)}
-            className="w-full px-3 py-2 rounded-lg bg-white/10 border border-gray-300 dark:border-gray-600 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
+            className="w-full px-3 py-2 rounded-lg dark:bg-white/10 bg-white dark:border-gray-600 border-gray-200 dark:text-white text-gray-900 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
             placeholder="Máximo"
           />
         </div>

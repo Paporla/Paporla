@@ -13,10 +13,10 @@ export default function BusinessAnalyticsHeader({ shop }: Props) {
           <BarChart3 className="w-7 h-7 text-primary" />
         </div>
         <div>
-          <h1 className="text-3xl md:text-4xl font-bold text-white">
+          <h1 className="text-3xl md:text-4xl font-bold dark:text-white text-gray-900">
             Estadisticas
           </h1>
-          <p className="text-gray-400 text-sm mt-1">
+          <p className="dark:text-gray-400 text-gray-600 text-sm mt-1">
             Analisis completo de {shop.name}
           </p>
         </div>

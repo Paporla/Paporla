@@ -27,9 +27,9 @@ export default function PackFormPickupTime({ data, onChange }: Props) {
   const update = (partial: Partial<PickupData>) => onChange({ ...data, ...partial })
 
   return (
-    <div className="bg-black/40 backdrop-blur-sm rounded-2xl p-6 border border-white/10">
+    <div className="dark:bg-black/40 bg-white dark:backdrop-blur-sm backdrop-blur-sm rounded-2xl p-6 border dark:border-white/10 border-gray-200">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-lg font-semibold text-white flex items-center gap-2">
+        <h2 className="text-lg font-semibold dark:text-white text-gray-900 flex items-center gap-2">
           <Calendar className="w-5 h-5 text-primary" />
           Recogida
         </h2>
@@ -42,7 +42,7 @@ export default function PackFormPickupTime({ data, onChange }: Props) {
           const dateStr = d.toISOString().split('T')[0]
           return (
             <button key={opt.label} type="button" onClick={() => update({ pickup_date: dateStr })}
-              className={`px-4 py-2 rounded-full text-sm ${data.pickup_date === dateStr ? 'bg-primary text-black font-medium' : 'bg-white/5 text-gray-400 hover:bg-white/10'}`}>
+              className={`px-4 py-2 rounded-full text-sm ${data.pickup_date === dateStr ? 'bg-primary text-black font-medium' : 'dark:bg-white/5 bg-gray-100 dark:text-gray-400 text-gray-600 dark:hover:bg-white/10 hover:bg-gray-200'}`}>
               {opt.label} ({d.toLocaleDateString('es-ES', { weekday: 'short' })})
             </button>
           )
@@ -54,22 +54,22 @@ export default function PackFormPickupTime({ data, onChange }: Props) {
           onChange={(e) => update({ pickup_date: e.target.value })} icon={<Calendar className="w-4 h-4" />} />
 
         <div>
-          <label className="block text-sm font-medium text-gray-400 mb-2">Desde</label>
+          <label className="block text-sm font-medium dark:text-gray-400 text-gray-600 mb-2">Desde</label>
           <div className="flex gap-2 flex-wrap">
             {startTimes.map(t => (
               <button key={t} type="button" onClick={() => update({ pickup_start_time: t })}
-                className={`px-3 py-1.5 rounded-lg text-xs ${data.pickup_start_time === t ? 'bg-primary text-black font-medium' : 'bg-white/5 text-gray-400 hover:bg-white/10'}`}>{t}</button>
+                className={`px-3 py-1.5 rounded-lg text-xs ${data.pickup_start_time === t ? 'bg-primary text-black font-medium' : 'dark:bg-white/5 bg-gray-100 dark:text-gray-400 text-gray-600 dark:hover:bg-white/10 hover:bg-gray-200'}`}>{t}</button>
             ))}
             <Input type="time" value={data.pickup_start_time} onChange={(e) => update({ pickup_start_time: e.target.value })} className="w-28" placeholder="Hora" />
           </div>
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-400 mb-2">Hasta</label>
+          <label className="block text-sm font-medium dark:text-gray-400 text-gray-600 mb-2">Hasta</label>
           <div className="flex gap-2 flex-wrap">
             {endTimes.map(t => (
               <button key={t} type="button" onClick={() => update({ pickup_end_time: t })}
-                className={`px-3 py-1.5 rounded-lg text-xs ${data.pickup_end_time === t ? 'bg-primary text-black font-medium' : 'bg-white/5 text-gray-400 hover:bg-white/10'}`}>{t}</button>
+                className={`px-3 py-1.5 rounded-lg text-xs ${data.pickup_end_time === t ? 'bg-primary text-black font-medium' : 'dark:bg-white/5 bg-gray-100 dark:text-gray-400 text-gray-600 dark:hover:bg-white/10 hover:bg-gray-200'}`}>{t}</button>
             ))}
             <Input type="time" value={data.pickup_end_time} onChange={(e) => update({ pickup_end_time: e.target.value })} className="w-28" placeholder="Hora" />
           </div>

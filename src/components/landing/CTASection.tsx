@@ -18,7 +18,7 @@ export default function CTASection() {
         >
           <div className="absolute -inset-0.5 bg-gradient-to-r from-primary/20 to-primary/10 rounded-2xl blur-xl opacity-0 group-hover:opacity-40 transition duration-500" />
           
-          <div className="relative bg-gradient-to-br from-primary/10 to-primary/5 rounded-2xl p-10 md:p-12 text-center border border-primary/20 backdrop-blur-sm">
+          <div className="relative dark:bg-gradient-to-br dark:from-primary/10 dark:to-primary/5 bg-primary/5 rounded-2xl p-10 md:p-12 text-center border border-primary/20 backdrop-blur-sm">
             <motion.div
               animate={{ rotate: 360 }}
               transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
@@ -27,12 +27,12 @@ export default function CTASection() {
               <Sparkles className="w-8 h-8 text-primary" />
             </motion.div>
             
-            <h2 className="text-2xl md:text-3xl font-bold text-white mb-3">
-              ¿Listo para <span className="text-primary">rescatar comida</span>?
+            <h2 className="text-2xl md:text-3xl font-bold dark:text-white text-gray-900 mb-3">
+              Listo para <span className="text-primary">rescatar comida</span>?
             </h2>
             
-            <p className="text-gray-400 mb-6 max-w-md mx-auto">
-              Únete a miles de personas que ya están ahorrando mientras ayudan al planeta.
+            <p className="dark:text-gray-400 text-gray-600 mb-6 max-w-md mx-auto">
+              Unete a miles de personas que ya estan ahorrando mientras ayudan al planeta.
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
@@ -45,7 +45,7 @@ export default function CTASection() {
               </Link>
               <Link
                 href="/shops"
-                className="inline-flex items-center justify-center px-8 py-3 rounded-full border border-primary/40 text-white font-semibold hover:bg-primary/10 transition text-center"
+                className="inline-flex items-center justify-center px-8 py-3 rounded-full border border-primary/40 dark:text-white text-gray-900 font-semibold hover:bg-primary/10 transition text-center"
               >
                 Soy comercio
               </Link>
@@ -53,38 +53,37 @@ export default function CTASection() {
 
             <div className="relative my-6">
               <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-white/10"></div>
+                <div className="w-full border-t dark:border-white/10 border-gray-300"></div>
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-4 bg-transparent text-gray-500 text-xs">O</span>
+                <span className="px-4 bg-transparent dark:text-gray-500 text-gray-400 text-xs">O</span>
               </div>
             </div>
 
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <Link
                 href="/register"
-                className="inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-full bg-white/5 border border-white/10 text-white font-medium hover:bg-primary/10 hover:border-primary/30 transition-all duration-300"
+                className="inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-full dark:bg-white/5 bg-gray-100 border dark:border-white/10 border-gray-300 dark:text-white text-gray-900 font-medium hover:bg-primary/10 hover:border-primary/30 transition-all duration-300"
               >
                 <UserPlus className="w-4 h-4 text-primary" />
                 Crear cuenta gratis
               </Link>
               <Link
                 href="/login"
-                className="inline-flex items-center justify-center gap-1 text-gray-400 text-sm hover:text-primary transition-colors"
+                className="inline-flex items-center justify-center gap-1 dark:text-gray-400 text-gray-500 text-sm hover:text-primary transition-colors"
               >
-                ¿Ya tienes cuenta? <span className="text-primary">Iniciar sesión</span>
+                Ya tienes cuenta? <span className="text-primary">Iniciar sesion</span>
               </Link>
             </div>
 
-            {/* 2 items simétricos en lugar de 3 */}
-            <div className="flex items-center justify-center gap-6 mt-8 pt-5 border-t border-white/10">
+            <div className="flex items-center justify-center gap-6 mt-8 pt-5 border-t dark:border-white/10 border-gray-300">
               <div className="flex items-center gap-2">
                 <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
-                <span className="text-xs text-gray-500">Ahorra hasta 70%</span>
+                <span className="text-xs dark:text-gray-500 text-gray-400">Ahorra hasta 70%</span>
               </div>
               <div className="flex items-center gap-2">
                 <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse delay-500" />
-                <span className="text-xs text-gray-500">Ayudas al planeta</span>
+                <span className="text-xs dark:text-gray-500 text-gray-400">Ayudas al planeta</span>
               </div>
             </div>
           </div>

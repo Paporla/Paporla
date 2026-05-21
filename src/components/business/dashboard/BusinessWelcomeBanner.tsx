@@ -34,10 +34,10 @@ export default function BusinessWelcomeBanner({
               Panel de Control
             </span>
           </div>
-          <h1 className="text-2xl lg:text-3xl font-bold text-white">
-            ¡Hola, <span className="text-primary">{shopName}</span>!
+          <h1 className="text-2xl lg:text-3xl font-bold dark:text-white text-gray-900">
+            Hola, <span className="text-primary">{shopName}</span>!
           </h1>
-          <p className="text-gray-400 text-sm mt-1">
+          <p className="dark:text-gray-400 text-gray-600 text-sm mt-1">
             Gestiona tus packs o descubre nuevos comercios para inspirarte.
           </p>
           
@@ -62,17 +62,17 @@ export default function BusinessWelcomeBanner({
         </div>
 
         <div className="flex items-center gap-4">
-          <div className="flex items-center gap-3 px-4 py-2 rounded-xl bg-black/40 backdrop-blur-sm border border-white/10">
+          <div className="flex items-center gap-3 px-4 py-2 rounded-xl dark:bg-black/40 bg-white/80 backdrop-blur-sm dark:border-white/10 border-gray-200">
             <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
               <CalendarCheck className="w-5 h-5 text-primary" />
             </div>
             <div>
-              <p className="text-2xl font-bold text-white">{todayReservations}</p>
-              <p className="text-[10px] text-gray-500">Reservas hoy</p>
+              <p className="text-2xl font-bold dark:text-white text-gray-900">{todayReservations}</p>
+              <p className="text-[10px] dark:text-gray-500 text-gray-400">Reservas hoy</p>
             </div>
           </div>
 
-          <div className="flex items-center gap-3 px-4 py-2 rounded-xl bg-black/40 backdrop-blur-sm border border-white/10">
+          <div className="flex items-center gap-3 px-4 py-2 rounded-xl dark:bg-black/40 bg-white/80 backdrop-blur-sm dark:border-white/10 border-gray-200">
             <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
               <TrendingUp className="w-5 h-5 text-primary" />
             </div>
@@ -80,7 +80,7 @@ export default function BusinessWelcomeBanner({
               <p className={`text-2xl font-bold ${isPositive ? 'text-green-400' : 'text-red-400'}`}>
                 {isPositive ? '+' : ''}{weekGrowth}%
               </p>
-              <p className="text-[10px] text-gray-500">vs semana pasada</p>
+              <p className="text-[10px] dark:text-gray-500 text-gray-400">vs semana pasada</p>
             </div>
           </div>
         </div>

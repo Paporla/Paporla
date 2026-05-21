@@ -119,7 +119,7 @@ export default function PrivacidadPage() {
                   <a
                     key={section.id}
                     href={`#${section.id}`}
-                    className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-gray-600 dark:text-gray-400 hover:bg-primary/10 hover:text-primary transition-all duration-300"
+                    className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm dark:text-gray-400 text-gray-600 hover:bg-primary/10 hover:text-primary transition-all duration-300"
                   >
                     <section.icon className="w-3 h-3" />
                     {section.title}
@@ -192,16 +192,16 @@ export default function PrivacidadPage() {
                   <Eye className="w-6 h-6 text-primary" />
                   2. Uso de la Información
                 </h2>
-                <p className="text-gray-700 dark:text-gray-300 mb-3">Utilizamos su información para los siguientes fines:</p>
+                <p className="dark:text-gray-300 text-gray-700 mb-3">Utilizamos su información para los siguientes fines:</p>
                 <div className="grid md:grid-cols-2 gap-3 mt-4">
-                  <div className="flex items-start gap-2 p-3 rounded-lg bg-white/5"><CheckCircle className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />Operar y mejorar la plataforma Paporla</div>
-                  <div className="flex items-start gap-2 p-3 rounded-lg bg-white/5"><CheckCircle className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />Procesar reservas y gestionar tu cuenta</div>
-                  <div className="flex items-start gap-2 p-3 rounded-lg bg-white/5"><CheckCircle className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />Comunicarnos sobre tus reservas y novedades</div>
-                  <div className="flex items-start gap-2 p-3 rounded-lg bg-white/5"><CheckCircle className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />Personalizar tu experiencia en la plataforma</div>
-                  <div className="flex items-start gap-2 p-3 rounded-lg bg-white/5"><CheckCircle className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />Prevenir fraudes y actividades fraudulentas</div>
-                  <div className="flex items-start gap-2 p-3 rounded-lg bg-white/5"><CheckCircle className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />Cumplir con obligaciones legales y regulatorias</div>
-                  <div className="flex items-start gap-2 p-3 rounded-lg bg-white/5"><CheckCircle className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />Realizar análisis estadísticos y mejoras del servicio</div>
-                  <div className="flex items-start gap-2 p-3 rounded-lg bg-white/5"><CheckCircle className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />Enviar ofertas y promociones (con tu consentimiento)</div>
+                  <div className="flex items-start gap-2 p-3 rounded-lg dark:bg-white/5 bg-gray-100"><CheckCircle className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />Operar y mejorar la plataforma Paporla</div>
+                  <div className="flex items-start gap-2 p-3 rounded-lg dark:bg-white/5 bg-gray-100"><CheckCircle className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />Procesar reservas y gestionar tu cuenta</div>
+                  <div className="flex items-start gap-2 p-3 rounded-lg dark:bg-white/5 bg-gray-100"><CheckCircle className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />Comunicarnos sobre tus reservas y novedades</div>
+                  <div className="flex items-start gap-2 p-3 rounded-lg dark:bg-white/5 bg-gray-100"><CheckCircle className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />Personalizar tu experiencia en la plataforma</div>
+                  <div className="flex items-start gap-2 p-3 rounded-lg dark:bg-white/5 bg-gray-100"><CheckCircle className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />Prevenir fraudes y actividades fraudulentas</div>
+                  <div className="flex items-start gap-2 p-3 rounded-lg dark:bg-white/5 bg-gray-100"><CheckCircle className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />Cumplir con obligaciones legales y regulatorias</div>
+                  <div className="flex items-start gap-2 p-3 rounded-lg dark:bg-white/5 bg-gray-100"><CheckCircle className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />Realizar análisis estadísticos y mejoras del servicio</div>
+                  <div className="flex items-start gap-2 p-3 rounded-lg dark:bg-white/5 bg-gray-100"><CheckCircle className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />Enviar ofertas y promociones (con tu consentimiento)</div>
                 </div>
               </div>
             </motion.section>
@@ -212,7 +212,7 @@ export default function PrivacidadPage() {
                   <UserCheck className="w-6 h-6 text-primary" />
                   3. Compartir Información
                 </h2>
-                <p className="text-gray-700 dark:text-gray-300 mb-3"><strong className="text-primary">Paporla NO vende ni alquila sus datos personales.</strong> Compartimos información únicamente en los siguientes casos:</p>
+                <p className="dark:text-gray-300 text-gray-700 mb-3"><strong className="text-primary">Paporla NO vende ni alquila sus datos personales.</strong> Compartimos información únicamente en los siguientes casos:</p>
                 
                 <div className="space-y-4 mt-4">
                   <div className="p-4 rounded-xl bg-blue-500/10 border border-blue-500/20">
@@ -239,7 +239,7 @@ export default function PrivacidadPage() {
                   <Lock className="w-6 h-6 text-primary" />
                   4. Protección de Datos
                 </h2>
-                <p className="text-gray-700 dark:text-gray-300 mb-3">Implementamos medidas de seguridad técnicas y organizativas para proteger su información:</p>
+                <p className="dark:text-gray-300 text-gray-700 mb-3">Implementamos medidas de seguridad técnicas y organizativas para proteger su información:</p>
                 <div className="grid md:grid-cols-2 gap-3 mt-4">
                   <div className="flex items-center gap-3 p-3 rounded-lg bg-green-500/10"><Lock className="w-5 h-5 text-green-500" />Encriptación SSL/TLS para todas las comunicaciones</div>
                   <div className="flex items-center gap-3 p-3 rounded-lg bg-green-500/10"><Key className="w-5 h-5 text-green-500" />Almacenamiento seguro de contraseñas (hash + salt)</div>
@@ -261,22 +261,22 @@ export default function PrivacidadPage() {
                   <RefreshCw className="w-6 h-6 text-primary" />
                   5. Derechos ARCO
                 </h2>
-                <p className="text-gray-700 dark:text-gray-300 mb-3">En cumplimiento con la <strong>Ley Orgánica de Protección de Datos e Infogobierno de Venezuela</strong> y legislaciones similares (LGPD en Brasil, Ley 1581 en Colombia, etc.), usted tiene derecho a:</p>
+                <p className="dark:text-gray-300 text-gray-700 mb-3">En cumplimiento con la <strong>Ley Orgánica de Protección de Datos e Infogobierno de Venezuela</strong> y legislaciones similares (LGPD en Brasil, Ley 1581 en Colombia, etc.), usted tiene derecho a:</p>
                 
                 <div className="grid md:grid-cols-2 gap-4 mt-4">
-                  <div className="p-4 rounded-xl bg-white/5">
+                  <div className="p-4 rounded-xl dark:bg-white/5 bg-gray-100">
                     <h3 className="font-bold text-primary flex items-center gap-2"><Eye className="w-4 h-4" />Acceso</h3>
                     <p className="text-sm mt-1">Conocer qué datos tenemos sobre usted y cómo los utilizamos.</p>
                   </div>
-                  <div className="p-4 rounded-xl bg-white/5">
+                  <div className="p-4 rounded-xl dark:bg-white/5 bg-gray-100">
                     <h3 className="font-bold text-primary flex items-center gap-2"><FileText className="w-4 h-4" />Rectificación</h3>
                     <p className="text-sm mt-1">Corregir datos incorrectos o incompletos.</p>
                   </div>
-                  <div className="p-4 rounded-xl bg-white/5">
+                  <div className="p-4 rounded-xl dark:bg-white/5 bg-gray-100">
                     <h3 className="font-bold text-primary flex items-center gap-2"><Trash2 className="w-4 h-4" />Cancelación</h3>
                     <p className="text-sm mt-1">Solicitar la eliminación de sus datos.</p>
                   </div>
-                  <div className="p-4 rounded-xl bg-white/5">
+                  <div className="p-4 rounded-xl dark:bg-white/5 bg-gray-100">
                     <h3 className="font-bold text-primary flex items-center gap-2"><XCircle className="w-4 h-4" />Oposición</h3>
                     <p className="text-sm mt-1">Oponerse al uso de sus datos para fines específicos.</p>
                   </div>
@@ -295,7 +295,7 @@ export default function PrivacidadPage() {
                   <Cookie className="w-6 h-6 text-primary" />
                   6. Uso de Cookies
                 </h2>
-                <p className="text-gray-700 dark:text-gray-300">Utilizamos cookies y tecnologías similares para mejorar su experiencia. Para más detalles sobre qué cookies usamos y cómo gestionarlas, consulte nuestra <a href="/legal/cookies" className="text-primary hover:underline">Política de Cookies específica</a>.</p>
+                <p className="dark:text-gray-300 text-gray-700">Utilizamos cookies y tecnologías similares para mejorar su experiencia. Para más detalles sobre qué cookies usamos y cómo gestionarlas, consulte nuestra <a href="/legal/cookies" className="text-primary hover:underline">Política de Cookies específica</a>.</p>
                 <div className="mt-4 flex flex-wrap gap-3">
                   <div className="flex items-center gap-2 text-sm"><span className="w-2 h-2 rounded-full bg-green-500"></span><strong>Esenciales:</strong> Autenticación y reservas</div>
                   <div className="flex items-center gap-2 text-sm"><span className="w-2 h-2 rounded-full bg-blue-500"></span><strong>Preferencias:</strong> Modo oscuro, idioma</div>
@@ -310,7 +310,7 @@ export default function PrivacidadPage() {
                   <Clock className="w-6 h-6 text-primary" />
                   7. Retención de Datos
                 </h2>
-                <p className="text-gray-700 dark:text-gray-300">Conservamos sus datos personales mientras su cuenta esté activa. Tras la cancelación de su cuenta:</p>
+                <p className="dark:text-gray-300 text-gray-700">Conservamos sus datos personales mientras su cuenta esté activa. Tras la cancelación de su cuenta:</p>
                 <ul className="list-none mt-3 space-y-2">
                   <li className="flex items-start gap-2"><Clock className="w-4 h-4 text-primary mt-0.5" />Datos de reservas: <strong>2 años</strong> (requisitos fiscales y legales)</li>
                   <li className="flex items-start gap-2"><Trash2 className="w-4 h-4 text-primary mt-0.5" />Datos de perfil: <strong>Eliminamos dentro de 30 días</strong></li>
@@ -326,7 +326,7 @@ export default function PrivacidadPage() {
                   <Shield className="w-6 h-6 text-primary" />
                   8. Privacidad de Menores
                 </h2>
-                <p className="text-gray-700 dark:text-gray-300">Paporla no está dirigida a menores de 18 años. No recopilamos conscientemente información de personas menores de edad. Si descubrimos que hemos recopilado datos de un menor sin consentimiento parental, los eliminaremos inmediatamente.</p>
+                <p className="dark:text-gray-300 text-gray-700">Paporla no está dirigida a menores de 18 años. No recopilamos conscientemente información de personas menores de edad. Si descubrimos que hemos recopilado datos de un menor sin consentimiento parental, los eliminaremos inmediatamente.</p>
                 <div className="mt-4 p-4 rounded-lg bg-red-500/10 border border-red-500/20">
                   <p className="text-sm">⚠️ <strong>Reporte:</strong> Si eres padre/tutor y crees que tu hijo menor ha proporcionado datos en Paporla, contáctanos a <strong>datos@paporla.com</strong></p>
                 </div>
@@ -339,7 +339,7 @@ export default function PrivacidadPage() {
                   <Globe className="w-6 h-6 text-primary" />
                   9. Transferencias Internacionales
                 </h2>
-                <p className="text-gray-700 dark:text-gray-300">Sus datos pueden ser procesados en servidores ubicados en diferentes países (Estados Unidos, Brasil, Unión Europea). En todos los casos:</p>
+                <p className="dark:text-gray-300 text-gray-700">Sus datos pueden ser procesados en servidores ubicados en diferentes países (Estados Unidos, Brasil, Unión Europea). En todos los casos:</p>
                 <ul className="list-none mt-3 space-y-2">
                   <li className="flex items-start gap-2"><CheckCircle className="w-4 h-4 text-primary mt-0.5" />Garantizamos un nivel adecuado de protección</li>
                   <li className="flex items-start gap-2"><CheckCircle className="w-4 h-4 text-primary mt-0.5" />Cumplimos con las leyes de protección de datos aplicables</li>
@@ -354,7 +354,7 @@ export default function PrivacidadPage() {
                   <Bell className="w-6 h-6 text-primary" />
                   10. Notificaciones
                 </h2>
-                <p className="text-gray-700 dark:text-gray-300">Con tu consentimiento, podemos enviarte:</p>
+                <p className="dark:text-gray-300 text-gray-700">Con tu consentimiento, podemos enviarte:</p>
                 <ul className="list-none mt-3 space-y-2">
                   <li className="flex items-start gap-2"><Mail className="w-4 h-4 text-primary mt-0.5" />Correos electrónicos sobre tu reserva y estado</li>
                   <li className="flex items-start gap-2"><Bell className="w-4 h-4 text-primary mt-0.5" />Notificaciones push sobre ofertas y novedades</li>
@@ -370,7 +370,7 @@ export default function PrivacidadPage() {
                   <RefreshCw className="w-6 h-6 text-primary" />
                   11. Actualizaciones
                 </h2>
-                <p className="text-gray-700 dark:text-gray-300">Actualizaremos esta política periódicamente. Los cambios significativos se comunicarán por email o mediante un aviso destacado en la plataforma. La fecha de la última actualización siempre estará visible al inicio del documento.</p>
+                <p className="dark:text-gray-300 text-gray-700">Actualizaremos esta política periódicamente. Los cambios significativos se comunicarán por email o mediante un aviso destacado en la plataforma. La fecha de la última actualización siempre estará visible al inicio del documento.</p>
                 <div className="mt-4 p-4 rounded-lg bg-primary/5 text-center">
                   <p className="text-sm">📋 <strong>Historial de versiones:</strong> Puedes consultar versiones anteriores de esta política solicitándolas a datos@paporla.com</p>
                 </div>
@@ -383,12 +383,12 @@ export default function PrivacidadPage() {
                   <Mail className="w-6 h-6 text-primary" />
                   12. Contacto
                 </h2>
-                <p className="text-gray-700 dark:text-gray-300 mb-3">Si tienes preguntas sobre esta política o sobre tus datos personales:</p>
+                <p className="dark:text-gray-300 text-gray-700 mb-3">Si tienes preguntas sobre esta política o sobre tus datos personales:</p>
                 <div className="space-y-3">
-                  <div className="flex items-center gap-3 p-3 rounded-lg bg-white/5"><Mail className="w-5 h-5 text-primary" />📧 <strong>Email:</strong> <a href="mailto:datos@paporla.com" className="text-primary hover:underline">datos@paporla.com</a></div>
-                  <div className="flex items-center gap-3 p-3 rounded-lg bg-white/5"><MapPin className="w-5 h-5 text-primary" />📍 <strong>Dirección:</strong> Caracas, Venezuela (Oficina de Protección de Datos)</div>
-                  <div className="flex items-center gap-3 p-3 rounded-lg bg-white/5"><Phone className="w-5 h-5 text-primary" />📞 <strong>Teléfono:</strong> <a href="tel:+582125551234" className="text-primary hover:underline">+58 212 555 1234</a> (Ext. 158)</div>
-                  <div className="flex items-center gap-3 p-3 rounded-lg bg-white/5"><Globe className="w-5 h-5 text-primary" />🌐 <strong>Formulario:</strong> <a href="/contacto" className="text-primary hover:underline">paporla.com/contacto</a></div>
+                  <div className="flex items-center gap-3 p-3 rounded-lg dark:bg-white/5 bg-gray-100"><Mail className="w-5 h-5 text-primary" />📧 <strong>Email:</strong> <a href="mailto:datos@paporla.com" className="text-primary hover:underline">datos@paporla.com</a></div>
+                  <div className="flex items-center gap-3 p-3 rounded-lg dark:bg-white/5 bg-gray-100"><MapPin className="w-5 h-5 text-primary" />📍 <strong>Dirección:</strong> Caracas, Venezuela (Oficina de Protección de Datos)</div>
+                  <div className="flex items-center gap-3 p-3 rounded-lg dark:bg-white/5 bg-gray-100"><Phone className="w-5 h-5 text-primary" />📞 <strong>Teléfono:</strong> <a href="tel:+582125551234" className="text-primary hover:underline">+58 212 555 1234</a> (Ext. 158)</div>
+                  <div className="flex items-center gap-3 p-3 rounded-lg dark:bg-white/5 bg-gray-100"><Globe className="w-5 h-5 text-primary" />🌐 <strong>Formulario:</strong> <a href="/contacto" className="text-primary hover:underline">paporla.com/contacto</a></div>
                 </div>
               </div>
             </motion.section>

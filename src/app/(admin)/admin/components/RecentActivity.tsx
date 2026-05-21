@@ -72,13 +72,13 @@ export default function RecentActivity() {
 
   if (loading) {
     return (
-      <div className="bg-black/40 backdrop-blur-sm border border-white/10 rounded-2xl overflow-hidden">
+      <div className="dark:bg-black/40 bg-gray-50 backdrop-blur-sm dark:border-white/10 border-gray-200 rounded-2xl overflow-hidden">
         <div className="animate-pulse p-6">
-          <div className="h-6 w-32 bg-gray-800 rounded mb-2" />
-          <div className="h-4 w-48 bg-gray-800 rounded" />
+          <div className="h-6 w-32 dark:bg-gray-800 bg-gray-200 rounded mb-2" />
+          <div className="h-4 w-48 dark:bg-gray-800 bg-gray-200 rounded" />
           <div className="space-y-3 mt-4">
             {[...Array(5)].map((_, i) => (
-              <div key={i} className="h-16 bg-gray-800 rounded-xl" />
+              <div key={i} className="h-16 dark:bg-gray-800 bg-gray-200 rounded-xl" />
             ))}
           </div>
         </div>
@@ -87,11 +87,11 @@ export default function RecentActivity() {
   }
 
   return (
-    <div className="bg-black/40 backdrop-blur-sm border border-white/10 rounded-2xl overflow-hidden">
+    <div className="dark:bg-black/40 bg-gray-50 backdrop-blur-sm dark:border-white/10 border-gray-200 rounded-2xl overflow-hidden">
       <div className="flex items-center justify-between p-6 pb-4">
         <div>
-          <h3 className="text-lg font-semibold text-white">Actividad reciente</h3>
-          <p className="text-xs text-gray-500 mt-1">Últimas acciones en la plataforma</p>
+          <h3 className="text-lg font-semibold dark:text-white text-gray-900">Actividad reciente</h3>
+          <p className="text-xs dark:text-gray-500 text-gray-400 mt-1">Ultimas acciones en la plataforma</p>
         </div>
         {activities.length > 5 && (
           <button
@@ -103,11 +103,11 @@ export default function RecentActivity() {
         )}
       </div>
 
-      <div className="divide-y divide-white/5">
+      <div className="dark:divide-white/5 divide-gray-200">
         {displayedActivities.length === 0 ? (
           <div className="text-center py-12">
-            <p className="text-gray-500 text-sm">No hay actividad reciente</p>
-            <p className="text-xs text-gray-600 mt-1">Los eventos aparecerán aquí automáticamente</p>
+            <p className="dark:text-gray-500 text-gray-400 text-sm">No hay actividad reciente</p>
+            <p className="text-xs dark:text-gray-600 text-gray-500 mt-1">Los eventos apareceran aqui automaticamente</p>
           </div>
         ) : (
           displayedActivities.map((activity, i) => {
@@ -118,17 +118,17 @@ export default function RecentActivity() {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.03 }}
-                className="flex items-start gap-4 px-6 py-4 hover:bg-white/5 transition-colors group"
+                className="flex items-start gap-4 px-6 py-4 dark:hover:bg-white/5 hover:bg-gray-100 transition-colors group"
               >
                 <div className={`p-2 rounded-xl ${bg} flex-shrink-0 mt-0.5`}>
                   <Icon className={`w-4 h-4 ${color}`} />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-white">{activity.title}</p>
-                  <p className="text-xs text-gray-500 mt-0.5">{activity.description}</p>
+                  <p className="text-sm font-medium dark:text-white text-gray-900">{activity.title}</p>
+                  <p className="text-xs dark:text-gray-500 text-gray-400 mt-0.5">{activity.description}</p>
                 </div>
                 <div className="flex items-center gap-3 flex-shrink-0">
-                  <span className="flex items-center gap-1 text-[10px] text-gray-600 whitespace-nowrap">
+                  <span className="flex items-center gap-1 text-[10px] dark:text-gray-600 text-gray-500 whitespace-nowrap">
                     <Clock className="w-3 h-3" />
                     {formatTime(activity.created_at)}
                   </span>

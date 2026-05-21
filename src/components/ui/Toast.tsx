@@ -25,9 +25,9 @@ export default function Toast({ message, type, onClose, duration = 3000 }: Toast
   }
 
   const icons = {
-    success: '✓',
-    error: '✕',
-    info: 'ℹ',
+    success: 'OK',
+    error: 'X',
+    info: 'i',
   }
 
   return (

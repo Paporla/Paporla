@@ -69,7 +69,7 @@ export default function BusinessStatsCards({ stats }: BusinessStatsCardsProps) {
             <Card glass hover className="p-5 cursor-pointer group transition-all duration-300">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-gray-400 text-sm mb-1">{item.label}</p>
+                  <p className="dark:text-gray-400 text-gray-600 text-sm mb-1">{item.label}</p>
                   <p className={`text-2xl font-bold ${item.color}`}>{item.value}</p>
                   {item.total !== undefined && (
                     <p className="text-xs text-gray-500 mt-1">de {item.total} totales</p>

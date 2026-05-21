@@ -52,7 +52,7 @@ export default function FavoritesPage() {
         setFavorites((data as any[]) || []);
       }
       
-      // Delay mínimo de 300ms para que el spinner sea visible
+      // Delay minimo de 300ms para que el spinner sea visible
       setTimeout(() => setLoading(false), 300);
     };
     
@@ -76,8 +76,8 @@ export default function FavoritesPage() {
       <div className="flex items-center justify-center min-h-[60vh]">
         <div className="text-center">
           <div className="w-14 h-14 rounded-full border-4 border-primary/30 border-t-primary animate-spin mx-auto mb-4" />
-          <p className="text-gray-400 text-lg font-medium">Cargando favoritos...</p>
-          <p className="text-gray-600 text-sm mt-1">Por favor espera</p>
+          <p className="dark:text-gray-400 text-gray-600 text-lg font-medium">Cargando favoritos...</p>
+          <p className="dark:text-gray-600 text-gray-400 text-sm mt-1">Por favor espera</p>
         </div>
       </div>
     );
@@ -93,8 +93,8 @@ export default function FavoritesPage() {
         <div className="w-24 h-24 rounded-full bg-primary/10 flex items-center justify-center mb-4">
           <Heart className="w-12 h-12 text-primary" />
         </div>
-        <h2 className="text-xl font-bold text-white mb-2">No tienes favoritos</h2>
-        <p className="text-gray-400 mb-6">Guarda tus comercios favoritos para encontrarlos fácilmente después</p>
+        <h2 className="text-xl font-bold dark:text-white text-gray-900 mb-2">No tienes favoritos</h2>
+        <p className="dark:text-gray-400 text-gray-600 mb-6">Guarda tus comercios favoritos para encontrarlos facilmente despues</p>
         <Button onClick={() => router.push('/shops')}><Store className="w-4 h-4 mr-2" />Explorar comercios</Button>
       </motion.div>
     );
@@ -112,9 +112,9 @@ export default function FavoritesPage() {
             <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
               <Heart className="w-5 h-5 text-primary" />
             </div>
-            <h1 className="text-3xl md:text-4xl font-bold text-white">Mis Favoritos</h1>
+            <h1 className="text-3xl md:text-4xl font-bold dark:text-white text-gray-900">Mis Favoritos</h1>
           </div>
-          <p className="text-gray-400">{favorites.length} {favorites.length === 1 ? 'comercio guardado' : 'comercios guardados'}</p>
+          <p className="dark:text-gray-400 text-gray-600">{favorites.length} {favorites.length === 1 ? 'comercio guardado' : 'comercios guardados'}</p>
         </div>
       </div>
 
@@ -133,7 +133,7 @@ export default function FavoritesPage() {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-start justify-between">
                     <div>
-                      <h3 onClick={() => router.push(`/shops/${fav.shop.id}`)} className="font-bold text-white hover:text-primary transition-colors cursor-pointer line-clamp-1">
+                      <h3 onClick={() => router.push(`/shops/${fav.shop.id}`)} className="font-bold dark:text-white text-gray-900 hover:text-primary transition-colors cursor-pointer line-clamp-1">
                         {fav.shop.name}
                       </h3>
                       <div className="flex items-center gap-1 mt-0.5">

@@ -22,7 +22,7 @@ interface Props {
 export default function PackCategoryTemplates({ selectedCategory, onSelect }: Props) {
   return (
     <div>
-      <label className="block text-sm font-medium text-gray-400 mb-3 flex items-center gap-2">
+      <label className="block text-sm font-medium dark:text-gray-400 text-gray-600 mb-3 flex items-center gap-2">
         <Tag className="w-5 h-5 text-primary" />
         Plantillas rapidas (opcional)
       </label>
@@ -30,7 +30,7 @@ export default function PackCategoryTemplates({ selectedCategory, onSelect }: Pr
         {CATEGORIES.map((cat) => (
           <button key={cat.id} type="button" onClick={() => onSelect(cat.id, cat.template)}
             className={`px-4 py-2 rounded-full text-sm transition-all ${
-              selectedCategory === cat.id ? 'bg-primary text-black font-medium' : 'bg-white/5 text-gray-400 hover:bg-white/10'
+              selectedCategory === cat.id ? 'bg-primary text-black font-medium' : 'dark:bg-white/5 bg-gray-100 dark:text-gray-400 text-gray-600 dark:hover:bg-white/10 hover:bg-gray-200'
             }`}
           >
             {cat.name}

@@ -36,12 +36,12 @@ export default function ShopDetailInfo({ shop, packsCount }: ShopDetailInfoProps
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay: 0.1 }}
-      className="bg-black/40 backdrop-blur-sm border border-white/10 rounded-2xl p-6 md:p-8 space-y-6"
+      className="dark:bg-black/40 bg-white backdrop-blur-sm dark:border-white/10 border-gray-200 rounded-2xl p-6 md:p-8 space-y-6"
     >
       {/* Fila superior: info basica */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-3">
-          <h2 className="text-lg font-bold text-white flex items-center gap-2">
+          <h2 className="text-lg font-bold dark:text-white text-gray-900 flex items-center gap-2">
             <Store className="w-5 h-5 text-primary" />
             Informacion
           </h2>
@@ -49,8 +49,8 @@ export default function ShopDetailInfo({ shop, packsCount }: ShopDetailInfoProps
           {(shop.address || shop.city) && (
             <div className="flex items-start gap-3 text-sm">
               <MapPin className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
-              <span className="text-gray-400">
-                {shop.address}{shop.city ? <span className="text-gray-500">, {shop.city}</span> : ''}
+              <span className="dark:text-gray-400 text-gray-600">
+                {shop.address}{shop.city ? <span className="dark:text-gray-500 text-gray-400">, {shop.city}</span> : ''}
               </span>
             </div>
           )}
@@ -58,7 +58,7 @@ export default function ShopDetailInfo({ shop, packsCount }: ShopDetailInfoProps
           {shop.phone && (
             <a href={'tel:' + shop.phone} className="flex items-center gap-3 text-sm group">
               <Phone className="w-4 h-4 text-primary flex-shrink-0" />
-              <span className="text-gray-400 group-hover:text-primary transition-colors">{shop.phone}</span>
+              <span className="dark:text-gray-400 text-gray-600 group-hover:text-primary transition-colors">{shop.phone}</span>
             </a>
           )}
 
@@ -67,7 +67,7 @@ export default function ShopDetailInfo({ shop, packsCount }: ShopDetailInfoProps
               target="_blank" rel="noopener noreferrer"
               className="flex items-center gap-3 text-sm group">
               <Globe className="w-4 h-4 text-primary flex-shrink-0" />
-              <span className="text-gray-400 group-hover:text-primary transition-colors truncate">{shop.website}</span>
+              <span className="dark:text-gray-400 text-gray-600 group-hover:text-primary transition-colors truncate">{shop.website}</span>
             </a>
           )}
 
@@ -76,21 +76,21 @@ export default function ShopDetailInfo({ shop, packsCount }: ShopDetailInfoProps
               target="_blank" rel="noopener noreferrer"
               className="flex items-center gap-3 text-sm group">
               <AtSign className="w-4 h-4 text-primary flex-shrink-0" />
-              <span className="text-gray-400 group-hover:text-primary transition-colors">{shop.instagram}</span>
+              <span className="dark:text-gray-400 text-gray-600 group-hover:text-primary transition-colors">{shop.instagram}</span>
             </a>
           )}
 
           <div className="flex items-center gap-3 text-sm">
             <Calendar className="w-4 h-4 text-primary flex-shrink-0" />
-            <span className="text-gray-400">Miembro desde {memberSince}</span>
+            <span className="dark:text-gray-400 text-gray-600">Miembro desde {memberSince}</span>
           </div>
         </div>
 
         {/* Stats */}
         <div className="flex flex-col items-end justify-start gap-2">
-          <div className="text-center bg-white/5 border border-white/10 rounded-2xl px-6 py-4">
+          <div className="text-center dark:bg-white/5 bg-gray-100 dark:border-white/10 border-gray-200 rounded-2xl px-6 py-4">
             <p className="text-3xl font-bold text-primary">{packsCount}</p>
-            <p className="text-xs text-gray-500">pack{packsCount !== 1 ? 's' : ''} disponible{packsCount !== 1 ? 's' : ''}</p>
+            <p className="text-xs dark:text-gray-500 text-gray-400">pack{packsCount !== 1 ? 's' : ''} disponible{packsCount !== 1 ? 's' : ''}</p>
           </div>
           {shop.rating > 0 && (
             <div className="flex items-center gap-1 bg-yellow-500/10 border border-yellow-500/20 px-4 py-2 rounded-xl">
@@ -104,14 +104,14 @@ export default function ShopDetailInfo({ shop, packsCount }: ShopDetailInfoProps
 
       {/* Horarios - Acordeon */}
       {Object.keys(hoursData).length > 0 && (
-        <div className="border-t border-white/5 pt-6">
+        <div className="border-t dark:border-white/5 border-gray-200 pt-6">
           <button
             onClick={() => setShowHours(!showHours)}
             className="w-full flex items-center justify-between text-left"
           >
             <div className="flex items-center gap-2">
               <Clock className="w-5 h-5 text-primary" />
-              <span className="text-sm font-semibold text-white">Horarios</span>
+              <span className="text-sm font-semibold dark:text-white text-gray-900">Horarios</span>
               {todayStatus && !todayStatus.closed && (
                 <span className="text-xs text-green-400 bg-green-500/10 px-2 py-0.5 rounded-full">
                   Abierto hoy: {todayStatus.open} - {todayStatus.close}
@@ -123,7 +123,7 @@ export default function ShopDetailInfo({ shop, packsCount }: ShopDetailInfoProps
                 </span>
               )}
             </div>
-            {showHours ? <ChevronUp className="w-4 h-4 text-gray-400" /> : <ChevronDown className="w-4 h-4 text-gray-400" />}
+            {showHours ? <ChevronUp className="w-4 h-4 dark:text-gray-400 text-gray-500" /> : <ChevronDown className="w-4 h-4 dark:text-gray-400 text-gray-500" />}
           </button>
 
           <AnimatePresence>
@@ -145,10 +145,10 @@ export default function ShopDetailInfo({ shop, packsCount }: ShopDetailInfoProps
                         className={'flex items-center justify-between py-2 px-3 rounded-lg text-sm ' +
                           (isToday ? 'bg-primary/5 border border-primary/10' : '')}
                       >
-                        <span className={'font-medium ' + (isToday ? 'text-primary' : 'text-gray-400')}>
+                        <span className={'font-medium ' + (isToday ? 'text-primary' : 'dark:text-gray-400 text-gray-600')}>
                           {day}
                         </span>
-                        <span className={isToday ? 'text-white font-medium' : 'text-gray-500'}>
+                        <span className={isToday ? 'dark:text-white text-gray-900 font-medium' : 'dark:text-gray-500 text-gray-400'}>
                           {h?.closed ? 'Cerrado' : (h?.open || '--:--') + ' - ' + (h?.close || '--:--')}
                         </span>
                       </div>
@@ -163,7 +163,7 @@ export default function ShopDetailInfo({ shop, packsCount }: ShopDetailInfoProps
 
       {/* Boton de Google Maps */}
       {shop.latitude && shop.longitude && (
-        <div className="border-t border-white/5 pt-4">
+        <div className="border-t dark:border-white/5 border-gray-200 pt-4">
           <a
             href={'https://www.google.com/maps?q=' + shop.latitude + ',' + shop.longitude}
             target="_blank" rel="noopener noreferrer"

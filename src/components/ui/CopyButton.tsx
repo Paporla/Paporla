@@ -25,7 +25,7 @@ export default function CopyButton({ text, label = 'Copiar' }: CopyButtonProps) 
   return (
     <button
       onClick={handleCopy}
-      className="inline-flex items-center gap-1.5 text-xs text-gray-400 hover:text-primary transition-colors group"
+      className="inline-flex items-center gap-1.5 text-xs dark:text-gray-400 text-gray-600 hover:text-primary transition-colors group"
     >
       <AnimatePresence mode="wait">
         {copied ? (
@@ -37,7 +37,7 @@ export default function CopyButton({ text, label = 'Copiar' }: CopyButtonProps) 
             className="flex items-center gap-1"
           >
             <Check className="w-3.5 h-3.5 text-green-400" />
-            <span>¡Copiado!</span>
+            <span>Copiado!</span>
           </motion.div>
         ) : (
           <motion.div

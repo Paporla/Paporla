@@ -82,10 +82,10 @@ export default function RecentActivity({ activities = [] }: RecentActivityProps)
 
   if (activities.length === 0) {
     return (
-      <div className="bg-dark-card border border-dark-border rounded-2xl p-6 text-center">
-        <ShoppingBag className="w-12 h-12 text-gray-600 mx-auto mb-3" />
-        <p className="text-gray-400">No hay actividad reciente</p>
-        <p className="text-xs text-gray-500 mt-1">Explora packs para empezar a rescatar comida</p>
+      <div className="dark:bg-dark-card bg-white border dark:border-dark-border border-gray-200 rounded-2xl p-6 text-center">
+        <ShoppingBag className="w-12 h-12 dark:text-gray-600 text-gray-400 mx-auto mb-3" />
+        <p className="dark:text-gray-400 text-gray-600">No hay actividad reciente</p>
+        <p className="text-xs dark:text-gray-500 text-gray-400 mt-1">Explora packs para empezar a rescatar comida</p>
         <Link href="/packs" className="text-xs text-primary hover:underline inline-block mt-2">
           Explorar packs →
         </Link>
@@ -94,11 +94,11 @@ export default function RecentActivity({ activities = [] }: RecentActivityProps)
   }
 
   return (
-    <div className="bg-dark-card border border-dark-border rounded-2xl overflow-hidden">
-      <div className="flex items-center justify-between p-5 pb-3 border-b border-dark-border">
+    <div className="dark:bg-dark-card bg-white border dark:border-dark-border border-gray-200 rounded-2xl overflow-hidden">
+      <div className="flex items-center justify-between p-5 pb-3 border-b dark:border-dark-border border-gray-200">
         <div>
-          <h3 className="text-lg font-semibold text-white">Actividad reciente</h3>
-          <p className="text-xs text-gray-500">Tus reservas y movimientos</p>
+          <h3 className="text-lg font-semibold dark:text-white text-gray-900">Actividad reciente</h3>
+          <p className="text-xs dark:text-gray-500 text-gray-400">Tus reservas y movimientos</p>
         </div>
         <Link href="/reservations" className="text-xs text-primary hover:text-primary/80 transition-colors">
           Ver todas →
@@ -111,17 +111,17 @@ export default function RecentActivity({ activities = [] }: RecentActivityProps)
           const isExpanded = expandedGroups[group.title] ?? false;
 
           return (
-            <div key={group.title} className="bg-dark-card/30">
+            <div key={group.title} className="dark:bg-dark-card/30 bg-gray-50">
               {/* Header del grupo - click para expandir/colapsar */}
               <button
                 onClick={() => toggleGroup(group.title)}
-                className="w-full flex items-center justify-between p-4 hover:bg-white/5 transition-colors"
+                className="w-full flex items-center justify-between p-4 dark:hover:bg-white/5 hover:bg-gray-100 transition-colors"
               >
                 <div className="flex items-center gap-3">
                   <div className={`p-1.5 rounded-lg ${group.bg}`}>
                     <Icon className={`w-4 h-4 ${group.color}`} />
                   </div>
-                  <h4 className="font-medium text-white">{group.title}</h4>
+                  <h4 className="font-medium dark:text-white text-gray-900">{group.title}</h4>
                   <span className="text-xs bg-primary/20 text-primary px-2 py-0.5 rounded-full">
                     {group.activities.length}
                   </span>
@@ -142,7 +142,7 @@ export default function RecentActivity({ activities = [] }: RecentActivityProps)
                     exit={{ opacity: 0, height: 0 }}
                     transition={{ duration: 0.2 }}
                   >
-                    <div className="divide-y divide-dark-border/50 border-t border-dark-border/50">
+                    <div className="divide-y dark:divide-dark-border/50 divide-gray-200 border-t dark:border-dark-border/50 border-gray-200">
                       {group.activities.slice(0, 5).map((activity, idx) => {
                         const status = statusConfig[activity.status || ''] || {
                           label: activity.status,
@@ -158,27 +158,27 @@ export default function RecentActivity({ activities = [] }: RecentActivityProps)
                             initial={{ opacity: 0, x: -20 }}
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ delay: idx * 0.05 }}
-                            className="flex items-start gap-4 p-4 hover:bg-white/5 transition-colors group"
+                            className="flex items-start gap-4 p-4 dark:hover:bg-white/5 hover:bg-gray-100 transition-colors group"
                           >
                             <div className={`p-2 rounded-xl ${status.bg} flex-shrink-0`}>
                               <StatusIcon className={`w-4 h-4 ${status.color}`} />
                             </div>
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center gap-2 flex-wrap">
-                                <p className="text-sm font-medium text-white group-hover:text-primary transition-colors">
+                                <p className="text-sm font-medium dark:text-white text-gray-900 group-hover:text-primary transition-colors">
                                   {activity.title}
                                 </p>
                                 <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${status.bg} ${status.color}`}>
                                   {status.label}
                                 </span>
                               </div>
-                              <p className="text-xs text-gray-500 mt-0.5">{activity.description}</p>
+                              <p className="text-xs dark:text-gray-500 text-gray-400 mt-0.5">{activity.description}</p>
                               {activity.price && (
                                 <p className="text-[10px] text-primary font-medium mt-0.5">
                                   {formatPrice(activity.price)} • {activity.quantity || 1}x
                                 </p>
                               )}
-                              <p className="text-[10px] text-gray-600 mt-1">
+                              <p className="text-[10px] dark:text-gray-600 text-gray-500 mt-1">
                                 {formatRelativeDate(activity.created_at)}
                               </p>
                             </div>

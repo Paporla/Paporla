@@ -248,14 +248,14 @@ export default function PackFormSimplified({
 
         if (err) throw err
 
-        setSuccess('✅ Pack actualizado correctamente')
+        setSuccess('Pack actualizado correctamente')
       } else {
         // Crear nuevo pack
         const { error: err } = await supabase.from('packs').insert(packData)
 
         if (err) throw err
 
-        setSuccess(isDuplicate ? '✅ Pack duplicado correctamente' : '✅ Pack creado correctamente')
+        setSuccess(isDuplicate ? 'Pack duplicado correctamente' : 'Pack creado correctamente')
       }
 
       // Esperar y redirigir

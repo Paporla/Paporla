@@ -115,8 +115,8 @@ export default function FAQPage() {
             <h1 className="text-4xl md:text-5xl font-bold text-gradient mb-4">
               Preguntas Frecuentes
             </h1>
-            <p className="text-gray-400 text-lg max-w-2xl mx-auto">
-              Encuentra respuestas a las dudas más comunes sobre Paporla
+            <p className="dark:text-gray-400 text-gray-600 text-lg max-w-2xl mx-auto">
+              Encuentra respuestas a las dudas mas comunes sobre Paporla
             </p>
           </motion.div>
         </div>
@@ -132,7 +132,7 @@ export default function FAQPage() {
               className={`px-5 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
                 activeCategory === tab.id
                   ? `bg-primary/20 text-primary border border-primary/50 shadow-lg shadow-primary/20`
-                  : 'bg-gray-800/50 text-gray-400 hover:bg-gray-800 border border-transparent'
+                  : 'dark:bg-gray-800/50 bg-gray-100 dark:text-gray-400 text-gray-600 hover:dark:bg-gray-800 hover:bg-gray-200 border border-transparent'
               }`}
             >
               {tab.label}
@@ -164,17 +164,17 @@ export default function FAQPage() {
                       openIndex === index ? 'bg-primary/20' : ''
                     }`}>
                       <faq.icon className={`w-5 h-5 ${
-                        openIndex === index ? 'text-primary' : 'text-gray-400'
+                        openIndex === index ? 'text-primary' : 'dark:text-gray-400 text-gray-600'
                       }`} />
                     </div>
-                    <span className="font-semibold text-white group-hover:text-primary transition-colors">
+                    <span className="font-semibold dark:text-white text-gray-900 group-hover:text-primary transition-colors">
                       {faq.question}
                     </span>
                   </div>
                   {openIndex === index ? (
                     <ChevronUp className="w-5 h-5 text-primary" />
                   ) : (
-                    <ChevronDown className="w-5 h-5 text-gray-400 group-hover:text-primary transition-colors" />
+                    <ChevronDown className="w-5 h-5 dark:text-gray-400 text-gray-600 group-hover:text-primary transition-colors" />
                   )}
                 </button>
                 
@@ -186,8 +186,8 @@ export default function FAQPage() {
                       exit={{ opacity: 0, height: 0 }}
                       transition={{ duration: 0.3 }}
                     >
-                      <div className="px-5 pb-5 pt-2 border-t border-gray-800/50">
-                        <p className="text-gray-400 text-sm leading-relaxed">
+                      <div className="px-5 pb-5 pt-2 border-t dark:border-gray-800/50 border-gray-200">
+                        <p className="dark:text-gray-400 text-gray-600 text-sm leading-relaxed">
                           {faq.answer}
                         </p>
                       </div>
@@ -202,10 +202,10 @@ export default function FAQPage() {
         {/* Contacto adicional */}
         <div className="max-w-3xl mx-auto mt-12">
           <Card glass className="p-6 text-center">
-            <h3 className="text-lg font-semibold text-white mb-2">
-              ¿No encontraste lo que buscabas?
+            <h3 className="text-lg font-semibold dark:text-white text-gray-900 mb-2">
+              No encontraste lo que buscabas?
             </h3>
-            <p className="text-gray-400 text-sm mb-4">
+            <p className="dark:text-gray-400 text-gray-600 text-sm mb-4">
               Escríbenos y te ayudaremos con tu consulta
             </p>
             <div className="flex flex-col sm:flex-row gap-3 justify-center">

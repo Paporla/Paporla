@@ -27,8 +27,8 @@ export default function AdminDashboard() {
           <div className="flex items-center gap-4">
             <div className="p-3 bg-primary/20 rounded-xl"><Shield className="w-8 h-8 text-primary" /></div>
             <div>
-              <h1 className="text-3xl md:text-4xl font-bold text-white mb-1">Panel de Administracion</h1>
-              <p className="text-gray-400">Bienvenido, <span className="text-primary font-medium">{user?.email}</span></p>
+              <h1 className="text-3xl md:text-4xl font-bold dark:text-white text-gray-900 mb-1">Panel de Administracion</h1>
+              <p className="dark:text-gray-400 text-gray-600">Bienvenido, <span className="text-primary font-medium">{user?.email}</span></p>
             </div>
           </div>
         </div>

@@ -46,7 +46,7 @@ export default function UserStatsGrid({ stats }: UserStatsGridProps) {
           transition={{ delay: idx * 0.05 }}
         >
           <Link href={item.link}>
-            <div className="group bg-dark-card border border-dark-border hover:border-primary/30 rounded-2xl p-4 transition-all duration-300 hover:-translate-y-1 cursor-pointer">
+            <div className="group dark:bg-dark-card bg-white border dark:border-dark-border border-gray-200 hover:border-primary/30 rounded-2xl p-4 transition-all duration-300 hover:-translate-y-1 cursor-pointer">
               <div className={`p-2 rounded-xl ${item.bg} inline-flex mb-3 group-hover:scale-110 transition-transform`}>
                 <item.icon className={`w-4 h-4 ${item.color}`} />
               </div>

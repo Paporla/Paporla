@@ -26,9 +26,9 @@ export default function Footer() {
   };
 
   const legalLinks = [
-    { href: '/legal/terminos', label: 'Términos y Condiciones', icon: FileText },
-    { href: '/legal/privacidad', label: 'Política de Privacidad', icon: Shield },
-    { href: '/legal/cookies', label: 'Política de Cookies', icon: Cookie },
+    { href: '/legal/terminos', label: 'Terminos y Condiciones', icon: FileText },
+    { href: '/legal/privacidad', label: 'Politica de Privacidad', icon: Shield },
+    { href: '/legal/cookies', label: 'Politica de Cookies', icon: Cookie },
     { href: '/legal/legal-bases', label: 'Bases Legales', icon: Scale },
   ];
 
@@ -54,7 +54,7 @@ export default function Footer() {
         </motion.button>
       )}
 
-      <footer className="relative mt-20 bg-gradient-to-b from-black to-gray-950 border-t border-primary/20">
+      <footer className="relative mt-20 dark:bg-gradient-to-b dark:from-black dark:to-gray-950 bg-gradient-to-b from-gray-50 to-white dark:border-t border-t border-primary/20">
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="absolute bottom-0 left-0 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
           <div className="absolute top-0 right-0 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
@@ -73,18 +73,18 @@ export default function Footer() {
                   height={32}
                   className="w-8 h-8 object-contain group-hover:scale-105 transition-transform duration-300"
                 />
-                <span className="font-bold text-xl text-white">
+                <span className="font-bold text-xl dark:text-white text-gray-900">
                   Paporla
                 </span>
               </Link>
-              <p className="text-gray-400 text-sm leading-relaxed text-center md:text-left">
+              <p className="dark:text-gray-400 text-gray-600 text-sm leading-relaxed text-center md:text-left">
                 Rescatando comida,<br />
                 alimentando esperanzas.
               </p>
             </div>
 
             <div>
-              <h3 className="text-white font-semibold mb-4 flex items-center gap-2 justify-center md:justify-start">
+              <h3 className="dark:text-white text-gray-900 font-semibold mb-4 flex items-center gap-2 justify-center md:justify-start">
                 <Shield className="w-4 h-4 text-primary" />
                 Legal
               </h3>
@@ -93,7 +93,7 @@ export default function Footer() {
                   <li key={link.href}>
                     <Link
                       href={link.href}
-                      className="text-gray-400 text-sm hover:text-primary transition-colors flex items-center gap-2 justify-center md:justify-start group"
+                      className="dark:text-gray-400 text-gray-600 text-sm hover:text-primary transition-colors flex items-center gap-2 justify-center md:justify-start group"
                     >
                       <link.icon className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
                       {link.label}
@@ -104,16 +104,16 @@ export default function Footer() {
             </div>
 
             <div>
-              <h3 className="text-white font-semibold mb-4 flex items-center gap-2 justify-center md:justify-start">
+              <h3 className="dark:text-white text-gray-900 font-semibold mb-4 flex items-center gap-2 justify-center md:justify-start">
                 <Mail className="w-4 h-4 text-primary" />
-                Compañía
+                Compania
               </h3>
               <ul className="space-y-2 text-center md:text-left">
                 {companyLinks.map((link) => (
                   <li key={link.href}>
                     <Link
                       href={link.href}
-                      className="text-gray-400 text-sm hover:text-primary transition-colors hover:translate-x-1 inline-block"
+                      className="dark:text-gray-400 text-gray-600 text-sm hover:text-primary transition-colors hover:translate-x-1 inline-block"
                     >
                       {link.label}
                     </Link>
@@ -123,24 +123,24 @@ export default function Footer() {
             </div>
 
             <div>
-              <h3 className="text-white font-semibold mb-4 flex items-center gap-2 justify-center md:justify-start">
+              <h3 className="dark:text-white text-gray-900 font-semibold mb-4 flex items-center gap-2 justify-center md:justify-start">
                 <Heart className="w-4 h-4 text-primary" />
                 Contacto
               </h3>
               <ul className="space-y-3 text-center md:text-left">
-                <li className="flex items-center gap-3 text-gray-400 text-sm justify-center md:justify-start">
+                <li className="flex items-center gap-3 dark:text-gray-400 text-gray-600 text-sm justify-center md:justify-start">
                   <MapPin className="w-4 h-4 text-primary flex-shrink-0" />
                   <span>Caracas, Venezuela</span>
                 </li>
-                <li className="flex items-center gap-3 text-gray-400 text-sm justify-center md:justify-start">
+                <li className="flex items-center gap-3 dark:text-gray-400 text-gray-600 text-sm justify-center md:justify-start">
                   <Mail className="w-4 h-4 text-primary flex-shrink-0" />
                   <span>123456789</span>
                 </li>
-                <li className="flex items-center gap-3 text-gray-400 text-sm justify-center md:justify-start">
+                <li className="flex items-center gap-3 dark:text-gray-400 text-gray-600 text-sm justify-center md:justify-start">
                   <Phone className="w-4 h-4 text-primary flex-shrink-0" />
                   <span>123456789</span>
                 </li>
-                <li className="flex items-center gap-3 text-gray-400 text-sm justify-center md:justify-start">
+                <li className="flex items-center gap-3 dark:text-gray-400 text-gray-600 text-sm justify-center md:justify-start">
                   <Clock className="w-4 h-4 text-primary flex-shrink-0" />
                   <span>Lun - Vie: 9am - 6pm</span>
                 </li>
@@ -148,31 +148,31 @@ export default function Footer() {
             </div>
           </div>
 
-          <div className="border-t border-white/10 my-8" />
+          <div className="dark:border-t border-t border-white/10 dark:border-gray-300 my-8" />
 
           <div className="flex flex-col md:flex-row justify-between items-center gap-4 text-sm">
-            <p className="text-gray-500 text-xs">
-              © {currentYear} Paporla. Todos los derechos reservados.
+            <p className="dark:text-gray-500 text-gray-400 text-xs">
+              &copy; {currentYear} Paporla. Todos los derechos reservados.
             </p>
 
             <div className="flex gap-6">
-              <Link href="/legal/terminos" className="text-gray-500 hover:text-primary transition-colors text-xs">
-                Términos
+              <Link href="/legal/terminos" className="dark:text-gray-500 text-gray-400 hover:text-primary transition-colors text-xs">
+                Terminos
               </Link>
-              <Link href="/legal/privacidad" className="text-gray-500 hover:text-primary transition-colors text-xs">
+              <Link href="/legal/privacidad" className="dark:text-gray-500 text-gray-400 hover:text-primary transition-colors text-xs">
                 Privacidad
               </Link>
-              <Link href="/legal/cookies" className="text-gray-500 hover:text-primary transition-colors text-xs">
+              <Link href="/legal/cookies" className="dark:text-gray-500 text-gray-400 hover:text-primary transition-colors text-xs">
                 Cookies
               </Link>
-              <Link href="/contacto" className="text-gray-500 hover:text-primary transition-colors text-xs">
+              <Link href="/contacto" className="dark:text-gray-500 text-gray-400 hover:text-primary transition-colors text-xs">
                 Contacto
               </Link>
             </div>
 
             <motion.p
               whileHover={{ scale: 1.05 }}
-              className="text-gray-500 text-xs flex items-center gap-1"
+              className="dark:text-gray-500 text-gray-400 text-xs flex items-center gap-1"
             >
               Hecho con
               <motion.span

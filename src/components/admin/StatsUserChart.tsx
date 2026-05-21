@@ -18,13 +18,13 @@ export default function StatsUserChart({ data }: Props) {
     <Card glass className="p-6">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h3 className="text-lg font-semibold text-white">Registros de Usuarios</h3>
-          <p className="text-xs text-gray-500 mt-0.5">Ultimos {range === 'all' ? '30' : days} dias</p>
+          <h3 className="text-lg font-semibold dark:text-white text-gray-900">Registros de Usuarios</h3>
+          <p className="text-xs dark:text-gray-500 text-gray-400 mt-0.5">Ultimos {range === 'all' ? '30' : days} dias</p>
         </div>
-        <div className="flex gap-1 bg-white/5 rounded-lg p-0.5">
+        <div className="flex gap-1 dark:bg-white/5 bg-gray-100 rounded-lg p-0.5">
           {(['7d', '30d', 'all'] as TimeRange[]).map((r) => (
             <button key={r} onClick={() => setRange(r)}
-              className={`text-[11px] font-medium px-2.5 py-1.5 rounded-md transition-all ${range === r ? 'bg-primary text-black' : 'text-gray-500 hover:text-white'}`}>
+              className={`text-[11px] font-medium px-2.5 py-1.5 rounded-md transition-all ${range === r ? 'bg-primary text-black' : 'dark:text-gray-500 text-gray-400 dark:hover:text-white hover:text-gray-900'}`}>
               {r === '7d' ? '7D' : r === '30d' ? '30D' : 'Todo'}
             </button>
           ))}

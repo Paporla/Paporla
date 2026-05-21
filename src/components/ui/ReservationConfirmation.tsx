@@ -42,72 +42,72 @@ export default function ReservationConfirmation({ reservation, onClose }: Reserv
       initial={{ opacity: 0, scale: 0.9 }}
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0.9 }}
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 dark:bg-black/80 bg-black/50 backdrop-blur-sm"
       onClick={onClose}
     >
-      <div className="relative max-w-md w-full bg-black/90 backdrop-blur-xl rounded-2xl border border-primary/30 shadow-2xl overflow-hidden" onClick={(e) => e.stopPropagation()}>
+      <div className="relative max-w-md w-full dark:bg-gray-900 bg-white backdrop-blur-xl rounded-2xl border dark:border-gray-700 border-gray-200 shadow-2xl overflow-hidden" onClick={(e) => e.stopPropagation()}>
         
         {/* Header */}
         <div className="text-center pt-8 pb-4 bg-gradient-to-b from-primary/10 to-transparent">
           <div className="w-16 h-16 mx-auto mb-3 rounded-full bg-green-500/20 flex items-center justify-center">
             <CheckCircle className="w-8 h-8 text-green-400" />
           </div>
-          <h2 className="text-2xl font-bold text-white">¡Reserva Confirmada!</h2>
-          <p className="text-gray-400 text-sm mt-1">Tu pack ha sido reservado exitosamente</p>
+          <h2 className="text-2xl font-bold dark:text-white text-gray-900">Reserva Confirmada!</h2>
+          <p className="dark:text-gray-400 text-gray-600 text-sm mt-1">Tu pack ha sido reservado exitosamente</p>
         </div>
 
         {/* Contenido */}
         <div className="p-6 space-y-5">
-          {/* Código de recogida */}
+          {/* Codigo de recogida */}
           <div className="text-center">
-            <p className="text-xs text-gray-500 mb-1">Código de recogida</p>
+            <p className="text-xs dark:text-gray-500 text-gray-400 mb-1">Codigo de recogida</p>
             <div className="flex items-center justify-center gap-3">
               <p className="text-3xl font-bold text-primary tracking-wider font-mono">
                 {reservation.pickup_code}
               </p>
               <button
                 onClick={handleCopyCode}
-                className="p-2 rounded-lg bg-white/10 hover:bg-white/20 transition-colors"
+                className="p-2 rounded-lg dark:bg-gray-800 bg-gray-100 hover:dark:bg-gray-700 hover:bg-gray-200 transition-colors"
               >
-                <Copy className="w-4 h-4 text-gray-300" />
+                <Copy className="w-4 h-4 dark:text-gray-400 text-gray-600" />
               </button>
             </div>
-            <p className="text-xs text-gray-500 mt-2">Presenta este código al recoger tu pedido</p>
+            <p className="text-xs dark:text-gray-500 text-gray-400 mt-2">Presenta este codigo al recoger tu pedido</p>
           </div>
 
-          {/* Información del pack */}
-          <div className="border-t border-white/10 pt-4">
-            <h3 className="font-semibold text-white mb-2">Detalle de la reserva</h3>
+          {/* Informacion del pack */}
+          <div className="border-t dark:border-gray-700 border-gray-200 pt-4">
+            <h3 className="font-semibold dark:text-white text-gray-900 mb-2">Detalle de la reserva</h3>
             <div className="flex gap-3">
               {reservation.pack.image_url && (
                 <Image src={reservation.pack.image_url} alt="" width={64} height={64} className="w-16 h-16 rounded-lg object-cover" />
               )}
               <div>
-                <p className="text-white font-medium">{reservation.pack.title}</p>
-                <p className="text-xs text-gray-400">{reservation.shop.name}</p>
+                <p className="dark:text-white text-gray-900 font-medium">{reservation.pack.title}</p>
+                <p className="text-xs dark:text-gray-400 text-gray-600">{reservation.shop.name}</p>
               </div>
             </div>
           </div>
 
-                    {/* Información de recogida */}
+                    {/* Informacion de recogida */}
           {(reservation.pickup_date || reservation.pickup_start_time) && (
-            <div className="border-t border-white/10 pt-4">
-              <h3 className="font-semibold text-white mb-2">Información de recogida</h3>
+            <div className="border-t dark:border-gray-700 border-gray-200 pt-4">
+              <h3 className="font-semibold dark:text-white text-gray-900 mb-2">Informacion de recogida</h3>
               <div className="space-y-2">
                 {reservation.pickup_date && (
-                  <div className="flex items-center gap-2 text-sm text-gray-400">
+                  <div className="flex items-center gap-2 text-sm dark:text-gray-400 text-gray-600">
                     <Calendar className="w-4 h-4 text-primary" />
                     <span>{new Date(reservation.pickup_date).toLocaleDateString()}</span>
                   </div>
                 )}
                 {(reservation.pickup_start_time || reservation.pickup_end_time) && (
-                  <div className="flex items-center gap-2 text-sm text-gray-400">
+                  <div className="flex items-center gap-2 text-sm dark:text-gray-400 text-gray-600">
                     <Clock className="w-4 h-4 text-primary" />
                     <span>{reservation.pickup_start_time?.slice(0,5)} - {reservation.pickup_end_time?.slice(0,5)}</span>
                   </div>
                 )}
                 {reservation.shop.address && (
-                  <div className="flex items-center gap-2 text-sm text-gray-400">
+                  <div className="flex items-center gap-2 text-sm dark:text-gray-400 text-gray-600">
                     <MapPin className="w-4 h-4 text-primary" />
                     <span>{reservation.shop.address}</span>
                     <a
@@ -117,7 +117,7 @@ export default function ReservationConfirmation({ reservation, onClose }: Reserv
                       className="inline-flex items-center gap-1 text-primary hover:text-primary/80 transition-colors ml-1"
                     >
                       <Navigation className="w-3 h-3" />
-                      <span className="text-xs">Cómo llegar</span>
+                      <span className="text-xs">Como llegar</span>
                     </a>
                   </div>
                 )}

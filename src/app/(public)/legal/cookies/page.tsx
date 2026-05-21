@@ -150,7 +150,7 @@ export default function CookiesPage() {
                   <Info className="w-6 h-6 text-primary" />
                   ¿Qué son las cookies?
                 </h2>
-                <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
+                <p className="dark:text-gray-300 text-gray-700 leading-relaxed">
                   Las cookies son pequeños archivos de texto que los sitios web colocan en tu dispositivo (computadora, tablet o teléfono) cuando los visitas. Las cookies permiten que el sitio web:
                 </p>
                 <ul className="list-none mt-4 space-y-2">
@@ -206,10 +206,10 @@ export default function CookiesPage() {
                   <Settings className="w-6 h-6 text-primary" />
                   Gestión de cookies
                 </h2>
-                <p className="text-gray-700 dark:text-gray-300 mb-4">Puedes gestionar las cookies de las siguientes maneras:</p>
+                <p className="dark:text-gray-300 text-gray-700 mb-4">Puedes gestionar las cookies de las siguientes maneras:</p>
                 
                 <div className="grid md:grid-cols-2 gap-4">
-                  <div className="p-4 rounded-xl bg-white/5">
+                  <div className="p-4 rounded-xl dark:bg-white/5 bg-gray-100">
                     <h3 className="font-bold text-primary mb-2">🌐 Configuración del navegador</h3>
                     <ul className="text-sm space-y-2">
                       <li><strong>Chrome:</strong> Configuración → Privacidad → Cookies</li>
@@ -218,7 +218,7 @@ export default function CookiesPage() {
                       <li><strong>Edge:</strong> Configuración → Cookies y permisos</li>
                     </ul>
                   </div>
-                  <div className="p-4 rounded-xl bg-white/5">
+                  <div className="p-4 rounded-xl dark:bg-white/5 bg-gray-100">
                     <h3 className="font-bold text-primary mb-2">🍪 Panel de preferencias</h3>
                     <p className="text-sm">Al visitar Paporla por primera vez, mostramos un banner donde puedes aceptar o rechazar cookies no esenciales. Puedes cambiar tus preferencias en cualquier momento desde el enlace "Configuración de cookies".</p>
                   </div>
@@ -236,17 +236,17 @@ export default function CookiesPage() {
                   <Database className="w-6 h-6 text-primary" />
                   Cookies de terceros
                 </h2>
-                <p className="text-gray-700 dark:text-gray-300">Paporla utiliza servicios de terceros que pueden establecer cookies:</p>
+                <p className="dark:text-gray-300 text-gray-700">Paporla utiliza servicios de terceros que pueden establecer cookies:</p>
                 <div className="grid gap-3 mt-4">
-                  <div className="flex items-center justify-between p-3 rounded-lg bg-white/5">
+                  <div className="flex items-center justify-between p-3 rounded-lg dark:bg-white/5 bg-gray-100">
                     <div><strong>Google Analytics</strong><p className="text-xs">Análisis de tráfico</p></div>
                     <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer" className="text-primary text-sm hover:underline">Política →</a>
                   </div>
-                  <div className="flex items-center justify-between p-3 rounded-lg bg-white/5">
+                  <div className="flex items-center justify-between p-3 rounded-lg dark:bg-white/5 bg-gray-100">
                     <div><strong>Supabase</strong><p className="text-xs">Autenticación y base de datos</p></div>
                     <a href="https://supabase.com/privacy" target="_blank" rel="noopener noreferrer" className="text-primary text-sm hover:underline">Política →</a>
                   </div>
-                  <div className="flex items-center justify-between p-3 rounded-lg bg-white/5">
+                  <div className="flex items-center justify-between p-3 rounded-lg dark:bg-white/5 bg-gray-100">
                     <div><strong>Resend</strong><p className="text-xs">Envío de correos</p></div>
                     <a href="https://resend.com/privacy" target="_blank" rel="noopener noreferrer" className="text-primary text-sm hover:underline">Política →</a>
                   </div>
@@ -260,8 +260,8 @@ export default function CookiesPage() {
                   <CheckCircle className="w-6 h-6 text-primary" />
                   Consentimiento
                 </h2>
-                <p className="text-gray-700 dark:text-gray-300">Al continuar utilizando Paporla después de ver nuestro aviso de cookies, aceptas nuestro uso de cookies de acuerdo con esta política. Para cookies no esenciales, requerimos tu consentimiento explícito a través del banner de cookies.</p>
-                <p className="text-gray-700 dark:text-gray-300 mt-3">Puedes retirar tu consentimiento en cualquier momento mediante la configuración de cookies o ajustando las preferencias de tu navegador.</p>
+                <p className="dark:text-gray-300 text-gray-700">Al continuar utilizando Paporla después de ver nuestro aviso de cookies, aceptas nuestro uso de cookies de acuerdo con esta política. Para cookies no esenciales, requerimos tu consentimiento explícito a través del banner de cookies.</p>
+                <p className="dark:text-gray-300 text-gray-700 mt-3">Puedes retirar tu consentimiento en cualquier momento mediante la configuración de cookies o ajustando las preferencias de tu navegador.</p>
                 <div className="mt-4 p-4 rounded-lg bg-green-500/10 border border-green-500/20 text-center">
                   <p className="text-sm">🔐 <strong>Compromiso de Paporla:</strong> Nunca usamos cookies para rastrear actividades fuera de nuestra plataforma ni para vender tus datos a terceros.</p>
                 </div>

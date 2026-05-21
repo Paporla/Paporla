@@ -22,7 +22,7 @@ export default function ShopDetailPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-[#0a0a1a] via-[#0f0f1a] to-[#020205]">
+      <div className="min-h-screen dark:bg-gradient-to-br dark:from-[#0a0a1a] dark:via-[#0f0f1a] dark:to-[#020205] bg-gray-50">
         <div className="container mx-auto px-4 py-12">
           <PageLoader />
         </div>
@@ -32,20 +32,20 @@ export default function ShopDetailPage() {
 
   if (error || !shop) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-[#0a0a1a] via-[#0f0f1a] to-[#020205] flex items-center justify-center">
+      <div className="min-h-screen dark:bg-gradient-to-br dark:from-[#0a0a1a] dark:via-[#0f0f1a] dark:to-[#020205] bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-red-500/10 flex items-center justify-center">
             <Store className="w-10 h-10 text-red-400" />
           </div>
-          <h2 className="text-xl font-bold text-white mb-2">Comercio no encontrado</h2>
-          <p className="text-gray-400">El comercio que buscas no existe o no esta disponible</p>
+          <h2 className="text-xl font-bold dark:text-white text-gray-900 mb-2">Comercio no encontrado</h2>
+          <p className="dark:text-gray-400 text-gray-600">El comercio que buscas no existe o no esta disponible</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#0a0a1a] via-[#0f0f1a] to-[#020205] pb-12">
+    <div className="min-h-screen dark:bg-gradient-to-br dark:from-[#0a0a1a] dark:via-[#0f0f1a] dark:to-[#020205] bg-gray-50 pb-12">
       <ShopDetailHeader
         shop={{
           ...shop,
