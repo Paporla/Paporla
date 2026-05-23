@@ -1,74 +1,73 @@
-'use client';
+'use client'
 
-import Link from 'next/link';
-import { motion } from 'framer-motion';
-import { UserPlus, ShoppingBag, Store, Package, AlertTriangle, CheckCircle, XCircle, Clock } from 'lucide-react';
-import { useState, useEffect } from 'react';
-import { supabaseBrowser } from '@/lib/supabase/client';
+import { motion } from 'framer-motion'
+import { UserPlus, ShoppingBag, Store, Package, AlertTriangle, CheckCircle, XCircle, Clock } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { supabaseBrowser } from '@/lib/supabase/client'
 
 interface Activity {
-  id: string;
-  type: string;
-  severity: string;
-  title: string;
-  description: string;
-  created_at: string;
-  user_id?: string;
-  shop_id?: string;
-  metadata?: any;
+  id: string
+  type: string
+  severity: string
+  title: string
+  description: string
+  created_at: string
+  user_id?: string
+  shop_id?: string
+  metadata?: Record<string, unknown>
 }
 
 const getIcon = (type: string, severity: string) => {
-  if (type === 'user_registered') return { icon: UserPlus, color: 'text-blue-400', bg: 'bg-blue-500/10' };
-  if (type === 'pack_reserved') return { icon: ShoppingBag, color: 'text-primary', bg: 'bg-primary/10' };
-  if (type === 'shop_created') return { icon: Store, color: 'text-violet-400', bg: 'bg-violet-500/10' };
-  if (type === 'pack_created') return { icon: Package, color: 'text-amber-400', bg: 'bg-amber-500/10' };
-  if (severity === 'warning') return { icon: AlertTriangle, color: 'text-amber-400', bg: 'bg-amber-500/10' };
-  if (severity === 'danger') return { icon: XCircle, color: 'text-red-400', bg: 'bg-red-500/10' };
-  if (severity === 'success') return { icon: CheckCircle, color: 'text-green-400', bg: 'bg-green-500/10' };
-  return { icon: ShoppingBag, color: 'text-primary', bg: 'bg-primary/10' };
-};
+  if (type === 'user_registered') return { icon: UserPlus, color: 'text-blue-400', bg: 'bg-blue-500/10' }
+  if (type === 'pack_reserved') return { icon: ShoppingBag, color: 'text-primary', bg: 'bg-primary/10' }
+  if (type === 'shop_created') return { icon: Store, color: 'text-violet-400', bg: 'bg-violet-500/10' }
+  if (type === 'pack_created') return { icon: Package, color: 'text-amber-400', bg: 'bg-amber-500/10' }
+  if (severity === 'warning') return { icon: AlertTriangle, color: 'text-amber-400', bg: 'bg-amber-500/10' }
+  if (severity === 'danger') return { icon: XCircle, color: 'text-red-400', bg: 'bg-red-500/10' }
+  if (severity === 'success') return { icon: CheckCircle, color: 'text-green-400', bg: 'bg-green-500/10' }
+  return { icon: ShoppingBag, color: 'text-primary', bg: 'bg-primary/10' }
+}
 
 const formatTime = (date: string) => {
-  const diff = Date.now() - new Date(date).getTime();
-  const minutes = Math.floor(diff / 60000);
-  const hours = Math.floor(minutes / 60);
-  const days = Math.floor(hours / 24);
+  const diff = Date.now() - new Date(date).getTime()
+  const minutes = Math.floor(diff / 60000)
+  const hours = Math.floor(minutes / 60)
+  const days = Math.floor(hours / 24)
 
-  if (minutes < 1) return 'Hace unos segundos';
-  if (minutes < 60) return `Hace ${minutes} min`;
-  if (hours < 24) return `Hace ${hours} h`;
-  return `Hace ${days} d`;
-};
+  if (minutes < 1) return 'Hace unos segundos'
+  if (minutes < 60) return `Hace ${minutes} min`
+  if (hours < 24) return `Hace ${hours} h`
+  return `Hace ${days} d`
+}
 
 export default function RecentActivity() {
-  const supabase = supabaseBrowser();
-  const [activities, setActivities] = useState<Activity[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [showAll, setShowAll] = useState(false);
+  const supabase = supabaseBrowser()
+  const [activities, setActivities] = useState<Activity[]>([])
+  const [loading, setLoading] = useState(true)
+  const [showAll, setShowAll] = useState(false)
 
   useEffect(() => {
-    loadActivities();
-  }, []);
+    loadActivities()
+  }, [])
 
   const loadActivities = async () => {
-    setLoading(true);
-    
+    setLoading(true)
+
     const { data, error } = await supabase
       .from('activity_logs')
       .select('*')
       .order('created_at', { ascending: false })
-      .limit(showAll ? 50 : 10);
+      .limit(showAll ? 50 : 10)
 
     if (error) {
-      console.error('Error loading activities:', error);
+      console.error('Error loading activities:', error)
     } else {
-      setActivities(data || []);
+      setActivities(data || [])
     }
-    setLoading(false);
-  };
+    setLoading(false)
+  }
 
-  const displayedActivities = showAll ? activities : activities.slice(0, 5);
+  const displayedActivities = showAll ? activities : activities.slice(0, 5)
 
   if (loading) {
     return (
@@ -83,7 +82,7 @@ export default function RecentActivity() {
           </div>
         </div>
       </div>
-    );
+    )
   }
 
   return (
@@ -111,7 +110,7 @@ export default function RecentActivity() {
           </div>
         ) : (
           displayedActivities.map((activity, i) => {
-            const { icon: Icon, color, bg } = getIcon(activity.type, activity.severity);
+            const { icon: Icon, color, bg } = getIcon(activity.type, activity.severity)
             return (
               <motion.div
                 key={activity.id}
@@ -134,10 +133,10 @@ export default function RecentActivity() {
                   </span>
                 </div>
               </motion.div>
-            );
+            )
           })
         )}
       </div>
     </div>
-  );
+  )
 }

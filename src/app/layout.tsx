@@ -5,18 +5,28 @@ import RouteLoader from '@/components/RouteLoader'
 import Providers from './providers'
 import GoogleAnalytics from '@/components/GoogleAnalytics'
 import GoogleTagManager from '@/components/GoogleTagManager'
-import { ThemeProvider } from '@/context/ThemeContext'
 import { PWAProvider } from '@/components/ui/PWAProvider'
+import ThemeScript from '@/components/layout/ThemeScript'
 
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
   title: {
     default: 'Paporla - Rescate Alimentario',
-    template: '%s | Paporla'
+    template: '%s | Paporla',
   },
-  description: 'Conectamos comercios con excedentes de comida con personas que necesitan alimentarse. Reduce el desperdicio, ayuda a tu comunidad.',
-  keywords: ['rescate alimentario', 'comida', 'Caracas', 'desperdicio', 'packs sorpresa', 'excedentes', 'alimentación', 'Latinoamérica'],
+  description:
+    'Conectamos comercios con excedentes de comida con personas que necesitan alimentarse. Reduce el desperdicio, ayuda a tu comunidad.',
+  keywords: [
+    'rescate alimentario',
+    'comida',
+    'Caracas',
+    'desperdicio',
+    'packs sorpresa',
+    'excedentes',
+    'alimentación',
+    'Latinoamérica',
+  ],
   authors: [{ name: 'Paporla', url: 'https://paporla.com' }],
   creator: 'Paporla',
   publisher: 'Paporla',
@@ -27,20 +37,23 @@ export const metadata: Metadata = {
     url: '/',
     siteName: 'Paporla',
     title: 'Paporla - Rescate Alimentario',
-    description: 'Conectamos comercios con excedentes de comida con personas que necesitan alimentarse. Reduce el desperdicio, ayuda a tu comunidad.',
-    images: [{
-      url: '/og-image.svg',
-      width: 1200,
-      height: 630,
-      alt: 'Paporla - Rescate Alimentario'
-    }]
+    description:
+      'Conectamos comercios con excedentes de comida con personas que necesitan alimentarse. Reduce el desperdicio, ayuda a tu comunidad.',
+    images: [
+      {
+        url: '/og-image.svg',
+        width: 1200,
+        height: 630,
+        alt: 'Paporla - Rescate Alimentario',
+      },
+    ],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'Paporla - Rescate Alimentario',
     description: 'Conectamos comercios con excedentes de comida con personas que necesitan alimentarse.',
     images: ['/og-image.svg'],
-    creator: '@paporla'
+    creator: '@paporla',
   },
   robots: {
     index: true,
@@ -72,23 +85,26 @@ export const viewport: Viewport = {
   ],
 }
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="es">
+    <html lang="es" suppressHydrationWarning>
+      <head>
+        <ThemeScript />
+      </head>
       <body className={inter.className}>
         <GoogleTagManager />
-        <ThemeProvider>
-          <Providers>
-            <RouteLoader />
-            <PWAProvider />
-            {children}
-            <GoogleAnalytics />
-          </Providers>
-        </ThemeProvider>
+        <a
+          href="#main-content"
+          className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[100] focus:px-4 focus:py-2 focus:bg-primary focus:text-white focus:rounded-lg"
+        >
+          Saltar al contenido principal
+        </a>
+        <Providers>
+          <RouteLoader />
+          <PWAProvider />
+          {children}
+          <GoogleAnalytics />
+        </Providers>
       </body>
     </html>
   )

@@ -24,13 +24,9 @@ export async function GET(request: Request) {
       return NextResponse.redirect(new URL('/login', request.url))
     }
 
-    const { data: profile } = await supabase
-      .from('user_profiles')
-      .select('role, name')
-      .eq('id', user.id)
-      .maybeSingle()
+    const { data: profile } = await supabase.from('user_profiles').select('role, name').eq('id', user.id).maybeSingle()
 
-        const role = profile?.role || 'user'
+    const role = profile?.role || 'user'
 
     // Enviar email de bienvenida (no bloqueante)
     if (user.email) {
@@ -41,9 +37,9 @@ export async function GET(request: Request) {
         body: JSON.stringify({
           type: 'welcome',
           email: user.email,
-          data: { name: (profile as any)?.name || 'Usuario' },
+          data: { name: profile?.name || 'Usuario' },
         }),
-      }).catch(err => console.error('[Callback] Error welcome email:', err))
+      }).catch((err) => console.error('[Callback] Error welcome email:', err))
     }
 
     if (role === 'comercio') {

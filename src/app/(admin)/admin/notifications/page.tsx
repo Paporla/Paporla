@@ -1,6 +1,7 @@
 'use client'
 
 import { motion } from 'framer-motion'
+import { pageVariants } from '@/lib/utils/motion'
 import { Bell, UserPlus, Store, AlertTriangle, ShoppingBag } from 'lucide-react'
 import NotificationList from '@/components/notifications/NotificationList'
 
@@ -13,11 +14,7 @@ const typeCounts = {
 
 export default function AdminNotificationsPage() {
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="space-y-8"
-    >
+    <motion.div variants={pageVariants} initial="initial" animate="animate" className="space-y-8">
       <div className="section-header -mt-8 -mx-4 px-4 py-8 rounded-b-3xl">
         <div className="flex items-center gap-4">
           <div className="w-14 h-14 rounded-xl bg-primary/10 flex items-center justify-center">

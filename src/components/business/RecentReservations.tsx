@@ -1,30 +1,30 @@
-'use client';
+'use client'
 
-import Link from 'next/link';
-import { motion } from 'framer-motion';
-import { ShoppingBag, Eye, Clock } from 'lucide-react';
-import Card from '@/components/ui/Card';
-import Button from '@/components/ui/Button';
-import { formatPrice } from '@/lib/utils/formatPrice';
-import { formatDate } from '@/lib/utils/formatDate';
+import Link from 'next/link'
+import { motion } from 'framer-motion'
+import { ShoppingBag, Eye } from 'lucide-react'
+import Card from '@/components/ui/Card'
+import Button from '@/components/ui/Button'
+import { formatPrice } from '@/lib/utils/formatPrice'
+import { formatDate } from '@/lib/utils/formatDate'
 
 interface Reservation {
-  id: string;
-  quantity: number;
-  total_price_cents: number;
-  status: string;
-  created_at: string;
+  id: string
+  quantity: number
+  total_price_cents: number
+  status: string
+  created_at: string
   user: {
-    name: string;
-    email: string;
-  };
+    name: string
+    email: string
+  }
   pack: {
-    title: string;
-  };
+    title: string
+  }
 }
 
 interface RecentReservationsProps {
-  reservations: Reservation[];
+  reservations: Reservation[]
 }
 
 const statusColors: Record<string, string> = {
@@ -33,7 +33,7 @@ const statusColors: Record<string, string> = {
   completed: 'bg-green-500/20 text-green-400',
   cancelled: 'bg-red-500/20 text-red-400',
   no_show: 'bg-gray-500/20 text-gray-400',
-};
+}
 
 const statusLabels: Record<string, string> = {
   pending: 'Pendiente',
@@ -41,7 +41,7 @@ const statusLabels: Record<string, string> = {
   completed: 'Retirado',
   cancelled: 'Cancelada',
   no_show: 'No retirado',
-};
+}
 
 export default function RecentReservations({ reservations }: RecentReservationsProps) {
   if (reservations.length === 0) {
@@ -51,7 +51,7 @@ export default function RecentReservations({ reservations }: RecentReservationsP
         <p className="text-gray-400">No hay reservas aún</p>
         <p className="text-xs text-gray-500 mt-1">Las reservas aparecerán aquí cuando lleguen</p>
       </Card>
-    );
+    )
   }
 
   return (
@@ -62,7 +62,9 @@ export default function RecentReservations({ reservations }: RecentReservationsP
           Ultimas Reservas
         </h2>
         <Link href="/business/reservations">
-          <Button variant="outline" size="sm">Ver todas</Button>
+          <Button variant="outline" size="sm">
+            Ver todas
+          </Button>
         </Link>
       </div>
       <div className="space-y-3">
@@ -95,5 +97,5 @@ export default function RecentReservations({ reservations }: RecentReservationsP
         ))}
       </div>
     </Card>
-  );
+  )
 }

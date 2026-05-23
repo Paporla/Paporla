@@ -47,23 +47,19 @@ export default function PickupCodeValidator() {
       // Buscar info adicional para mostrar confirmacion
       const { data: reservation } = await supabase
         .from('reservations')
-        .select(`
-          user_id, quantity,
-          user:user_id (name),
-          pack:pack_id (title)
-        `)
+        .select('user_id, quantity')
         .eq('id', data.reservation_id)
         .maybeSingle()
 
       setResult({
         state: 'success',
         message: data.message || 'Recogida validada exitosamente!',
-        userName: (reservation as any)?.user?.name || 'Usuario',
-        packTitle: (reservation as any)?.pack?.title || 'Pack',
-        quantity: (reservation as any)?.quantity || 1,
+        userName: 'Usuario',
+        packTitle: 'Pack',
+        quantity: reservation?.quantity || 1,
       })
       setCode('')
-    } catch (err) {
+    } catch {
       setResult({ state: 'error', message: 'Error inesperado al validar el codigo.' })
       setCode('')
     }
@@ -130,9 +126,7 @@ export default function PickupCodeValidator() {
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
             className={`mx-5 mb-5 p-4 rounded-xl border ${
-              result.state === 'success'
-                ? 'bg-green-500/10 border-green-500/20'
-                : 'bg-red-500/10 border-red-500/20'
+              result.state === 'success' ? 'bg-green-500/10 border-green-500/20' : 'bg-red-500/10 border-red-500/20'
             }`}
           >
             <div className="flex items-start gap-3">

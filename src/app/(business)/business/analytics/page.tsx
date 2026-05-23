@@ -1,17 +1,18 @@
-'use client';
+'use client'
 
-import { motion } from 'framer-motion';
-import { BarChart3, TrendingUp } from 'lucide-react';
-import LoadingSkeleton from '@/components/business/LoadingSkeleton';
-import BusinessAnalyticsHeader from '@/components/business/analytics/BusinessAnalyticsHeader';
-import AnalyticsSummaryCards from '@/components/business/analytics/AnalyticsSummaryCards';
-import ReservationChart from '@/components/business/analytics/ReservationChart';
-import RevenueChart from '@/components/business/analytics/RevenueChart';
-import PeakHoursChart from '@/components/business/analytics/PeakHoursChart';
-import TopPacksTable from '@/components/business/analytics/TopPacksTable';
-import CancellationRate from '@/components/business/analytics/CancellationRate';
-import WeekComparison from '@/components/business/analytics/WeekComparison';
-import { useBusinessAnalytics } from '@/components/business/analytics/useBusinessAnalytics';
+import { motion } from 'framer-motion'
+import { pageVariants } from '@/lib/utils/motion'
+import { BarChart3, TrendingUp } from 'lucide-react'
+import LoadingSkeleton from '@/components/business/LoadingSkeleton'
+import BusinessAnalyticsHeader from '@/components/business/analytics/BusinessAnalyticsHeader'
+import AnalyticsSummaryCards from '@/components/business/analytics/AnalyticsSummaryCards'
+import ReservationChart from '@/components/business/analytics/ReservationChart'
+import RevenueChart from '@/components/business/analytics/RevenueChart'
+import PeakHoursChart from '@/components/business/analytics/PeakHoursChart'
+import TopPacksTable from '@/components/business/analytics/TopPacksTable'
+import CancellationRate from '@/components/business/analytics/CancellationRate'
+import WeekComparison from '@/components/business/analytics/WeekComparison'
+import { useBusinessAnalytics } from '@/components/business/analytics/useBusinessAnalytics'
 
 export default function BusinessAnalyticsPage() {
   const {
@@ -24,9 +25,9 @@ export default function BusinessAnalyticsPage() {
     topPacks,
     cancellationRate,
     weeklyComparison,
-  } = useBusinessAnalytics();
+  } = useBusinessAnalytics()
 
-  if (loading) return <LoadingSkeleton />;
+  if (loading) return <LoadingSkeleton />
 
   if (!shop) {
     return (
@@ -37,31 +38,22 @@ export default function BusinessAnalyticsPage() {
           <p className="dark:text-gray-400 text-gray-600">Registra tu comercio para ver las estadisticas.</p>
         </div>
       </div>
-    );
+    )
   }
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3 }}
-      className="space-y-8 pb-8"
-    >
+    <motion.div variants={pageVariants} initial="initial" animate="animate" className="space-y-8 pb-8">
       <BusinessAnalyticsHeader shop={shop} />
       <AnalyticsSummaryCards summary={summary} />
       <WeekComparison comparison={weeklyComparison} />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <ReservationChart 
-          data={reservationTrend} 
-          title="Reservas (últimos 7 días)" 
-          trend={weeklyComparison.reservationChange} 
+        <ReservationChart
+          data={reservationTrend}
+          title="Reservas (últimos 7 días)"
+          trend={weeklyComparison.reservationChange}
         />
-        <RevenueChart 
-          data={revenueTrend} 
-          title="Ingresos (últimos 7 días)" 
-          trend={weeklyComparison.revenueChange} 
-        />
+        <RevenueChart data={revenueTrend} title="Ingresos (últimos 7 días)" trend={weeklyComparison.revenueChange} />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -83,5 +75,5 @@ export default function BusinessAnalyticsPage() {
         </div>
       </div>
     </motion.div>
-  );
+  )
 }

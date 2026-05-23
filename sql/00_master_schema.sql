@@ -317,6 +317,7 @@ CREATE OR REPLACE FUNCTION public.get_user_role()
 RETURNS TEXT
 LANGUAGE plpgsql
 SECURITY DEFINER
+SET search_path = public
 AS $$
 DECLARE
   user_role TEXT;
@@ -426,6 +427,7 @@ CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER
 LANGUAGE plpgsql
 SECURITY DEFINER
+SET search_path = public
 AS $$
 BEGIN
   INSERT INTO public.user_profiles (id, email, name, role, avatar_url)
@@ -433,7 +435,7 @@ BEGIN
     NEW.id,
     NEW.email,
     COALESCE(NEW.raw_user_meta_data->>'name', NEW.raw_user_meta_data->>'full_name', split_part(NEW.email, '@', 1)),
-    COALESCE(NEW.raw_user_meta_data->>'role', 'user'),
+    'user', -- SIEMPRE 'user' por seguridad; el cambio de rol solo via admin
     NEW.raw_user_meta_data->>'avatar_url'
   )
   ON CONFLICT (id) DO NOTHING;
@@ -453,6 +455,7 @@ CREATE OR REPLACE FUNCTION public.sync_email_confirmed()
 RETURNS TRIGGER
 LANGUAGE plpgsql
 SECURITY DEFINER
+SET search_path = public
 AS $$
 BEGIN
   IF NEW.email_confirmed_at IS NOT NULL AND OLD.email_confirmed_at IS NULL THEN
@@ -485,6 +488,7 @@ CREATE OR REPLACE FUNCTION public.create_reservation_atomic(
 RETURNS JSONB
 LANGUAGE plpgsql
 SECURITY DEFINER
+SET search_path = public
 AS $$
 DECLARE
   v_pack RECORD;
@@ -588,13 +592,15 @@ CREATE OR REPLACE FUNCTION public.cancel_reservation(
 RETURNS JSONB
 LANGUAGE plpgsql
 SECURITY DEFINER
+SET search_path = public
 AS $$
 DECLARE
   v_res RECORD;
   v_role TEXT;
   v_hours_before_pickup NUMERIC;
 BEGIN
-  SELECT * INTO v_res FROM public.reservations WHERE id = p_reservation_id;
+  -- BLOQUEO: evitar race conditions en cancelacion concurrente
+  SELECT * INTO v_res FROM public.reservations WHERE id = p_reservation_id FOR UPDATE;
   
   IF NOT FOUND THEN
     RETURN jsonb_build_object('success', false, 'error', 'Reserva no encontrada.');
@@ -650,15 +656,18 @@ CREATE OR REPLACE FUNCTION public.validate_pickup(
 RETURNS JSONB
 LANGUAGE plpgsql
 SECURITY DEFINER
+SET search_path = public
 AS $$
 DECLARE
   v_res RECORD;
   v_shop RECORD;
 BEGIN
+  -- BLOQUEO: evitar doble validacion del mismo codigo
   SELECT r.*, p.title AS pack_title INTO v_res 
   FROM public.reservations r
   JOIN public.packs p ON p.id = r.pack_id
-  WHERE r.pickup_code = p_pickup_code;
+  WHERE r.pickup_code = p_pickup_code
+  FOR UPDATE OF r;
   
   IF NOT FOUND THEN
     RETURN jsonb_build_object('success', false, 'error', 'Código de recogida inválido.');
@@ -715,6 +724,7 @@ CREATE OR REPLACE FUNCTION public.expire_reservations()
 RETURNS JSONB
 LANGUAGE plpgsql
 SECURITY DEFINER
+SET search_path = public
 AS $$
 DECLARE
   v_expired_res_count INTEGER := 0;
@@ -776,6 +786,7 @@ CREATE OR REPLACE FUNCTION public.cleanup_pending_reservations(
 RETURNS JSONB
 LANGUAGE plpgsql
 SECURITY DEFINER
+SET search_path = public
 AS $$
 DECLARE
   v_cleaned_count INTEGER := 0;
@@ -784,7 +795,7 @@ BEGIN
   -- Esto cubre el caso donde el usuario inició la reserva pero no finalizó
   DELETE FROM public.reservations
   WHERE status = 'pending'
-    AND created_at < NOW() - (p_minutes_ago || ' minutes')::interval;
+    AND created_at < NOW() - (p_minutes_ago * INTERVAL '1 minute');
   
   GET DIAGNOSTICS v_cleaned_count = ROW_COUNT;
 
@@ -804,35 +815,31 @@ CREATE OR REPLACE FUNCTION public.update_shop_rating(
 RETURNS JSONB
 LANGUAGE plpgsql
 SECURITY DEFINER
+SET search_path = public
 AS $$
 DECLARE
-  v_shop RECORD;
-  v_new_total_ratings INTEGER;
-  v_new_avg_rating DOUBLE PRECISION;
+  v_updated RECORD;
 BEGIN
-  SELECT * INTO v_shop FROM public.shops WHERE id = p_shop_id;
-  
-  IF NOT FOUND THEN
-    RETURN jsonb_build_object('success', false, 'error', 'Comercio no encontrado.');
-  END IF;
-  
   IF p_new_rating < 1 OR p_new_rating > 5 THEN
     RETURN jsonb_build_object('success', false, 'error', 'La calificación debe ser entre 1 y 5.');
   END IF;
   
-  v_new_total_ratings := v_shop.total_ratings + 1;
-  v_new_avg_rating := ((v_shop.rating * v_shop.total_ratings) + p_new_rating) / v_new_total_ratings;
-  
+  -- UPDATE atómico: evita race conditions al calcular rating en una sola operacion
   UPDATE public.shops
-  SET rating = ROUND(v_new_avg_rating, 1),
-      total_ratings = v_new_total_ratings,
+  SET rating = ROUND(((COALESCE(rating, 0) * total_ratings) + p_new_rating) / (total_ratings + 1), 1),
+      total_ratings = total_ratings + 1,
       updated_at = NOW()
-  WHERE id = p_shop_id;
+  WHERE id = p_shop_id
+  RETURNING rating, total_ratings INTO v_updated;
+
+  IF NOT FOUND THEN
+    RETURN jsonb_build_object('success', false, 'error', 'Comercio no encontrado.');
+  END IF;
 
   RETURN jsonb_build_object(
     'success', true,
-    'new_rating', v_new_avg_rating,
-    'total_ratings', v_new_total_ratings
+    'new_rating', v_updated.rating,
+    'total_ratings', v_updated.total_ratings
   );
 END;
 $$;
@@ -845,6 +852,7 @@ CREATE OR REPLACE FUNCTION public.admin_delete_user(
 RETURNS JSONB
 LANGUAGE plpgsql
 SECURITY DEFINER
+SET search_path = public
 AS $$
 DECLARE
   v_caller_role TEXT;
@@ -893,6 +901,7 @@ CREATE OR REPLACE FUNCTION public.admin_delete_shop(
 RETURNS JSONB
 LANGUAGE plpgsql
 SECURITY DEFINER
+SET search_path = public
 AS $$
 DECLARE
   v_caller_role TEXT;
@@ -979,7 +988,7 @@ DROP POLICY IF EXISTS "packs_owner_manage" ON public.packs;
 DROP POLICY IF EXISTS "packs_admin_all" ON public.packs;
 
 CREATE POLICY "packs_select_public" ON public.packs 
-  FOR SELECT USING (deleted_at IS NULL);
+  FOR SELECT USING (deleted_at IS NULL AND is_active = true AND remaining_stock > 0);
 
 CREATE POLICY "packs_owner_manage" ON public.packs 
   FOR ALL USING (
@@ -1013,8 +1022,10 @@ CREATE POLICY "reservations_select_merchant" ON public.reservations
 CREATE POLICY "reservations_client_insert" ON public.reservations 
   FOR INSERT WITH CHECK (auth.uid() = user_id);
 
+-- Solo permite actualizar columnas NO-criticas (cancel_reason, etc.)
+-- El status solo debe cambiarse via RPC functions (cancel_reservation, validate_pickup, etc.)
 CREATE POLICY "reservations_client_update" ON public.reservations 
-  FOR UPDATE USING (auth.uid() = user_id);
+  FOR UPDATE USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
 
 CREATE POLICY "reservations_admin_all" ON public.reservations 
   FOR ALL USING (public.get_user_role() IN ('admin', 'super_admin'));
@@ -1086,10 +1097,156 @@ ON CONFLICT (id) DO NOTHING;
 -- 15. PERMISOS PARA FUNCIONES SECURITY DEFINER
 -- ========================================================
 
+-- ============================================
+-- PERMISOS MINIMOS POR PRINCIPIO DE MENOR PRIVILEGIO
+-- ============================================
 GRANT USAGE ON SCHEMA public TO anon, authenticated, service_role;
-GRANT ALL ON ALL TABLES IN SCHEMA public TO anon, authenticated, service_role;
-GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO anon, authenticated, service_role;
-GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA public TO anon, authenticated, service_role;
+
+-- anon (usuario no autenticado) solo puede SELECT en tablas publicas
+GRANT SELECT ON public.shops TO anon;
+GRANT SELECT ON public.packs TO anon;
+GRANT SELECT ON public.user_profiles TO anon;
+GRANT SELECT ON public.activity_logs TO anon;
+
+-- authenticated (usuario logueado) tiene acceso completo segun RLS
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.user_profiles TO authenticated;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.shops TO authenticated;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.packs TO authenticated;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.reservations TO authenticated;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.favorites TO authenticated;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.notifications TO authenticated;
+GRANT SELECT, INSERT, DELETE ON public.activity_logs TO authenticated;
+
+-- service_role (backend) tiene acceso completo
+GRANT ALL ON ALL TABLES IN SCHEMA public TO service_role;
+GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO service_role;
+
+-- ============================================
+-- FUNCIONES: Solo permitir EXECUTE en las que cada rol necesita
+-- ============================================
+-- anon: solo funciones de lectura publica
+GRANT EXECUTE ON FUNCTION public.get_user_role TO anon;
+
+-- authenticated: funciones que requieren autenticacion
+GRANT EXECUTE ON FUNCTION public.get_user_role TO authenticated;
+GRANT EXECUTE ON FUNCTION public.generate_pickup_code TO authenticated;
+GRANT EXECUTE ON FUNCTION public.create_reservation_atomic(uuid, integer, text) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.cancel_reservation(uuid, text) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.validate_pickup(text) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.update_shop_rating(uuid, double precision) TO authenticated;
+
+-- admin: funciones de administracion (se requiere rol admin en la funcion)
+GRANT EXECUTE ON FUNCTION public.admin_delete_user(uuid) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.admin_delete_shop(uuid) TO authenticated;
+
+-- service_role: funciones de cron/mantenimiento
+GRANT EXECUTE ON FUNCTION public.expire_reservations TO service_role;
+GRANT EXECUTE ON FUNCTION public.cleanup_pending_reservations(integer) TO service_role;
+GRANT EXECUTE ON FUNCTION public.get_user_role TO service_role;
+GRANT EXECUTE ON FUNCTION public.generate_pickup_code TO service_role;
+GRANT EXECUTE ON FUNCTION public.create_reservation_atomic(uuid, integer, text) TO service_role;
+GRANT EXECUTE ON FUNCTION public.cancel_reservation(uuid, text) TO service_role;
+GRANT EXECUTE ON FUNCTION public.validate_pickup(text) TO service_role;
+GRANT EXECUTE ON FUNCTION public.update_shop_rating(uuid, double precision) TO service_role;
+GRANT EXECUTE ON FUNCTION public.admin_delete_user(uuid) TO service_role;
+GRANT EXECUTE ON FUNCTION public.admin_delete_shop(uuid) TO service_role;
+GRANT EXECUTE ON FUNCTION public.cleanup_rate_limits TO service_role;
+
+-- ========================================================
+-- 16. CHECK CONSTRAINTS ADICIONALES (seguridad de datos)
+-- ========================================================
+
+DO $$ BEGIN
+  ALTER TABLE public.shops ADD CONSTRAINT shops_rating_check CHECK (rating >= 0 AND rating <= 5);
+EXCEPTION WHEN duplicate_object THEN NULL;
+END; $$;
+
+DO $$ BEGIN
+  ALTER TABLE public.shops ADD CONSTRAINT shops_total_ratings_check CHECK (total_ratings >= 0);
+EXCEPTION WHEN duplicate_object THEN NULL;
+END; $$;
+
+DO $$ BEGIN
+  ALTER TABLE public.shops ADD CONSTRAINT shops_total_packs_sold_check CHECK (total_packs_sold >= 0);
+EXCEPTION WHEN duplicate_object THEN NULL;
+END; $$;
+
+DO $$ BEGIN
+  ALTER TABLE public.shops ADD CONSTRAINT shops_total_revenue_cents_check CHECK (total_revenue_cents >= 0);
+EXCEPTION WHEN duplicate_object THEN NULL;
+END; $$;
+
+DO $$ BEGIN
+  ALTER TABLE public.shops ADD CONSTRAINT shops_active_packs_count_check CHECK (active_packs_count >= 0);
+EXCEPTION WHEN duplicate_object THEN NULL;
+END; $$;
+
+DO $$ BEGIN
+  ALTER TABLE public.shops ADD CONSTRAINT shops_latitude_check CHECK (latitude >= -90 AND latitude <= 90);
+EXCEPTION WHEN duplicate_object THEN NULL;
+END; $$;
+
+DO $$ BEGIN
+  ALTER TABLE public.shops ADD CONSTRAINT shops_longitude_check CHECK (longitude >= -180 AND longitude <= 180);
+EXCEPTION WHEN duplicate_object THEN NULL;
+END; $$;
+
+DO $$ BEGIN
+  ALTER TABLE public.user_profiles ADD CONSTRAINT user_profiles_total_reservations_check CHECK (total_reservations >= 0);
+EXCEPTION WHEN duplicate_object THEN NULL;
+END; $$;
+
+DO $$ BEGIN
+  ALTER TABLE public.user_profiles ADD CONSTRAINT user_profiles_total_pickups_check CHECK (total_pickups >= 0);
+EXCEPTION WHEN duplicate_object THEN NULL;
+END; $$;
+
+DO $$ BEGIN
+  ALTER TABLE public.user_profiles ADD CONSTRAINT user_profiles_total_cancellations_check CHECK (total_cancellations >= 0);
+EXCEPTION WHEN duplicate_object THEN NULL;
+END; $$;
+
+DO $$ BEGIN
+  ALTER TABLE public.user_profiles ADD CONSTRAINT user_profiles_total_no_shows_check CHECK (total_no_shows >= 0);
+EXCEPTION WHEN duplicate_object THEN NULL;
+END; $$;
+
+DO $$ BEGIN
+  ALTER TABLE public.packs ADD CONSTRAINT packs_discount_percentage_check CHECK (discount_percentage >= 0 AND discount_percentage <= 100);
+EXCEPTION WHEN duplicate_object THEN NULL;
+END; $$;
+
+DO $$ BEGIN
+  ALTER TABLE public.packs ADD CONSTRAINT packs_pickup_times_check CHECK (pickup_end_time > pickup_start_time);
+EXCEPTION WHEN duplicate_object THEN NULL;
+END; $$;
+
+DO $$ BEGIN
+  ALTER TABLE public.reservations ADD CONSTRAINT reservations_total_price_cents_check CHECK (total_price_cents > 0);
+EXCEPTION WHEN duplicate_object THEN NULL;
+END; $$;
+
+-- ========================================================
+-- 17. ÍNDICES COMPUESTOS ADICIONALES (performance)
+-- ========================================================
+
+-- Indice compuesto para la consulta en create_reservation_atomic
+CREATE INDEX IF NOT EXISTS idx_reservations_user_pack_status ON public.reservations(user_id, pack_id, status);
+
+-- Indice compuesto para la vista available_packs
+CREATE INDEX IF NOT EXISTS idx_packs_listado ON public.packs(is_active, deleted_at, remaining_stock, ends_at);
+
+-- Indice parcial para soft-delete en packs
+CREATE INDEX IF NOT EXISTS idx_packs_active_not_deleted ON public.packs(is_active, remaining_stock, ends_at) WHERE deleted_at IS NULL;
+
+-- Indice compuesto para RLS policy de packs_owner_manage
+CREATE INDEX IF NOT EXISTS idx_shops_owner_id ON public.shops(owner_id, id);
+
+-- Indice para busqueda de rate_limits expirados
+CREATE INDEX IF NOT EXISTS idx_rate_limits_reset_at ON rate_limits(reset_at);
+
+-- Eliminar indice redundante (idx_favorites_user cubierto por idx_favorites_user_shop)
+DROP INDEX IF EXISTS idx_favorites_user;
 
 -- ========================================================
 -- FIN DEL SCRIPT

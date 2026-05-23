@@ -1,23 +1,29 @@
-'use client';
+'use client'
 
-import { motion } from 'framer-motion';
-import { Package, DollarSign, Leaf, TrendingUp } from 'lucide-react';
+import { motion } from 'framer-motion'
+import { Package, DollarSign, Leaf, TrendingUp } from 'lucide-react'
 
 interface ProfileStatsProps {
-  packsRescued: number;
-  moneySaved: number;
-  co2Avoided: string;
-  level: string;
-  points: number;
+  packsRescued: number
+  moneySaved: number
+  co2Avoided: string
+  level: string
+  points: number
 }
 
-export default function ProfileStats({ packsRescued, moneySaved, co2Avoided, level, points }: ProfileStatsProps) {
+export default function ProfileStats({
+  packsRescued,
+  moneySaved,
+  co2Avoided,
+  level: _level,
+  points,
+}: ProfileStatsProps) {
   const stats = [
     { label: 'Packs rescatados', value: packsRescued, icon: Package, color: 'text-primary', suffix: '' },
     { label: 'Ahorrado', value: `$${moneySaved.toFixed(2)}`, icon: DollarSign, color: 'text-green-400', suffix: '' },
     { label: 'CO₂ evitado', value: co2Avoided, icon: Leaf, color: 'text-amber-400', suffix: '' },
     { label: 'Puntos', value: points, icon: TrendingUp, color: 'text-primary', suffix: ' pts' },
-  ];
+  ]
 
   return (
     <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -35,5 +41,5 @@ export default function ProfileStats({ packsRescued, moneySaved, co2Avoided, lev
         </motion.div>
       ))}
     </div>
-  );
+  )
 }

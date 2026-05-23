@@ -21,7 +21,12 @@ export async function middleware(request: NextRequest) {
   if (process.env.NEXT_PUBLIC_MAINTENANCE_MODE === 'true') {
     const path = request.nextUrl.pathname
     // Permitir acceso a la pagina de mantenimiento y recursos estaticos
-    if (path !== '/mantenimiento' && !path.startsWith('/_next') && !path.startsWith('/api') && !path.startsWith('/favicon')) {
+    if (
+      path !== '/mantenimiento' &&
+      !path.startsWith('/_next') &&
+      !path.startsWith('/api') &&
+      !path.startsWith('/favicon')
+    ) {
       return NextResponse.redirect(new URL('/mantenimiento', request.url))
     }
     // Si ya esta en /mantenimiento, seguir
@@ -47,7 +52,7 @@ export async function middleware(request: NextRequest) {
           response.cookies.set({ name, value: '', ...options, maxAge: 0 })
         },
       },
-    }
+    },
   )
 
   const path = request.nextUrl.pathname
@@ -60,18 +65,26 @@ export async function middleware(request: NextRequest) {
     path.startsWith('/legal/') ||
     path.startsWith('/packs') ||
     path.startsWith('/shops') ||
+    path.startsWith('/contacto') ||
     path.startsWith('/callback') ||
     path.startsWith('/api') ||
     path.startsWith('/mantenimiento')
 
-  const isDashboardPath = path.startsWith('/dashboard') || path.startsWith('/profile') || path.startsWith('/notifications') || path.startsWith('/favorites') || path.startsWith('/reservations')
+  const isDashboardPath =
+    path.startsWith('/dashboard') ||
+    path.startsWith('/profile') ||
+    path.startsWith('/notifications') ||
+    path.startsWith('/favorites') ||
+    path.startsWith('/reservations')
   const isBusinessPath = path.startsWith('/business')
   const isAdminPath = path.startsWith('/admin')
   const isAuthPage = path === '/login' || path === '/register'
 
   // Solo verificar auth para rutas protegidas
   if (!isPublicPath || isDashboardPath || isBusinessPath || isAdminPath) {
-    const { data: { user } } = await supabase.auth.getUser()
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
 
     if (!user && !isPublicPath) {
       return NextResponse.redirect(new URL('/login', request.url))
@@ -80,17 +93,14 @@ export async function middleware(request: NextRequest) {
     let role = 'user'
 
     if (user) {
-      const { data: profile } = await supabase
-        .from('user_profiles')
-        .select('role')
-        .eq('id', user.id)
-        .maybeSingle()
+      const { data: profile } = await supabase.from('user_profiles').select('role').eq('id', user.id).maybeSingle()
 
       role = profile?.role || 'user'
 
       // Si ya esta logueado y entra a login/register, redirigir a su panel
       if (isAuthPage) {
-        const dest = role === 'comercio' ? '/business' : role === 'admin' || role === 'super_admin' ? '/admin' : '/dashboard'
+        const dest =
+          role === 'comercio' ? '/business' : role === 'admin' || role === 'super_admin' ? '/admin' : '/dashboard'
         return NextResponse.redirect(new URL(dest, request.url))
       }
 
@@ -115,5 +125,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/((?!api|_next/static|_next/image|favicon.ico|.*\\.svg$|.*\\.png$|.*\\.jpg$|.*\\.jpeg$|.*\\.webp$).*)'],
+  matcher: ['/((?!_next/static|_next/image|favicon.ico|.*\\.svg$|.*\\.png$|.*\\.jpg$|.*\\.jpeg$|.*\\.webp$).*)'],
 }

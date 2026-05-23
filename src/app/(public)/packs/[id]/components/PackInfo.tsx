@@ -28,7 +28,7 @@ export default function PackInfo({
   pickupDate,
   pickupStartTime,
   pickupEndTime,
-  isAvailable
+  isAvailable: _isAvailable,
 }: PackInfoProps) {
   const calculateDiscount = () => {
     if (!originalPriceCents || originalPriceCents <= priceCents) return null
@@ -38,28 +38,18 @@ export default function PackInfo({
   const discount = calculateDiscount()
 
   return (
-    <motion.div
-      initial={{ opacity: 0, x: 20 }}
-      animate={{ opacity: 1, x: 0 }}
-      className="space-y-6"
-    >
+    <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-6">
       <div>
-        <h1 className="text-3xl md:text-4xl font-bold dark:text-white text-gray-900 mb-2">
-          {title}
-        </h1>
+        <h1 className="text-3xl md:text-4xl font-bold dark:text-white text-gray-900 mb-2">{title}</h1>
         <div className="flex items-baseline gap-2">
-          <span className="text-3xl font-bold text-primary">
-            {formatPrice(priceCents)}
-          </span>
+          <span className="text-3xl font-bold text-primary">{formatPrice(priceCents)}</span>
           {originalPriceCents && (
             <span className="text-lg dark:text-gray-500 text-gray-400 line-through">
               {formatPrice(originalPriceCents)}
             </span>
           )}
           {discount && (
-            <span className="text-sm bg-red-500/20 text-red-400 px-2 py-0.5 rounded-full font-bold">
-              -{discount}%
-            </span>
+            <span className="text-sm bg-red-500/20 text-red-400 px-2 py-0.5 rounded-full font-bold">-{discount}%</span>
           )}
         </div>
       </div>
@@ -95,7 +85,7 @@ export default function PackInfo({
               <div className="flex items-center gap-2 dark:text-gray-400 text-gray-600">
                 <Clock className="w-4 h-4" />
                 <span>
-                  {pickupStartTime?.slice(0,5)} - {pickupEndTime?.slice(0,5)}
+                  {pickupStartTime?.slice(0, 5)} - {pickupEndTime?.slice(0, 5)}
                 </span>
               </div>
             )}

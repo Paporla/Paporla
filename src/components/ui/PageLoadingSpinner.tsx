@@ -1,30 +1,27 @@
-'use client';
+'use client'
 
-import { motion } from 'framer-motion';
-import { useEffect, useState } from 'react';
+import Skeleton from '@/components/ui/Skeleton'
 
-export default function PageLoadingSpinner({ message = 'Cargando...' }: { message?: string }) {
-  const [show, setShow] = useState(false);
-
-  // Pequeno delay para evitar parpadeo si carga muy rapido
-  useEffect(() => {
-    const timer = setTimeout(() => setShow(true), 50);
-    return () => clearTimeout(timer);
-  }, []);
-
-  if (!show) return null;
-
+export default function PageLoadingSpinner({ message: _message = 'Cargando...' }: { message?: string }) {
   return (
     <div className="min-h-[60vh] flex items-center justify-center">
-      <div className="text-center">
-        <motion.div
-          className="w-14 h-14 rounded-full border-4 border-primary/30 border-t-primary mx-auto mb-4"
-          animate={{ rotate: 360 }}
-          transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
-        />
-        <p className="dark:text-gray-400 text-gray-600 text-lg font-medium">{message}</p>
-        <p className="dark:text-gray-600 text-gray-400 text-sm mt-1">Por favor espera</p>
+      <div className="w-full max-w-md space-y-4">
+        <div className="text-center space-y-2 mb-6">
+          <div className="w-14 h-14 rounded-full bg-gray-200 dark:bg-gray-800 animate-pulse mx-auto" />
+          <Skeleton className="h-5 w-48 mx-auto" variant="text" />
+          <Skeleton className="h-4 w-32 mx-auto" variant="text" />
+        </div>
+        <div className="rounded-xl border dark:border-white/10 border-gray-200 p-5 space-y-3">
+          <Skeleton className="h-6 w-1/3" />
+          <Skeleton className="h-4 w-1/2" />
+          <Skeleton className="h-12 w-full" />
+        </div>
+        <div className="rounded-xl border dark:border-white/10 border-gray-200 p-5 space-y-3">
+          <Skeleton className="h-6 w-1/4" />
+          <Skeleton className="h-4 w-2/3" />
+          <Skeleton className="h-12 w-full" />
+        </div>
       </div>
     </div>
-  );
+  )
 }

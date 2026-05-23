@@ -1,29 +1,29 @@
-'use client';
+'use client'
 
-import { motion } from 'framer-motion';
-import { MapPin, Star, Trash2, Store } from 'lucide-react';
-import Image from 'next/image';
-import Link from 'next/link';
+import { motion } from 'framer-motion'
+import { MapPin, Star, Trash2, Store } from 'lucide-react'
+import Image from 'next/image'
+import Link from 'next/link'
 
 interface Shop {
-  id: string;
-  name: string;
-  address: string | null;
-  city: string | null;
-  phone: string | null;
-  verified: boolean;
-  rating: number | null;
-  logo_url: string | null;
-  cover_url: string | null;
+  id: string
+  name: string
+  address: string | null
+  city: string | null
+  phone: string | null
+  verified: boolean
+  rating: number | null
+  logo_url: string | null
+  cover_url: string | null
 }
 
 interface FavoriteCardProps {
-  id: string;
-  shop: Shop;
-  onRemove: () => void;
+  id: string
+  shop: Shop
+  onRemove: () => void
 }
 
-export default function FavoriteCard({ id, shop, onRemove }: FavoriteCardProps) {
+export default function FavoriteCard({ id: _id, shop, onRemove }: FavoriteCardProps) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -36,24 +36,24 @@ export default function FavoriteCard({ id, shop, onRemove }: FavoriteCardProps) 
           {/* Imagen / Logo */}
           <div className="relative w-full sm:w-32 h-32 dark:bg-dark-muted bg-gray-100 flex items-center justify-center">
             {shop.logo_url ? (
-              <Image 
-                src={shop.logo_url} 
-                alt={shop.name} 
-                width={128} 
+              <Image
+                src={shop.logo_url}
+                alt={shop.name}
+                width={128}
                 height={128}
                 className="w-full h-full object-cover"
               />
             ) : (
               <Store className="w-12 h-12 dark:text-gray-500 text-gray-400" />
             )}
-            
+
             {shop.verified && (
               <div className="absolute top-2 left-2 bg-primary/90 text-dark text-[10px] font-black px-2 py-0.5 rounded-lg">
                 Verificado
               </div>
             )}
           </div>
-          
+
           {/* Contenido */}
           <div className="flex-1 p-4">
             <div className="flex items-start justify-between">
@@ -75,28 +75,27 @@ export default function FavoriteCard({ id, shop, onRemove }: FavoriteCardProps) 
                 )}
               </div>
             </div>
-            
+
             <div className="flex flex-wrap items-center justify-between gap-2 mt-3 pt-3 border-t dark:border-dark-border border-gray-200">
               <div className="flex items-center gap-3 text-xs dark:text-gray-500 text-gray-400">
-                {shop.city && (
-                  <span>{shop.city}</span>
-                )}
-                {shop.phone && (
-                  <span>{shop.phone}</span>
-                )}
+                {shop.city && <span>{shop.city}</span>}
+                {shop.phone && <span>{shop.phone}</span>}
               </div>
             </div>
           </div>
         </div>
       </Link>
-      
+
       {/* Boton eliminar */}
       <button
-        onClick={(e) => { e.stopPropagation(); onRemove(); }}
+        onClick={(e) => {
+          e.stopPropagation()
+          onRemove()
+        }}
         className="absolute top-4 right-4 p-2 rounded-full bg-red-500/10 hover:bg-red-500/20 transition-colors opacity-0 group-hover:opacity-100"
       >
         <Trash2 className="w-4 h-4 text-red-400" />
       </button>
     </motion.div>
-  );
+  )
 }

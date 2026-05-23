@@ -1,5 +1,3 @@
-'use client'
-
 export default function PacksLoadingGrid() {
   return (
     <div className="min-h-screen dark:bg-black bg-gray-50">

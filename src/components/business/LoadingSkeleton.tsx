@@ -1,5 +1,3 @@
-'use client';
-
 export default function LoadingSkeleton() {
   return (
     <div className="flex items-center justify-center min-h-[80vh]">
@@ -9,5 +7,5 @@ export default function LoadingSkeleton() {
         <p className="dark:text-gray-600 text-gray-400 text-sm mt-1">Preparando tu comercio</p>
       </div>
     </div>
-  );
+  )
 }

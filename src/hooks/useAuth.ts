@@ -2,7 +2,7 @@
 
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { supabaseBrowser } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 
@@ -17,8 +17,6 @@ export type UserProfile = {
   avatar_url: string | null
   email_confirmed: boolean | null
   created_at: string | null
-  country: string | null
-  city: string | null
 }
 
 export type SignUpRole = 'user' | 'comercio'
@@ -47,10 +45,12 @@ export function useAuth() {
     router.replace(target)
   }
 
+  const PROFILE_FIELDS = 'id, email, name, phone, role, avatar_url, email_confirmed, created_at'
+
   const fetchProfile = async (userId: string) => {
     const { data: profile, error } = await supabase
       .from('user_profiles')
-      .select('*')
+      .select(PROFILE_FIELDS)
       .eq('id', userId)
       .maybeSingle()
 
@@ -62,44 +62,47 @@ export function useAuth() {
     return profile as UserProfile | null
   }
 
-  const getUser = async (skipLoading = false) => {
-    try {
-      if (!skipLoading) setLoading(true)
+  const getUser = useCallback(
+    async (skipLoading = false) => {
+      try {
+        if (!skipLoading) setLoading(true)
 
-      const {
-        data: { user: authUser },
-        error: authError,
-      } = await supabase.auth.getUser()
+        const {
+          data: { user: authUser },
+          error: authError,
+        } = await supabase.auth.getUser()
 
-      if (authError) {
-        console.error('Error obteniendo usuario auth:', authError)
+        if (authError) {
+          console.error('Error obteniendo usuario auth:', authError)
+          setUser(null)
+          return null
+        }
+
+        if (!authUser) {
+          setUser(null)
+          return null
+        }
+
+        const profile = await fetchProfile(authUser.id)
+
+        if (!profile) {
+          console.warn('Usuario autenticado sin perfil:', authUser.id)
+          setUser(null)
+          return null
+        }
+
+        setUser(profile)
+        return profile
+      } catch (error) {
+        console.error('Error en getUser:', error)
         setUser(null)
         return null
+      } finally {
+        setLoading(false)
       }
-
-      if (!authUser) {
-        setUser(null)
-        return null
-      }
-
-      const profile = await fetchProfile(authUser.id)
-
-      if (!profile) {
-        console.warn('Usuario autenticado sin perfil:', authUser.id)
-        setUser(null)
-        return null
-      }
-
-      setUser(profile)
-      return profile
-    } catch (error) {
-      console.error('Error en getUser:', error)
-      setUser(null)
-      return null
-    } finally {
-      setLoading(false)
-    }
-  }
+    },
+    [supabase],
+  )
 
   useEffect(() => {
     getUser(false)
@@ -107,8 +110,6 @@ export function useAuth() {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((event) => {
-      // Solo recargar en eventos significativos, ignorar TOKEN_REFRESHED
-      // para evitar doble recarga al navegar entre paginas
       if (event === 'SIGNED_IN' || event === 'USER_UPDATED') {
         getUser(true)
       }
@@ -122,7 +123,7 @@ export function useAuth() {
     return () => {
       subscription.unsubscribe()
     }
-  }, [])
+  }, [getUser, supabase])
 
   const signIn = async (email: string, password: string) => {
     const { data, error } = await supabase.auth.signInWithPassword({
@@ -152,7 +153,7 @@ export function useAuth() {
     name: string,
     role: SignUpRole,
     phone?: string,
-    shopData?: ShopData
+    shopData?: ShopData,
   ) => {
     const { data, error } = await supabase.auth.signUp({
       email,
@@ -174,37 +175,14 @@ export function useAuth() {
       throw new Error('Error al crear usuario')
     }
 
-    // NOTIFICAR A ADMINS: Nuevo usuario registrado
-    const baseUrl = window.location.origin
-    ;(async () => {
-      try {
-        const { data: admins } = await supabase
-          .from('user_profiles')
-          .select('id')
-          .in('role', ['admin', 'super_admin'])
-        if (admins && admins.length > 0) {
-          const notifications = admins.map((admin: any) => ({
-            userId: admin.id,
-            type: 'new_user',
-            message: `${name || 'Usuario'} se registro como ${role === 'comercio' ? 'comercio' : 'usuario'}${role === 'comercio' && shopData?.name ? ' - ' + shopData.name : ''}`,
-          }))
-          await fetch(baseUrl + '/api/notifications', {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ notifications }),
-          })
-        }
-      } catch (err) {
-        console.error('[Notifications] Error:', err)
-      }
-    })()
+    notifyAdminsOfNewUser(name, role, shopData?.name).catch((err) => console.error('[Notifications] Error:', err))
+
+    sendWelcomeEmail(email, name).catch((err) => console.error('[WelcomeEmail] Error:', err))
 
     if (!data.session) {
       router.replace('/login?registered=true')
       return
     }
-
-    await new Promise((resolve) => setTimeout(resolve, 500))
 
     const profile = await fetchProfile(data.user.id)
 
@@ -220,8 +198,25 @@ export function useAuth() {
   const signOut = async () => {
     await supabase.auth.signOut()
     setUser(null)
-    // Usar window.location.href para recarga completa y evitar doble navegacion
     window.location.href = '/'
+  }
+
+  async function sendWelcomeEmail(email: string, name: string) {
+    const { sendWelcomeEmail: sendEmail } = await import('@/lib/email')
+    await sendEmail(email, name)
+  }
+
+  async function notifyAdminsOfNewUser(name: string, role: string, shopName?: string) {
+    const { data: admins } = await supabase.from('user_profiles').select('id').in('role', ['admin', 'super_admin'])
+    if (!admins || admins.length === 0) return
+
+    const { sendBatchNotifications } = await import('@/lib/notifications/sendNotification')
+    const notifications = admins.map((admin) => ({
+      userId: admin.id,
+      type: 'new_user' as const,
+      message: `${name || 'Usuario'} se registro como ${role === 'comercio' ? 'comercio' : 'usuario'}${role === 'comercio' && shopName ? ' - ' + shopName : ''}`,
+    }))
+    await sendBatchNotifications(notifications)
   }
 
   return {

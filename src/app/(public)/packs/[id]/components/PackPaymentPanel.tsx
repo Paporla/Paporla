@@ -2,15 +2,14 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import Image from 'next/image'
-import { Calendar, Clock, CreditCard, MapPin, Package } from 'lucide-react'
+import { CreditCard, Package } from 'lucide-react'
 import Button from '@/components/ui/Button'
 import { formatPrice } from '@/lib/utils/formatPrice'
-import { formatDate } from '@/lib/utils/formatDate'
+import type { UserProfile } from '@/hooks/useAuth'
 
 interface PackPaymentPanelProps {
   packId: string
-  user: any | null
+  user: UserProfile | null
   isAvailable: boolean
   remainingStock: number
   priceCents: number
@@ -19,13 +18,13 @@ interface PackPaymentPanelProps {
 }
 
 export default function PackPaymentPanel({
-  packId,
+  packId: _packId,
   user,
   isAvailable,
   remainingStock,
   priceCents,
   onReserve,
-  reserving
+  reserving,
 }: PackPaymentPanelProps) {
   const [quantity, setQuantity] = useState(1)
   const [paymentMethod, setPaymentMethod] = useState<'cash' | 'demo'>('cash')
@@ -114,11 +113,7 @@ export default function PackPaymentPanel({
       </label>
 
       {isAvailable ? (
-        <Button
-          onClick={handleReserve}
-          disabled={reserving || !acceptedPolicies}
-          className="w-full py-6 text-lg"
-        >
+        <Button onClick={handleReserve} disabled={reserving || !acceptedPolicies} className="w-full py-6 text-lg">
           {reserving ? (
             <div className="flex items-center gap-2">
               <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />

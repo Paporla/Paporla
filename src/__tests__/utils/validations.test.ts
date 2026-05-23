@@ -117,29 +117,27 @@ describe('registerSchema', () => {
 })
 
 describe('packSchema', () => {
+  const validPack = {
+    shop_id: '00000000-0000-0000-0000-000000000001',
+    title: 'Pack Sorpresa',
+    price_cents: 1500,
+    total_stock: 10,
+    pickup_date: '2024-06-15',
+    pickup_start_time: '14:00',
+    pickup_end_time: '16:00',
+  }
+
   it('validates correct pack data', () => {
     const result = packSchema.safeParse({
-      title: 'Pack Sorpresa',
+      ...validPack,
       description: 'Delicioso pack',
-      price_cents: 1500,
       original_price_cents: 3000,
-      total_stock: 10,
-      pickup_date: '2024-06-15',
-      pickup_start_time: '14:00',
-      pickup_end_time: '16:00',
     })
     expect(result.success).toBe(true)
   })
 
   it('defaults is_active to true', () => {
-    const result = packSchema.safeParse({
-      title: 'Pack Sorpresa',
-      price_cents: 1500,
-      total_stock: 10,
-      pickup_date: '2024-06-15',
-      pickup_start_time: '14:00',
-      pickup_end_time: '16:00',
-    })
+    const result = packSchema.safeParse(validPack)
     expect(result.success).toBe(true)
     if (result.success) {
       expect(result.data.is_active).toBe(true)
@@ -147,51 +145,22 @@ describe('packSchema', () => {
   })
 
   it('rejects short title', () => {
-    const result = packSchema.safeParse({
-      title: 'Pa',
-      price_cents: 1500,
-      total_stock: 10,
-      pickup_date: '2024-06-15',
-      pickup_start_time: '14:00',
-      pickup_end_time: '16:00',
-    })
+    const result = packSchema.safeParse({ ...validPack, title: 'Pa' })
     expect(result.success).toBe(false)
   })
 
   it('rejects zero price', () => {
-    const result = packSchema.safeParse({
-      title: 'Pack Sorpresa',
-      price_cents: 0,
-      total_stock: 10,
-      pickup_date: '2024-06-15',
-      pickup_start_time: '14:00',
-      pickup_end_time: '16:00',
-    })
+    const result = packSchema.safeParse({ ...validPack, price_cents: 0 })
     expect(result.success).toBe(false)
   })
 
   it('rejects zero stock', () => {
-    const result = packSchema.safeParse({
-      title: 'Pack Sorpresa',
-      price_cents: 1500,
-      total_stock: 0,
-      pickup_date: '2024-06-15',
-      pickup_start_time: '14:00',
-      pickup_end_time: '16:00',
-    })
+    const result = packSchema.safeParse({ ...validPack, total_stock: 0 })
     expect(result.success).toBe(false)
   })
 
   it('allows image_gallery array', () => {
-    const result = packSchema.safeParse({
-      title: 'Pack Sorpresa',
-      price_cents: 1500,
-      total_stock: 10,
-      pickup_date: '2024-06-15',
-      pickup_start_time: '14:00',
-      pickup_end_time: '16:00',
-      image_gallery: ['url1', 'url2'],
-    })
+    const result = packSchema.safeParse({ ...validPack, image_gallery: ['url1', 'url2'] })
     expect(result.success).toBe(true)
   })
 })

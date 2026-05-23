@@ -15,13 +15,13 @@ interface StatsCardsProps {
   trend?: { active: number; value: number; completed: number }
 }
 
-export default function StatsCards({ 
-  activeCount, 
-  totalValue, 
-  completedCount, 
-  onScrollToActive, 
+export default function StatsCards({
+  activeCount,
+  totalValue,
+  completedCount,
+  onScrollToActive,
   onScrollToHistory,
-  trend = { active: 0, value: 0, completed: 0 }
+  trend = { active: 0, value: 0, completed: 0 },
 }: StatsCardsProps) {
   const cards = [
     {
@@ -54,7 +54,7 @@ export default function StatsCards({
   ]
 
   return (
-    <motion.div 
+    <motion.div
       className="grid grid-cols-1 md:grid-cols-3 gap-4"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
@@ -63,30 +63,40 @@ export default function StatsCards({
       {cards.map((card, idx) => {
         const isPositive = card.trend >= 0
         const TrendIcon = isPositive ? TrendingUp : TrendingDown
-        
+
         const cardContent = (
           <Card glass hover className="cursor-pointer transition-all duration-300 group">
             <div className="flex items-center justify-between mb-2">
               <card.icon className={`w-8 h-8 ${card.color}`} />
               {card.trend !== 0 && (
-                <div className={`flex items-center gap-0.5 text-xs font-medium px-2 py-0.5 rounded-full ${isPositive ? 'text-green-400 bg-green-500/10' : 'text-red-400 bg-red-500/10'}`}>
+                <div
+                  className={`flex items-center gap-0.5 text-xs font-medium px-2 py-0.5 rounded-full ${isPositive ? 'text-green-400 bg-green-500/10' : 'text-red-400 bg-red-500/10'}`}
+                >
                   <TrendIcon className="w-3 h-3" />
                   {Math.abs(card.trend)}%
                 </div>
               )}
             </div>
             <div className="text-2xl font-bold dark:text-white text-gray-900">{card.value}</div>
-            <div className="text-sm dark:text-gray-400 text-gray-600">{card.label}</div>
+            <div className="text-sm dark:text-gray-400 text-gray-700">{card.label}</div>
             <div className="text-xs text-primary mt-2 opacity-0 group-hover:opacity-100 transition-opacity">
               {card.action} →
             </div>
           </Card>
         )
-        
+
         if (card.href) {
-          return <Link key={idx} href={card.href}>{cardContent}</Link>
+          return (
+            <Link key={idx} href={card.href}>
+              {cardContent}
+            </Link>
+          )
         }
-        return <button key={idx} onClick={card.onClick} className="text-left w-full">{cardContent}</button>
+        return (
+          <button key={idx} onClick={card.onClick} className="text-left w-full">
+            {cardContent}
+          </button>
+        )
       })}
     </motion.div>
   )

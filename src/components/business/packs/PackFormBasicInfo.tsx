@@ -1,31 +1,33 @@
-'use client';
+'use client'
 
-import { Package, DollarSign, Tag } from 'lucide-react';
-import Input from '@/components/ui/Input';
+import { Package, DollarSign, Tag } from 'lucide-react'
+import Input from '@/components/ui/Input'
 
 // Elimina la importación de ImageUpload
 
 interface BasicData {
-  title: string;
-  description: string;
-  price_cents: number;
-  original_price_cents: number;
-  total_stock: number;
-  image_url: string;
+  title: string
+  description: string
+  price_cents: number
+  original_price_cents: number
+  total_stock: number
+  image_url: string
 }
 
 interface Props {
-  data: BasicData;
-  onChange: (data: BasicData) => void;
-  shopId: string;
-  onError: (err: string) => void;
+  data: BasicData
+  onChange: (data: BasicData) => void
+  shopId: string
+  onError: (err: string) => void
 }
 
-export default function PackFormBasicInfo({ data, onChange, shopId, onError }: Props) {
-  const update = (partial: Partial<BasicData>) => onChange({ ...data, ...partial });
+export default function PackFormBasicInfo({ data, onChange, shopId: _shopId, onError: _onError }: Props) {
+  const update = (partial: Partial<BasicData>) => onChange({ ...data, ...partial })
 
-  const discount = data.original_price_cents > data.price_cents
-    ? Math.round((1 - data.price_cents / data.original_price_cents) * 100) : null;
+  const discount =
+    data.original_price_cents > data.price_cents
+      ? Math.round((1 - data.price_cents / data.original_price_cents) * 100)
+      : null
 
   return (
     <div className="dark:bg-black/40 bg-white dark:backdrop-blur-sm backdrop-blur-sm rounded-2xl p-6 border dark:border-white/10 border-gray-200">
@@ -45,7 +47,9 @@ export default function PackFormBasicInfo({ data, onChange, shopId, onError }: P
         />
 
         <div>
-          <label className="block text-sm font-medium dark:text-gray-400 text-gray-600 mb-2">Descripcion (opcional)</label>
+          <label className="block text-sm font-medium dark:text-gray-400 text-gray-600 mb-2">
+            Descripcion (opcional)
+          </label>
           <textarea
             value={data.description}
             onChange={(e) => update({ description: e.target.value })}
@@ -73,7 +77,9 @@ export default function PackFormBasicInfo({ data, onChange, shopId, onError }: P
             step="0.01"
             placeholder="24.99"
             value={data.original_price_cents / 100 || ''}
-            onChange={(e) => update({ original_price_cents: e.target.value ? Math.round(parseFloat(e.target.value) * 100) : 0 })}
+            onChange={(e) =>
+              update({ original_price_cents: e.target.value ? Math.round(parseFloat(e.target.value) * 100) : 0 })
+            }
             icon={<DollarSign className="w-4 h-4" />}
           />
 
@@ -98,5 +104,5 @@ export default function PackFormBasicInfo({ data, onChange, shopId, onError }: P
         {/* Eliminado ImageUpload - la imagen se usará del perfil del comercio */}
       </div>
     </div>
-  );
+  )
 }

@@ -1,10 +1,25 @@
 import { createClient } from '@/lib/supabase/server'
+import { getSupabaseAdmin } from '@/lib/supabase/admin'
+import { sendReservationConfirmationEmail } from '@/lib/email'
+
+const VALID_STATUS_TRANSITIONS: Record<string, string[]> = {
+  pending: ['confirmed', 'cancelled'],
+  confirmed: ['cancelled', 'picked_up', 'no_show', 'ready_pickup'],
+  ready_pickup: ['picked_up', 'no_show'],
+  picked_up: ['completed'],
+  cancelled: [],
+  no_show: [],
+  expired: [],
+  completed: [],
+}
 
 export async function getUserReservations(userId: string, shopId?: string) {
   const supabase = await createClient()
   const query = supabase
     .from('reservations')
-    .select(`*,pack:packs(id,title,price_cents,image_url,pickup_date,pickup_start_time,pickup_end_time),shop:shops(id,name,address,phone,logo_url)`)
+    .select(
+      `*,pack:packs(id,title,price_cents,image_url,pickup_date,pickup_start_time,pickup_end_time),shop:shops(id,name,address,phone,logo_url)`,
+    )
 
   if (shopId) {
     const { data: profile } = await supabase.from('user_profiles').select('role').eq('id', userId).maybeSingle()
@@ -25,60 +40,75 @@ export async function getUserReservations(userId: string, shopId?: string) {
 
 export async function createReservation(userId: string, body: { pack_id: string; shop_id: string; quantity?: number }) {
   const supabase = await createClient()
-  const { pack_id, shop_id, quantity = 1 } = body
+  const { pack_id, quantity = 1 } = body
 
-  if (!pack_id || !shop_id) return { error: 'Faltan campos requeridos', status: 400 }
+  if (!pack_id) return { error: 'Faltan campos requeridos: pack_id', status: 400 }
 
-  const { data: pack, error: packError } = await supabase.from('packs')
-    .select('price_cents, remaining_stock, title').eq('id', pack_id).maybeSingle()
-  if (packError || !pack) return { error: 'Pack no encontrado', status: 404 }
-  if (pack.remaining_stock < quantity) return { error: 'No hay suficiente stock', status: 400 }
+  const { data: rpcResult, error: rpcError } = await supabase.rpc('create_reservation_atomic', {
+    p_pack_id: pack_id,
+    p_quantity: quantity,
+    p_payment_method: 'demo',
+  })
 
-  const { data: existing } = await supabase.from('reservations').select('id')
-    .eq('user_id', userId).eq('pack_id', pack_id).in('status', ['pending', 'confirmed']).maybeSingle()
-  if (existing) return { error: 'Ya tienes una reserva activa para este pack', status: 400 }
+  if (rpcError) return { error: rpcError.message, status: 500 }
 
-  const total_price_cents = pack.price_cents * quantity
-  const { data: reservation, error } = await supabase.from('reservations').insert({
-    user_id: userId, shop_id, pack_id, quantity, total_price_cents,
-    status: 'confirmed', payment_method: 'demo', payment_status: 'completed',
-    reserved_at: new Date().toISOString()
-  }).select().single()
+  const result = rpcResult as { success: boolean; reservation_id?: string; pickup_code?: string; error?: string }
 
-  if (error) return { error: error.message, status: 500 }
+  if (!result.success) {
+    return { error: result.error || 'Error al crear la reserva', status: 400 }
+  }
 
-  // Email de confirmación no bloqueante
-  try {
-    const [{ data: userProfile }, { data: shop }] = await Promise.all([
-      supabase.from('user_profiles').select('name, email').eq('id', userId).maybeSingle(),
-      supabase.from('shops').select('name, owner_id').eq('id', shop_id).maybeSingle(),
-    ])
-    fetch(`${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/api/email`, {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        type: 'reservation', email: userProfile?.email || '',
-        data: { userName: userProfile?.name || 'Usuario', packTitle: pack.title,
-          shopName: shop?.name || 'Comercio', pickupCode: reservation.pickup_code || 'XXXXXX',
-          price: `$${(total_price_cents / 100).toFixed(2)}` }
-      }),
-    }).catch(err => console.error('Error sending reservation email:', err))
+  const { data: reservation } = await supabase
+    .from('reservations')
+    .select(
+      '*,pack:packs(id,title,price_cents,image_url,pickup_date,pickup_start_time,pickup_end_time),shop:shops(id,name,address,phone,logo_url)',
+    )
+    .eq('id', result.reservation_id)
+    .single()
 
-    // NOTIFICACION: Avisar al comercio de nueva reserva
-    if (shop?.owner_id) {
-      fetch(`${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/api/notifications`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          userId: shop.owner_id,
-          type: 'new_reservation',
-          message: `Nueva reserva de ${userProfile?.name || 'un usuario'} para "${pack.title}"`,
-          reservationId: reservation.id,
-        }),
-      }).catch(err => console.error('Error sending notification:', err))
-    }
-  } catch (e) { console.error('Error preparing notifications:', e) }
+  if (reservation) {
+    notifyReservationCreated(userId, reservation).catch((err) =>
+      console.error('[ReservationService] Error sending notifications:', err),
+    )
+  }
 
   return { data: reservation, status: 201 }
+}
+
+async function notifyReservationCreated(userId: string, reservation: Record<string, unknown>) {
+  const supabase = getSupabaseAdmin()
+  const pack = reservation.pack as { title: string } | null
+  const shop = reservation.shop as { name: string; owner_id: string } | null
+
+  const { data: userProfile } = await supabase
+    .from('user_profiles')
+    .select('name, email')
+    .eq('id', userId)
+    .maybeSingle()
+
+  if (userProfile?.email) {
+    sendReservationConfirmationEmail(userProfile.email, {
+      userName: userProfile.name || 'Usuario',
+      packTitle: pack?.title || 'Pack',
+      shopName: shop?.name || 'Comercio',
+      shopAddress: null,
+      pickupCode: (reservation.pickup_code as string) || 'XXXXXX',
+      pickupDate: (reservation.pickup_date as string) || null,
+      pickupTime: (reservation.pickup_start_time as string) || null,
+      price: `$${(((reservation.total_price_cents as number) || 0) / 100).toFixed(2)}`,
+    }).catch((err) => console.error('[ReservationService] Email error:', err))
+  }
+
+  if (shop?.owner_id) {
+    await supabase.from('notifications').insert({
+      user_id: shop.owner_id,
+      type: 'new_reservation',
+      message: `Nueva reserva de ${userProfile?.name || 'un usuario'} para "${pack?.title || 'Pack'}"`,
+      reservation_id: reservation.id as string,
+      is_read: false,
+      sent_at: new Date().toISOString(),
+    })
+  }
 }
 
 export async function updateReservation(userId: string, body: { id: string; status: string; cancel_reason?: string }) {
@@ -86,9 +116,17 @@ export async function updateReservation(userId: string, body: { id: string; stat
   const { id, status } = body
   if (!id || !status) return { error: 'ID y status requeridos', status: 400 }
 
-  const { data: reservation } = await supabase.from('reservations')
-    .select('user_id, shop_id, status').eq('id', id).maybeSingle()
+  const { data: reservation } = await supabase
+    .from('reservations')
+    .select('user_id, shop_id, status')
+    .eq('id', id)
+    .maybeSingle()
   if (!reservation) return { error: 'Reserva no encontrada', status: 404 }
+
+  const allowedNext = VALID_STATUS_TRANSITIONS[reservation.status]
+  if (!allowedNext || !allowedNext.includes(status)) {
+    return { error: `Transición de estado inválida: ${reservation.status} → ${status}`, status: 400 }
+  }
 
   const { data: profile } = await supabase.from('user_profiles').select('role').eq('id', userId).maybeSingle()
   const isAdmin = profile?.role === 'admin' || profile?.role === 'super_admin'
@@ -98,67 +136,85 @@ export async function updateReservation(userId: string, body: { id: string; stat
 
   if (!isOwner && !isShopOwner && !isAdmin) return { error: 'No autorizado', status: 403 }
   if (status === 'cancelled' && !isOwner && !isAdmin) return { error: 'Solo el usuario puede cancelar', status: 403 }
-  if (status === 'confirmed' && !isShopOwner && !isAdmin) return { error: 'Solo el comercio puede confirmar', status: 403 }
+  if (status === 'confirmed' && !isShopOwner && !isAdmin)
+    return { error: 'Solo el comercio puede confirmar', status: 403 }
 
-  const updates: any = { status }
+  const updates: Record<string, unknown> = { status }
   if (status === 'cancelled') updates.cancelled_at = new Date().toISOString()
   if (status === 'confirmed') updates.payment_status = 'paid'
 
   const { data: updated, error } = await supabase.from('reservations').update(updates).eq('id', id).select().single()
   if (error) return { error: error.message, status: 500 }
 
-  // NOTIFICACION: Si cancelaron, avisar a todos
   if (status === 'cancelled' && updated) {
-    const [{ data: userProfile }, { data: shop }, { data: pack }] = await Promise.all([
-      supabase.from('user_profiles').select('name, email').eq('id', updated.user_id).maybeSingle(),
-      supabase.from('shops').select('name, owner_id').eq('id', updated.shop_id).maybeSingle(),
-      supabase.from('packs').select('title').eq('id', updated.pack_id).maybeSingle(),
-    ])
-
-    const notifications = []
-
-    // Avisar al usuario
-    notifications.push({
-      userId: updated.user_id,
-      type: 'cancellation',
-      message: `Tu reserva para "${pack?.title || 'Pack'}" fue cancelada${body.cancel_reason ? ': ' + body.cancel_reason : ''}`,
-      reservationId: id,
-    })
-
-    // Avisar al comercio (si quien cancelo NO fue el comercio)
-    if (shop?.owner_id && shop.owner_id !== userId) {
-      notifications.push({
-        userId: shop.owner_id,
-        type: 'user_cancelled',
-        message: `${userProfile?.name || 'Un usuario'} cancelo su reserva para "${pack?.title || 'Pack'}"`,
-        reservationId: id,
-      })
-    }
-
-    // Avisar admins si es cancelacion rara
-    if (body.cancel_reason === 'problema') {
-      const { data: admins } = await supabase
-        .from('user_profiles')
-        .select('id')
-        .in('role', ['admin', 'super_admin'])
-      admins?.forEach(admin => {
-        notifications.push({
-          userId: admin.id,
-          type: 'incidence',
-          message: `Cancelacion con problema: ${userProfile?.name || 'Usuario'} - "${pack?.title || 'Pack'}"`,
-          reservationId: id,
-        })
-      })
-    }
-
-    if (notifications.length > 0) {
-      fetch(`${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/api/notifications`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ notifications }),
-      }).catch(err => console.error('Error sending cancellation notifications:', err))
-    }
+    notifyCancellation(userId, updated, body.cancel_reason).catch((err) =>
+      console.error('[ReservationService] Error sending cancellation notifications:', err),
+    )
   }
 
   return { data: updated }
+}
+
+async function notifyCancellation(
+  userId: string,
+  updated: { id: string; user_id: string; shop_id: string; pack_id: string },
+  cancelReason?: string,
+) {
+  const supabase = getSupabaseAdmin()
+
+  const [{ data: userProfile }, { data: shop }, { data: pack }] = await Promise.all([
+    supabase.from('user_profiles').select('name, email').eq('id', updated.user_id).maybeSingle(),
+    supabase.from('shops').select('name, owner_id').eq('id', updated.shop_id).maybeSingle(),
+    supabase.from('packs').select('title').eq('id', updated.pack_id).maybeSingle(),
+  ])
+
+  const notifications: Array<{
+    user_id: string
+    type: string
+    message: string
+    reservation_id: string
+    is_read: boolean
+    sent_at: string
+  }> = []
+
+  notifications.push({
+    user_id: updated.user_id,
+    type: 'cancellation',
+    message: `Tu reserva para "${pack?.title || 'Pack'}" fue cancelada${cancelReason ? ': ' + cancelReason : ''}`,
+    reservation_id: updated.id,
+    is_read: false,
+    sent_at: new Date().toISOString(),
+  })
+
+  if (shop?.owner_id && shop.owner_id !== userId) {
+    notifications.push({
+      user_id: shop.owner_id,
+      type: 'user_cancelled',
+      message: `${userProfile?.name || 'Un usuario'} cancelo su reserva para "${pack?.title || 'Pack'}"`,
+      reservation_id: updated.id,
+      is_read: false,
+      sent_at: new Date().toISOString(),
+    })
+  }
+
+  if (cancelReason === 'problema') {
+    const { data: admins } = await supabase.from('user_profiles').select('id').in('role', ['admin', 'super_admin'])
+    admins?.forEach((admin) => {
+      notifications.push({
+        user_id: admin.id,
+        type: 'incidence',
+        message: `Cancelacion con problema: ${userProfile?.name || 'Usuario'} - "${pack?.title || 'Pack'}"`,
+        reservation_id: updated.id,
+        is_read: false,
+        sent_at: new Date().toISOString(),
+      })
+    })
+  }
+
+  if (notifications.length > 0) {
+    const { error: notifError } = await supabase.from('notifications').insert(notifications)
+    if (notifError) {
+      console.error('[ReservationService] Error inserting cancellation notifications:', notifError)
+    }
+  }
 }

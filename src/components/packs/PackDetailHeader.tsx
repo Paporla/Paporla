@@ -1,33 +1,31 @@
-'use client';
+'use client'
 
-import { ArrowLeft, Share2, Heart } from 'lucide-react';
-import { motion } from 'framer-motion';
-import { useState } from 'react';
-import { formatPrice } from '@/lib/utils/formatPrice';
+import { ArrowLeft, Share2, Heart } from 'lucide-react'
+import { motion } from 'framer-motion'
+import { useState } from 'react'
+import { formatPrice } from '@/lib/utils/formatPrice'
 
 interface PackDetailHeaderProps {
-  title: string;
-  priceCents: number;
-  originalPriceCents: number | null;
-  remainingStock: number;
-  totalStock: number;
-  onBack: () => void;
+  title: string
+  priceCents: number
+  originalPriceCents: number | null
+  remainingStock: number
+  totalStock: number
+  onBack: () => void
 }
 
 export default function PackDetailHeader({
-  title,
+  title: _title,
   priceCents,
   originalPriceCents,
   remainingStock,
   totalStock,
   onBack,
 }: PackDetailHeaderProps) {
-  const [liked, setLiked] = useState(false);
-  const discount = originalPriceCents
-    ? Math.round((1 - priceCents / originalPriceCents) * 100)
-    : null;
+  const [liked, setLiked] = useState(false)
+  const discount = originalPriceCents ? Math.round((1 - priceCents / originalPriceCents) * 100) : null
 
-  const isLowStock = remainingStock <= 3 && remainingStock > 0;
+  const isLowStock = remainingStock <= 3 && remainingStock > 0
 
   return (
     <div className="sticky top-0 z-10 flex items-center justify-between p-4 dark:bg-dark/80 bg-white/80 backdrop-blur-xl">
@@ -78,7 +76,9 @@ export default function PackDetailHeader({
         <div className="flex items-baseline gap-2">
           <span className="text-2xl font-black text-primary">{formatPrice(priceCents)}</span>
           {originalPriceCents && (
-            <span className="text-sm dark:text-gray-600 text-gray-400 line-through">{formatPrice(originalPriceCents)}</span>
+            <span className="text-sm dark:text-gray-600 text-gray-400 line-through">
+              {formatPrice(originalPriceCents)}
+            </span>
           )}
         </div>
         <div className="text-xs dark:text-gray-500 text-gray-400">
@@ -86,5 +86,5 @@ export default function PackDetailHeader({
         </div>
       </div>
     </div>
-  );
-}   
+  )
+}

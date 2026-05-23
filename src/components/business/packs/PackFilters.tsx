@@ -1,30 +1,25 @@
-'use client';
+'use client'
 
-import { Search, Filter, X } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { useState } from 'react';
-import Input from '@/components/ui/Input';
+import { Search, Filter } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { useState } from 'react'
+import Input from '@/components/ui/Input'
 
 interface PackFiltersProps {
-  searchTerm: string;
-  onSearchChange: (value: string) => void;
-  filterStatus: 'all' | 'active' | 'inactive';
-  onStatusChange: (value: 'all' | 'active' | 'inactive') => void;
+  searchTerm: string
+  onSearchChange: (value: string) => void
+  filterStatus: 'all' | 'active' | 'inactive'
+  onStatusChange: (value: 'all' | 'active' | 'inactive') => void
 }
 
-export default function PackFilters({
-  searchTerm,
-  onSearchChange,
-  filterStatus,
-  onStatusChange,
-}: PackFiltersProps) {
-  const [showFilters, setShowFilters] = useState(false);
+export default function PackFilters({ searchTerm, onSearchChange, filterStatus, onStatusChange }: PackFiltersProps) {
+  const [showFilters, setShowFilters] = useState(false)
 
   const filters = [
     { id: 'all', label: 'Todos', count: null },
     { id: 'active', label: 'Activos', count: null },
     { id: 'inactive', label: 'Inactivos', count: null },
-  ];
+  ]
 
   return (
     <div className="space-y-3">
@@ -59,12 +54,12 @@ export default function PackFilters({
               {filters.map((filter) => (
                 <button
                   key={filter.id}
-                  onClick={() => onStatusChange(filter.id as any)}
-          className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-            filterStatus === filter.id
-              ? 'bg-primary/20 text-primary border border-primary/30'
-              : 'dark:bg-dark-muted bg-gray-100 dark:text-gray-400 text-gray-600 dark:hover:text-white hover:text-gray-900 dark:hover:bg-white/5 hover:bg-gray-200'
-          }`}
+                  onClick={() => onStatusChange(filter.id as 'all' | 'active' | 'inactive')}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                    filterStatus === filter.id
+                      ? 'bg-primary/20 text-primary border border-primary/30'
+                      : 'dark:bg-dark-muted bg-gray-100 dark:text-gray-400 text-gray-600 dark:hover:text-white hover:text-gray-900 dark:hover:bg-white/5 hover:bg-gray-200'
+                  }`}
                 >
                   {filter.label}
                 </button>
@@ -74,5 +69,5 @@ export default function PackFilters({
         )}
       </AnimatePresence>
     </div>
-  );
+  )
 }

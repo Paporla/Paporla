@@ -1,20 +1,17 @@
-'use client';
+'use client'
 
-import { motion } from 'framer-motion';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { useAuth } from '@/hooks/useAuth';
-import { 
-  Package, Heart, Bell, HelpCircle, Info, LogOut, ChevronRight 
-} from 'lucide-react';
-import ConfirmModal from '@/components/ui/ConfirmModal';
-import { useState } from 'react';
+import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import { useAuth } from '@/hooks/useAuth'
+import { Package, Heart, Bell, HelpCircle, Info, LogOut, ChevronRight } from 'lucide-react'
+import ConfirmModal from '@/components/ui/ConfirmModal'
+import { useState } from 'react'
 
 interface MenuItem {
-  icon: any;
-  label: string;
-  href: string;
-  value?: string;
+  icon: React.ComponentType<{ className?: string }>
+  label: string
+  href: string
+  value?: string
 }
 
 const menuSections = [
@@ -33,17 +30,17 @@ const menuSections = [
       { icon: Info, label: 'Sobre Paporla', href: '/about' },
     ] as MenuItem[],
   },
-];
+]
 
 export default function ProfileMenu() {
-  const router = useRouter();
-  const { signOut } = useAuth();
-  const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
+  const router = useRouter()
+  const { signOut } = useAuth()
+  const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false)
 
   const handleLogout = async () => {
-    await signOut();
-    router.push('/');
-  };
+    await signOut()
+    router.push('/')
+  }
 
   return (
     <>
@@ -65,9 +62,7 @@ export default function ProfileMenu() {
                   <item.icon className="w-4 h-4 dark:text-gray-400 text-gray-600 group-hover:text-primary transition-colors" />
                 </div>
                 <span className="flex-1 text-sm dark:text-white text-gray-900">{item.label}</span>
-                {item.value && (
-                  <span className="text-xs dark:text-gray-500 text-gray-400">{item.value}</span>
-                )}
+                {item.value && <span className="text-xs dark:text-gray-500 text-gray-400">{item.value}</span>}
                 <ChevronRight className="w-4 h-4 dark:text-gray-600 text-gray-400 group-hover:dark:text-gray-400 group-hover:text-gray-600 transition-colors" />
               </Link>
             ))}
@@ -97,5 +92,5 @@ export default function ProfileMenu() {
         cancelText="Cancelar"
       />
     </>
-  );
+  )
 }

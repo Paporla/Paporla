@@ -1,34 +1,34 @@
-'use client';
+'use client'
 
-import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { MapPin, Navigation, AlertCircle, CheckCircle } from 'lucide-react';
+import { useState } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { MapPin, Navigation, AlertCircle, CheckCircle } from 'lucide-react'
 
 interface Coordinates {
-  lat: number;
-  lng: number;
+  lat: number
+  lng: number
 }
 
 interface GeolocationFilterProps {
-  onLocationChange: (coords: Coordinates | null, radiusKm: number) => void;
-  defaultRadius?: number;
+  onLocationChange: (coords: Coordinates | null, radiusKm: number) => void
+  defaultRadius?: number
 }
 
 export default function GeolocationFilter({ onLocationChange, defaultRadius = 10 }: GeolocationFilterProps) {
-  const [location, setLocation] = useState<Coordinates | null>(null);
-  const [radius, setRadius] = useState(defaultRadius);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [locationName, setLocationName] = useState<string | null>(null);
+  const [location, setLocation] = useState<Coordinates | null>(null)
+  const [radius, setRadius] = useState(defaultRadius)
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [locationName, setLocationName] = useState<string | null>(null)
 
   const getLocation = () => {
-    setIsLoading(true);
-    setError(null);
+    setIsLoading(true)
+    setError(null)
 
     if (!navigator.geolocation) {
-      setError('Tu navegador no soporta geolocalización');
-      setIsLoading(false);
-      return;
+      setError('Tu navegador no soporta geolocalización')
+      setIsLoading(false)
+      return
     }
 
     navigator.geolocation.getCurrentPosition(
@@ -36,61 +36,61 @@ export default function GeolocationFilter({ onLocationChange, defaultRadius = 10
         const coords = {
           lat: position.coords.latitude,
           lng: position.coords.longitude,
-        };
-        setLocation(coords);
-        onLocationChange(coords, radius);
-        
+        }
+        setLocation(coords)
+        onLocationChange(coords, radius)
+
         // Reverse geocoding para obtener nombre de la ciudad
         try {
           const response = await fetch(
-            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${coords.lat}&lon=${coords.lng}&zoom=10&addressdetails=1`
-          );
-          const data = await response.json();
-          const city = data.address?.city || data.address?.town || data.address?.state || 'tu ubicación';
-          setLocationName(city);
+            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${coords.lat}&lon=${coords.lng}&zoom=10&addressdetails=1`,
+          )
+          const data = await response.json()
+          const city = data.address?.city || data.address?.town || data.address?.state || 'tu ubicación'
+          setLocationName(city)
         } catch (err) {
-          console.error('Error en reverse geocoding:', err);
-          setLocationName('tu ubicación');
+          console.error('Error en reverse geocoding:', err)
+          setLocationName('tu ubicación')
         }
-        
-        setIsLoading(false);
+
+        setIsLoading(false)
       },
       (err) => {
-        let errorMessage = 'Error al obtener ubicación';
+        let errorMessage = 'Error al obtener ubicación'
         switch (err.code) {
           case err.PERMISSION_DENIED:
-            errorMessage = 'Permiso denegado. Activa la ubicación en tu navegador';
-            break;
+            errorMessage = 'Permiso denegado. Activa la ubicación en tu navegador'
+            break
           case err.POSITION_UNAVAILABLE:
-            errorMessage = 'No se pudo obtener tu ubicación';
-            break;
+            errorMessage = 'No se pudo obtener tu ubicación'
+            break
           case err.TIMEOUT:
-            errorMessage = 'Tiempo de espera agotado';
-            break;
+            errorMessage = 'Tiempo de espera agotado'
+            break
         }
-        setError(errorMessage);
-        setIsLoading(false);
+        setError(errorMessage)
+        setIsLoading(false)
       },
       {
         enableHighAccuracy: true,
         timeout: 10000,
         maximumAge: 0,
-      }
-    );
-  };
+      },
+    )
+  }
 
   const handleRadiusChange = (newRadius: number) => {
-    setRadius(newRadius);
+    setRadius(newRadius)
     if (location) {
-      onLocationChange(location, newRadius);
+      onLocationChange(location, newRadius)
     }
-  };
+  }
 
   const clearLocation = () => {
-    setLocation(null);
-    setLocationName(null);
-    onLocationChange(null, radius);
-  };
+    setLocation(null)
+    setLocationName(null)
+    onLocationChange(null, radius)
+  }
 
   return (
     <div className="space-y-4">
@@ -100,10 +100,7 @@ export default function GeolocationFilter({ onLocationChange, defaultRadius = 10
           Packs cercanos
         </label>
         {location && (
-          <button
-            onClick={clearLocation}
-            className="text-xs text-red-500 hover:text-red-600 transition-colors"
-          >
+          <button onClick={clearLocation} className="text-xs text-red-500 hover:text-red-600 transition-colors">
             Limpiar
           </button>
         )}
@@ -143,11 +140,7 @@ export default function GeolocationFilter({ onLocationChange, defaultRadius = 10
       </AnimatePresence>
 
       {location && locationName && (
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="space-y-3"
-        >
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-3">
           <div className="flex items-center justify-between p-3 rounded-lg bg-primary/5 border border-primary/20">
             <div className="flex items-center gap-2">
               <CheckCircle className="w-4 h-4 text-primary" />
@@ -179,5 +172,5 @@ export default function GeolocationFilter({ onLocationChange, defaultRadius = 10
         </motion.div>
       )}
     </div>
-  );
+  )
 }

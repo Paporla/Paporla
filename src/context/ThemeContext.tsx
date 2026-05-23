@@ -12,18 +12,22 @@ interface ThemeContextType {
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined)
 
+function getInitialTheme(): Theme {
+  if (typeof window !== 'undefined') {
+    const stored = localStorage.getItem('paporla-theme') as Theme | null
+    if (stored === 'light') return 'light'
+    if (stored === 'dark') return 'dark'
+    if (window.matchMedia('(prefers-color-scheme: light)').matches) return 'light'
+  }
+  return 'dark'
+}
+
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setThemeState] = useState<Theme>('dark')
+  const [theme, setThemeState] = useState<Theme>(getInitialTheme)
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
     setMounted(true)
-    const stored = localStorage.getItem('paporla-theme') as Theme | null
-    if (stored && (stored === 'dark' || stored === 'light')) {
-      setThemeState(stored)
-    } else if (window.matchMedia('(prefers-color-scheme: light)').matches) {
-      setThemeState('light')
-    }
   }, [])
 
   useEffect(() => {
@@ -40,18 +44,14 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   }, [theme, mounted])
 
   const toggleTheme = () => {
-    setThemeState(prev => prev === 'dark' ? 'light' : 'dark')
+    setThemeState((prev) => (prev === 'dark' ? 'light' : 'dark'))
   }
 
   const setTheme = (newTheme: Theme) => {
     setThemeState(newTheme)
   }
 
-  return (
-    <ThemeContext.Provider value={{ theme, toggleTheme, setTheme }}>
-      {children}
-    </ThemeContext.Provider>
-  )
+  return <ThemeContext.Provider value={{ theme, toggleTheme, setTheme }}>{children}</ThemeContext.Provider>
 }
 
 export function useTheme() {

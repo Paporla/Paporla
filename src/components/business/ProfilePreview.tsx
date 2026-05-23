@@ -1,20 +1,21 @@
-'use client';
+'use client'
 
-import { ArrowLeft, MapPin, Phone, Store } from 'lucide-react';
+import Image from 'next/image'
+import { ArrowLeft, MapPin, Phone } from 'lucide-react'
 
 interface ProfilePreviewProps {
   formData: {
-    name: string;
-    description: string;
-    category: string;
-    address: string;
-    city: string;
-    phone: string;
-    logoUrl: string;
-    coverUrl: string;
-  };
-  hours: any;
-  onBack: () => void;
+    name: string
+    description: string
+    category: string
+    address: string
+    city: string
+    phone: string
+    logoUrl: string
+    coverUrl: string
+  }
+  hours: Record<string, { open: string; close: string; closed: boolean }>
+  onBack: () => void
 }
 
 const CATEGORIES: Record<string, { emoji: string }> = {
@@ -28,10 +29,10 @@ const CATEGORIES: Record<string, { emoji: string }> = {
   supermarket: { emoji: '🛒' },
   fastfood: { emoji: '🍔' },
   other: { emoji: '🏪' },
-};
+}
 
-export default function ProfilePreview({ formData, hours, onBack }: ProfilePreviewProps) {
-  const category = CATEGORIES[formData.category] || { emoji: '🏪' };
+export default function ProfilePreview({ formData, hours: _hours, onBack }: ProfilePreviewProps) {
+  const category = CATEGORIES[formData.category] || { emoji: '🏪' }
 
   return (
     <div className="space-y-6">
@@ -51,7 +52,13 @@ export default function ProfilePreview({ formData, hours, onBack }: ProfilePrevi
       <div className="max-w-md mx-auto dark:bg-black/40 bg-white dark:border-white/10 border-gray-200 rounded-3xl overflow-hidden">
         <div className="h-40 bg-gradient-to-br from-primary/20 via-black/40 to-secondary/20 flex items-center justify-center relative">
           {formData.coverUrl ? (
-            <img src={formData.coverUrl} alt="" className="w-full h-full object-cover" />
+            <Image
+              src={formData.coverUrl}
+              alt=""
+              fill
+              className="object-cover"
+              sizes="(max-width: 768px) 100vw, 448px"
+            />
           ) : (
             <span className="text-5xl">{category.emoji}</span>
           )}
@@ -64,7 +71,13 @@ export default function ProfilePreview({ formData, hours, onBack }: ProfilePrevi
         <div className="p-5 space-y-4">
           <div className="flex items-center gap-3">
             {formData.logoUrl ? (
-              <img src={formData.logoUrl} alt="" className="w-12 h-12 rounded-xl object-cover" />
+              <Image
+                src={formData.logoUrl}
+                alt=""
+                width={48}
+                height={48}
+                className="w-12 h-12 rounded-xl object-cover"
+              />
             ) : (
               <div className="w-12 h-12 rounded-xl bg-primary/20 flex items-center justify-center text-2xl">
                 {category.emoji}
@@ -102,5 +115,5 @@ export default function ProfilePreview({ formData, hours, onBack }: ProfilePrevi
         </div>
       </div>
     </div>
-  );
+  )
 }

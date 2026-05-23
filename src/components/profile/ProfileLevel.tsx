@@ -1,26 +1,26 @@
-'use client';
+'use client'
 
-import { motion } from 'framer-motion';
-import { Star, Award, Trophy } from 'lucide-react';
+import { motion } from 'framer-motion'
+import { Star, Award, Trophy } from 'lucide-react'
 
 interface ProfileLevelProps {
-  level: string;
-  points: number;
-  nextLevelPoints: number;
-  nextLevelName: string;
+  level: string
+  points: number
+  nextLevelPoints: number
+  nextLevelName: string
 }
 
-const levelConfig: Record<string, { icon: any; color: string; bg: string }> = {
+const levelConfig: Record<string, { icon: React.ComponentType<{ className?: string }>; color: string; bg: string }> = {
   'Rescatador Principiante': { icon: Star, color: 'dark:text-gray-400 text-gray-600', bg: 'bg-gray-500/10' },
   'Rescatador Pro': { icon: Award, color: 'text-primary', bg: 'bg-primary/10' },
   'Rescatador Elite': { icon: Trophy, color: 'text-amber-400', bg: 'bg-amber-500/10' },
-};
+}
 
 export default function ProfileLevel({ level, points, nextLevelPoints, nextLevelName }: ProfileLevelProps) {
-  const config = levelConfig[level] || levelConfig['Rescatador Principiante'];
-  const Icon = config.icon;
-  const progress = Math.min((points / nextLevelPoints) * 100, 100);
-  const remaining = nextLevelPoints - points;
+  const config = levelConfig[level] || levelConfig['Rescatador Principiante']
+  const Icon = config.icon
+  const progress = Math.min((points / nextLevelPoints) * 100, 100)
+  const remaining = nextLevelPoints - points
 
   return (
     <motion.div
@@ -64,5 +64,5 @@ export default function ProfileLevel({ level, points, nextLevelPoints, nextLevel
         </p>
       </div>
     </motion.div>
-  );
+  )
 }

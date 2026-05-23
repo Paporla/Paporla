@@ -1,40 +1,33 @@
-import { createClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
+import { getSupabaseAdmin, validateCronRequest } from '@/lib/supabase/admin'
 import { sendPickupReminderEmail } from '@/lib/email'
-
-function validateCronRequest(request: Request): boolean {
-  const authHeader = request.headers.get('authorization')
-  const cronSecret = process.env.CRON_SECRET
-  if (!cronSecret) return true
-  return authHeader === 'Bearer ' + cronSecret
-}
 
 export async function GET(request: Request) {
   if (!validateCronRequest(request)) {
-    return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
+    return NextResponse.json({ success: false, error: 'No autorizado' }, { status: 401 })
   }
 
   try {
-    const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!
-    )
+    const supabase = getSupabaseAdmin()
 
     const now = new Date()
     const today = now.toISOString().split('T')[0]
 
     const { data: reservations } = await supabase
       .from('reservations')
-      .select(`
+      .select(
+        `
         id,
         user_id,
         pickup_date,
         pickup_start_time,
         pickup_end_time,
         pack_id,
-        pack:packs(title),
-        shop:shops(name, address)
-      `)
+        pickup_code,
+        pack:packs(title, shop_id),
+        shop:shops(name, address, owner_id)
+      `,
+      )
       .in('status', ['confirmed', 'ready_pickup'])
       .eq('pickup_date', today)
       .order('pickup_start_time', { ascending: true })
@@ -46,7 +39,7 @@ export async function GET(request: Request) {
     let notificationCount = 0
     let emailCount = 0
 
-    for (const reservation of reservations as any[]) {
+    for (const reservation of reservations) {
       if (!reservation.pickup_start_time) continue
 
       const [hours, minutes] = reservation.pickup_start_time.split(':').map(Number)
@@ -57,25 +50,30 @@ export async function GET(request: Request) {
       const diffMinutes = Math.round(diffMs / 60000)
 
       if (diffMinutes >= 15 && diffMinutes <= 60) {
-        const packTitle = reservation.pack?.title || 'Pack'
-        const shopName = reservation.shop?.name || 'Comercio'
-        const shopAddress = reservation.shop?.address || null
+        const packData = reservation.pack as { title?: string; shop_id?: string } | null
+        const shopData = reservation.shop as { name?: string; address?: string; owner_id?: string } | null
+        const packTitle = packData?.title || 'Pack'
+        const shopName = shopData?.name || 'Comercio'
+        const shopAddress = shopData?.address || null
+        const userId = reservation.user_id
+        const reservationId = reservation.id
+        const pickupTimeStr = reservation.pickup_start_time || '00:00'
 
         const { data: existing } = await supabase
           .from('notifications')
           .select('id')
-          .eq('user_id', reservation.user_id)
+          .eq('user_id', userId)
           .eq('type', 'pickup_reminder')
-          .eq('reservation_id', reservation.id)
+          .eq('reservation_id', reservationId)
           .gte('created_at', today + 'T00:00:00')
           .maybeSingle()
 
         if (!existing) {
           await supabase.from('notifications').insert({
-            user_id: reservation.user_id,
+            user_id: userId,
             type: 'pickup_reminder',
-            message: `Tu reserva de "${packTitle}" en ${shopName} esta proxima a recogerse (${reservation.pickup_start_time.slice(0, 5)})`,
-            reservation_id: reservation.id,
+            message: `Tu reserva de "${packTitle}" en ${shopName} esta proxima a recogerse (${pickupTimeStr.slice(0, 5)})`,
+            reservation_id: reservationId,
             is_read: false,
             sent_at: now.toISOString(),
           })
@@ -85,7 +83,7 @@ export async function GET(request: Request) {
         const { data: userEmail } = await supabase
           .from('user_profiles')
           .select('email, name')
-          .eq('id', reservation.user_id)
+          .eq('id', userId)
           .maybeSingle()
 
         if (userEmail?.email) {
@@ -96,39 +94,32 @@ export async function GET(request: Request) {
             shopAddress,
             pickupCode: reservation.pickup_code || 'N/A',
             pickupDate: reservation.pickup_date || today,
-            pickupTime: reservation.pickup_start_time,
+            pickupTime: pickupTimeStr,
           })
           emailCount++
         }
 
-        const { data: pack } = await supabase
-          .from('packs').select('shop_id').eq('id', reservation.pack_id).maybeSingle()
+        const ownerId = shopData?.owner_id
+        if (ownerId) {
+          const { data: existingShopNotif } = await supabase
+            .from('notifications')
+            .select('id')
+            .eq('user_id', ownerId)
+            .eq('type', 'pickup_reminder')
+            .eq('reservation_id', reservationId)
+            .gte('created_at', today + 'T00:00:00')
+            .maybeSingle()
 
-        if (pack) {
-          const { data: shop } = await supabase
-            .from('shops').select('owner_id').eq('id', pack.shop_id).maybeSingle()
-
-          if (shop?.owner_id) {
-            const { data: existingShopNotif } = await supabase
-              .from('notifications')
-              .select('id')
-              .eq('user_id', shop.owner_id)
-              .eq('type', 'pickup_reminder')
-              .eq('reservation_id', reservation.id)
-              .gte('created_at', today + 'T00:00:00')
-              .maybeSingle()
-
-            if (!existingShopNotif) {
-              await supabase.from('notifications').insert({
-                user_id: shop.owner_id,
-                type: 'pickup_reminder',
-                message: `Se acerca la hora de recogida de "${packTitle}" - ${reservation.pickup_start_time?.slice(0, 5)}`,
-                reservation_id: reservation.id,
-                is_read: false,
-                sent_at: now.toISOString(),
-              })
-              notificationCount++
-            }
+          if (!existingShopNotif) {
+            await supabase.from('notifications').insert({
+              user_id: ownerId,
+              type: 'pickup_reminder',
+              message: `Se acerca la hora de recogida de "${packTitle}" - ${pickupTimeStr.slice(0, 5)}`,
+              reservation_id: reservationId,
+              is_read: false,
+              sent_at: now.toISOString(),
+            })
+            notificationCount++
           }
         }
       }
@@ -141,6 +132,6 @@ export async function GET(request: Request) {
     })
   } catch (err) {
     console.error('[PickupReminders] Error:', err)
-    return NextResponse.json({ error: 'Error interno' }, { status: 500 })
+    return NextResponse.json({ success: false, error: 'Error interno' }, { status: 500 })
   }
 }

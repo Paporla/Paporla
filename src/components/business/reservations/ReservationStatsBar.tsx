@@ -1,22 +1,22 @@
-'use client';
+'use client'
 
-import { motion } from 'framer-motion';
-import { ShoppingBag, Clock, CheckCircle, Ban, XCircle, DollarSign, Calendar } from 'lucide-react';
-import Card from '@/components/ui/Card';
+import { motion } from 'framer-motion'
+import { ShoppingBag, Clock, CheckCircle, Ban, XCircle, DollarSign, Calendar } from 'lucide-react'
+import Card from '@/components/ui/Card'
 
 interface Stats {
-  total: number;
-  pending: number;
-  confirmed: number;
-  completed: number;
-  cancelled: number;
-  noShow: number;
-  totalRevenue: number;
-  todayCount?: number;
+  total: number
+  pending: number
+  confirmed: number
+  completed: number
+  cancelled: number
+  noShow: number
+  totalRevenue: number
+  todayCount?: number
 }
 
 interface ReservationStatsBarProps {
-  stats: Stats;
+  stats: Stats
 }
 
 const statItems = [
@@ -28,18 +28,18 @@ const statItems = [
   { key: 'noShow', label: 'No retiradas', color: 'text-gray-400', icon: Ban, bg: 'bg-gray-500/10' },
   { key: 'cancelled', label: 'Canceladas', color: 'text-red-400', icon: XCircle, bg: 'bg-red-500/10' },
   { key: 'revenue', label: 'Ingresos', color: 'text-primary', icon: DollarSign, bg: 'bg-primary/10', isPrice: true },
-];
+]
 
 export default function ReservationStatsBar({ stats }: ReservationStatsBarProps) {
-  const getValue = (key: string, isPrice?: boolean) => {
+  const getValue = (key: string, _isPrice?: boolean) => {
     if (key === 'revenue') {
-      return `$${(stats.totalRevenue / 100).toLocaleString()}`;
+      return `$${(stats.totalRevenue / 100).toLocaleString()}`
     }
     if (key === 'todayCount') {
-      return stats.todayCount ?? 0;
+      return stats.todayCount ?? 0
     }
-    return stats[key as keyof Stats];
-  };
+    return stats[key as keyof Stats]
+  }
 
   return (
     <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
@@ -60,5 +60,5 @@ export default function ReservationStatsBar({ stats }: ReservationStatsBarProps)
         </motion.div>
       ))}
     </div>
-  );
+  )
 }

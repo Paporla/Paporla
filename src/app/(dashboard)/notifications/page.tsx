@@ -1,16 +1,16 @@
-﻿'use client';
+﻿'use client'
 
-import { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
-import { Bell, CheckCheck, Trash2, Clock, Package, CheckCircle, XCircle, AlertCircle, Store, Heart } from 'lucide-react';
-import { useAuth } from '@/hooks/useAuth';
-import { supabaseBrowser } from '@/lib/supabase/client';
-import Card from '@/components/ui/Card';
-import Button from '@/components/ui/Button';
-import EmptyState from '@/components/ui/EmptyState';
-import Toast from '@/components/ui/Toast';
+import { useState } from 'react'
+import { motion } from 'framer-motion'
+import { pageVariants } from '@/lib/utils/motion'
+import { Bell, CheckCheck, Trash2, Clock, Package, CheckCircle, XCircle, AlertCircle, Store, Heart } from 'lucide-react'
+import { useNotifications } from '@/hooks/useNotifications'
+import Card from '@/components/ui/Card'
+import Button from '@/components/ui/Button'
+import EmptyState from '@/components/ui/EmptyState'
+import Toast from '@/components/ui/Toast'
 
-const iconMap: Record<string, { icon: any; color: string; bg: string }> = {
+const iconMap: Record<string, { icon: React.ComponentType<{ className?: string }>; color: string; bg: string }> = {
   pickup_reminder: { icon: Clock, color: 'text-amber-400', bg: 'bg-amber-500/10' },
   cancellation: { icon: XCircle, color: 'text-red-400', bg: 'bg-red-500/10' },
   confirmation: { icon: CheckCircle, color: 'text-green-400', bg: 'bg-green-500/10' },
@@ -20,82 +20,26 @@ const iconMap: Record<string, { icon: any; color: string; bg: string }> = {
   favorite: { icon: Heart, color: 'text-red-400', bg: 'bg-red-500/10' },
   shop_verified: { icon: Store, color: 'text-blue-400', bg: 'bg-blue-500/10' },
   incidence: { icon: AlertCircle, color: 'text-red-400', bg: 'bg-red-500/10' },
-};
+}
 
-const defaultIcon = { icon: Bell, color: 'text-gray-400', bg: 'bg-gray-500/10' };
+const defaultIcon = { icon: Bell, color: 'text-gray-400', bg: 'bg-gray-500/10' }
 
 export default function NotificationsPage() {
-  const { user } = useAuth();
-  const supabase = supabaseBrowser();
-  const [notifications, setNotifications] = useState<any[]>([]);
-  const [unreadCount, setUnreadCount] = useState(0);
-  const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState<'all' | 'unread'>('all');
-  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
-
-  useEffect(() => {
-    const load = async () => {
-      setLoading(true);
-      
-      if (!user) {
-        setLoading(false);
-        return;
-      }
-      
-      const { data, error } = await supabase
-        .from('notifications')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false });
-
-      if (!error) {
-        setNotifications(data || []);
-        setUnreadCount(data?.filter(n => !n.is_read).length || 0);
-      }
-      
-      // Delay minimo de 300ms para que el spinner sea visible
-      setTimeout(() => setLoading(false), 300);
-    };
-    
-    load();
-  }, [user, supabase]);
-
-  const markAsRead = async (id: string) => {
-    await supabase.from('notifications').update({ is_read: true }).eq('id', id);
-    setNotifications(prev => prev.map(n => n.id === id ? { ...n, is_read: true } : n));
-    setUnreadCount(prev => Math.max(0, prev - 1));
-  };
-
-  const markAllAsRead = async () => {
-    const unreadIds = notifications.filter(n => !n.is_read).map(n => n.id);
-    if (unreadIds.length === 0) return;
-    await supabase.from('notifications').update({ is_read: true }).in('id', unreadIds);
-    setNotifications(prev => prev.map(n => ({ ...n, is_read: true })));
-    setUnreadCount(0);
-    setToast({ message: 'Todas marcadas como leidas', type: 'success' });
-    setTimeout(() => setToast(null), 2000);
-  };
-
-  const deleteNotification = async (id: string) => {
-    await supabase.from('notifications').delete().eq('id', id);
-    const deleted = notifications.find(n => n.id === id);
-    setNotifications(prev => prev.filter(n => n.id !== id));
-    if (deleted && !deleted.is_read) setUnreadCount(prev => Math.max(0, prev - 1));
-    setToast({ message: 'Notificacion eliminada', type: 'success' });
-    setTimeout(() => setToast(null), 2000);
-  };
+  const { notifications, unreadCount, loading, markAsRead, markAllAsRead, deleteNotification } = useNotifications()
+  const [filter, setFilter] = useState<'all' | 'unread'>('all')
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null)
 
   const formatTime = (date: string) => {
-    const now = new Date();
-    const target = new Date(date);
-    const diffMins = Math.floor((now.getTime() - target.getTime()) / 60000);
-    if (diffMins < 1) return 'Justo ahora';
-    if (diffMins < 60) return `Hace ${diffMins} min`;
-    if (diffMins < 1440) return `Hace ${Math.floor(diffMins / 60)} h`;
-    return target.toLocaleDateString();
-  };
+    const now = new Date()
+    const target = new Date(date)
+    const diffMins = Math.floor((now.getTime() - target.getTime()) / 60000)
+    if (diffMins < 1) return 'Justo ahora'
+    if (diffMins < 60) return `Hace ${diffMins} min`
+    if (diffMins < 1440) return `Hace ${Math.floor(diffMins / 60)} h`
+    return target.toLocaleDateString()
+  }
 
-  const filteredNotifications = filter === 'all' ? notifications : notifications.filter(n => !n.is_read);
+  const filteredNotifications = filter === 'all' ? notifications : notifications.filter((n) => !n.is_read)
 
   // SPINNER
   if (loading) {
@@ -107,15 +51,11 @@ export default function NotificationsPage() {
           <p className="dark:text-gray-600 text-gray-400 text-sm mt-1">Por favor espera</p>
         </div>
       </div>
-    );
+    )
   }
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="space-y-8 pb-8"
-    >
+    <motion.div variants={pageVariants} initial="initial" animate="animate" className="space-y-8 pb-8">
       <div className="relative overflow-hidden bg-gradient-to-br from-primary/5 via-transparent to-secondary/5 -mt-8 -mx-4 px-4 py-8 rounded-b-3xl">
         <div className="relative flex justify-between items-center">
           <div>
@@ -133,7 +73,16 @@ export default function NotificationsPage() {
             <p className="dark:text-gray-400 text-gray-600">Mantente al dia con tus reservas y novedades</p>
           </div>
           {unreadCount > 0 && (
-            <Button variant="outline" size="sm" onClick={markAllAsRead} className="flex items-center gap-1">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                markAllAsRead()
+                setToast({ message: 'Todas marcadas como leidas', type: 'success' })
+                setTimeout(() => setToast(null), 2000)
+              }}
+              className="flex items-center gap-1"
+            >
               <CheckCheck className="w-4 h-4" />
               Marcar todas
             </Button>
@@ -162,20 +111,21 @@ export default function NotificationsPage() {
         >
           No leidas
           {unreadCount > 0 && (
-            <span className="ml-1.5 text-xs bg-primary/30 px-1.5 py-0.5 rounded-full">
-              {unreadCount}
-            </span>
+            <span className="ml-1.5 text-xs bg-primary/30 px-1.5 py-0.5 rounded-full">{unreadCount}</span>
           )}
         </button>
       </div>
 
       {filteredNotifications.length === 0 ? (
-        <EmptyState type="notifications" action={{ label: "Explorar packs", onClick: () => window.location.href = '/packs' }} />
+        <EmptyState
+          type="notifications"
+          action={{ label: 'Explorar packs', onClick: () => (window.location.href = '/packs') }}
+        />
       ) : (
         <div className="space-y-3">
           {filteredNotifications.map((notification, idx) => {
-            const { icon: Icon, color, bg } = iconMap[notification.type] || defaultIcon;
-            const isUnread = !notification.is_read;
+            const { icon: Icon, color, bg } = iconMap[notification.type] || defaultIcon
+            const isUnread = !notification.is_read
 
             return (
               <motion.div
@@ -192,7 +142,9 @@ export default function NotificationsPage() {
                       <Icon className={`w-5 h-5 ${color}`} />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className={`text-sm ${isUnread ? 'dark:text-white text-gray-900 font-medium' : 'dark:text-gray-400 text-gray-600'}`}>
+                      <p
+                        className={`text-sm ${isUnread ? 'dark:text-white text-gray-900 font-medium' : 'dark:text-gray-400 text-gray-600'}`}
+                      >
                         {notification.message}
                       </p>
                       <div className="flex items-center gap-3 mt-2">
@@ -203,7 +155,12 @@ export default function NotificationsPage() {
                       </div>
                     </div>
                     <button
-                      onClick={(e) => { e.stopPropagation(); deleteNotification(notification.id); }}
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        deleteNotification(notification.id)
+                        setToast({ message: 'Notificacion eliminada', type: 'success' })
+                        setTimeout(() => setToast(null), 2000)
+                      }}
                       className="p-1.5 rounded-lg text-gray-500 hover:text-red-400 hover:bg-red-500/10 transition-all opacity-0 group-hover:opacity-100"
                     >
                       <Trash2 className="w-4 h-4" />
@@ -211,12 +168,12 @@ export default function NotificationsPage() {
                   </div>
                 </Card>
               </motion.div>
-            );
+            )
           })}
         </div>
       )}
 
       {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
     </motion.div>
-  );
+  )
 }

@@ -1,8 +1,4 @@
-// ============================================
-// Helpers para enviar notificaciones via API
-// ============================================
-
-const API_BASE = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
+import { getSupabaseAdmin } from '@/lib/supabase/admin'
 
 interface SendNotificationParams {
   userId: string
@@ -11,62 +7,59 @@ interface SendNotificationParams {
   reservationId?: string
 }
 
-interface SendBatchParams {
-  notifications: SendNotificationParams[]
-}
-
-/**
- * Enviar una notificacion a un usuario
- */
 export async function sendNotification({ userId, type, message, reservationId }: SendNotificationParams) {
   try {
-    const res = await fetch(`${API_BASE}/api/notifications`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ userId, type, message, reservationId }),
+    const supabase = getSupabaseAdmin()
+    const { error } = await supabase.from('notifications').insert({
+      user_id: userId,
+      type,
+      message,
+      reservation_id: reservationId || null,
+      is_read: false,
+      sent_at: new Date().toISOString(),
     })
-    if (!res.ok) console.error('[sendNotification] Error:', await res.text())
-    return res.ok
+    if (error) {
+      console.error('[sendNotification] Error:', error.message)
+      return false
+    }
+    return true
   } catch (err) {
     console.error('[sendNotification] Error:', err)
     return false
   }
 }
 
-/**
- * Enviar notificaciones a multiples usuarios
- */
-export async function sendBatchNotifications(notifications: SendBatchParams['notifications']) {
+export async function sendBatchNotifications(notifications: SendNotificationParams[]) {
   try {
-    const res = await fetch(`${API_BASE}/api/notifications`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ notifications }),
-    })
-    if (!res.ok) console.error('[sendBatchNotifications] Error:', await res.text())
-    return res.ok
+    const supabase = getSupabaseAdmin()
+    const records = notifications.map((n) => ({
+      user_id: n.userId,
+      type: n.type,
+      message: n.message,
+      reservation_id: n.reservationId || null,
+      is_read: false,
+      sent_at: new Date().toISOString(),
+    }))
+    const { error } = await supabase.from('notifications').insert(records)
+    if (error) {
+      console.error('[sendBatchNotifications] Error:', error.message)
+      return false
+    }
+    return true
   } catch (err) {
     console.error('[sendBatchNotifications] Error:', err)
     return false
   }
 }
 
-/**
- * Tipos de notificaciones predefinidos
- */
 export const NOTIFICATION_TYPES = {
-  // Para USUARIO
   PICKUP_REMINDER: 'pickup_reminder',
   CONFIRMATION: 'confirmation',
   CANCELLATION: 'cancellation',
   SHOP_CANCELLED: 'shop_cancelled',
-
-  // Para COMERCIO
   NEW_RESERVATION: 'new_reservation',
   USER_CANCELLED: 'user_cancelled',
   PICKUP_COMPLETED: 'pickup_completed',
-
-  // Para ADMIN
   NEW_USER: 'new_user',
   NEW_SHOP: 'new_shop',
   INCIDENCE: 'incidence',

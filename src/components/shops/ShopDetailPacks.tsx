@@ -1,34 +1,34 @@
-﻿'use client';
+﻿'use client'
 
-import { motion } from 'framer-motion';
-import { Package, Clock, MapPin, ChevronRight } from 'lucide-react';
-import Link from 'next/link';
-import Image from 'next/image';
-import { formatPrice } from '@/lib/utils/formatPrice';
+import { motion } from 'framer-motion'
+import { Package, Clock, MapPin, ChevronRight } from 'lucide-react'
+import Link from 'next/link'
+import Image from 'next/image'
+import { formatPrice } from '@/lib/utils/formatPrice'
 
 interface Pack {
-  id: string;
-  title: string;
-  description: string | null;
-  price_cents: number;
-  original_price_cents: number | null;
-  remaining_stock: number;
-  total_stock: number;
-  is_active: boolean;
-  ends_at: string | null;
-  pickup_date: string | null;
-  pickup_start_time: string | null;
-  pickup_end_time: string | null;
-  image_url: string | null;
+  id: string
+  title: string
+  description: string | null
+  price_cents: number
+  original_price_cents: number | null
+  remaining_stock: number
+  total_stock: number
+  is_active: boolean
+  ends_at: string | null
+  pickup_date: string | null
+  pickup_start_time: string | null
+  pickup_end_time: string | null
+  image_url: string | null
 }
 
 interface ShopDetailPacksProps {
-  packs: Pack[];
-  shopName: string;
-  shopAddress: string | null;
+  packs: Pack[]
+  shopName: string
+  shopAddress: string | null
 }
 
-export default function ShopDetailPacks({ packs, shopName, shopAddress }: ShopDetailPacksProps) {
+export default function ShopDetailPacks({ packs, shopName: _shopName, shopAddress }: ShopDetailPacksProps) {
   if (packs.length === 0) {
     return (
       <motion.div
@@ -42,7 +42,7 @@ export default function ShopDetailPacks({ packs, shopName, shopAddress }: ShopDe
         <p className="dark:text-gray-400 text-gray-600 font-medium">No hay packs disponibles</p>
         <p className="text-xs dark:text-gray-500 text-gray-400 mt-1">Vuelve mas tarde para ver nuevas opciones</p>
       </motion.div>
-    );
+    )
   }
 
   return (
@@ -61,14 +61,15 @@ export default function ShopDetailPacks({ packs, shopName, shopAddress }: ShopDe
         {packs.map((pack, idx) => {
           const discount = pack.original_price_cents
             ? Math.round((1 - pack.price_cents / pack.original_price_cents) * 100)
-            : null;
+            : null
 
-          const pickupTime = pack.pickup_start_time && pack.pickup_end_time
-            ? pack.pickup_start_time.slice(0, 5) + ' - ' + pack.pickup_end_time.slice(0, 5)
-            : null;
+          const pickupTime =
+            pack.pickup_start_time && pack.pickup_end_time
+              ? pack.pickup_start_time.slice(0, 5) + ' - ' + pack.pickup_end_time.slice(0, 5)
+              : null
 
-          const isLowStock = pack.remaining_stock <= 3;
-          const hasImage = pack.image_url && pack.image_url.trim() !== '';
+          const isLowStock = pack.remaining_stock <= 3
+          const hasImage = pack.image_url && pack.image_url.trim() !== ''
 
           return (
             <motion.div
@@ -116,7 +117,9 @@ export default function ShopDetailPacks({ packs, shopName, shopAddress }: ShopDe
                       <div className="flex items-baseline gap-1 bg-black/70 backdrop-blur-sm rounded-xl px-3 py-1.5">
                         <span className="text-lg font-bold text-primary">{formatPrice(pack.price_cents)}</span>
                         {pack.original_price_cents && (
-                          <span className="text-xs dark:text-gray-500 text-gray-400 line-through">{formatPrice(pack.original_price_cents)}</span>
+                          <span className="text-xs dark:text-gray-500 text-gray-400 line-through">
+                            {formatPrice(pack.original_price_cents)}
+                          </span>
                         )}
                       </div>
                     </div>
@@ -129,7 +132,9 @@ export default function ShopDetailPacks({ packs, shopName, shopAddress }: ShopDe
                     </h3>
 
                     {pack.description && (
-                      <p className="text-sm dark:text-gray-500 text-gray-400 line-clamp-2 leading-relaxed">{pack.description}</p>
+                      <p className="text-sm dark:text-gray-500 text-gray-400 line-clamp-2 leading-relaxed">
+                        {pack.description}
+                      </p>
                     )}
 
                     <div className="flex flex-wrap items-center gap-3 text-xs dark:text-gray-500 text-gray-400 pt-1">
@@ -159,9 +164,9 @@ export default function ShopDetailPacks({ packs, shopName, shopAddress }: ShopDe
                 </div>
               </Link>
             </motion.div>
-          );
+          )
         })}
       </div>
     </div>
-  );
+  )
 }

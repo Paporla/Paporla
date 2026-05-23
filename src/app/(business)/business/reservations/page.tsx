@@ -1,29 +1,29 @@
-﻿'use client';
+﻿'use client'
 
-import { useState } from 'react';
-import { Calendar, ShoppingBag } from 'lucide-react';
-import Card from '@/components/ui/Card';
-import Toast from '@/components/ui/Toast';
-import ConfirmModal from '@/components/ui/ConfirmModal';
-import LoadingSkeleton from '@/components/business/LoadingSkeleton';
-import TodayPickups from '@/components/business/TodayPickups';
-import PickupCodeValidator from '@/components/business/PickupCodeValidator';
-import { useBusinessReservations } from '@/components/business/reservations/useBusinessReservations';
-import ReservationStatsBar from '@/components/business/reservations/ReservationStatsBar';
-import ReservationFilters from '@/components/business/reservations/ReservationFilters';
-import ReservationGroup from '@/components/business/reservations/ReservationGroup';
+import { useState } from 'react'
+import { Calendar, ShoppingBag } from 'lucide-react'
+import Card from '@/components/ui/Card'
+import Toast from '@/components/ui/Toast'
+import ConfirmModal from '@/components/ui/ConfirmModal'
+import LoadingSkeleton from '@/components/business/LoadingSkeleton'
+import TodayPickups from '@/components/business/TodayPickups'
+import PickupCodeValidator from '@/components/business/PickupCodeValidator'
+import { useBusinessReservations, ReservationItem } from '@/components/business/reservations/useBusinessReservations'
+import ReservationStatsBar from '@/components/business/reservations/ReservationStatsBar'
+import ReservationFilters from '@/components/business/reservations/ReservationFilters'
+import ReservationGroup from '@/components/business/reservations/ReservationGroup'
 
 // Agrupar reservas por estado
-const groupReservations = (reservations: any[]) => {
+const groupReservations = (reservations: ReservationItem[]) => {
   return {
-    ready_pickup: reservations.filter(r => r.status === 'ready_pickup'),
-    pending: reservations.filter(r => r.status === 'pending'),
-    confirmed: reservations.filter(r => r.status === 'confirmed'),
-    picked_up: reservations.filter(r => r.status === 'picked_up'),
-    no_show: reservations.filter(r => r.status === 'no_show'),
-    cancelled: reservations.filter(r => r.status === 'cancelled'),
-  };
-};
+    ready_pickup: reservations.filter((r) => r.status === 'ready_pickup'),
+    pending: reservations.filter((r) => r.status === 'pending'),
+    confirmed: reservations.filter((r) => r.status === 'confirmed'),
+    picked_up: reservations.filter((r) => r.status === 'picked_up'),
+    no_show: reservations.filter((r) => r.status === 'no_show'),
+    cancelled: reservations.filter((r) => r.status === 'cancelled'),
+  }
+}
 
 export default function BusinessReservationsPage() {
   const {
@@ -41,30 +41,30 @@ export default function BusinessReservationsPage() {
     stats,
     updating,
     updateStatus,
-  } = useBusinessReservations();
+  } = useBusinessReservations()
 
-  const [modalOpen, setModalOpen] = useState(false);
-  const [reservationToCancel, setReservationToCancel] = useState<string | null>(null);
+  const [modalOpen, setModalOpen] = useState(false)
+  const [reservationToCancel, setReservationToCancel] = useState<string | null>(null)
 
-  const today = new Date().toISOString().split('T')[0];
-  const todayCount = reservations.filter(r => r.created_at?.startsWith(today)).length;
+  const today = new Date().toISOString().split('T')[0]
+  const todayCount = reservations.filter((r) => r.created_at?.startsWith(today)).length
 
-  const grouped = groupReservations(reservations);
+  const grouped = groupReservations(reservations)
 
   const confirmCancel = (id: string) => {
-    setReservationToCancel(id);
-    setModalOpen(true);
-  };
+    setReservationToCancel(id)
+    setModalOpen(true)
+  }
 
   const handleCancel = async () => {
     if (reservationToCancel) {
-      await updateStatus(reservationToCancel, 'cancelled');
-      setModalOpen(false);
-      setReservationToCancel(null);
+      await updateStatus(reservationToCancel, 'cancelled')
+      setModalOpen(false)
+      setReservationToCancel(null)
     }
-  };
+  }
 
-  if (loading) return <LoadingSkeleton />;
+  if (loading) return <LoadingSkeleton />
 
   return (
     <div className="space-y-8 pb-8">
@@ -187,5 +187,5 @@ export default function BusinessReservationsPage() {
       {error && <Toast message={error} type="error" onClose={() => setError('')} />}
       {success && <Toast message={success} type="success" onClose={() => setSuccess('')} />}
     </div>
-  );
+  )
 }

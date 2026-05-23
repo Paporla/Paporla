@@ -1,46 +1,41 @@
-'use client';
+'use client'
 
-import Link from 'next/link';
-import Image from 'next/image';
-import { motion } from 'framer-motion';
-import { Calendar, Navigation, Clock, Package, MapPin, Copy } from 'lucide-react';
-import Card from '@/components/ui/Card';
-import Button from '@/components/ui/Button';
-import CopyButton from '@/components/ui/CopyButton';
-import CountdownTimer from '@/components/ui/CountdownTimer';
-import { formatDate } from '@/lib/utils/formatDate';
-import type { Reservation } from '@/types/reservation';
+import Link from 'next/link'
+import Image from 'next/image'
+import { motion } from 'framer-motion'
+import { Navigation, Clock, MapPin } from 'lucide-react'
+import Card from '@/components/ui/Card'
+import Button from '@/components/ui/Button'
+import CopyButton from '@/components/ui/CopyButton'
+import CountdownTimer from '@/components/ui/CountdownTimer'
+import type { Reservation } from '@/types/reservation'
 
 interface NextPickupCardProps {
-  reservation: Reservation;
+  reservation: Reservation
 }
 
 export default function NextPickupCard({ reservation }: NextPickupCardProps) {
-  if (!reservation.pack || !reservation.shop) return null;
+  if (!reservation.pack || !reservation.shop) return null
 
   const googleMapsUrl = reservation.shop.address
     ? `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(reservation.shop.address)}`
-    : null;
+    : null
 
-  const hasPickupInfo = reservation.pickup_date && reservation.pickup_end_time;
+  const hasPickupInfo = reservation.pickup_date && reservation.pickup_end_time
 
   return (
-    <motion.div
-      initial={{ opacity: 0, scale: 0.95 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{ delay: 0.1 }}
-    >
+    <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.1 }}>
       <Card glass className="border-primary/30 overflow-hidden">
         <div className="flex flex-col md:flex-row items-start md:items-center gap-4 p-5">
           {/* Imagen del pack */}
           {reservation.pack.image_url && (
             <div className="w-20 h-20 rounded-xl overflow-hidden bg-gray-800 flex-shrink-0 relative">
-              <Image 
-                src={reservation.pack.image_url} 
-                alt={reservation.pack.title} 
-                fill 
-                className="object-cover" 
-                sizes="80px" 
+              <Image
+                src={reservation.pack.image_url}
+                alt={reservation.pack.title}
+                fill
+                className="object-cover"
+                sizes="80px"
               />
             </div>
           )}
@@ -48,9 +43,7 @@ export default function NextPickupCard({ reservation }: NextPickupCardProps) {
           {/* Informacion principal */}
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-1">
-              <span className="text-xs font-bold text-primary uppercase tracking-wider">
-                Proxima recogida
-              </span>
+              <span className="text-xs font-bold text-primary uppercase tracking-wider">Proxima recogida</span>
               <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
             </div>
             <Link href={`/packs/${reservation.pack.id}`}>
@@ -63,7 +56,7 @@ export default function NextPickupCard({ reservation }: NextPickupCardProps) {
                 {reservation.shop.name}
               </p>
             </Link>
-            
+
             {reservation.shop.address && (
               <p className="text-xs text-gray-500 flex items-center gap-1 mt-1">
                 <MapPin className="w-3 h-3" />
@@ -77,10 +70,7 @@ export default function NextPickupCard({ reservation }: NextPickupCardProps) {
                   <Clock className="w-3 h-3" />
                   <span>Recoge antes de las {reservation.pickup_end_time?.slice(0, 5)}</span>
                 </div>
-                <CountdownTimer
-                  targetDate={reservation.pickup_date!}
-                  targetEndTime={reservation.pickup_end_time!}
-                />
+                <CountdownTimer targetDate={reservation.pickup_date!} targetEndTime={reservation.pickup_end_time!} />
               </div>
             )}
           </div>
@@ -90,9 +80,7 @@ export default function NextPickupCard({ reservation }: NextPickupCardProps) {
             <div className="bg-primary/10 border border-primary/30 rounded-xl px-4 py-2 text-center">
               <p className="text-[10px] dark:text-gray-400 text-gray-600">Codigo</p>
               <div className="flex items-center gap-2">
-                <p className="text-xl font-bold text-primary tracking-wider font-mono">
-                  {reservation.pickup_code}
-                </p>
+                <p className="text-xl font-bold text-primary tracking-wider font-mono">{reservation.pickup_code}</p>
                 <CopyButton text={reservation.pickup_code} label="" />
               </div>
             </div>
@@ -110,12 +98,14 @@ export default function NextPickupCard({ reservation }: NextPickupCardProps) {
                 </a>
               )}
               <Link href={`/packs/${reservation.pack.id}`}>
-                <Button variant="outline" size="sm">Ver detalles</Button>
+                <Button variant="outline" size="sm">
+                  Ver detalles
+                </Button>
               </Link>
             </div>
           </div>
         </div>
       </Card>
     </motion.div>
-  );
+  )
 }

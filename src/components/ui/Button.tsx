@@ -1,33 +1,36 @@
-'use client';
+'use client'
 
-import { motion, MotionProps } from 'framer-motion';
-import { ReactNode } from 'react';
+import { motion, MotionProps } from 'framer-motion'
+import { ReactNode } from 'react'
+import { cn } from '@/lib/utils/cn'
 
 interface ButtonProps extends MotionProps {
-  children: ReactNode;
-  variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger';
-  size?: 'sm' | 'md' | 'lg';
-  className?: string;
-  disabled?: boolean;
-  loading?: boolean;
-  icon?: ReactNode;
-  onClick?: () => void;
-  type?: 'button' | 'submit' | 'reset';
+  children: ReactNode
+  variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger'
+  size?: 'sm' | 'md' | 'lg'
+  className?: string
+  disabled?: boolean
+  loading?: boolean
+  icon?: ReactNode
+  onClick?: () => void
+  type?: 'button' | 'submit' | 'reset'
+  ariaLabel?: string
 }
 
 const variants = {
   primary: 'bg-gradient-to-r from-primary to-primary/80 text-dark font-bold hover:shadow-lg hover:shadow-primary/25',
   secondary: 'dark:bg-gray-800 bg-gray-200 dark:text-white text-gray-900 dark:hover:bg-gray-700 hover:bg-gray-300',
   outline: 'border border-primary/30 text-primary hover:bg-primary/10 hover:border-primary/60',
-  ghost: 'dark:text-gray-400 text-gray-600 dark:hover:text-white hover:text-gray-900 dark:hover:bg-white/5 hover:bg-gray-100',
+  ghost:
+    'dark:text-gray-400 text-gray-600 dark:hover:text-white hover:text-gray-900 dark:hover:bg-white/5 hover:bg-gray-100',
   danger: 'bg-red-500/80 dark:text-white text-gray-900 hover:bg-red-600 border border-red-500/20',
-};
+}
 
 const sizes = {
   sm: 'px-3 py-1.5 text-sm rounded-lg',
   md: 'px-4 py-2 rounded-lg',
-  lg: 'px-6 py-3 rounded-xl text-lg',
-};
+  lg: 'px-6 py-3 rounded-lg text-lg',
+}
 
 export default function Button({
   children,
@@ -39,45 +42,39 @@ export default function Button({
   icon,
   onClick,
   type = 'button',
+  ariaLabel,
   ...motionProps
 }: ButtonProps) {
-  const isDisabled = disabled || loading;
+  const isDisabled = disabled || loading
 
   return (
     <motion.button
       type={type}
+      aria-label={ariaLabel}
       whileHover={!isDisabled ? { scale: 1.02 } : {}}
       whileTap={!isDisabled ? { scale: 0.98 } : {}}
       onClick={onClick}
       disabled={isDisabled}
-      className={`
-        ${variants[variant]}
-        ${sizes[size]}
-        font-medium transition-all duration-300
-        flex items-center justify-center gap-2
-        ${isDisabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
-        ${className}
-      `}
+      className={cn(
+        variants[variant],
+        sizes[size],
+        'font-medium transition-all duration-300 flex items-center justify-center gap-2',
+        isDisabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer',
+        className,
+      )}
       {...motionProps}
     >
       {loading && (
-        <svg 
-          className="animate-spin h-4 w-4 text-current" 
-          xmlns="http://www.w3.org/2000/svg" 
-          fill="none" 
+        <svg
+          className="animate-spin h-4 w-4 text-current"
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
           viewBox="0 0 24 24"
         >
-          <circle 
-            className="opacity-25" 
-            cx="12" 
-            cy="12" 
-            r="10" 
-            stroke="currentColor" 
-            strokeWidth="4"
-          />
-          <path 
-            className="opacity-75" 
-            fill="currentColor" 
+          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+          <path
+            className="opacity-75"
+            fill="currentColor"
             d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
           />
         </svg>
@@ -85,5 +82,5 @@ export default function Button({
       {!loading && icon && <span className="inline-flex">{icon}</span>}
       {loading ? 'Cargando...' : children}
     </motion.button>
-  );
+  )
 }

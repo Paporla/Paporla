@@ -1,21 +1,24 @@
-﻿'use client';
+﻿'use client'
 
-import { motion } from 'framer-motion';
-import { Package, Search, Filter, AlertCircle, Store, Heart, Bell, Users, Inbox } from 'lucide-react';
+import { motion } from 'framer-motion'
+import { Package, Search, Filter, AlertCircle, Store, Heart, Bell, Users, Inbox } from 'lucide-react'
 
 interface EmptyStateProps {
-  type?: 'packs' | 'search' | 'filters' | 'reservations' | 'shops' | 'favorites' | 'notifications' | 'users' | 'generic';
-  icon?: any;
-  title?: string;
-  description?: string;
+  type?: 'packs' | 'search' | 'filters' | 'reservations' | 'shops' | 'favorites' | 'notifications' | 'users' | 'generic'
+  icon?: React.ComponentType<{ className?: string }>
+  title?: string
+  description?: string
   action?: {
-    label: string;
-    onClick: () => void;
-  };
-  compact?: boolean;
+    label: string
+    onClick: () => void
+  }
+  compact?: boolean
 }
 
-const emptyStateConfig: Record<string, { icon: any; title: string; description: string }> = {
+const emptyStateConfig: Record<
+  string,
+  { icon: React.ComponentType<{ className?: string }>; title: string; description: string }
+> = {
   packs: {
     icon: Package,
     title: 'No hay packs disponibles',
@@ -61,13 +64,20 @@ const emptyStateConfig: Record<string, { icon: any; title: string; description: 
     title: 'Sin datos',
     description: 'No hay informacion disponible en este momento.',
   },
-};
+}
 
-export default function EmptyState({ type, icon: customIcon, title: customTitle, description: customDescription, action, compact }: EmptyStateProps) {
-  const config = type ? emptyStateConfig[type] : emptyStateConfig.generic;
-  const Icon = customIcon || config.icon;
-  const title = customTitle || config.title;
-  const description = customDescription || config.description;
+export default function EmptyState({
+  type,
+  icon: customIcon,
+  title: customTitle,
+  description: customDescription,
+  action,
+  compact,
+}: EmptyStateProps) {
+  const config = type ? emptyStateConfig[type] : emptyStateConfig.generic
+  const Icon = customIcon || config.icon
+  const title = customTitle || config.title
+  const description = customDescription || config.description
 
   if (compact) {
     return (
@@ -81,7 +91,7 @@ export default function EmptyState({ type, icon: customIcon, title: customTitle,
         </div>
         <p className="text-sm dark:text-gray-400 text-gray-600">{description}</p>
       </motion.div>
-    );
+    )
   }
 
   return (
@@ -94,15 +104,11 @@ export default function EmptyState({ type, icon: customIcon, title: customTitle,
         <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-primary/10 flex items-center justify-center">
           <Icon className="w-10 h-10 text-primary" />
         </div>
-        
-        <h3 className="text-xl font-bold dark:text-white text-gray-900 mb-2">
-          {title}
-        </h3>
-        
-        <p className="dark:text-gray-400 text-gray-600 mb-6 text-sm">
-          {description}
-        </p>
-        
+
+        <h3 className="text-xl font-bold dark:text-white text-gray-900 mb-2">{title}</h3>
+
+        <p className="dark:text-gray-400 text-gray-600 mb-6 text-sm">{description}</p>
+
         {action && (
           <motion.button
             whileHover={{ scale: 1.02 }}
@@ -115,5 +121,5 @@ export default function EmptyState({ type, icon: customIcon, title: customTitle,
         )}
       </div>
     </motion.div>
-  );
+  )
 }

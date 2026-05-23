@@ -4,35 +4,35 @@ vi.mock('@/lib/email', () => ({
   sendPickupReminderEmail: vi.fn().mockResolvedValue({ success: true }),
 }))
 
+vi.mock('@/lib/supabase/admin', () => ({
+  getSupabaseAdmin: () => mockSupabase,
+  validateCronRequest: (request: Request) => {
+    const authHeader = request.headers.get('authorization')
+    const secret = process.env.CRON_SECRET
+    return !!(secret && authHeader === 'Bearer ' + secret)
+  },
+}))
+
 const mockFrom = vi.fn()
-const mockSelect = vi.fn().mockReturnThis()
-const mockIn = vi.fn().mockReturnThis()
-const mockEq = vi.fn().mockReturnThis()
-const mockOrder = vi.fn().mockReturnThis()
+const mockSelect = vi.fn()
+const mockIn = vi.fn()
+const mockEq = vi.fn()
+const mockOrder = vi.fn()
 const mockMaybeSingle = vi.fn()
-const mockInsert = vi.fn().mockReturnThis()
+const mockInsert = vi.fn()
 
 const mockSupabase = {
-  from: (table: string) => {
-    mockFrom(table)
-    return {
-      select: mockSelect,
-      insert: mockInsert,
-    }
-  },
+  from: mockFrom,
+  channel: vi.fn(),
 }
-
-const mockCreateClient = vi.fn(() => mockSupabase)
-
-vi.mock('@supabase/supabase-js', () => ({
-  createClient: () => mockCreateClient(),
-}))
 
 describe('GET /api/cron/pickup-reminders', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     vi.resetModules()
     process.env.CRON_SECRET = 'test-secret'
+    process.env.NEXT_PUBLIC_SUPABASE_URL = 'https://test.supabase.co'
+    process.env.SUPABASE_SERVICE_ROLE_KEY = 'test-key'
 
     mockFrom.mockReturnValue({
       select: mockSelect,
@@ -88,13 +88,12 @@ describe('GET /api/cron/pickup-reminders', () => {
     expect(body.sent).toBe(0)
   })
 
-  it('allows request when CRON_SECRET is not set', async () => {
+  it('denies request when CRON_SECRET is not set (security fix)', async () => {
     delete process.env.CRON_SECRET
-    mockOrder.mockResolvedValue({ data: [], error: null })
 
     const { GET } = await import('@/app/api/cron/pickup-reminders/route')
     const request = new Request('http://localhost/api/cron/pickup-reminders')
     const response = await GET(request)
-    expect(response.status).toBe(200)
+    expect(response.status).toBe(401)
   })
 })

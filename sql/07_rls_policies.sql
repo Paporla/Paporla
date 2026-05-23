@@ -34,7 +34,7 @@ CREATE POLICY "shops_admin_all" ON public.shops FOR ALL USING (public.get_user_r
 DROP POLICY IF EXISTS "packs_select_public" ON public.packs;
 DROP POLICY IF EXISTS "packs_owner_manage" ON public.packs;
 DROP POLICY IF EXISTS "packs_admin_all" ON public.packs;
-CREATE POLICY "packs_select_public" ON public.packs FOR SELECT USING (deleted_at IS NULL);
+CREATE POLICY "packs_select_public" ON public.packs FOR SELECT USING (deleted_at IS NULL AND is_active = true AND remaining_stock > 0);
 CREATE POLICY "packs_owner_manage" ON public.packs FOR ALL USING (EXISTS (SELECT 1 FROM public.shops WHERE id = packs.shop_id AND owner_id = auth.uid()));
 CREATE POLICY "packs_admin_all" ON public.packs FOR ALL USING (public.get_user_role() IN ('admin', 'super_admin'));
 
@@ -47,7 +47,9 @@ DROP POLICY IF EXISTS "reservations_admin_all" ON public.reservations;
 CREATE POLICY "reservations_select_client" ON public.reservations FOR SELECT USING (auth.uid() = user_id);
 CREATE POLICY "reservations_select_merchant" ON public.reservations FOR SELECT USING (EXISTS (SELECT 1 FROM public.shops WHERE id = reservations.shop_id AND owner_id = auth.uid()));
 CREATE POLICY "reservations_client_insert" ON public.reservations FOR INSERT WITH CHECK (auth.uid() = user_id);
-CREATE POLICY "reservations_client_update" ON public.reservations FOR UPDATE USING (auth.uid() = user_id);
+-- Solo permite actualizar columnas NO-criticas (cancel_reason, etc.)
+-- El status solo debe cambiarse via RPC functions (cancel_reservation, validate_pickup, etc.)
+CREATE POLICY "reservations_client_update" ON public.reservations FOR UPDATE USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
 CREATE POLICY "reservations_admin_all" ON public.reservations FOR ALL USING (public.get_user_role() IN ('admin', 'super_admin'));
 
 -- favorites

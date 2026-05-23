@@ -1,5 +1,3 @@
-'use client';
-
 export default function ProfileSkeleton() {
   return (
     <div className="flex items-center justify-center min-h-[70vh]">
@@ -9,5 +7,5 @@ export default function ProfileSkeleton() {
         <p className="text-gray-600 text-sm mt-1">Preparando tus estadisticas</p>
       </div>
     </div>
-  );
+  )
 }

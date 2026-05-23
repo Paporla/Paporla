@@ -1,47 +1,53 @@
 'use client'
 
-import { motion, AnimatePresence } from 'framer-motion'
 import { useEffect } from 'react'
-
-export type ToastType = 'success' | 'error' | 'info'
+import { motion, AnimatePresence } from 'framer-motion'
+import { X, AlertCircle, CheckCircle, Info } from 'lucide-react'
 
 interface ToastProps {
   message: string
-  type: ToastType
+  type?: 'error' | 'success' | 'info'
   onClose: () => void
   duration?: number
 }
 
-export default function Toast({ message, type, onClose, duration = 3000 }: ToastProps) {
+export default function Toast({ message, type = 'info', onClose, duration = 4000 }: ToastProps) {
   useEffect(() => {
     const timer = setTimeout(onClose, duration)
     return () => clearTimeout(timer)
   }, [onClose, duration])
 
-  const colors = {
-    success: 'bg-green-600',
-    error: 'bg-red-600',
-    info: 'bg-blue-600',
+  const config = {
+    error: { icon: AlertCircle, color: 'bg-red-500/20 border-red-500/40 text-red-400', iconColor: 'text-red-400' },
+    success: {
+      icon: CheckCircle,
+      color: 'bg-green-500/20 border-green-500/40 text-green-400',
+      iconColor: 'text-green-400',
+    },
+    info: { icon: Info, color: 'bg-blue-500/20 border-blue-500/40 text-blue-400', iconColor: 'text-blue-400' },
   }
 
-  const icons = {
-    success: 'OK',
-    error: 'X',
-    info: 'i',
-  }
+  const { icon: Icon, color, iconColor } = config[type]
 
   return (
     <AnimatePresence>
       <motion.div
-        initial={{ opacity: 0, x: 100 }}
-        animate={{ opacity: 1, x: 0 }}
-        exit={{ opacity: 0, x: 100 }}
-        className={`fixed bottom-4 right-4 z-50 px-6 py-3 rounded-lg shadow-lg ${colors[type]} text-white`}
+        role="alert"
+        aria-live="assertive"
+        initial={{ opacity: 0, y: -20, x: '-50%' }}
+        animate={{ opacity: 1, y: 0, x: '-50%' }}
+        exit={{ opacity: 0, y: -20, x: '-50%' }}
+        className={`fixed top-24 left-1/2 z-[9999] flex items-center gap-3 px-4 py-3 rounded-xl border backdrop-blur-xl ${color}`}
       >
-        <div className="flex items-center gap-3">
-          <span className="text-xl">{icons[type]}</span>
-          <span>{message}</span>
-        </div>
+        <Icon className={`w-5 h-5 ${iconColor} flex-shrink-0`} />
+        <p className="text-sm font-medium">{message}</p>
+        <button
+          onClick={onClose}
+          className="ml-2 opacity-60 hover:opacity-100 transition-opacity"
+          aria-label="Cerrar notificación"
+        >
+          <X className="w-4 h-4" />
+        </button>
       </motion.div>
     </AnimatePresence>
   )

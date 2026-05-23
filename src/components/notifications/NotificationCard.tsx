@@ -1,27 +1,27 @@
-'use client';
+'use client'
 
-import { motion } from 'framer-motion';
-import { 
-  Clock, 
-  XCircle, 
-  CheckCircle, 
-  Package, 
+import { motion } from 'framer-motion'
+import {
+  Clock,
+  XCircle,
+  CheckCircle,
+  Package,
   ShieldCheck,
   ShoppingBag,
   UserPlus,
   Store,
   AlertTriangle,
-  Trash2
-} from 'lucide-react';
-import type { Notification } from '@/hooks/useNotifications';
+  Trash2,
+} from 'lucide-react'
+import type { Notification } from '@/hooks/useNotifications'
 
 interface NotificationCardProps {
-  notification: Notification;
-  onMarkAsRead: (id: string) => void;
-  onDelete: (id: string) => void;
+  notification: Notification
+  onMarkAsRead: (id: string) => void
+  onDelete: (id: string) => void
 }
 
-const iconMap: Record<string, { icon: any; color: string; bg: string }> = {
+const iconMap: Record<string, { icon: React.ComponentType<{ className?: string }>; color: string; bg: string }> = {
   pickup_reminder: { icon: Clock, color: 'text-amber-400', bg: 'bg-amber-500/10' },
   cancellation: { icon: XCircle, color: 'text-red-400', bg: 'bg-red-500/10' },
   shop_cancelled: { icon: XCircle, color: 'text-red-400', bg: 'bg-red-500/10' },
@@ -34,34 +34,34 @@ const iconMap: Record<string, { icon: any; color: string; bg: string }> = {
   new_user: { icon: UserPlus, color: 'text-purple-400', bg: 'bg-purple-500/10' },
   new_shop: { icon: Store, color: 'text-primary', bg: 'bg-primary/10' },
   incidence: { icon: AlertTriangle, color: 'text-red-400', bg: 'bg-red-500/10' },
-};
+}
 
 export default function NotificationCard({ notification, onMarkAsRead, onDelete }: NotificationCardProps) {
-  const config = iconMap[notification.type] || iconMap.confirmation;
-  const Icon = config.icon;
-  const isUnread = !notification.is_read;
+  const config = iconMap[notification.type] || iconMap.confirmation
+  const Icon = config.icon
+  const isUnread = !notification.is_read
 
   const handleClick = () => {
     if (isUnread) {
-      onMarkAsRead(notification.id);
+      onMarkAsRead(notification.id)
     }
-  };
+  }
 
   const handleDelete = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    onDelete(notification.id);
-  };
+    e.stopPropagation()
+    onDelete(notification.id)
+  }
 
   const timeAgo = (date: string) => {
-    const seconds = Math.floor((new Date().getTime() - new Date(date).getTime()) / 1000);
-    if (seconds < 60) return 'Hace unos segundos';
-    const minutes = Math.floor(seconds / 60);
-    if (minutes < 60) return `Hace ${minutes} min`;
-    const hours = Math.floor(minutes / 60);
-    if (hours < 24) return `Hace ${hours} h`;
-    const days = Math.floor(hours / 24);
-    return `Hace ${days} d`;
-  };
+    const seconds = Math.floor((new Date().getTime() - new Date(date).getTime()) / 1000)
+    if (seconds < 60) return 'Hace unos segundos'
+    const minutes = Math.floor(seconds / 60)
+    if (minutes < 60) return `Hace ${minutes} min`
+    const hours = Math.floor(minutes / 60)
+    if (hours < 24) return `Hace ${hours} h`
+    const days = Math.floor(hours / 24)
+    return `Hace ${days} d`
+  }
 
   return (
     <motion.div
@@ -78,12 +78,12 @@ export default function NotificationCard({ notification, onMarkAsRead, onDelete 
           <Icon className={`w-4 h-4 ${config.color}`} />
         </div>
         <div className="flex-1 min-w-0">
-          <p className={`text-sm ${isUnread ? 'dark:text-white text-gray-900 font-medium' : 'dark:text-gray-400 text-gray-600'}`}>
+          <p
+            className={`text-sm ${isUnread ? 'dark:text-white text-gray-900 font-medium' : 'dark:text-gray-400 text-gray-600'}`}
+          >
             {notification.message}
           </p>
-          <p className="text-[10px] dark:text-gray-500 text-gray-400 mt-1">
-            {timeAgo(notification.created_at)}
-          </p>
+          <p className="text-[10px] dark:text-gray-500 text-gray-400 mt-1">{timeAgo(notification.created_at)}</p>
         </div>
         <button
           onClick={handleDelete}
@@ -93,5 +93,5 @@ export default function NotificationCard({ notification, onMarkAsRead, onDelete 
         </button>
       </div>
     </motion.div>
-  );
+  )
 }

@@ -6,14 +6,58 @@ import { Users, Store, TrendingUp, Bell, ChevronRight } from 'lucide-react'
 import Card from '@/components/ui/Card'
 import type { AdminDashboardStats } from './useAdminDashboard'
 
-interface Props { stats: AdminDashboardStats }
+interface Props {
+  stats: AdminDashboardStats
+}
 
-const navCards = [
-  { icon: Users, label: 'Usuarios', key: 'totalUsers', href: '/admin/users', color: 'text-primary', bg: 'bg-primary/10', description: 'Gestionar usuarios' },
-  { icon: Store, label: 'Comercios', key: 'totalShops', href: '/admin/shops', color: 'text-secondary', bg: 'bg-secondary/10', description: 'Gestionar comercios' },
-  { icon: TrendingUp, label: 'Estadisticas', key: null, href: '/admin/stats', color: 'text-primary', bg: 'bg-primary/10', description: 'Analisis detallado' },
-  { icon: Bell, label: 'Notificaciones', key: null, href: '/admin/notifications', color: 'text-amber-400', bg: 'bg-amber-500/10', description: 'Actividad en tiempo real' },
-] as const
+interface NavCard {
+  icon: React.ComponentType<{ className?: string }>
+  label: string
+  key: keyof AdminDashboardStats | null
+  href: string
+  color: string
+  bg: string
+  description: string
+}
+
+const navCards: NavCard[] = [
+  {
+    icon: Users,
+    label: 'Usuarios',
+    key: 'totalUsers',
+    href: '/admin/users',
+    color: 'text-primary',
+    bg: 'bg-primary/10',
+    description: 'Gestionar usuarios',
+  },
+  {
+    icon: Store,
+    label: 'Comercios',
+    key: 'totalShops',
+    href: '/admin/shops',
+    color: 'text-secondary',
+    bg: 'bg-secondary/10',
+    description: 'Gestionar comercios',
+  },
+  {
+    icon: TrendingUp,
+    label: 'Estadisticas',
+    key: null,
+    href: '/admin/stats',
+    color: 'text-primary',
+    bg: 'bg-primary/10',
+    description: 'Analisis detallado',
+  },
+  {
+    icon: Bell,
+    label: 'Notificaciones',
+    key: null,
+    href: '/admin/notifications',
+    color: 'text-amber-400',
+    bg: 'bg-amber-500/10',
+    description: 'Actividad en tiempo real',
+  },
+]
 
 function getValue(stats: AdminDashboardStats, key: keyof AdminDashboardStats | null): string {
   if (!key) return 'Ver mas'
@@ -24,12 +68,17 @@ export default function AdminNavCards({ stats }: Props) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
       {navCards.map((item, index) => (
-        <motion.div key={item.label} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.1 }}>
+        <motion.div
+          key={item.label}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: index * 0.1 }}
+        >
           <Link href={item.href}>
             <Card glass hover className="p-6 cursor-pointer group">
               <div className="flex items-center justify-between">
                 <div>
-                  <div className={`text-3xl font-bold ${item.color} mb-2`}>{getValue(stats, item.key as any)}</div>
+                  <div className={`text-3xl font-bold ${item.color} mb-2`}>{getValue(stats, item.key)}</div>
                   <div className="dark:text-gray-400 text-gray-600 text-sm font-medium">{item.label}</div>
                   <div className="text-xs dark:text-gray-500 text-gray-400 mt-1">{item.description}</div>
                 </div>

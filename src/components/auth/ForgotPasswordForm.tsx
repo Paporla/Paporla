@@ -7,7 +7,7 @@ import Input from '@/components/ui/Input'
 import Toast from '@/components/ui/Toast'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
-import { Mail, ArrowLeft, CheckCircle, Sparkles } from 'lucide-react'
+import { Mail, ArrowLeft, CheckCircle } from 'lucide-react'
 
 export default function ForgotPasswordForm() {
   const supabase = supabaseBrowser()
@@ -42,30 +42,25 @@ export default function ForgotPasswordForm() {
 
   if (success) {
     return (
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="text-center space-y-4"
-      >
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center space-y-4">
         <div className="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mx-auto">
           <CheckCircle className="w-8 h-8 text-green-400" />
         </div>
         <h2 className="text-2xl font-bold dark:text-white text-gray-900">Revisa tu correo!</h2>
         <p className="dark:text-gray-400 text-gray-600">
-          Te hemos enviado un enlace para restablecer tu contrasena a{' '}
-          <strong className="text-primary">{email}</strong>
+          Te hemos enviado un enlace para restablecer tu contrasena a <strong className="text-primary">{email}</strong>
         </p>
         <p className="text-sm dark:text-gray-500 text-gray-400">
           No recibiste el correo?{' '}
-          <button
-            onClick={() => setSuccess(false)}
-            className="text-primary hover:underline"
-          >
+          <button onClick={() => setSuccess(false)} className="text-primary hover:underline">
             Intentar de nuevo
           </button>
         </p>
         <div className="pt-4">
-          <Link href="/login" className="dark:text-gray-400 text-gray-600 hover:text-primary transition-colors inline-flex items-center gap-1">
+          <Link
+            href="/login"
+            className="dark:text-gray-400 text-gray-600 hover:text-primary transition-colors inline-flex items-center gap-1"
+          >
             <ArrowLeft className="w-4 h-4" />
             Volver al inicio de sesion
           </Link>
@@ -75,15 +70,12 @@ export default function ForgotPasswordForm() {
   }
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-    >
+    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
       <form onSubmit={handleSubmit} className="space-y-6">
         <p className="dark:text-gray-400 text-gray-600 text-sm text-center mb-4">
           Ingresa tu correo electronico y te enviaremos un enlace para restablecer tu contrasena.
         </p>
-        
+
         <Input
           label="Correo electronico"
           type="email"
@@ -94,19 +86,22 @@ export default function ForgotPasswordForm() {
           required
           autoComplete="email"
         />
-        
+
         <Button type="submit" loading={loading} className="w-full">
           {loading ? 'Enviando...' : 'Enviar enlace de recuperacion'}
         </Button>
-        
+
         <div className="text-center">
-          <Link href="/login" className="text-sm dark:text-gray-400 text-gray-600 hover:text-primary transition-colors inline-flex items-center gap-1">
+          <Link
+            href="/login"
+            className="text-sm dark:text-gray-400 text-gray-600 hover:text-primary transition-colors inline-flex items-center gap-1"
+          >
             <ArrowLeft className="w-4 h-4" />
             Volver al inicio de sesion
           </Link>
         </div>
       </form>
-      
+
       {error && <Toast message={error} type="error" onClose={() => setError('')} />}
     </motion.div>
   )

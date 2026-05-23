@@ -1,14 +1,14 @@
-'use client';
+'use client'
 
-import { Navigation, MapPin, Loader2 } from 'lucide-react';
-import Input from '@/components/ui/Input';
-import { useState } from 'react';
+import { Navigation, MapPin } from 'lucide-react'
+import Input from '@/components/ui/Input'
+import { useState } from 'react'
 
 interface ProfileLocationFormProps {
-  latitude: string;
-  longitude: string;
-  onLatitudeChange: (value: string) => void;
-  onLongitudeChange: (value: string) => void;
+  latitude: string
+  longitude: string
+  onLatitudeChange: (value: string) => void
+  onLongitudeChange: (value: string) => void
 }
 
 export default function ProfileLocationForm({
@@ -17,29 +17,29 @@ export default function ProfileLocationForm({
   onLatitudeChange,
   onLongitudeChange,
 }: ProfileLocationFormProps) {
-  const [locating, setLocating] = useState(false);
-  const lat = parseFloat(latitude);
-  const lng = parseFloat(longitude);
-  const isValid = latitude && longitude && !isNaN(lat) && !isNaN(lng);
+  const [locating, setLocating] = useState(false)
+  const lat = parseFloat(latitude)
+  const lng = parseFloat(longitude)
+  const isValid = latitude && longitude && !isNaN(lat) && !isNaN(lng)
 
   const detectLocation = () => {
     if (!navigator.geolocation) {
-      alert('La geolocalización no está disponible en este navegador');
-      return;
+      alert('La geolocalización no está disponible en este navegador')
+      return
     }
-    setLocating(true);
+    setLocating(true)
     navigator.geolocation.getCurrentPosition(
       (position) => {
-        onLatitudeChange(position.coords.latitude.toString());
-        onLongitudeChange(position.coords.longitude.toString());
-        setLocating(false);
+        onLatitudeChange(position.coords.latitude.toString())
+        onLongitudeChange(position.coords.longitude.toString())
+        setLocating(false)
       },
       (err) => {
-        alert('Error al detectar ubicación: ' + err.message);
-        setLocating(false);
-      }
-    );
-  };
+        alert('Error al detectar ubicación: ' + err.message)
+        setLocating(false)
+      },
+    )
+  }
 
   return (
     <div className="dark:bg-black/40 bg-white dark:backdrop-blur-sm backdrop-blur-sm border dark:border-white/10 border-gray-200 rounded-2xl p-6 lg:p-8 space-y-6">
@@ -63,7 +63,8 @@ export default function ProfileLocationForm({
           <div
             className="absolute inset-0 opacity-20"
             style={{
-              backgroundImage: 'linear-gradient(rgba(39,211,184,0.3) 1px, transparent 1px), linear-gradient(90deg, rgba(39,211,184,0.3) 1px, transparent 1px)',
+              backgroundImage:
+                'linear-gradient(rgba(39,211,184,0.3) 1px, transparent 1px), linear-gradient(90deg, rgba(39,211,184,0.3) 1px, transparent 1px)',
               backgroundSize: '30px 30px',
             }}
           />
@@ -121,5 +122,5 @@ export default function ProfileLocationForm({
         </p>
       </div>
     </div>
-  );
+  )
 }

@@ -1,20 +1,33 @@
 'use client'
 
 import Image from 'next/image'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowLeft, Home, LayoutDashboard, MapPin, Calendar, Clock, DollarSign, Package, 
-  Store, CheckCircle, AlertCircle, 
-  CreditCard, Shield, Star, Truck, Clock as ClockIcon,
-  Heart, Share2, ExternalLink, Navigation, FileText } from 'lucide-react'
+import { useQuery } from '@tanstack/react-query'
+import {
+  ArrowLeft,
+  Home,
+  Package,
+  MapPin,
+  Calendar,
+  Clock,
+  Store,
+  CheckCircle,
+  AlertCircle,
+  Shield,
+  Star,
+  Truck,
+  ExternalLink,
+} from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
 import { supabaseBrowser } from '@/lib/supabase/client'
 import { motion } from 'framer-motion'
-import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
 import Toast from '@/components/ui/Toast'
 import ReservationConfirmation from '@/components/ui/ReservationConfirmation'
+import PackPaymentSelector from '@/components/packs/PackPaymentSelector'
+import PackReservationModal from '@/components/packs/PackReservationModal'
 import { formatPrice } from '@/lib/utils/formatPrice'
 import { formatDate } from '@/lib/utils/formatDate'
 
@@ -50,60 +63,53 @@ export default function PackDetailPage() {
   const params = useParams()
   const router = useRouter()
   const { user } = useAuth()
-  const supabase = supabaseBrowser()
-  const [pack, setPack] = useState<Pack | null>(null)
-  const [loading, setLoading] = useState(true)
   const [reserving, setReserving] = useState(false)
   const [error, setError] = useState('')
-  const [success, setSuccess] = useState('')
   const [quantity, setQuantity] = useState(1)
-    const [showConfirmation, setShowConfirmation] = useState(false)
-    const [showSummary, setShowSummary] = useState(false)
-    const [lastReservation, setLastReservation] = useState<any>(null)
-    const [paymentMethod, setPaymentMethod] = useState<'cash' | 'demo'>('cash')
-    const [acceptedPolicies, setAcceptedPolicies] = useState(false)
+  const [showConfirmation, setShowConfirmation] = useState(false)
+  const [showSummary, setShowSummary] = useState(false)
+  const [lastReservation, setLastReservation] = useState<{
+    id: string
+    pickup_code: string
+    pack: { title: string; image_url: string | null }
+    shop: { name: string; address: string | null; phone: string | null }
+    pickup_date: string | null
+    pickup_start_time: string | null
+    pickup_end_time: string | null
+  } | null>(null)
+  const [paymentMethod, setPaymentMethod] = useState<'cash' | 'demo'>('cash')
+  const [acceptedPolicies, setAcceptedPolicies] = useState(false)
 
-  useEffect(() => {
-    loadPack()
-  }, [params.id])
+  const { data: pack, isLoading: loading } = useQuery({
+    queryKey: ['pack-detail', params.id],
+    queryFn: async () => {
+      const supabase = supabaseBrowser()
+      const { data, error } = await supabase
+        .from('packs')
+        .select('*, shop:shops (id, name, description, address, city, phone, logo_url, rating, verified)')
+        .eq('id', params.id)
+        .eq('is_active', true)
+        .is('deleted_at', null)
+        .maybeSingle()
 
-  const loadPack = async () => {
-    setLoading(true)
-    
-    const { data, error } = await supabase
-      .from('packs')
-      .select(`
-        *,
-        shop:shops (
-          id,
-          name,
-          description,
-          address,
-          city,
-          phone,
-          logo_url,
-          rating,
-          verified
-        )
-      `)
-      .eq('id', params.id)
-      .eq('is_active', true)
-      .is('deleted_at', null)
-      .maybeSingle()
+      if (error || !data) {
+        throw new Error('Pack no encontrado')
+      }
 
-    if (error || !data) {
-      console.error('Error loading pack:', error)
-      setError('Pack no encontrado')
-      setTimeout(() => router.push('/packs'), 2000)
-    } else {
-      setPack(data)
-    }
-    setLoading(false)
+      return data as Pack
+    },
+    staleTime: 30 * 1000,
+  })
+
+  if (error && !loading && !pack) {
+    setTimeout(() => router.push('/packs'), 2000)
   }
 
-        // Mostrar resumen antes de confirmar
   const handleReserve = () => {
-    if (!user) { router.push('/login'); return }
+    if (!user) {
+      router.push('/login')
+      return
+    }
     if (!pack) return
     if (!acceptedPolicies) {
       setError('Debes aceptar las politicas de retiro y cancelacion')
@@ -122,6 +128,7 @@ export default function PackDetailPage() {
     setError('')
 
     try {
+      const supabase = supabaseBrowser()
       const { data, error: rpcError } = await supabase.rpc('create_reservation_atomic', {
         p_pack_id: pack.id,
         p_quantity: quantity,
@@ -129,12 +136,8 @@ export default function PackDetailPage() {
       })
 
       if (rpcError) throw rpcError
+      if (!data?.success) throw new Error(data?.error || 'Error al crear la reserva')
 
-      if (!data?.success) {
-        throw new Error(data?.error || 'Error al crear la reserva')
-      }
-
-      // Enviar email de confirmacion
       try {
         await fetch('/api/email', {
           method: 'POST',
@@ -156,13 +159,8 @@ export default function PackDetailPage() {
       }
 
       setLastReservation({
-        id: data.reservation_id,
-        pickup_code: data.pickup_code,
-        pack_id: pack.id,
-        shop_id: pack.shop_id,
-        quantity,
-        total_price_cents: pack.price_cents * quantity,
-        payment_method: paymentMethod,
+        id: data.reservation_id as string,
+        pickup_code: data.pickup_code as string,
         pickup_date: pack.pickup_date,
         pickup_start_time: pack.pickup_start_time,
         pickup_end_time: pack.pickup_end_time,
@@ -171,21 +169,18 @@ export default function PackDetailPage() {
       })
       setShowSummary(false)
       setShowConfirmation(true)
-      await loadPack()
-    } catch (err: any) {
-      setError(err.message || 'Error al procesar la reserva')
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Error al procesar la reserva')
     } finally {
       setReserving(false)
     }
   }
 
-  const calculateDiscount = () => {
+  const discount = (() => {
     if (!pack?.original_price_cents || pack.original_price_cents <= pack.price_cents) return null
-    const discount = Math.round((1 - pack.price_cents / pack.original_price_cents) * 100)
-    return discount
-  }
+    return Math.round((1 - pack.price_cents / pack.original_price_cents) * 100)
+  })()
 
-  const discount = calculateDiscount()
   const isAvailable = pack?.remaining_stock && pack.remaining_stock > 0 && pack.is_active
 
   if (loading) {
@@ -225,8 +220,7 @@ export default function PackDetailPage() {
 
   return (
     <div className="min-h-screen pb-12">
-            <div className="container mx-auto px-4 py-8">
-        {/* Navegacion superior */}
+      <div className="container mx-auto px-4 py-8">
         <div className="flex items-center justify-between mb-6">
           <button
             onClick={() => router.back()}
@@ -254,13 +248,8 @@ export default function PackDetailPage() {
         </div>
 
         <div className="grid md:grid-cols-2 gap-8">
-          {/* Imagen del pack */}
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            className="relative"
-          >
-                        <div className="relative h-80 md:h-96 rounded-2xl overflow-hidden glass-card">
+          <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="relative">
+            <div className="relative h-80 md:h-96 rounded-2xl overflow-hidden glass-card">
               {pack.image_url ? (
                 <Image
                   src={pack.image_url}
@@ -286,38 +275,15 @@ export default function PackDetailPage() {
                 </div>
               )}
             </div>
-
-            <div className="flex gap-2 mt-4">
-                            <div className="w-20 h-20 rounded-lg overflow-hidden dark:bg-gray-800 bg-gray-100 cursor-pointer hover:opacity-80 transition relative">
-                {pack.image_url ? (
-                  <Image src={pack.image_url} alt="Thumb" fill className="object-cover" sizes="80px" />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center">
-                    <Package className="w-6 h-6 dark:text-gray-600 text-gray-400" />
-                  </div>
-                )}
-              </div>
-            </div>
           </motion.div>
 
-          {/* Información del pack */}
-          <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            className="space-y-6"
-          >
+          <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-6">
             <div>
-              <h1 className="text-3xl md:text-4xl font-bold dark:text-white text-gray-900 mb-2">
-                {pack.title}
-              </h1>
+              <h1 className="text-3xl md:text-4xl font-bold dark:text-white text-gray-900 mb-2">{pack.title}</h1>
               <div className="flex items-baseline gap-2">
-                <span className="text-3xl font-bold text-primary">
-                  {formatPrice(pack.price_cents)}
-                </span>
+                <span className="text-3xl font-bold text-primary">{formatPrice(pack.price_cents)}</span>
                 {pack.original_price_cents && (
-                  <span className="text-lg text-gray-500 line-through">
-                    {formatPrice(pack.original_price_cents)}
-                  </span>
+                  <span className="text-lg text-gray-500 line-through">{formatPrice(pack.original_price_cents)}</span>
                 )}
               </div>
             </div>
@@ -325,13 +291,14 @@ export default function PackDetailPage() {
             <div className="flex items-center gap-2 text-sm">
               <Package className="w-4 h-4 dark:text-gray-400 text-gray-500" />
               <span className="dark:text-gray-400 text-gray-600">
-                Stock disponible: <span className="text-primary font-semibold">{pack.remaining_stock}</span> / {pack.total_stock} unidades
+                Stock disponible: <span className="text-primary font-semibold">{pack.remaining_stock}</span> /{' '}
+                {pack.total_stock} unidades
               </span>
             </div>
 
             {pack.description && (
               <div className="p-4 glass-card rounded-xl">
-                <h3 className="font-semibold dark:text-white text-gray-900 mb-2">Descripción</h3>
+                <h3 className="font-semibold dark:text-white text-gray-900 mb-2">Descripcion</h3>
                 <p className="dark:text-gray-400 text-gray-600 text-sm leading-relaxed">{pack.description}</p>
               </div>
             )}
@@ -339,7 +306,7 @@ export default function PackDetailPage() {
             {(pack.pickup_date || pack.pickup_start_time) && (
               <div className="p-4 glass-card rounded-xl">
                 <h3 className="font-semibold dark:text-white text-gray-900 mb-3 flex items-center gap-2">
-                  <ClockIcon className="w-4 h-4 text-primary" />
+                  <Clock className="w-4 h-4 text-primary" />
                   Informacion de recogida
                 </h3>
                 <div className="space-y-2 text-sm">
@@ -353,7 +320,7 @@ export default function PackDetailPage() {
                     <div className="flex items-center gap-2 dark:text-gray-400 text-gray-600">
                       <Clock className="w-4 h-4" />
                       <span>
-                        {pack.pickup_start_time?.slice(0,5)} - {pack.pickup_end_time?.slice(0,5)}
+                        {pack.pickup_start_time?.slice(0, 5)} - {pack.pickup_end_time?.slice(0, 5)}
                       </span>
                     </div>
                   )}
@@ -361,9 +328,8 @@ export default function PackDetailPage() {
               </div>
             )}
 
-                        {isAvailable && (
+            {isAvailable && (
               <div className="space-y-5">
-                {/* Selector de cantidad */}
                 <div className="flex items-center gap-4">
                   <span className="dark:text-gray-300 text-gray-700">Cantidad:</span>
                   <div className="flex items-center gap-2">
@@ -383,59 +349,8 @@ export default function PackDetailPage() {
                   </div>
                 </div>
 
-                {/* Método de pago demo */}
-                <div className="p-4 glass-card rounded-xl">
-                  <h3 className="font-semibold dark:text-white text-gray-900 mb-3 flex items-center gap-2">
-                    <CreditCard className="w-4 h-4 text-primary" />
-                    Metodo de pago
-                  </h3>
-                  <div className="space-y-2">
-                    <label className="flex items-center gap-3 p-3 rounded-xl dark:bg-white/5 bg-gray-100 dark:border-white/10 border-gray-200 cursor-pointer hover:border-primary/50 transition-all has-checked:border-primary has-checked:bg-primary/10">
-                      <input
-                        type="radio"
-                        name="payment"
-                        value="cash"
-                        checked={paymentMethod === 'cash'}
-                        onChange={() => setPaymentMethod('cash')}
-                        className="w-4 h-4 accent-primary"
-                      />
-                      <div className="flex-1">
-                        <p className="dark:text-white text-gray-900 text-sm font-medium">Efectivo</p>
-                        <p className="text-xs dark:text-gray-500 text-gray-400">Paga al recoger en el comercio</p>
-                      </div>
-                    </label>
-                    <label className="flex items-center gap-3 p-3 rounded-xl dark:bg-white/5 bg-gray-100 dark:border-white/10 border-gray-200 cursor-pointer hover:border-primary/50 transition-all has-checked:border-primary has-checked:bg-primary/10">
-                      <input
-                        type="radio"
-                        name="payment"
-                        value="demo"
-                        checked={paymentMethod === 'demo'}
-                        onChange={() => setPaymentMethod('demo')}
-                        className="w-4 h-4 accent-primary"
-                      />
-                      <div className="flex-1">
-                        <p className="dark:text-white text-gray-900 text-sm font-medium">Demo</p>
-                        <p className="text-xs dark:text-gray-500 text-gray-400">Confirmacion de prueba (sin pago real)</p>
-                      </div>
-                    </label>
-                    <label className="flex items-center gap-3 p-3 rounded-xl bg-white/5 border border-white/10 cursor-pointer hover:border-primary/50 transition-all has-checked:border-primary has-checked:bg-primary/10">
-                      <input
-                        type="radio"
-                        name="payment"
-                        value="demo"
-                        checked={paymentMethod === 'demo'}
-                        onChange={() => setPaymentMethod('demo')}
-                        className="w-4 h-4 accent-primary"
-                      />
-                      <div className="flex-1">
-                        <p className="text-white text-sm font-medium">Demo</p>
-                        <p className="text-xs text-gray-500">Confirmación de prueba (sin pago real)</p>
-                      </div>
-                    </label>
-                  </div>
-                </div>
+                <PackPaymentSelector paymentMethod={paymentMethod} onChange={setPaymentMethod} />
 
-                {/* Políticas de retiro */}
                 <label className="flex items-start gap-3 cursor-pointer group">
                   <input
                     type="checkbox"
@@ -446,20 +361,16 @@ export default function PackDetailPage() {
                   <div className="text-xs dark:text-gray-400 text-gray-600 group-hover:text-gray-300 transition-colors">
                     Acepto las{' '}
                     <Link href="/legal/politicas-retiro" target="_blank" className="text-primary hover:underline">
-                      políticas de retiro y cancelación
+                      politicas de retiro y cancelacion
                     </Link>
-                    . Confirmo que podré recoger el pedido en la fecha y hora indicadas.
+                    . Confirmo que podre recoger el pedido en la fecha y hora indicadas.
                   </div>
                 </label>
               </div>
             )}
 
             {isAvailable ? (
-              <Button
-                onClick={handleReserve}
-                disabled={reserving || !acceptedPolicies}
-                className="w-full py-6 text-lg"
-              >
+              <Button onClick={handleReserve} disabled={reserving || !acceptedPolicies} className="w-full py-6 text-lg">
                 {reserving ? (
                   <div className="flex items-center gap-2">
                     <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -479,8 +390,14 @@ export default function PackDetailPage() {
             <Link href={`/shops/${pack.shop.id}`}>
               <div className="p-4 glass-card rounded-xl cursor-pointer hover:border-primary/50 transition-all group">
                 <div className="flex items-center gap-3">
-                                    {pack.shop.logo_url ? (
-                    <Image src={pack.shop.logo_url} alt={pack.shop.name} width={48} height={48} className="w-12 h-12 rounded-full object-cover" />
+                  {pack.shop.logo_url ? (
+                    <Image
+                      src={pack.shop.logo_url}
+                      alt={pack.shop.name}
+                      width={48}
+                      height={48}
+                      className="w-12 h-12 rounded-full object-cover"
+                    />
                   ) : (
                     <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center">
                       <Store className="w-6 h-6 text-primary" />
@@ -491,9 +408,7 @@ export default function PackDetailPage() {
                       <p className="font-semibold dark:text-white text-gray-900 group-hover:text-primary transition-colors">
                         {pack.shop.name}
                       </p>
-                      {pack.shop.verified && (
-                        <CheckCircle className="w-4 h-4 text-green-400" />
-                      )}
+                      {pack.shop.verified && <CheckCircle className="w-4 h-4 text-green-400" />}
                     </div>
                     {pack.shop.address && (
                       <p className="text-xs dark:text-gray-400 text-gray-600 flex items-center gap-1">
@@ -526,75 +441,15 @@ export default function PackDetailPage() {
         </div>
       </div>
 
-            {/* Modal resumen de pago antes de reservar */}
       {showSummary && pack && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 dark:bg-black/80 bg-black/60 backdrop-blur-sm" onClick={() => setShowSummary(false)}>
-          <div className="relative max-w-md w-full dark:bg-black/90 bg-white dark:bg-opacity-90 backdrop-blur-xl rounded-2xl dark:border-white/10 border-gray-200 shadow-2xl overflow-hidden" onClick={(e) => e.stopPropagation()}>
-            <div className="text-center pt-8 pb-4 bg-gradient-to-b from-primary/10 to-transparent">
-              <CreditCard className="w-12 h-12 text-primary mx-auto mb-3" />
-              <h2 className="text-2xl font-bold dark:text-white text-gray-900">Confirmar Reserva</h2>
-              <p className="dark:text-gray-400 text-gray-600 text-sm mt-1">Revisa los detalles antes de confirmar</p>
-            </div>
-
-            <div className="p-6 space-y-4">
-              {/* Pack info */}
-              <div className="flex gap-3 p-3 dark:bg-white/5 bg-gray-100 rounded-xl">
-                <div className="w-16 h-16 rounded-lg overflow-hidden dark:bg-gray-800 bg-gray-200 flex-shrink-0 relative">
-                  {pack.image_url ? (
-                    <Image src={pack.image_url} alt={pack.title} fill className="object-cover" sizes="64px" />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center"><Package className="w-6 h-6 dark:text-gray-600 text-gray-400" /></div>
-                  )}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="dark:text-white text-gray-900 font-medium truncate">{pack.title}</p>
-                  <p className="text-xs dark:text-gray-400 text-gray-600">{pack.shop.name}</p>
-                  <p className="text-sm text-primary font-bold mt-1">{formatPrice(pack.price_cents)} x {quantity}</p>
-                </div>
-              </div>
-
-              {/* Total */}
-              <div className="flex justify-between items-center p-3 bg-primary/5 border border-primary/20 rounded-xl">
-                <span className="dark:text-white text-gray-900 font-semibold">Total a pagar</span>
-                <span className="text-xl font-bold text-primary">{formatPrice(pack.price_cents * quantity)}</span>
-              </div>
-
-              {/* Metodo de pago */}
-              <div className="flex items-center gap-2 text-sm dark:text-gray-400 text-gray-600">
-                <CreditCard className="w-4 h-4 text-primary" />
-                <span>Metodo de pago: <strong className="dark:text-white text-gray-900">{paymentMethod === 'cash' ? 'Efectivo' : 'Demo'}</strong></span>
-              </div>
-
-              {/* Info de recogida */}
-              {(pack.pickup_date || pack.pickup_start_time) && (
-                <div className="text-sm dark:text-gray-400 text-gray-600 space-y-1">
-                  <Calendar className="w-4 h-4 text-primary inline mr-1" />
-                  {pack.pickup_date && <span>{formatDate(pack.pickup_date)}</span>}
-                  {(pack.pickup_start_time || pack.pickup_end_time) && (
-                    <span> de {pack.pickup_start_time?.slice(0,5)} a {pack.pickup_end_time?.slice(0,5)}</span>
-                  )}
-                </div>
-              )}
-
-              {pack.shop.address && (
-                <div className="flex items-center gap-2 text-sm dark:text-gray-400 text-gray-600">
-                  <MapPin className="w-4 h-4 text-primary" />
-                  <span>{pack.shop.address}</span>
-                </div>
-              )}
-
-              {/* Botones */}
-              <div className="flex gap-3 pt-2">
-                <Button variant="outline" className="flex-1" onClick={() => setShowSummary(false)}>
-                  Cancelar
-                </Button>
-                <Button className="flex-1" onClick={handleConfirmReservation} disabled={reserving}>
-                  {reserving ? 'Reservando...' : 'Confirmar y Pagar'}
-                </Button>
-              </div>
-            </div>
-          </div>
-        </div>
+        <PackReservationModal
+          pack={pack}
+          quantity={quantity}
+          paymentMethod={paymentMethod}
+          reserving={reserving}
+          onClose={() => setShowSummary(false)}
+          onConfirm={handleConfirmReservation}
+        />
       )}
 
       {showConfirmation && lastReservation && (
@@ -608,7 +463,6 @@ export default function PackDetailPage() {
       )}
 
       {error && <Toast message={error} type="error" onClose={() => setError('')} />}
-      {success && <Toast message={success} type="success" onClose={() => setSuccess('')} />}
     </div>
   )
 }

@@ -1,11 +1,13 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts'
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts'
 import { AlertTriangle } from 'lucide-react'
 import type { CancellationData } from './useBusinessAnalytics'
 
-interface Props { data: CancellationData }
+interface Props {
+  data: CancellationData
+}
 
 const COLORS = {
   completed: '#00ff88',
@@ -23,7 +25,7 @@ export default function CancellationRate({ data }: Props) {
     { name: 'Canceladas', value: data.cancelled, color: COLORS.cancelled },
     { name: 'No retiradas', value: data.noShow, color: COLORS.noShow },
     { name: 'Expiradas', value: data.expired, color: COLORS.expired },
-  ].filter(d => d.value > 0)
+  ].filter((d) => d.value > 0)
 
   const successRate = Math.round((data.completed / total) * 100)
 
@@ -39,7 +41,9 @@ export default function CancellationRate({ data }: Props) {
           <AlertTriangle className="w-5 h-5 text-amber-400" />
           <h3 className="font-bold dark:text-white text-gray-900">Tasa de exito</h3>
         </div>
-        <div className={`text-2xl font-bold ${successRate >= 80 ? 'text-green-400' : successRate >= 60 ? 'text-amber-400' : 'text-red-400'}`}>
+        <div
+          className={`text-2xl font-bold ${successRate >= 80 ? 'text-green-400' : successRate >= 60 ? 'text-amber-400' : 'text-red-400'}`}
+        >
           {successRate}%
         </div>
       </div>
@@ -48,24 +52,20 @@ export default function CancellationRate({ data }: Props) {
         <div className="h-48">
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
-              <Pie
-                data={chartData}
-                cx="50%"
-                cy="50%"
-                innerRadius={50}
-                outerRadius={80}
-                dataKey="value"
-              >
+              <Pie data={chartData} cx="50%" cy="50%" innerRadius={50} outerRadius={80} dataKey="value">
                 {chartData.map((entry, idx) => (
                   <Cell key={idx} fill={entry.color} />
                 ))}
               </Pie>
               <Tooltip
                 contentStyle={{
-                  background: '#1a1a2e', border: '1px solid rgba(255,255,255,0.1)',
-                  borderRadius: '12px', color: '#fff', fontSize: '12px',
+                  background: '#1a1a2e',
+                  border: '1px solid rgba(255,255,255,0.1)',
+                  borderRadius: '12px',
+                  color: '#fff',
+                  fontSize: '12px',
                 }}
-                formatter={(value: number) => [`${value} (${Math.round(value / total * 100)}%)`]}
+                formatter={(value: number) => [`${value} (${Math.round((value / total) * 100)}%)`]}
               />
             </PieChart>
           </ResponsiveContainer>
@@ -80,7 +80,9 @@ export default function CancellationRate({ data }: Props) {
               </div>
               <div className="flex items-center gap-2">
                 <span className="text-sm font-medium dark:text-white text-gray-900">{item.value}</span>
-                <span className="text-xs dark:text-gray-500 text-gray-400">({Math.round(item.value / total * 100)}%)</span>
+                <span className="text-xs dark:text-gray-500 text-gray-400">
+                  ({Math.round((item.value / total) * 100)}%)
+                </span>
               </div>
             </div>
           ))}

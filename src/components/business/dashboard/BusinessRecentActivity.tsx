@@ -1,30 +1,30 @@
-'use client';
+'use client'
 
-import { motion } from 'framer-motion';
-import Link from 'next/link';
-import { ShoppingBag, Eye, Clock, CheckCircle, XCircle } from 'lucide-react';
-import { formatRelativeDate } from '@/lib/utils/formatDate';
+import { motion } from 'framer-motion'
+import Link from 'next/link'
+import { ShoppingBag, Eye, Clock, CheckCircle, XCircle } from 'lucide-react'
+import { formatRelativeDate } from '@/lib/utils/formatDate'
 
 interface Activity {
-  id: string;
-  type: 'reservation' | 'pack' | 'review';
-  title: string;
-  description: string;
-  status?: string;
-  created_at: string;
-  link?: string;
+  id: string
+  type: 'reservation' | 'pack' | 'review'
+  title: string
+  description: string
+  status?: string
+  created_at: string
+  link?: string
 }
 
 interface BusinessRecentActivityProps {
-  activities?: Activity[];
+  activities?: Activity[]
 }
 
-const statusConfig: Record<string, { icon: any; color: string }> = {
+const statusConfig: Record<string, { icon: React.ComponentType<{ className?: string }>; color: string }> = {
   pending: { icon: Clock, color: 'text-yellow-400' },
   confirmed: { icon: CheckCircle, color: 'text-blue-400' },
   picked_up: { icon: CheckCircle, color: 'text-green-400' },
   cancelled: { icon: XCircle, color: 'text-red-400' },
-};
+}
 
 export default function BusinessRecentActivity({ activities = [] }: BusinessRecentActivityProps) {
   if (activities.length === 0) {
@@ -34,7 +34,7 @@ export default function BusinessRecentActivity({ activities = [] }: BusinessRece
         <p className="dark:text-gray-400 text-gray-600">No hay actividad reciente</p>
         <p className="text-xs dark:text-gray-500 text-gray-400 mt-1">Las nuevas reservas apareceran aqui</p>
       </div>
-    );
+    )
   }
 
   return (
@@ -51,8 +51,8 @@ export default function BusinessRecentActivity({ activities = [] }: BusinessRece
 
       <div className="divide-y divide-dark-border">
         {activities.slice(0, 5).map((activity, idx) => {
-          const StatusIcon = activity.status ? statusConfig[activity.status]?.icon : null;
-          const statusColor = activity.status ? statusConfig[activity.status]?.color : '';
+          const StatusIcon = activity.status ? statusConfig[activity.status]?.icon : null
+          const statusColor = activity.status ? statusConfig[activity.status]?.color : ''
 
           return (
             <motion.div
@@ -70,14 +70,16 @@ export default function BusinessRecentActivity({ activities = [] }: BusinessRece
                   <p className="text-sm font-medium dark:text-white text-gray-900 group-hover:text-primary transition-colors">
                     {activity.title}
                   </p>
-                  {StatusIcon && (
-                    <StatusIcon className={`w-3 h-3 ${statusColor}`} />
-                  )}
+                  {StatusIcon && <StatusIcon className={`w-3 h-3 ${statusColor}`} />}
                   {activity.status && (
                     <span className="text-[10px] text-gray-500">
-                      {activity.status === 'pending' ? 'Pendiente' :
-                       activity.status === 'confirmed' ? 'Confirmada' :
-                       activity.status === 'picked_up' ? 'Recogido' : 'Cancelado'}
+                      {activity.status === 'pending'
+                        ? 'Pendiente'
+                        : activity.status === 'confirmed'
+                          ? 'Confirmada'
+                          : activity.status === 'picked_up'
+                            ? 'Recogido'
+                            : 'Cancelado'}
                     </span>
                   )}
                 </div>
@@ -90,9 +92,9 @@ export default function BusinessRecentActivity({ activities = [] }: BusinessRece
                 </Link>
               )}
             </motion.div>
-          );
+          )
         })}
       </div>
     </div>
-  );
+  )
 }

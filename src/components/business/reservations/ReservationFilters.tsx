@@ -1,15 +1,15 @@
-'use client';
+'use client'
 
-import { Search, Filter, X, Calendar } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { useState } from 'react';
-import Input from '@/components/ui/Input';
+import { Search, Filter } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { useState } from 'react'
+import Input from '@/components/ui/Input'
 
 interface ReservationFiltersProps {
-  searchTerm: string;
-  onSearchChange: (value: string) => void;
-  statusFilter: string;
-  onStatusFilterChange: (value: string) => void;
+  searchTerm: string
+  onSearchChange: (value: string) => void
+  statusFilter: string
+  onStatusFilterChange: (value: string) => void
 }
 
 const statusOptions = [
@@ -20,7 +20,7 @@ const statusOptions = [
   { value: 'picked_up', label: 'Recogidas', color: 'text-green-400' },
   { value: 'no_show', label: 'No retiradas', color: 'text-orange-400' },
   { value: 'cancelled', label: 'Canceladas', color: 'text-red-400' },
-];
+]
 
 export default function ReservationFilters({
   searchTerm,
@@ -28,7 +28,7 @@ export default function ReservationFilters({
   statusFilter,
   onStatusFilterChange,
 }: ReservationFiltersProps) {
-  const [showFilters, setShowFilters] = useState(false);
+  const [showFilters, setShowFilters] = useState(false)
 
   return (
     <div className="space-y-3">
@@ -48,9 +48,7 @@ export default function ReservationFilters({
         >
           <Filter className="w-4 h-4 text-gray-400" />
           <span className="text-sm text-gray-400">Filtros</span>
-          {statusFilter !== 'all' && (
-            <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-          )}
+          {statusFilter !== 'all' && <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />}
         </button>
       </div>
 
@@ -81,5 +79,5 @@ export default function ReservationFilters({
         )}
       </AnimatePresence>
     </div>
-  );
+  )
 }

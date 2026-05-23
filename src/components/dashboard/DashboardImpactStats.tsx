@@ -1,12 +1,10 @@
-'use client';
-
-import Card from '@/components/ui/Card';
-import { Package, DollarSign, Leaf } from 'lucide-react';
+import Card from '@/components/ui/Card'
+import { Package, DollarSign, Leaf } from 'lucide-react'
 
 interface DashboardImpactStatsProps {
-  totalPacks: number;
-  totalSaved: number;
-  co2Avoided: number;
+  totalPacks: number
+  totalSaved: number
+  co2Avoided: number
 }
 
 export default function DashboardImpactStats({ totalPacks, totalSaved, co2Avoided }: DashboardImpactStatsProps) {
@@ -28,5 +26,5 @@ export default function DashboardImpactStats({ totalPacks, totalSaved, co2Avoide
         <div className="text-xs dark:text-gray-400 text-gray-600">CO2 evitado</div>
       </Card>
     </div>
-  );
+  )
 }

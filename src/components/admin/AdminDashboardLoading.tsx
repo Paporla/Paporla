@@ -1,5 +1,3 @@
-'use client'
-
 export default function AdminDashboardLoading() {
   return (
     <div className="flex items-center justify-center min-h-[60vh]">

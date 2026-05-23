@@ -3,30 +3,12 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/hooks/useAuth'
-import { supabaseBrowser } from '@/lib/supabase/client'
+import { usePacks } from '@/hooks/usePacks'
 import { Package, AlertCircle } from 'lucide-react'
 import Button from '@/components/ui/Button'
 import QuickReserveFlow from '@/components/reservations/QuickReserveFlow'
 import { formatPrice } from '@/lib/utils/formatPrice'
-
-interface PackMinData {
-  id: string
-  title: string
-  description: string | null
-  price_cents: number
-  image_url: string | null
-  pickup_date: string | null
-  pickup_start_time: string | null
-  pickup_end_time: string | null
-  remaining_stock: number
-  shop_id: string
-  shop: {
-    id: string
-    name: string
-    address: string | null
-    phone: string | null
-  }
-}
+import type { PackWithShop } from '@/types/pack'
 
 interface PackDetailActionsProps {
   packId: string
@@ -38,50 +20,56 @@ interface PackDetailActionsProps {
 }
 
 export default function PackDetailActions({
-  packId, priceCents, remainingStock, isActive, onSuccess
+  packId,
+  priceCents,
+  remainingStock,
+  isActive,
+  onSuccess,
 }: PackDetailActionsProps) {
   const { user } = useAuth()
   const router = useRouter()
-  const supabase = supabaseBrowser()
+  const { getPackById } = usePacks()
   const [showReserveFlow, setShowReserveFlow] = useState(false)
-  const [packData, setPackData] = useState<PackMinData | null>(null)
+  const [packData, setPackData] = useState<PackWithShop | null>(null)
   const [loadingPack, setLoadingPack] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   const handleReserveClick = async () => {
-    if (!user) { router.push('/login'); return }
-    
-    setLoadingPack(true)
-    setError(null)
-    
-    // Obtener datos del pack
-    const { data, error: fetchError } = await supabase
-      .from('packs')
-      .select('id, title, description, price_cents, image_url, pickup_date, pickup_start_time, pickup_end_time, remaining_stock, shop_id, shop:shops(id, name, address, phone)')
-      .eq('id', packId)
-      .single()
-    
-    if (fetchError || !data) {
-      setError('Error al cargar el pack')
-      setLoadingPack(false)
+    if (!user) {
+      router.push('/login')
       return
     }
 
-    // ✅ VALIDACIÓN: Verificar si el pack ya expiró
-    if (data.pickup_date && data.pickup_end_time) {
-      const pickupDateTime = new Date(`${data.pickup_date}T${data.pickup_end_time}`)
-      const now = new Date()
-      
-      if (pickupDateTime < now) {
-        setError('Este pack ya expiró. No puedes reservarlo.')
+    setLoadingPack(true)
+    setError(null)
+
+    try {
+      const data = await getPackById(packId)
+
+      if (!data) {
+        setError('Error al cargar el pack')
         setLoadingPack(false)
         return
       }
+
+      if (data.pickup_date && data.pickup_end_time) {
+        const pickupDateTime = new Date(`${data.pickup_date}T${data.pickup_end_time}`)
+        const now = new Date()
+
+        if (pickupDateTime < now) {
+          setError('Este pack ya expiró. No puedes reservarlo.')
+          setLoadingPack(false)
+          return
+        }
+      }
+
+      setPackData(data)
+      setShowReserveFlow(true)
+    } catch {
+      setError('Error al cargar el pack')
+    } finally {
+      setLoadingPack(false)
     }
-    
-    setPackData(data as unknown as PackMinData)
-    setShowReserveFlow(true)
-    setLoadingPack(false)
   }
 
   if (!isActive || remainingStock <= 0) {
@@ -106,7 +94,11 @@ export default function PackDetailActions({
               <span className="text-sm text-red-400">{error}</span>
             </div>
           )}
-          <Button onClick={handleReserveClick} disabled={loadingPack} className="w-full py-4 text-lg font-bold shadow-lg shadow-primary/20">
+          <Button
+            onClick={handleReserveClick}
+            disabled={loadingPack}
+            className="w-full py-4 text-lg font-bold shadow-lg shadow-primary/20"
+          >
             {loadingPack ? (
               <div className="flex items-center justify-center gap-2">
                 <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -124,8 +116,15 @@ export default function PackDetailActions({
       {showReserveFlow && packData && (
         <QuickReserveFlow
           pack={packData}
-          onClose={() => { setShowReserveFlow(false); setPackData(null) }}
-          onSuccess={() => { setShowReserveFlow(false); setPackData(null); if (onSuccess) onSuccess() }}
+          onClose={() => {
+            setShowReserveFlow(false)
+            setPackData(null)
+          }}
+          onSuccess={() => {
+            setShowReserveFlow(false)
+            setPackData(null)
+            if (onSuccess) onSuccess()
+          }}
         />
       )}
     </>

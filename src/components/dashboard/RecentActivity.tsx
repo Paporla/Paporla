@@ -1,37 +1,40 @@
-'use client';
+'use client'
 
-import { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import Link from 'next/link';
-import { ShoppingBag, Eye, Clock, CheckCircle, XCircle, ChevronDown, ChevronUp } from 'lucide-react';
-import { formatRelativeDate } from '@/lib/utils/formatDate';
-import { formatPrice } from '@/lib/utils/formatPrice';
+import { useState } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
+import Link from 'next/link'
+import { ShoppingBag, Eye, Clock, CheckCircle, XCircle, ChevronDown, ChevronUp } from 'lucide-react'
+import { formatRelativeDate } from '@/lib/utils/formatDate'
+import { formatPrice } from '@/lib/utils/formatPrice'
 
 interface Activity {
-  id: string;
-  type: 'reservation' | 'favorite' | 'completed';
-  title: string;
-  description: string;
-  status?: string;
-  price?: number;
-  quantity?: number;
-  created_at: string;
-  link?: string;
+  id: string
+  type: 'reservation' | 'favorite' | 'completed'
+  title: string
+  description: string
+  status?: string
+  price?: number
+  quantity?: number
+  created_at: string
+  link?: string
 }
 
 interface ActivityGroup {
-  title: string;
-  icon: any;
-  color: string;
-  bg: string;
-  activities: Activity[];
+  title: string
+  icon: React.ComponentType<{ className?: string }>
+  color: string
+  bg: string
+  activities: Activity[]
 }
 
 interface RecentActivityProps {
-  activities?: Activity[];
+  activities?: Activity[]
 }
 
-const statusConfig: Record<string, { label: string; icon: any; color: string; bg: string }> = {
+const statusConfig: Record<
+  string,
+  { label: string; icon: React.ComponentType<{ className?: string }>; color: string; bg: string }
+> = {
   confirmed: { label: 'Confirmada', icon: CheckCircle, color: 'text-blue-400', bg: 'bg-blue-500/10' },
   pending: { label: 'Pendiente', icon: Clock, color: 'text-yellow-400', bg: 'bg-yellow-500/10' },
   ready_pickup: { label: 'Lista para recoger', icon: Clock, color: 'text-primary', bg: 'bg-primary/10' },
@@ -39,14 +42,14 @@ const statusConfig: Record<string, { label: string; icon: any; color: string; bg
   completed: { label: 'Completado', icon: CheckCircle, color: 'text-green-400', bg: 'bg-green-500/10' },
   cancelled: { label: 'Cancelado', icon: XCircle, color: 'text-red-400', bg: 'bg-red-500/10' },
   no_show: { label: 'No retirado', icon: XCircle, color: 'text-gray-400', bg: 'bg-gray-500/10' },
-};
+}
 
 export default function RecentActivity({ activities = [] }: RecentActivityProps) {
   const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({
     activas: true,
     completadas: false,
     canceladas: false,
-  });
+  })
 
   // Agrupar actividades por tipo
   const groups: ActivityGroup[] = [
@@ -55,30 +58,30 @@ export default function RecentActivity({ activities = [] }: RecentActivityProps)
       icon: Clock,
       color: 'text-primary',
       bg: 'bg-primary/10',
-      activities: activities.filter(a => ['pending', 'confirmed', 'ready_pickup'].includes(a.status || '')),
+      activities: activities.filter((a) => ['pending', 'confirmed', 'ready_pickup'].includes(a.status || '')),
     },
     {
       title: 'Completadas',
       icon: CheckCircle,
       color: 'text-green-400',
       bg: 'bg-green-500/10',
-      activities: activities.filter(a => ['picked_up', 'completed'].includes(a.status || '')),
+      activities: activities.filter((a) => ['picked_up', 'completed'].includes(a.status || '')),
     },
     {
       title: 'Canceladas',
       icon: XCircle,
       color: 'text-red-400',
       bg: 'bg-red-500/10',
-      activities: activities.filter(a => a.status === 'cancelled'),
+      activities: activities.filter((a) => a.status === 'cancelled'),
     },
-  ].filter(group => group.activities.length > 0);
+  ].filter((group) => group.activities.length > 0)
 
   const toggleGroup = (groupTitle: string) => {
-    setExpandedGroups(prev => ({
+    setExpandedGroups((prev) => ({
       ...prev,
       [groupTitle]: !prev[groupTitle],
-    }));
-  };
+    }))
+  }
 
   if (activities.length === 0) {
     return (
@@ -90,7 +93,7 @@ export default function RecentActivity({ activities = [] }: RecentActivityProps)
           Explorar packs →
         </Link>
       </div>
-    );
+    )
   }
 
   return (
@@ -106,9 +109,9 @@ export default function RecentActivity({ activities = [] }: RecentActivityProps)
       </div>
 
       <div className="divide-y divide-dark-border">
-        {groups.map((group, groupIdx) => {
-          const Icon = group.icon;
-          const isExpanded = expandedGroups[group.title] ?? false;
+        {groups.map((group, _groupIdx) => {
+          const Icon = group.icon
+          const isExpanded = expandedGroups[group.title] ?? false
 
           return (
             <div key={group.title} className="dark:bg-dark-card/30 bg-gray-50">
@@ -149,8 +152,8 @@ export default function RecentActivity({ activities = [] }: RecentActivityProps)
                           icon: ShoppingBag,
                           color: 'text-gray-400',
                           bg: 'bg-gray-500/10',
-                        };
-                        const StatusIcon = status.icon;
+                        }
+                        const StatusIcon = status.icon
 
                         return (
                           <motion.div
@@ -188,16 +191,16 @@ export default function RecentActivity({ activities = [] }: RecentActivityProps)
                               </Link>
                             )}
                           </motion.div>
-                        );
+                        )
                       })}
                     </div>
                   </motion.div>
                 )}
               </AnimatePresence>
             </div>
-          );
+          )
         })}
       </div>
     </div>
-  );
+  )
 }

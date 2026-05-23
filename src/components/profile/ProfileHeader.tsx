@@ -1,20 +1,20 @@
-'use client';
+'use client'
 
-import { motion } from 'framer-motion';
-import { User, Settings } from 'lucide-react';
-import Image from 'next/image';
-import Link from 'next/link';
+import { motion } from 'framer-motion'
+import { Settings } from 'lucide-react'
+import Image from 'next/image'
+import Link from 'next/link'
 
 interface ProfileHeaderProps {
-  name: string | null;
-  email: string | null;
-  avatarUrl: string | null;
-  memberSince: string;
+  name: string | null
+  email: string | null
+  avatarUrl: string | null
+  memberSince: string
 }
 
 export default function ProfileHeader({ name, email, avatarUrl, memberSince }: ProfileHeaderProps) {
-  const displayName = name || email?.split('@')[0] || 'Usuario';
-  const initial = displayName.charAt(0).toUpperCase();
+  const displayName = name || email?.split('@')[0] || 'Usuario'
+  const initial = displayName.charAt(0).toUpperCase()
 
   return (
     <div className="relative overflow-hidden bg-gradient-to-br from-primary/5 via-transparent to-secondary/5 rounded-2xl p-6">
@@ -64,5 +64,5 @@ export default function ProfileHeader({ name, email, avatarUrl, memberSince }: P
         </Link>
       </div>
     </div>
-  );
+  )
 }

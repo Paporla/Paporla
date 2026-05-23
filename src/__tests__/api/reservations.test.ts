@@ -83,11 +83,11 @@ describe('POST /api/reservations', () => {
     const { POST } = await import('@/app/api/reservations/route')
     const request = new Request('http://localhost/api/reservations', {
       method: 'POST',
-      body: JSON.stringify({ packId: 'pack-1', quantity: 1 }),
+      body: JSON.stringify({ pack_id: 'pack-1', shop_id: 'shop-1', quantity: 1 }),
     })
     const response = await POST(request)
     const body = await response.json()
-    expect(body.reservation).toBeDefined()
+    expect(body.success).toBe(true)
     expect(response.status).toBe(201)
   })
 

@@ -1,114 +1,108 @@
-'use client';
+'use client'
 
-import { useEffect, useState } from 'react';
-import { useAuth } from '@/hooks/useAuth';
-import { supabaseBrowser } from '@/lib/supabase/client';
-import { motion } from 'framer-motion';
-import { Users, Shield, Search, Filter } from 'lucide-react';
-import Card from '@/components/ui/Card';
-import Button from '@/components/ui/Button';
-import Input from '@/components/ui/Input';
-import Toast from '@/components/ui/Toast';
-import ConfirmModal from '@/components/ui/ConfirmModal';
-import EmptyState from '@/components/ui/EmptyState';
-import UsersTable from '../components/UsersTable';
-import UserModal from '../components/UserModal';
-import LoadingSkeleton from '../components/LoadingSkeleton';
-import { UserProfile } from '@/lib/supabase/types';
+import { useState } from 'react'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useAuth } from '@/hooks/useAuth'
+import { supabaseBrowser } from '@/lib/supabase/client'
+import { motion } from 'framer-motion'
+import { Users, Search, Filter } from 'lucide-react'
+import Input from '@/components/ui/Input'
+import Toast from '@/components/ui/Toast'
+import ConfirmModal from '@/components/ui/ConfirmModal'
+import EmptyState from '@/components/ui/EmptyState'
+import UsersTable from '../components/UsersTable'
+import UserModal from '../components/UserModal'
+import LoadingSkeleton from '../components/LoadingSkeleton'
+import { UserProfile } from '@/lib/supabase/types'
 
 export default function AdminUsersPage() {
-  const { user: currentUser } = useAuth();
-  const supabase = supabaseBrowser();
-  const [users, setUsers] = useState<UserProfile[]>([]);
-  const [filteredUsers, setFilteredUsers] = useState<UserProfile[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedUser, setSelectedUser] = useState<UserProfile | null>(null);
-  const [modalOpen, setModalOpen] = useState(false);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
-  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
-  const [userToDelete, setUserToDelete] = useState<string | null>(null);
+  const { user: currentUser } = useAuth()
+  const supabase = supabaseBrowser()
+  const queryClient = useQueryClient()
+  const [searchTerm, setSearchTerm] = useState('')
+  const [selectedUser, setSelectedUser] = useState<UserProfile | null>(null)
+  const [modalOpen, setModalOpen] = useState(false)
+  const [error, setError] = useState('')
+  const [success, setSuccess] = useState('')
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false)
+  const [userToDelete, setUserToDelete] = useState<string | null>(null)
 
-  useEffect(() => {
-    loadUsers();
-  }, []);
+  const { data: users = [], isLoading: loading } = useQuery({
+    queryKey: ['admin-users'],
+    queryFn: async () => {
+      const { data, error } = await supabase.from('user_profiles').select('*').order('created_at', { ascending: false })
 
-  useEffect(() => {
-    if (searchTerm) {
-      setFilteredUsers(
-        users.filter(user =>
+      if (error) throw error
+      return (data || []) as UserProfile[]
+    },
+    staleTime: 30 * 1000,
+  })
+
+  const filteredUsers = searchTerm
+    ? users.filter(
+        (user) =>
           user.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          user.email?.toLowerCase().includes(searchTerm.toLowerCase())
-        )
-      );
-    } else {
-      setFilteredUsers(users);
-    }
-  }, [searchTerm, users]);
+          user.email?.toLowerCase().includes(searchTerm.toLowerCase()),
+      )
+    : users
 
-  const loadUsers = async () => {
-    setLoading(true);
-    const { data, error } = await supabase
-      .from('user_profiles')
-      .select('*')
-      .order('created_at', { ascending: false });
+  const invalidateUsers = () => queryClient.invalidateQueries({ queryKey: ['admin-users'] })
 
-    if (error) {
-      setError(error.message);
-    } else {
-      setUsers(data || []);
-      setFilteredUsers(data || []);
-    }
-    setLoading(false);
-  };
+  const updateRoleMutation = useMutation({
+    mutationFn: async ({ userId, newRole }: { userId: string; newRole: string }) => {
+      const { error } = await supabase.from('user_profiles').update({ role: newRole }).eq('id', userId)
+
+      if (error) throw error
+    },
+    onSuccess: () => {
+      setSuccess('Rol actualizado correctamente')
+      invalidateUsers()
+    },
+    onError: (err: Error) => setError(err.message),
+    onSettled: () => {
+      setModalOpen(false)
+      setSelectedUser(null)
+    },
+  })
+
+  const deleteMutation = useMutation({
+    mutationFn: async (userId: string) => {
+      const { error } = await supabase.from('user_profiles').delete().eq('id', userId)
+
+      if (error) throw error
+    },
+    onSuccess: () => {
+      setSuccess('Usuario eliminado correctamente')
+      invalidateUsers()
+    },
+    onError: (err: Error) => setError(err.message),
+    onSettled: () => {
+      setDeleteModalOpen(false)
+      setUserToDelete(null)
+    },
+  })
 
   const handleRoleChange = async (userId: string, newRole: string) => {
-    const { error } = await supabase
-      .from('user_profiles')
-      .update({ role: newRole })
-      .eq('id', userId);
-
-    if (error) {
-      setError(error.message);
-    } else {
-      setSuccess(`Rol actualizado correctamente`);
-      await loadUsers();
-    }
-    setModalOpen(false);
-    setSelectedUser(null);
-  };
+    await updateRoleMutation.mutateAsync({ userId, newRole })
+  }
 
   const confirmDelete = (userId: string) => {
-    setUserToDelete(userId);
-    setDeleteModalOpen(true);
-  };
+    setUserToDelete(userId)
+    setDeleteModalOpen(true)
+  }
 
   const handleDeleteUser = async () => {
-    if (!userToDelete) return;
-
-    const { error } = await supabase
-      .from('user_profiles')
-      .delete()
-      .eq('id', userToDelete);
-
-    if (error) {
-      setError(error.message);
-    } else {
-      setSuccess('Usuario eliminado correctamente');
-      await loadUsers();
-    }
-    setDeleteModalOpen(false);
-    setUserToDelete(null);
-  };
+    if (!userToDelete) return
+    await deleteMutation.mutateAsync(userToDelete)
+  }
 
   const openUserModal = (user: UserProfile) => {
-    setSelectedUser(user);
-    setModalOpen(true);
-  };
+    setSelectedUser(user)
+    setModalOpen(true)
+  }
 
   if (loading) {
-    return <LoadingSkeleton />;
+    return <LoadingSkeleton />
   }
 
   if (filteredUsers.length === 0 && !loading) {
@@ -116,11 +110,11 @@ export default function AdminUsersPage() {
       <EmptyState
         type="search"
         action={{
-          label: "Limpiar búsqueda",
-          onClick: () => setSearchTerm('')
+          label: 'Limpiar búsqueda',
+          onClick: () => setSearchTerm(''),
         }}
       />
-    );
+    )
   }
 
   return (
@@ -136,9 +130,7 @@ export default function AdminUsersPage() {
             <Users className="w-8 h-8 text-primary" />
           </div>
           <div>
-            <h1 className="text-3xl md:text-4xl font-bold text-gradient">
-              Gestión de Usuarios
-            </h1>
+            <h1 className="text-3xl md:text-4xl font-bold text-gradient">Gestión de Usuarios</h1>
             <p className="dark:text-gray-400 text-gray-600 mt-1">
               Administra los usuarios de la plataforma. Puedes cambiar roles, editar o eliminar.
             </p>
@@ -176,8 +168,8 @@ export default function AdminUsersPage() {
         isOpen={modalOpen}
         user={selectedUser}
         onClose={() => {
-          setModalOpen(false);
-          setSelectedUser(null);
+          setModalOpen(false)
+          setSelectedUser(null)
         }}
         onSave={handleRoleChange}
       />
@@ -196,5 +188,5 @@ export default function AdminUsersPage() {
       {error && <Toast message={error} type="error" onClose={() => setError('')} />}
       {success && <Toast message={success} type="success" onClose={() => setSuccess('')} />}
     </div>
-  );
+  )
 }

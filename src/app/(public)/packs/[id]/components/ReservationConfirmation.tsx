@@ -2,7 +2,7 @@
 
 import { motion } from 'framer-motion'
 import Link from 'next/link'
-import { CheckCircle, ShoppingBag, ArrowRight, Copy } from 'lucide-react'
+import { CheckCircle, ShoppingBag, ArrowRight } from 'lucide-react'
 import Button from '@/components/ui/Button'
 import CopyButton from '@/components/ui/CopyButton'
 import { formatPrice } from '@/lib/utils/formatPrice'
@@ -23,18 +23,12 @@ export default function ReservationConfirmation({
   quantity,
 }: ReservationConfirmationProps) {
   return (
-    <motion.div
-      initial={{ opacity: 0, scale: 0.95 }}
-      animate={{ opacity: 1, scale: 1 }}
-      className="max-w-md mx-auto"
-    >
+    <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="max-w-md mx-auto">
       <div className="text-center mb-8">
         <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-green-500/20 flex items-center justify-center">
           <CheckCircle className="w-10 h-10 text-green-400" />
         </div>
-        <h2 className="text-2xl font-bold dark:text-white text-gray-900 mb-2">
-          Reserva Confirmada!
-        </h2>
+        <h2 className="text-2xl font-bold dark:text-white text-gray-900 mb-2">Reserva Confirmada!</h2>
         <p className="dark:text-gray-400 text-gray-600">
           {packTitle} en {shopName}
         </p>
@@ -42,9 +36,7 @@ export default function ReservationConfirmation({
 
       <div className="bg-primary/5 border border-primary/20 rounded-2xl p-6 text-center mb-6">
         <p className="text-sm dark:text-gray-400 text-gray-600 mb-2">Tu codigo de recogida</p>
-        <p className="text-4xl font-bold text-primary tracking-widest font-mono mb-3">
-          {pickupCode}
-        </p>
+        <p className="text-4xl font-bold text-primary tracking-widest font-mono mb-3">{pickupCode}</p>
         <CopyButton text={pickupCode} label="Copiar codigo" />
       </div>
 

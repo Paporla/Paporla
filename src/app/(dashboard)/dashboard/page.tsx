@@ -1,10 +1,11 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useMemo } from 'react'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
+import { pageVariants } from '@/lib/utils/motion'
 import { useAuth } from '@/hooks/useAuth'
-import { supabaseBrowser } from '@/lib/supabase/client'
+import { useReservations } from '@/hooks/useReservations'
 import UserWelcomeBanner from '@/components/dashboard/UserWelcomeBanner'
 import UserStatsGrid from '@/components/dashboard/UserStatsGrid'
 import UserQuickActions from '@/components/dashboard/UserQuickActions'
@@ -12,62 +13,21 @@ import NextPickupCard from '@/components/dashboard/NextPickupCard'
 import RecentActivity from '@/components/dashboard/RecentActivity'
 import DashboardSkeleton from '@/components/dashboard/DashboardSkeleton'
 import Toast from '@/components/ui/Toast'
-import { sortReservationsByPickupTime } from '@/components/dashboard/ReservationCard'
-import type { Reservation } from '@/types/reservation'
+import { sortReservationsByPickupTime } from '@/lib/constants/reservations'
+import type { ReservationWithDetails } from '@/types/reservation'
 
 export default function UserDashboardPage() {
   const { user } = useAuth()
-  const supabase = supabaseBrowser()
-  const [loading, setLoading] = useState(true)
-  const [activeReservations, setActiveReservations] = useState<Reservation[]>([])
-  const [stats, setStats] = useState({
-    activeReservations: 0,
-    totalPacksRescued: 0,
-    co2Saved: 0,
-    moneySaved: 0,
-    points: 0,
-    level: 'Aprendiz',
-  })
-  const [activities, setActivities] = useState<any[]>([])
-  const [error, setError] = useState('')
+  const { reservations, loading, error: hookError } = useReservations()
 
-  useEffect(() => {
-    if (user) loadDashboardData()
-  }, [user])
-
-  const loadDashboardData = async () => {
-    if (!user) return
-    setLoading(true)
-
-    const { data: reservationsData, error: fetchError } = await supabase
-      .from('reservations')
-      .select(`
-        *,
-        pack:packs (id, title, description, price_cents, image_url),
-        shop:shops (id, name, address, city, phone, logo_url, rating)
-      `)
-      .eq('user_id', user.id)
-      .order('created_at', { ascending: false })
-
-    if (fetchError) {
-      setError(fetchError.message)
-      setLoading(false)
-      return
-    }
-
-    if (!reservationsData || reservationsData.length === 0) {
-      setStats({ activeReservations: 0, totalPacksRescued: 0, co2Saved: 0, moneySaved: 0, points: 0, level: 'Aprendiz' })
-      setLoading(false)
-      return
-    }
-
-    const validReservations = reservationsData.filter((r: any) => r.pack && r.shop)
-    const active = validReservations.filter((r: any) => ['confirmed', 'pending'].includes(r.status))
-    const completed = validReservations.filter((r: any) => r.status === 'picked_up')
+  const { activeReservations, stats, activities } = useMemo(() => {
+    const valid = reservations.filter((r): r is ReservationWithDetails => !!r.pack && !!r.shop)
+    const active = sortReservationsByPickupTime(valid.filter((r) => ['confirmed', 'pending'].includes(r.status)))
+    const completed = valid.filter((r) => r.status === 'picked_up')
 
     const totalPacksRescued = completed.length
     const co2Saved = Math.round(totalPacksRescued * 1.2)
-    const moneySavedCents = completed.reduce((sum: number, r: any) => sum + (r.total_price_cents || 0), 0)
+    const moneySavedCents = completed.reduce((sum, r) => sum + (r.total_price_cents || 0), 0)
     const points = totalPacksRescued * 10
 
     let level = 'Aprendiz'
@@ -76,10 +36,7 @@ export default function UserDashboardPage() {
     else if (points >= 50) level = 'Rescatador Avanzado'
     else if (points >= 10) level = 'Rescatador'
 
-    setStats({ activeReservations: active.length, totalPacksRescued, co2Saved, moneySaved: moneySavedCents / 100, points, level })
-    setActiveReservations(sortReservationsByPickupTime(active))
-
-    const recentActivities = validReservations.slice(0, 5).map((r: any) => ({
+    const recentActivities = valid.slice(0, 5).map((r) => ({
       id: r.id,
       type: 'reservation' as const,
       title: r.pack.title,
@@ -88,21 +45,27 @@ export default function UserDashboardPage() {
       created_at: r.created_at,
       link: '/reservations',
     }))
-    setActivities(recentActivities)
-    setLoading(false)
-  }
+
+    return {
+      activeReservations: active,
+      stats: {
+        activeReservations: active.length,
+        totalPacksRescued,
+        co2Saved,
+        moneySaved: moneySavedCents / 100,
+        points,
+        level,
+      },
+      activities: recentActivities,
+    }
+  }, [reservations])
 
   if (loading) return <DashboardSkeleton />
 
   const nextReservation = activeReservations[0]
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3 }}
-      className="space-y-8 pb-8"
-    >
+    <motion.div variants={pageVariants} initial="initial" animate="animate" className="space-y-8 pb-8">
       <UserWelcomeBanner
         userName={user?.name || 'Usuario'}
         packsRescued={stats.totalPacksRescued}
@@ -135,7 +98,7 @@ export default function UserDashboardPage() {
 
       <RecentActivity activities={activities} />
 
-      {error && <Toast message={error} type="error" onClose={() => setError('')} />}
+      {hookError && <Toast message={hookError} type="error" onClose={() => {}} />}
     </motion.div>
   )
 }

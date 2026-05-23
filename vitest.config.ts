@@ -9,9 +9,17 @@ export default defineConfig({
     environment: 'jsdom',
     setupFiles: './src/__tests__/setup.ts',
     include: ['src/__tests__/**/*.test.ts', 'src/__tests__/**/*.test.tsx'],
+    css: true,
+    restoreMocks: true,
+    testTimeout: 10000,
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],
+      thresholds: {
+        lines: 50,
+        branches: 40,
+        functions: 40,
+      },
       exclude: [
         'node_modules/',
         'src/__tests__/',

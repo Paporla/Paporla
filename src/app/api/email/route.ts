@@ -1,7 +1,18 @@
 ﻿import { NextResponse } from 'next/server'
 import { Resend } from 'resend'
 import { createClient } from '@/lib/supabase/server'
-import { welcomeTemplate, reservationConfirmationTemplate, passwordResetTemplate, pickupReminderTemplate } from '@/lib/email/templates'
+import {
+  welcomeTemplate,
+  reservationConfirmationTemplate,
+  passwordResetTemplate,
+  pickupReminderTemplate,
+} from '@/lib/email/templates'
+
+const VALID_EMAIL_TYPES = ['welcome', 'reservation', 'password_reset', 'pickup_reminder'] as const
+
+function isValidEmail(email: string): boolean {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
+}
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 const senderEmail = process.env.RESEND_FROM_EMAIL || 'noreply@paporla.com'
@@ -9,67 +20,94 @@ const senderEmail = process.env.RESEND_FROM_EMAIL || 'noreply@paporla.com'
 export async function POST(request: Request) {
   try {
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
 
     if (!user) {
-      return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
+      return NextResponse.json({ success: false, error: 'No autorizado' }, { status: 401 })
     }
 
-    const body = await request.json()
-    const { type, email, data } = body
+    let body: Record<string, unknown>
+    try {
+      body = await request.json()
+    } catch {
+      return NextResponse.json({ success: false, error: 'Cuerpo de solicitud inválido' }, { status: 400 })
+    }
+
+    const { type, email, data } = body as {
+      type?: string
+      email?: string
+      data?: Record<string, unknown>
+    }
 
     if (!email || !type) {
-      return NextResponse.json({ error: 'Faltan campos: email y type son requeridos' }, { status: 400 })
+      return NextResponse.json({ success: false, error: 'Faltan campos: email y type son requeridos' }, { status: 400 })
     }
 
-    const { data: profile } = await supabase.from('user_profiles').select('role').eq('id', user.id).maybeSingle()
+    if (!isValidEmail(email)) {
+      return NextResponse.json({ success: false, error: 'Formato de email inválido' }, { status: 400 })
+    }
+
+    if (!VALID_EMAIL_TYPES.includes(type as (typeof VALID_EMAIL_TYPES)[number])) {
+      return NextResponse.json({ success: false, error: 'Tipo de correo no válido' }, { status: 400 })
+    }
+
     const isSystemEmail = email === user.email
-    const isAdmin = profile?.role === 'admin' || profile?.role === 'super_admin'
-    const isBusiness = profile?.role === 'comercio'
-
-    if (!isSystemEmail && !isAdmin && !isBusiness) {
-      return NextResponse.json({ error: 'No tienes permiso para enviar emails a otros usuarios' }, { status: 403 })
+    if (!isSystemEmail) {
+      return NextResponse.json(
+        { success: false, error: 'Solo puedes enviar emails a tu propia dirección' },
+        { status: 403 },
+      )
     }
+
+    const safeData = data || {}
 
     let subject = ''
     let html = ''
     let text = ''
 
-    if (type === 'welcome') {
-      subject = 'Bienvenido a Paporla - Rescate Alimentario'
-      html = welcomeTemplate(data?.name || 'Usuario')
-      text = `Bienvenido a Paporla, ${data?.name || 'Usuario'}!\n\nGracias por unirte a la comunidad que esta cambiando la forma de alimentarnos.\n\nExplora packs disponibles en nuestra web.`
-    } else if (type === 'reservation') {
-      subject = `Tu reserva de ${data?.packTitle || 'Pack'} esta confirmada - Paporla`
-      html = reservationConfirmationTemplate({
-        userName: data?.userName || 'Usuario',
-        packTitle: data?.packTitle || 'Pack',
-        shopName: data?.shopName || 'Comercio',
-        shopAddress: data?.shopAddress || null,
-        pickupCode: data?.pickupCode || 'XXXXXX',
-        pickupDate: data?.pickupDate || null,
-        pickupTime: data?.pickupTime || null,
-        price: data?.price || '',
-      })
-      text = `Tu reserva esta confirmada.\n\nPack: ${data?.packTitle || 'Pack'}\nComercio: ${data?.shopName || 'Comercio'}\nCodigo de recogida: ${data?.pickupCode || 'XXXXXX'}\n\nPresenta este codigo al llegar al comercio.`
-    } else if (type === 'password_reset') {
-      subject = 'Restablece tu contrasena - Paporla'
-      html = passwordResetTemplate(data?.resetLink || '')
-      text = `Recibimos una solicitud para restablecer tu contrasena.\n\nHaz clic en este enlace: ${data?.resetLink || ''}\n\nSi no solicitaste este cambio, ignora este mensaje.`
-    } else if (type === 'pickup_reminder') {
-      subject = `Recuerda recoger tu pack de ${data?.packTitle || 'Pack'} hoy - Paporla`
-      html = pickupReminderTemplate({
-        userName: data?.userName || 'Usuario',
-        packTitle: data?.packTitle || 'Pack',
-        shopName: data?.shopName || 'Comercio',
-        shopAddress: data?.shopAddress || null,
-        pickupCode: data?.pickupCode || 'XXXXXX',
-        pickupDate: data?.pickupDate || '',
-        pickupTime: data?.pickupTime || null,
-      })
-      text = `Recuerda recoger tu pack hoy.\n\nPack: ${data?.packTitle || 'Pack'}\nComercio: ${data?.shopName || 'Comercio'}\nCodigo: ${data?.pickupCode || 'XXXXXX'}`
-    } else {
-      return NextResponse.json({ error: 'Tipo de correo no valido' }, { status: 400 })
+    switch (type) {
+      case 'welcome':
+        subject = 'Bienvenido a Paporla - Rescate Alimentario'
+        html = welcomeTemplate(String(safeData.name || 'Usuario'))
+        text = `Bienvenido a Paporla, ${String(safeData.name || 'Usuario')}! Gracias por unirte a la comunidad que esta cambiando la forma de alimentarnos. Explora packs disponibles en nuestra web.`
+        break
+
+      case 'reservation':
+        subject = `Tu reserva de ${String(safeData.packTitle || 'Pack')} esta confirmada - Paporla`
+        html = reservationConfirmationTemplate({
+          userName: String(safeData.userName || 'Usuario'),
+          packTitle: String(safeData.packTitle || 'Pack'),
+          shopName: String(safeData.shopName || 'Comercio'),
+          shopAddress: safeData.shopAddress ? String(safeData.shopAddress) : null,
+          pickupCode: String(safeData.pickupCode || 'XXXXXX'),
+          pickupDate: safeData.pickupDate ? String(safeData.pickupDate) : null,
+          pickupTime: safeData.pickupTime ? String(safeData.pickupTime) : null,
+          price: String(safeData.price || ''),
+        })
+        text = `Tu reserva esta confirmada. Pack: ${String(safeData.packTitle || 'Pack')}. Comercio: ${String(safeData.shopName || 'Comercio')}. Codigo de recogida: ${String(safeData.pickupCode || 'XXXXXX')}.`
+        break
+
+      case 'password_reset':
+        subject = 'Restablece tu contrasena - Paporla'
+        html = passwordResetTemplate(String(safeData.resetLink || ''))
+        text = `Recibimos una solicitud para restablecer tu contrasena. Haz clic en este enlace: ${safeData.resetLink || ''}`
+        break
+
+      case 'pickup_reminder':
+        subject = `Recuerda recoger tu pack de ${String(safeData.packTitle || 'Pack')} hoy - Paporla`
+        html = pickupReminderTemplate({
+          userName: String(safeData.userName || 'Usuario'),
+          packTitle: String(safeData.packTitle || 'Pack'),
+          shopName: String(safeData.shopName || 'Comercio'),
+          shopAddress: safeData.shopAddress ? String(safeData.shopAddress) : null,
+          pickupCode: String(safeData.pickupCode || 'XXXXXX'),
+          pickupDate: String(safeData.pickupDate || ''),
+          pickupTime: safeData.pickupTime ? String(safeData.pickupTime) : null,
+        })
+        text = `Recuerda recoger tu pack hoy. Pack: ${String(safeData.packTitle || 'Pack')}. Comercio: ${String(safeData.shopName || 'Comercio')}. Codigo: ${String(safeData.pickupCode || 'XXXXXX')}.`
+        break
     }
 
     const { data: res, error } = await resend.emails.send({
@@ -91,8 +129,9 @@ export async function POST(request: Request) {
 
     console.log(`[Email API Sent] ${type} to:`, email)
     return NextResponse.json({ success: true, data: res })
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error('[Email API Exception]:', err)
-    return NextResponse.json({ success: false, error: err.message }, { status: 500 })
+    const message = err instanceof Error ? err.message : 'Error interno del servidor'
+    return NextResponse.json({ success: false, error: message }, { status: 500 })
   }
 }

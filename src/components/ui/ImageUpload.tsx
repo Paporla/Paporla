@@ -1,96 +1,92 @@
-'use client';
+'use client'
 
 import Image from 'next/image'
-import { useState, useRef } from 'react';
-import { supabaseBrowser } from '@/lib/supabase/client';
-import { ImageIcon, Upload, X, Loader2 } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useState, useRef } from 'react'
+import { supabaseBrowser } from '@/lib/supabase/client'
+import { ImageIcon, Upload, X, Loader2 } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
 
 interface ImageUploadProps {
-  bucket: 'shop-images' | 'pack-images' | 'avatars';
-  path: string;
-  onUploadComplete: (url: string) => void;
-  onError?: (error: string) => void;
-  existingImage?: string | null;
-  label?: string;
+  bucket: 'shop-images' | 'pack-images' | 'avatars'
+  path: string
+  onUploadComplete: (url: string) => void
+  onError?: (error: string) => void
+  existingImage?: string | null
+  label?: string
 }
 
-export default function ImageUpload({ 
-  bucket, 
-  path, 
-  onUploadComplete, 
-  onError, 
+export default function ImageUpload({
+  bucket,
+  path,
+  onUploadComplete,
+  onError,
   existingImage,
-  label = 'Imagen'
+  label = 'Imagen',
 }: ImageUploadProps) {
-  const supabase = supabaseBrowser();
-  const [uploading, setUploading] = useState(false);
-  const [preview, setPreview] = useState<string | null>(existingImage || null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const supabase = supabaseBrowser()
+  const [uploading, setUploading] = useState(false)
+  const [preview, setPreview] = useState<string | null>(existingImage || null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
+    const file = event.target.files?.[0]
+    if (!file) return
 
     // Validar tipo de archivo
     if (!file.type.startsWith('image/')) {
-      onError?.('Solo se permiten imagenes');
-      return;
+      onError?.('Solo se permiten imagenes')
+      return
     }
 
     // Validar tamano (max 5MB)
     if (file.size > 5 * 1024 * 1024) {
-      onError?.('La imagen no debe superar los 5MB');
-      return;
+      onError?.('La imagen no debe superar los 5MB')
+      return
     }
 
-    setUploading(true);
+    setUploading(true)
 
     try {
       // Generar nombre unico
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
-      const filePath = `${path}/${fileName}`;
+      const fileExt = file.name.split('.').pop()
+      const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`
+      const filePath = `${path}/${fileName}`
 
       // Subir archivo
-      const { error: uploadError } = await supabase.storage
-        .from(bucket)
-        .upload(filePath, file, {
-          cacheControl: '3600',
-          upsert: false,
-        });
+      const { error: uploadError } = await supabase.storage.from(bucket).upload(filePath, file, {
+        cacheControl: '3600',
+        upsert: false,
+      })
 
-      if (uploadError) throw uploadError;
+      if (uploadError) throw uploadError
 
       // Obtener URL publica
-      const { data: { publicUrl } } = supabase.storage
-        .from(bucket)
-        .getPublicUrl(filePath);
+      const {
+        data: { publicUrl },
+      } = supabase.storage.from(bucket).getPublicUrl(filePath)
 
-      setPreview(publicUrl);
-      onUploadComplete(publicUrl);
-    } catch (error: any) {
-      console.error('Error uploading image:', error);
-      onError?.(error.message || 'Error al subir la imagen');
+      setPreview(publicUrl)
+      onUploadComplete(publicUrl)
+    } catch (error: unknown) {
+      console.error('Error uploading image:', error)
+      onError?.((error instanceof Error ? error.message : 'Error') || 'Error al subir la imagen')
     } finally {
-      setUploading(false);
+      setUploading(false)
     }
-  };
+  }
 
   const handleRemove = () => {
-    setPreview(null);
-    onUploadComplete('');
+    setPreview(null)
+    onUploadComplete('')
     if (fileInputRef.current) {
-      fileInputRef.current.value = '';
+      fileInputRef.current.value = ''
     }
-  };
+  }
 
   return (
     <div className="space-y-2">
-      <label className="block text-sm font-medium dark:text-gray-400 text-gray-600">
-        {label}
-      </label>
-      
+      <label className="block text-sm font-medium dark:text-gray-400 text-gray-600">{label}</label>
+
       <div className="relative">
         <input
           ref={fileInputRef}
@@ -100,7 +96,7 @@ export default function ImageUpload({
           className="hidden"
           disabled={uploading}
         />
-        
+
         <AnimatePresence mode="wait">
           {preview ? (
             <motion.div
@@ -111,9 +107,9 @@ export default function ImageUpload({
               className="relative group"
             >
               <div className="relative w-full h-40 rounded-xl overflow-hidden dark:bg-gray-800 bg-gray-100">
-                <Image 
-                  src={preview} 
-                  alt="Preview" 
+                <Image
+                  src={preview}
+                  alt="Preview"
                   fill
                   className="object-cover"
                   sizes="(max-width: 768px) 100vw, 400px"
@@ -165,5 +161,5 @@ export default function ImageUpload({
         </AnimatePresence>
       </div>
     </div>
-  );
+  )
 }

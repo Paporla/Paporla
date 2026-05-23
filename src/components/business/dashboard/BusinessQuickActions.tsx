@@ -1,16 +1,51 @@
-'use client';
+'use client'
 
-import Link from 'next/link';
-import { motion } from 'framer-motion';
-import { Plus, Package, Calendar, Store, BarChart3, Copy } from 'lucide-react';
+import Link from 'next/link'
+import { motion } from 'framer-motion'
+import { Plus, Package, Calendar, Store, BarChart3 } from 'lucide-react'
 
 const actions = [
-  { icon: Plus, label: 'Crear Pack', href: '/business/packs/new', color: 'from-primary to-primary/80', description: 'Nuevo pack sorpresa', bg: 'bg-primary/10' },
-  { icon: Package, label: 'Mis Packs', href: '/business/packs', color: 'from-blue-500 to-cyan-500', description: 'Gestionar packs', bg: 'bg-blue-500/10' },
-  { icon: Calendar, label: 'Reservas', href: '/business/reservations', color: 'from-orange-500 to-red-500', description: 'Ver pedidos', bg: 'bg-orange-500/10' },
-  { icon: Store, label: 'Mi Perfil', href: '/business/profile', color: 'from-green-500 to-emerald-500', description: 'Editar perfil', bg: 'bg-green-500/10' },
-  { icon: BarChart3, label: 'Analytics', href: '/business/analytics', color: 'from-amber-500 to-orange-500', description: 'Ver metricas', bg: 'bg-amber-500/10' },
-];
+  {
+    icon: Plus,
+    label: 'Crear Pack',
+    href: '/business/packs/new',
+    color: 'from-primary to-primary/80',
+    description: 'Nuevo pack sorpresa',
+    bg: 'bg-primary/10',
+  },
+  {
+    icon: Package,
+    label: 'Mis Packs',
+    href: '/business/packs',
+    color: 'from-blue-500 to-cyan-500',
+    description: 'Gestionar packs',
+    bg: 'bg-blue-500/10',
+  },
+  {
+    icon: Calendar,
+    label: 'Reservas',
+    href: '/business/reservations',
+    color: 'from-orange-500 to-red-500',
+    description: 'Ver pedidos',
+    bg: 'bg-orange-500/10',
+  },
+  {
+    icon: Store,
+    label: 'Mi Perfil',
+    href: '/business/profile',
+    color: 'from-green-500 to-emerald-500',
+    description: 'Editar perfil',
+    bg: 'bg-green-500/10',
+  },
+  {
+    icon: BarChart3,
+    label: 'Analytics',
+    href: '/business/analytics',
+    color: 'from-amber-500 to-orange-500',
+    description: 'Ver metricas',
+    bg: 'bg-amber-500/10',
+  },
+]
 
 export default function BusinessQuickActions() {
   return (
@@ -30,7 +65,9 @@ export default function BusinessQuickActions() {
           >
             <Link href={action.href}>
               <div className="group dark:bg-dark-card bg-white dark:bg-white dark:border-gray-200 border dark:border-dark-border border-gray-200 hover:border-primary/30 rounded-2xl p-4 text-center cursor-pointer transition-all duration-300 hover:-translate-y-1">
-                <div className={`w-12 h-12 mx-auto mb-3 rounded-xl bg-gradient-to-br ${action.color} flex items-center justify-center group-hover:scale-110 transition-transform`}>
+                <div
+                  className={`w-12 h-12 mx-auto mb-3 rounded-xl bg-gradient-to-br ${action.color} flex items-center justify-center group-hover:scale-110 transition-transform`}
+                >
                   <action.icon className="w-6 h-6 text-white" />
                 </div>
                 <p className="dark:text-white text-gray-900 font-medium text-sm">{action.label}</p>
@@ -41,5 +78,5 @@ export default function BusinessQuickActions() {
         ))}
       </div>
     </div>
-  );
+  )
 }

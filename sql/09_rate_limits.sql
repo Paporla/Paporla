@@ -17,6 +17,11 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+-- RLS para que cada usuario solo vea/modifique sus propios rate limits
+ALTER TABLE rate_limits ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "rate_limits_own" ON rate_limits;
+CREATE POLICY "rate_limits_own" ON rate_limits FOR ALL USING (id = auth.uid()::text);
+
 -- Grant permissions
 GRANT SELECT, INSERT, UPDATE, DELETE ON rate_limits TO authenticated;
 GRANT SELECT, INSERT, UPDATE, DELETE ON rate_limits TO service_role;

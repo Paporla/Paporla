@@ -1,15 +1,15 @@
-'use client';
+'use client'
 
-import { useState } from 'react';
-import { motion } from 'framer-motion';
-import { Bell, CheckCheck, Trash2, Clock, Package, CheckCircle, XCircle, AlertCircle, Store } from 'lucide-react';
-import { useNotifications } from '@/hooks/useNotifications';
-import Card from '@/components/ui/Card';
-import Button from '@/components/ui/Button';
-import EmptyState from '@/components/ui/EmptyState';
-import Toast from '@/components/ui/Toast';
+import { useState } from 'react'
+import { motion } from 'framer-motion'
+import { Bell, CheckCheck, Trash2, Clock, Package, CheckCircle, XCircle, AlertCircle, Store } from 'lucide-react'
+import { useNotifications } from '@/hooks/useNotifications'
+import Card from '@/components/ui/Card'
+import Button from '@/components/ui/Button'
+import EmptyState from '@/components/ui/EmptyState'
+import Toast from '@/components/ui/Toast'
 
-const iconMap: Record<string, { icon: any; color: string; bg: string }> = {
+const iconMap: Record<string, { icon: React.ComponentType<{ className?: string }>; color: string; bg: string }> = {
   new_reservation: { icon: Package, color: 'text-primary', bg: 'bg-primary/10' },
   pickup_completed: { icon: CheckCircle, color: 'text-green-400', bg: 'bg-green-500/10' },
   user_cancelled: { icon: XCircle, color: 'text-red-400', bg: 'bg-red-500/10' },
@@ -19,45 +19,43 @@ const iconMap: Record<string, { icon: any; color: string; bg: string }> = {
   new_user: { icon: Bell, color: 'text-blue-400', bg: 'bg-blue-500/10' },
   new_shop: { icon: Store, color: 'text-primary', bg: 'bg-primary/10' },
   incidence: { icon: AlertCircle, color: 'text-red-400', bg: 'bg-red-500/10' },
-};
+}
 
-const defaultIcon = { icon: Bell, color: 'text-gray-400', bg: 'bg-gray-500/10' };
+const defaultIcon = { icon: Bell, color: 'text-gray-400', bg: 'bg-gray-500/10' }
 
 export default function BusinessNotificationsPage() {
-  const { notifications, unreadCount, markAsRead, markAllAsRead, deleteNotification, loading } = useNotifications();
-  const [filter, setFilter] = useState<'all' | 'unread'>('all');
-  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+  const { notifications, unreadCount, markAsRead, markAllAsRead, deleteNotification, loading } = useNotifications()
+  const [filter, setFilter] = useState<'all' | 'unread'>('all')
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null)
 
-  const filteredNotifications = filter === 'all' 
-    ? notifications 
-    : notifications.filter(n => !n.is_read);
+  const filteredNotifications = filter === 'all' ? notifications : notifications.filter((n) => !n.is_read)
 
   const handleMarkAll = async () => {
-    await markAllAsRead();
-    setToast({ message: 'Todas las notificaciones marcadas como leídas', type: 'success' });
-    setTimeout(() => setToast(null), 2000);
-  };
+    await markAllAsRead()
+    setToast({ message: 'Todas las notificaciones marcadas como leídas', type: 'success' })
+    setTimeout(() => setToast(null), 2000)
+  }
 
   const handleDelete = async (id: string) => {
-    await deleteNotification(id);
-    setToast({ message: 'Notificación eliminada', type: 'success' });
-    setTimeout(() => setToast(null), 2000);
-  };
+    await deleteNotification(id)
+    setToast({ message: 'Notificación eliminada', type: 'success' })
+    setTimeout(() => setToast(null), 2000)
+  }
 
   const formatTime = (date: string) => {
-    const now = new Date();
-    const target = new Date(date);
-    const diffMs = now.getTime() - target.getTime();
-    const diffMins = Math.floor(diffMs / 60000);
-    const diffHours = Math.floor(diffMs / 3600000);
-    const diffDays = Math.floor(diffMs / 86400000);
+    const now = new Date()
+    const target = new Date(date)
+    const diffMs = now.getTime() - target.getTime()
+    const diffMins = Math.floor(diffMs / 60000)
+    const diffHours = Math.floor(diffMs / 3600000)
+    const diffDays = Math.floor(diffMs / 86400000)
 
-    if (diffMins < 1) return 'Justo ahora';
-    if (diffMins < 60) return `Hace ${diffMins} min`;
-    if (diffHours < 24) return `Hace ${diffHours} h`;
-    if (diffDays < 7) return `Hace ${diffDays} d`;
-    return target.toLocaleDateString();
-  };
+    if (diffMins < 1) return 'Justo ahora'
+    if (diffMins < 60) return `Hace ${diffMins} min`
+    if (diffHours < 24) return `Hace ${diffHours} h`
+    if (diffDays < 7) return `Hace ${diffDays} d`
+    return target.toLocaleDateString()
+  }
 
   if (loading) {
     return (
@@ -68,7 +66,10 @@ export default function BusinessNotificationsPage() {
         </div>
         <div className="animate-pulse space-y-4">
           {[...Array(5)].map((_, i) => (
-              <div key={i} className="bg-dark-card dark:bg-white dark:border-gray-200 border border-dark-border rounded-2xl p-5">
+            <div
+              key={i}
+              className="bg-dark-card dark:bg-white dark:border-gray-200 border border-dark-border rounded-2xl p-5"
+            >
               <div className="flex gap-4">
                 <div className="w-12 h-12 rounded-xl dark:bg-gray-800 bg-gray-200" />
                 <div className="flex-1">
@@ -80,7 +81,7 @@ export default function BusinessNotificationsPage() {
           ))}
         </div>
       </div>
-    );
+    )
   }
 
   return (
@@ -133,9 +134,7 @@ export default function BusinessNotificationsPage() {
         >
           No leidas
           {unreadCount > 0 && (
-            <span className="ml-1.5 text-xs bg-primary/30 px-1.5 py-0.5 rounded-full">
-              {unreadCount}
-            </span>
+            <span className="ml-1.5 text-xs bg-primary/30 px-1.5 py-0.5 rounded-full">{unreadCount}</span>
           )}
         </button>
       </div>
@@ -145,15 +144,15 @@ export default function BusinessNotificationsPage() {
         <EmptyState
           type="notifications"
           action={{
-            label: "Explorar packs",
-            onClick: () => window.location.href = '/business/packs'
+            label: 'Explorar packs',
+            onClick: () => (window.location.href = '/business/packs'),
           }}
         />
       ) : (
         <div className="space-y-3">
           {filteredNotifications.map((notification, idx) => {
-            const { icon: Icon, color, bg } = iconMap[notification.type] || defaultIcon;
-            const isUnread = !notification.is_read;
+            const { icon: Icon, color, bg } = iconMap[notification.type] || defaultIcon
+            const isUnread = !notification.is_read
 
             return (
               <motion.div
@@ -162,9 +161,7 @@ export default function BusinessNotificationsPage() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: idx * 0.03 }}
                 onClick={() => isUnread && markAsRead(notification.id)}
-                className={`cursor-pointer transition-all duration-200 ${
-                  isUnread ? 'border-l-2 border-primary' : ''
-                }`}
+                className={`cursor-pointer transition-all duration-200 ${isUnread ? 'border-l-2 border-primary' : ''}`}
               >
                 <Card glass className="p-5 group hover:border-primary/30">
                   <div className="flex gap-4">
@@ -172,7 +169,9 @@ export default function BusinessNotificationsPage() {
                       <Icon className={`w-5 h-5 ${color}`} />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className={`text-sm ${isUnread ? 'dark:text-white text-gray-900 font-medium' : 'dark:text-gray-400 text-gray-600'}`}>
+                      <p
+                        className={`text-sm ${isUnread ? 'dark:text-white text-gray-900 font-medium' : 'dark:text-gray-400 text-gray-600'}`}
+                      >
                         {notification.message}
                       </p>
                       <div className="flex items-center gap-3 mt-2">
@@ -189,8 +188,8 @@ export default function BusinessNotificationsPage() {
                     </div>
                     <button
                       onClick={(e) => {
-                        e.stopPropagation();
-                        handleDelete(notification.id);
+                        e.stopPropagation()
+                        handleDelete(notification.id)
                       }}
                       className="p-1.5 rounded-lg text-gray-500 hover:text-red-400 hover:bg-red-500/10 transition-all opacity-0 group-hover:opacity-100"
                     >
@@ -199,18 +198,12 @@ export default function BusinessNotificationsPage() {
                   </div>
                 </Card>
               </motion.div>
-            );
+            )
           })}
         </div>
       )}
 
-      {toast && (
-        <Toast
-          message={toast.message}
-          type={toast.type}
-          onClose={() => setToast(null)}
-        />
-      )}
+      {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
     </div>
-  );
+  )
 }

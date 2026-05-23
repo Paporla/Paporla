@@ -9,6 +9,20 @@ vi.mock('@/lib/services/packService', () => ({
   createPack: vi.fn(),
   updatePack: vi.fn(),
   deletePack: vi.fn(),
+  ALLOWED_PACK_FIELDS: [
+    'title',
+    'description',
+    'price_cents',
+    'original_price_cents',
+    'total_stock',
+    'image_url',
+    'image_gallery',
+    'pickup_date',
+    'pickup_start_time',
+    'pickup_end_time',
+    'tags',
+    'category',
+  ] as const,
 }))
 
 import { createClient } from '@/lib/supabase/server'
@@ -32,6 +46,7 @@ describe('GET /api/packs', () => {
     const response = await GET(request)
     const body = await response.json()
     expect(body.packs).toHaveLength(1)
+    expect(body.success).toBe(true)
     expect(response.status).toBe(200)
   })
 
@@ -42,6 +57,7 @@ describe('GET /api/packs', () => {
     const response = await GET(request)
     const body = await response.json()
     expect(body.pack).toBeDefined()
+    expect(body.success).toBe(true)
     expect(response.status).toBe(200)
   })
 
@@ -51,6 +67,7 @@ describe('GET /api/packs', () => {
     const request = new Request('http://localhost/api/packs')
     const response = await GET(request)
     const body = await response.json()
+    expect(body.success).toBe(false)
     expect(body.error).toBe('Not found')
     expect(response.status).toBe(404)
   })
@@ -71,11 +88,19 @@ describe('POST /api/packs', () => {
     const { POST } = await import('@/app/api/packs/route')
     const request = new Request('http://localhost/api/packs', {
       method: 'POST',
-      body: JSON.stringify({ title: 'New Pack', price_cents: 1000 }),
+      body: JSON.stringify({
+        title: 'New Pack',
+        price_cents: 1000,
+        total_stock: 10,
+        shop_id: '00000000-0000-0000-0000-000000000001',
+        pickup_date: '2025-06-01',
+        pickup_start_time: '10:00',
+        pickup_end_time: '12:00',
+      }),
     })
     const response = await POST(request)
     const body = await response.json()
-    expect(body.pack).toBeDefined()
+    expect(body.success).toBe(true)
     expect(response.status).toBe(201)
   })
 
@@ -113,7 +138,7 @@ describe('PUT /api/packs', () => {
     })
     const response = await PUT(request)
     const body = await response.json()
-    expect(body.pack).toBeDefined()
+    expect(body.success).toBe(true)
     expect(response.status).toBe(200)
   })
 

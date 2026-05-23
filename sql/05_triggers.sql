@@ -57,7 +57,7 @@ BEGIN
   VALUES (
     NEW.id, NEW.email,
     COALESCE(NEW.raw_user_meta_data->>'name', NEW.raw_user_meta_data->>'full_name', split_part(NEW.email, '@', 1)),
-    COALESCE(NEW.raw_user_meta_data->>'role', 'user'),
+    'user', -- SIEMPRE 'user' por seguridad; el cambio de rol solo via admin
     NEW.raw_user_meta_data->>'avatar_url'
   ) ON CONFLICT (id) DO NOTHING;
   RETURN NEW;

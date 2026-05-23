@@ -8,7 +8,7 @@
 DROP FUNCTION IF EXISTS public.create_reservation_atomic(uuid, integer, text) CASCADE;
 CREATE OR REPLACE FUNCTION public.create_reservation_atomic(
   p_pack_id UUID, p_quantity INTEGER, p_payment_method TEXT DEFAULT 'demo'
-) RETURNS JSONB LANGUAGE plpgsql SECURITY DEFINER AS $$
+) RETURNS JSONB LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
 DECLARE v_pack RECORD; v_reservation_id UUID; v_pickup_code TEXT; v_total_price INTEGER;
 BEGIN
   SELECT * INTO v_pack FROM public.packs WHERE id = p_pack_id FOR UPDATE;
@@ -36,7 +36,7 @@ $$;
 -- 2. CANCELAR RESERVA
 DROP FUNCTION IF EXISTS public.cancel_reservation(uuid, text) CASCADE;
 CREATE OR REPLACE FUNCTION public.cancel_reservation(p_reservation_id UUID, p_cancel_reason TEXT DEFAULT NULL)
-RETURNS JSONB LANGUAGE plpgsql SECURITY DEFINER AS $$
+RETURNS JSONB LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
 DECLARE v_res RECORD; v_role TEXT; v_hours_before_pickup NUMERIC;
 BEGIN
   SELECT * INTO v_res FROM public.reservations WHERE id = p_reservation_id;
@@ -58,7 +58,7 @@ $$;
 -- 3. VALIDAR RECOGIDA
 DROP FUNCTION IF EXISTS public.validate_pickup(text) CASCADE;
 CREATE OR REPLACE FUNCTION public.validate_pickup(p_pickup_code TEXT)
-RETURNS JSONB LANGUAGE plpgsql SECURITY DEFINER AS $$
+RETURNS JSONB LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
 DECLARE v_res RECORD; v_shop RECORD;
 BEGIN
   SELECT r.*, p.title AS pack_title INTO v_res FROM public.reservations r JOIN public.packs p ON p.id = r.pack_id WHERE r.pickup_code = p_pickup_code;
@@ -84,7 +84,7 @@ $$;
 -- 4. EXPIRACION AUTOMATICA
 DROP FUNCTION IF EXISTS public.expire_reservations() CASCADE;
 CREATE OR REPLACE FUNCTION public.expire_reservations()
-RETURNS JSONB LANGUAGE plpgsql SECURITY DEFINER AS $$
+RETURNS JSONB LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
 DECLARE v_expired_res_count INTEGER := 0; v_expired_packs_count INTEGER := 0; v_sold_out_count INTEGER := 0;
 BEGIN
   UPDATE public.reservations SET status = 'no_show', updated_at = NOW()
@@ -105,10 +105,10 @@ $$;
 -- 5. LIMPIEZA DE RESERVAS PENDIENTES
 DROP FUNCTION IF EXISTS public.cleanup_pending_reservations(integer) CASCADE;
 CREATE OR REPLACE FUNCTION public.cleanup_pending_reservations(p_minutes_ago INTEGER DEFAULT 30)
-RETURNS JSONB LANGUAGE plpgsql SECURITY DEFINER AS $$
+RETURNS JSONB LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
 DECLARE v_cleaned_count INTEGER := 0;
 BEGIN
-  DELETE FROM public.reservations WHERE status = 'pending' AND created_at < NOW() - (p_minutes_ago || ' minutes')::interval;
+  DELETE FROM public.reservations WHERE status = 'pending' AND created_at < NOW() - (p_minutes_ago * INTERVAL '1 minute');
   GET DIAGNOSTICS v_cleaned_count = ROW_COUNT;
   RETURN jsonb_build_object('success', true, 'cleaned_count', v_cleaned_count);
 END;
@@ -117,7 +117,7 @@ $$;
 -- 6. ACTUALIZAR RATING DEL COMERCIO
 DROP FUNCTION IF EXISTS public.update_shop_rating(uuid, double precision) CASCADE;
 CREATE OR REPLACE FUNCTION public.update_shop_rating(p_shop_id UUID, p_new_rating DOUBLE PRECISION)
-RETURNS JSONB LANGUAGE plpgsql SECURITY DEFINER AS $$
+RETURNS JSONB LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
 DECLARE v_shop RECORD; v_new_total_ratings INTEGER; v_new_avg_rating DOUBLE PRECISION;
 BEGIN
   SELECT * INTO v_shop FROM public.shops WHERE id = p_shop_id;
@@ -133,7 +133,7 @@ $$;
 -- 7. ELIMINAR USUARIO (ADMIN)
 DROP FUNCTION IF EXISTS public.admin_delete_user(uuid) CASCADE;
 CREATE OR REPLACE FUNCTION public.admin_delete_user(p_user_id UUID)
-RETURNS JSONB LANGUAGE plpgsql SECURITY DEFINER AS $$
+RETURNS JSONB LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
 DECLARE v_caller_role TEXT; v_user_email TEXT;
 BEGIN
   SELECT role INTO v_caller_role FROM public.user_profiles WHERE id = auth.uid();
@@ -154,7 +154,7 @@ $$;
 -- 8. ELIMINAR COMERCIO (ADMIN)
 DROP FUNCTION IF EXISTS public.admin_delete_shop(uuid) CASCADE;
 CREATE OR REPLACE FUNCTION public.admin_delete_shop(p_shop_id UUID)
-RETURNS JSONB LANGUAGE plpgsql SECURITY DEFINER AS $$
+RETURNS JSONB LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
 DECLARE v_caller_role TEXT; v_shop_name TEXT;
 BEGIN
   SELECT role INTO v_caller_role FROM public.user_profiles WHERE id = auth.uid();

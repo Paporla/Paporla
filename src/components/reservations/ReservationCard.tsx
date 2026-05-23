@@ -3,14 +3,12 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { ChevronRight, Calendar, Clock, MapPin } from 'lucide-react'
-import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
 import CopyButton from '@/components/ui/CopyButton'
 import { formatPrice } from '@/lib/utils/formatPrice'
 import { formatDate } from '@/lib/utils/formatDate'
 import type { ReservationWithDetails } from '@/types/reservation'
-
-type ReservationStatus = 'pending' | 'confirmed' | 'ready_pickup' | 'completed' | 'cancelled' | 'no_show' | 'expired'
+import { STATUS_CONFIG, STATUS_LABELS, isActiveStatus, canCancelStatus } from '@/lib/constants/reservations'
 
 interface ReservationCardProps {
   reservation: ReservationWithDetails
@@ -20,43 +18,24 @@ interface ReservationCardProps {
   showUserDetails?: boolean
 }
 
-const statusColors: Record<ReservationStatus, { bg: string; text: string; border: string }> = {
-  pending: { bg: 'bg-yellow-500/10', text: 'text-yellow-400', border: 'border-yellow-500/20' },
-  confirmed: { bg: 'bg-blue-500/10', text: 'text-blue-400', border: 'border-blue-500/20' },
-  ready_pickup: { bg: 'bg-primary/10', text: 'text-primary', border: 'border-primary/20' },
-  completed: { bg: 'bg-green-500/10', text: 'text-green-400', border: 'border-green-500/20' },
-  cancelled: { bg: 'bg-red-500/10', text: 'text-red-400', border: 'border-red-500/20' },
-  no_show: { bg: 'bg-gray-500/10', text: 'text-gray-400', border: 'border-gray-500/20' },
-  expired: { bg: 'bg-orange-500/10', text: 'text-orange-400', border: 'border-orange-500/20' },
-}
-
-const statusLabels: Record<ReservationStatus, string> = {
-  pending: 'Pendiente',
-  confirmed: 'Confirmada',
-  ready_pickup: 'Lista para recoger',
-  completed: 'Completada',
-  cancelled: 'Cancelada',
-  no_show: 'No retirada',
-  expired: 'Expirada',
-}
-
-export default function ReservationCard({ 
-  reservation, 
-  onCancel, 
+export default function ReservationCard({
+  reservation,
+  onCancel,
   onConfirm,
   onComplete,
-  showUserDetails = false 
+  showUserDetails = false,
 }: ReservationCardProps) {
   const [isExpanded, setIsExpanded] = useState(false)
-  const status = reservation.status as ReservationStatus
-  const colors = statusColors[status] || statusColors.pending
+  const status = reservation.status
+  const colors = STATUS_CONFIG[status] || STATUS_CONFIG.pending
 
-  const pickupTime = reservation.pickup_start_time && reservation.pickup_end_time
-    ? `${reservation.pickup_start_time.slice(0,5)} - ${reservation.pickup_end_time.slice(0,5)}`
-    : null
+  const pickupTime =
+    reservation.pickup_start_time && reservation.pickup_end_time
+      ? `${reservation.pickup_start_time.slice(0, 5)} - ${reservation.pickup_end_time.slice(0, 5)}`
+      : null
 
-  const isActive = ['confirmed', 'pending'].includes(status)
-  const canCancel = ['confirmed', 'pending'].includes(status)
+  const active = isActiveStatus(status)
+  const canCancel = canCancelStatus(status)
   const canConfirm = false
   const canComplete = status === 'confirmed'
 
@@ -70,10 +49,10 @@ export default function ReservationCard({
       <div className="p-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${colors.bg} ${colors.text}`}>
-              {statusLabels[status]}
+            <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${colors.bg} ${colors.color}`}>
+              {STATUS_LABELS[status] || status}
             </span>
-            {isActive && (
+            {active && (
               <span className="text-[10px] text-primary flex items-center gap-1">
                 <span className="w-1.5 h-1.5 bg-primary rounded-full animate-pulse" />
                 Activa
@@ -90,14 +69,10 @@ export default function ReservationCard({
 
         <h3 className="font-bold dark:text-white text-gray-900 mt-2">{reservation.pack.title}</h3>
         <p className="text-sm dark:text-gray-400 text-gray-600">{reservation.shop.name}</p>
-        
+
         <div className="flex items-center justify-between mt-3">
-          <span className="text-lg font-black text-primary">
-            {formatPrice(reservation.total_price_cents)}
-          </span>
-          <span className="text-xs dark:text-gray-500 text-gray-400">
-            Cantidad: {reservation.quantity || 1}
-          </span>
+          <span className="text-lg font-black text-primary">{formatPrice(reservation.total_price_cents)}</span>
+          <span className="text-xs dark:text-gray-500 text-gray-400">Cantidad: {reservation.quantity || 1}</span>
         </div>
       </div>
 
@@ -109,13 +84,11 @@ export default function ReservationCard({
           className="px-4 pb-4 space-y-3 border-t dark:border-dark-border border-gray-200 pt-3"
         >
           {/* Codigo de recogida */}
-          {reservation.pickup_code && isActive && (
+          {reservation.pickup_code && active && (
             <div className="bg-primary/5 border border-primary/20 rounded-xl p-3 flex items-center justify-between">
               <div>
                 <p className="text-[10px] dark:text-gray-500 text-gray-400 uppercase">Codigo de recogida</p>
-                <p className="text-lg font-bold text-primary tracking-wider font-mono">
-                  {reservation.pickup_code}
-                </p>
+                <p className="text-lg font-bold text-primary tracking-wider font-mono">{reservation.pickup_code}</p>
               </div>
               <CopyButton text={reservation.pickup_code} label="Copiar" />
             </div>
@@ -172,12 +145,7 @@ export default function ReservationCard({
               </Button>
             )}
             {canCancel && onCancel && (
-              <Button 
-                size="sm" 
-                variant="danger" 
-                onClick={() => onCancel(reservation.id)}
-                className="flex-1"
-              >
+              <Button size="sm" variant="danger" onClick={() => onCancel(reservation.id)} className="flex-1">
                 Cancelar
               </Button>
             )}
