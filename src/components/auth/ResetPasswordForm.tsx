@@ -32,8 +32,8 @@ export default function ResetPasswordForm() {
     setLoading(true)
     setError('')
 
-    if (password.length < 6) {
-      setError('La contrasena debe tener al menos 6 caracteres')
+    if (password.length < 8) {
+      setError('La contrasena debe tener al menos 8 caracteres')
       setLoading(false)
       return
     }
@@ -118,7 +118,7 @@ export default function ResetPasswordForm() {
         <div className="text-sm dark:text-gray-400 text-gray-600 space-y-1">
           <p>La contrasena debe tener:</p>
           <ul className="list-disc list-inside ml-2">
-            <li>Al menos 6 caracteres</li>
+            <li>Al menos 8 caracteres</li>
           </ul>
         </div>
 
