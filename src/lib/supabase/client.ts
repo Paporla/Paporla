@@ -1,12 +1,11 @@
 import { createBrowserClient } from '@supabase/ssr'
 
-function getEnvVar(name: string): string {
-  const value = process.env[name]
-  if (!value) {
-    throw new Error(`Variable de entorno faltante: ${name}. Revisa tu archivo .env.local`)
-  }
-  return value
-}
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 
-export const supabaseBrowser = () =>
-  createBrowserClient(getEnvVar('NEXT_PUBLIC_SUPABASE_URL'), getEnvVar('NEXT_PUBLIC_SUPABASE_ANON_KEY'))
+if (!supabaseUrl)
+  throw new Error('Variable de entorno faltante: NEXT_PUBLIC_SUPABASE_URL. Revisa tu archivo .env.local')
+if (!supabaseAnonKey)
+  throw new Error('Variable de entorno faltante: NEXT_PUBLIC_SUPABASE_ANON_KEY. Revisa tu archivo .env.local')
+
+export const supabaseBrowser = () => createBrowserClient(supabaseUrl, supabaseAnonKey)
