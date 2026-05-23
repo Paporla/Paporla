@@ -36,6 +36,9 @@ supabase/.temp
 next-env.d.ts
 .husky/_/
 
+# Coverage
+coverage/
+
 # Vercel
 .vercel
 
