@@ -1,32 +1,52 @@
-const CACHE_NAME = 'paporla-v1'
-const STATIC_ASSETS = ['/', '/packs', '/shops', '/favicon.svg', '/images/logo-transparent.png']
+const CACHE_NAME = 'paporla-v2'
+const STATIC_CACHE = 'paporla-static-v2'
 
-self.addEventListener('install', (event) => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(STATIC_ASSETS).catch(() => {})
-    }),
-  )
+self.addEventListener('install', () => {
   self.skipWaiting()
 })
 
 self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.keys().then((keys) => {
-      return Promise.all(keys.filter((key) => key !== CACHE_NAME).map((key) => caches.delete(key)))
-    }),
+    caches
+      .keys()
+      .then((keys) =>
+        Promise.all(keys.filter((key) => key !== CACHE_NAME && key !== STATIC_CACHE).map((key) => caches.delete(key))),
+      ),
   )
-  self.clients.claim()
+  event.waitUntil(self.clients.claim())
 })
 
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return
 
-  if (event.request.url.includes('/api/')) {
+  const url = new URL(event.request.url)
+  const isStatic =
+    url.pathname.startsWith('/_next/static/') || url.pathname.match(/\.(js|css|woff2?|svg|png|jpg|webp|ico)$/)
+  const isApi = url.pathname.startsWith('/api/')
+  const isHtml = event.request.headers.get('accept')?.includes('text/html')
+
+  if (isApi) {
     event.respondWith(
-      fetch(event.request).catch(() => {
-        return new Response(JSON.stringify({ error: 'Sin conexion' }), {
-          headers: { 'Content-Type': 'application/json' },
+      fetch(event.request).catch(
+        () =>
+          new Response(JSON.stringify({ error: 'Sin conexion' }), {
+            headers: { 'Content-Type': 'application/json' },
+          }),
+      ),
+    )
+    return
+  }
+
+  if (isStatic) {
+    event.respondWith(
+      caches.match(event.request).then((cached) => {
+        if (cached) return cached
+        return fetch(event.request).then((response) => {
+          if (response.ok) {
+            const clone = response.clone()
+            caches.open(STATIC_CACHE).then((cache) => cache.put(event.request, clone))
+          }
+          return response
         })
       }),
     )
@@ -34,23 +54,20 @@ self.addEventListener('fetch', (event) => {
   }
 
   event.respondWith(
-    caches.match(event.request).then((cached) => {
-      if (cached) return cached
-
-      return fetch(event.request)
-        .then((response) => {
-          const responseToCache = response.clone()
-          caches.open(CACHE_NAME).then((cache) => {
-            cache.put(event.request, responseToCache)
-          })
-          return response
-        })
-        .catch(() => {
-          if (event.request.headers.get('accept')?.includes('text/html')) {
-            return caches.match('/')
-          }
-        })
-    }),
+    fetch(event.request)
+      .then((response) => {
+        if (response.ok && isHtml) {
+          const clone = response.clone()
+          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone))
+        }
+        return response
+      })
+      .catch(() => {
+        if (isHtml) {
+          return caches.match(event.request).then((cached) => cached || caches.match('/'))
+        }
+        return caches.match(event.request)
+      }),
   )
 })
 
