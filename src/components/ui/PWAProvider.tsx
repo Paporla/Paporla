@@ -6,31 +6,36 @@ import PWAInstallPrompt from '@/components/ui/PWAInstallPrompt'
 export function PWAProvider() {
   useEffect(() => {
     if (!('serviceWorker' in navigator) || process.env.NODE_ENV !== 'production') return
+    ;(async () => {
+      const registrations = await navigator.serviceWorker.getRegistrations()
+      for (const reg of registrations) {
+        await reg.unregister()
+      }
 
-    const register = async () => {
-      const registration = await navigator.serviceWorker.register('/sw.js').catch(() => null)
+      const cacheKeys = await caches.keys()
+      for (const key of cacheKeys) {
+        await caches.delete(key)
+      }
+
+      const registration = await navigator.serviceWorker
+        .register('/sw.js', { updateViaCache: 'none' })
+        .catch(() => null)
       if (!registration) return
 
-      registration.addEventListener('updatefound', () => {
-        const installing = registration.installing
-        if (!installing) return
-        installing.addEventListener('statechange', () => {
-          if (installing.state === 'activated') {
-            window.location.reload()
-          }
+      if (registration.active) {
+        registration.addEventListener('updatefound', () => {
+          registration.installing?.addEventListener('statechange', () => {
+            if (registration.installing?.state === 'activated') {
+              window.location.reload()
+            }
+          })
         })
-      })
 
-      if (registration.waiting) {
-        registration.waiting.addEventListener('statechange', () => {
-          if (registration.waiting?.state === 'activated') {
-            window.location.reload()
-          }
+        navigator.serviceWorker.addEventListener('controllerchange', () => {
+          window.location.reload()
         })
       }
-    }
-
-    window.addEventListener('load', register)
+    })()
   }, [])
 
   return <PWAInstallPrompt />
