@@ -125,16 +125,12 @@ export default function BusinessProfilePage() {
   }
 
   const handleSave = async (toastMessage?: string) => {
-    if (!shop?.id) {
-      setToast({ message: 'No se encontró el comercio', type: 'error' })
-      return
-    }
-
     setSaving(true)
     setIsSaving(true)
 
     try {
-      const updateData = {
+      const shopData = {
+        owner_id: user!.id,
         name: formData.name,
         description: formData.description || null,
         category: formData.category || null,
@@ -151,9 +147,14 @@ export default function BusinessProfilePage() {
         hours: JSON.stringify(hours),
       }
 
-      const { error } = await supabase.from('shops').update(updateData).eq('id', shop.id)
-
-      if (error) throw error
+      if (shop?.id) {
+        const { error } = await supabase.from('shops').update(shopData).eq('id', shop.id)
+        if (error) throw error
+      } else {
+        const { data: newShop, error } = await supabase.from('shops').insert(shopData).select().single()
+        if (error) throw error
+        setShop(newShop)
+      }
 
       setToast({ message: toastMessage || 'Perfil actualizado correctamente', type: 'success' })
       setIsDirty(false)

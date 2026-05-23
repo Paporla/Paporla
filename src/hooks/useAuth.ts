@@ -175,6 +175,18 @@ export function useAuth() {
       throw new Error('Error al crear usuario')
     }
 
+    if (role === 'comercio' && shopData?.name) {
+      const { error: shopError } = await supabase.from('shops').insert({
+        owner_id: data.user.id,
+        name: shopData.name,
+        description: shopData.description || null,
+        address: shopData.address || null,
+        city: shopData.city || null,
+        phone: shopData.phone || null,
+      })
+      if (shopError) console.error('[ShopCreation] Error:', shopError)
+    }
+
     notifyAdminsOfNewUser(name, role, shopData?.name).catch((err) => console.error('[Notifications] Error:', err))
 
     sendWelcomeEmail(email, name).catch((err) => console.error('[WelcomeEmail] Error:', err))
