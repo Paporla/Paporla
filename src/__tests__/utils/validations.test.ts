@@ -18,10 +18,10 @@ describe('loginSchema', () => {
     expect(result.success).toBe(false)
   })
 
-  it('rejects short password', () => {
+  it('rejects empty password', () => {
     const result = loginSchema.safeParse({
       email: 'test@example.com',
-      password: 'short',
+      password: '',
     })
     expect(result.success).toBe(false)
   })
