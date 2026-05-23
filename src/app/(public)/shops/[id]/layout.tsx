@@ -11,10 +11,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params
 
   try {
-    const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!
-    )
+    const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!)
 
     const { data: shop } = await supabase
       .from('shops')
@@ -25,7 +22,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     if (shop) {
       return {
         title: shop.name,
-        description: shop.description || `Visita ${shop.name} en ${shop.city || 'tu ciudad'} y descubre sus packs sorpresa.`,
+        description:
+          shop.description || `Visita ${shop.name} en ${shop.city || 'tu ciudad'} y descubre sus packs sorpresa.`,
         openGraph: {
           title: `${shop.name} | Paporla`,
           description: shop.description || `Visita ${shop.name} en ${shop.city || 'tu ciudad'}`,

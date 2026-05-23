@@ -1,10 +1,10 @@
-'use client';
+'use client'
 
-import { motion } from 'framer-motion';
-import Link from 'next/link';
-import { ArrowRight, Sparkles } from 'lucide-react';
-import { ShieldCheckIcon, ArrowPathIcon } from '@heroicons/react/24/outline';
-import HowItWorksSection from './HowItWorksSection';
+import { motion } from 'framer-motion'
+import Link from 'next/link'
+import { ArrowRight, Sparkles } from 'lucide-react'
+import { ShieldCheckIcon, ArrowPathIcon } from '@heroicons/react/24/outline'
+import HowItWorksSection from './HowItWorksSection'
 
 export default function HeroSection() {
   return (
@@ -17,7 +17,6 @@ export default function HeroSection() {
 
       <div className="relative z-10 max-w-6xl mx-auto px-4">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
-          
           {/* Columna Izquierda */}
           <motion.div
             initial={{ opacity: 0, x: -40 }}
@@ -28,14 +27,14 @@ export default function HeroSection() {
             <motion.div
               initial={{ opacity: 0, scale: 0 }}
               animate={{ opacity: 1, scale: 1 }}
-              transition={{ type: "spring", delay: 0.2 }}
+              transition={{ type: 'spring', delay: 0.2 }}
               className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/30 text-primary mb-6"
             >
               <Sparkles className="w-4 h-4" />
               <span className="text-sm font-medium">Lanzando en Caracas - 2026</span>
             </motion.div>
 
-            <motion.h1 
+            <motion.h1
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
@@ -56,8 +55,8 @@ export default function HeroSection() {
               transition={{ delay: 0.4 }}
               className="dark:text-gray-400 text-gray-600 text-lg max-w-md mb-8 leading-relaxed"
             >
-              Paporla conecta comercios con excedentes del dia y personas como tu. 
-              Reserva, recoge y disfruta mientras ayudas al planeta.
+              Paporla conecta comercios con excedentes del dia y personas como tu. Reserva, recoge y disfruta mientras
+              ayudas al planeta.
             </motion.p>
 
             <motion.div
@@ -66,16 +65,16 @@ export default function HeroSection() {
               transition={{ delay: 0.5 }}
               className="flex flex-col sm:flex-row gap-4 mb-8"
             >
-              <Link 
-                href="/packs" 
+              <Link
+                href="/packs"
                 className="group relative overflow-hidden inline-flex items-center justify-center gap-2 px-8 py-3 rounded-full bg-primary text-black font-semibold transition-all shadow-lg shadow-primary/30 hover:shadow-xl text-center"
               >
                 <span className="relative z-10">Ver packs cerca de mi</span>
                 <ArrowRight className="w-4 h-4 relative z-10 group-hover:translate-x-1 transition" />
                 <div className="absolute inset-0 bg-white/20 translate-x-full group-hover:translate-x-0 transition-transform duration-300" />
               </Link>
-              <Link 
-                href="/shops" 
+              <Link
+                href="/shops"
                 className="inline-flex items-center justify-center px-8 py-3 rounded-full border border-primary/40 dark:text-white text-gray-900 font-semibold hover:bg-primary/10 transition text-center"
               >
                 Soy comercio
@@ -104,5 +103,5 @@ export default function HeroSection() {
         </div>
       </div>
     </section>
-  );
+  )
 }

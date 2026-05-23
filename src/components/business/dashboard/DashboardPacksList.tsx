@@ -20,7 +20,9 @@ export default function DashboardPacksList({ packs }: Props) {
           Mis Packs
         </h2>
         <Link href="/business/packs">
-          <Button variant="outline" size="sm">Ver todos</Button>
+          <Button variant="outline" size="sm">
+            Ver todos
+          </Button>
         </Link>
       </div>
 
@@ -29,7 +31,9 @@ export default function DashboardPacksList({ packs }: Props) {
           <Package className="w-12 h-12 text-gray-600 mx-auto mb-3" />
           <p className="text-gray-400">No tienes packs creados</p>
           <Link href="/business/packs/new">
-            <Button size="sm" className="mt-3">Crear mi primer pack</Button>
+            <Button size="sm" className="mt-3">
+              Crear mi primer pack
+            </Button>
           </Link>
         </div>
       ) : (
@@ -44,7 +48,9 @@ export default function DashboardPacksList({ packs }: Props) {
               <Link href={`/business/packs/${pack.id}`}>
                 <div className="flex items-center justify-between p-3 rounded-xl dark:bg-white/5 bg-gray-50 dark:hover:bg-white/10 hover:bg-gray-100 transition-all cursor-pointer group">
                   <div>
-                    <p className="font-medium dark:text-white text-gray-900 group-hover:text-primary transition-colors">{pack.title}</p>
+                    <p className="font-medium dark:text-white text-gray-900 group-hover:text-primary transition-colors">
+                      {pack.title}
+                    </p>
                     <p className="text-xs dark:text-gray-500 text-gray-400 mt-0.5">
                       Stock: {pack.remaining_stock} | {pack.is_active ? 'Activo' : 'Inactivo'}
                     </p>

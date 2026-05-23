@@ -1,36 +1,33 @@
-'use client';
+'use client'
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react'
 import Image from 'next/image'
-import Link from 'next/link';
-import { motion } from 'framer-motion';
-import {
-  Heart, Mail, MapPin, Clock, Phone,
-  ChevronUp, Shield, FileText, Cookie, Scale
-} from 'lucide-react';
+import Link from 'next/link'
+import { motion } from 'framer-motion'
+import { Heart, Mail, MapPin, Clock, Phone, ChevronUp, Shield, FileText, Cookie, Scale } from 'lucide-react'
 
 export default function Footer() {
-  const [showScrollTop, setShowScrollTop] = useState(false);
-  const currentYear = new Date().getFullYear();
+  const [showScrollTop, setShowScrollTop] = useState(false)
+  const currentYear = new Date().getFullYear()
 
   useEffect(() => {
     const handleScroll = () => {
-      setShowScrollTop(window.scrollY > 500);
-    };
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+      setShowScrollTop(window.scrollY > 500)
+    }
+    window.addEventListener('scroll', handleScroll)
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
 
   const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
 
   const legalLinks = [
     { href: '/legal/terminos', label: 'Terminos y Condiciones', icon: FileText },
     { href: '/legal/privacidad', label: 'Politica de Privacidad', icon: Shield },
     { href: '/legal/cookies', label: 'Politica de Cookies', icon: Cookie },
     { href: '/legal/legal-bases', label: 'Bases Legales', icon: Scale },
-  ];
+  ]
 
   const companyLinks = [
     { href: '/packs', label: 'Explorar packs' },
@@ -38,7 +35,7 @@ export default function Footer() {
     { href: '/about', label: 'Sobre nosotros' },
     { href: '/faq', label: 'Preguntas frecuentes' },
     { href: '/contacto', label: 'Contacto' },
-  ];
+  ]
 
   return (
     <>
@@ -61,9 +58,7 @@ export default function Footer() {
         </div>
 
         <div className="relative max-w-6xl mx-auto px-4 py-12">
-
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
-
             <div className="flex flex-col items-center md:items-start">
               <Link href="/" className="flex items-center gap-2 group mb-3">
                 <Image
@@ -73,12 +68,11 @@ export default function Footer() {
                   height={32}
                   className="w-8 h-8 object-contain group-hover:scale-105 transition-transform duration-300"
                 />
-                <span className="font-bold text-xl dark:text-white text-gray-900">
-                  Paporla
-                </span>
+                <span className="font-bold text-xl dark:text-white text-gray-900">Paporla</span>
               </Link>
               <p className="dark:text-gray-400 text-gray-600 text-sm leading-relaxed text-center md:text-left">
-                Rescatando comida,<br />
+                Rescatando comida,
+                <br />
                 alimentando esperanzas.
               </p>
             </div>
@@ -156,16 +150,28 @@ export default function Footer() {
             </p>
 
             <div className="flex gap-6">
-              <Link href="/legal/terminos" className="dark:text-gray-500 text-gray-400 hover:text-primary transition-colors text-xs">
+              <Link
+                href="/legal/terminos"
+                className="dark:text-gray-500 text-gray-400 hover:text-primary transition-colors text-xs"
+              >
                 Terminos
               </Link>
-              <Link href="/legal/privacidad" className="dark:text-gray-500 text-gray-400 hover:text-primary transition-colors text-xs">
+              <Link
+                href="/legal/privacidad"
+                className="dark:text-gray-500 text-gray-400 hover:text-primary transition-colors text-xs"
+              >
                 Privacidad
               </Link>
-              <Link href="/legal/cookies" className="dark:text-gray-500 text-gray-400 hover:text-primary transition-colors text-xs">
+              <Link
+                href="/legal/cookies"
+                className="dark:text-gray-500 text-gray-400 hover:text-primary transition-colors text-xs"
+              >
                 Cookies
               </Link>
-              <Link href="/contacto" className="dark:text-gray-500 text-gray-400 hover:text-primary transition-colors text-xs">
+              <Link
+                href="/contacto"
+                className="dark:text-gray-500 text-gray-400 hover:text-primary transition-colors text-xs"
+              >
                 Contacto
               </Link>
             </div>
@@ -175,10 +181,7 @@ export default function Footer() {
               className="dark:text-gray-500 text-gray-400 text-xs flex items-center gap-1"
             >
               Hecho con
-              <motion.span
-                animate={{ scale: [1, 1.2, 1] }}
-                transition={{ repeat: Infinity, duration: 1.5 }}
-              >
+              <motion.span animate={{ scale: [1, 1.2, 1] }} transition={{ repeat: Infinity, duration: 1.5 }}>
                 <Heart className="w-3 h-3 text-primary fill-primary" />
               </motion.span>
               para reducir el desperdicio alimentario
@@ -187,5 +190,5 @@ export default function Footer() {
         </div>
       </footer>
     </>
-  );
+  )
 }

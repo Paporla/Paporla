@@ -38,8 +38,14 @@ export default function PackCheckoutSummary({
   reserving,
 }: PackCheckoutSummaryProps) {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 dark:bg-black/80 bg-black/40 backdrop-blur-sm" onClick={onClose}>
-      <div className="relative max-w-md w-full dark:bg-black/90 bg-white backdrop-blur-xl rounded-2xl dark:border-white/10 border-gray-200 shadow-2xl overflow-hidden" onClick={(e) => e.stopPropagation()}>
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 dark:bg-black/80 bg-black/40 backdrop-blur-sm"
+      onClick={onClose}
+    >
+      <div
+        className="relative max-w-md w-full dark:bg-black/90 bg-white backdrop-blur-xl rounded-2xl dark:border-white/10 border-gray-200 shadow-2xl overflow-hidden"
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="text-center pt-8 pb-4 bg-gradient-to-b from-primary/10 to-transparent">
           <CreditCard className="w-12 h-12 text-primary mx-auto mb-3" />
           <h2 className="text-2xl font-bold dark:text-white text-gray-900">Confirmar Reserva</h2>
@@ -61,7 +67,9 @@ export default function PackCheckoutSummary({
             <div className="flex-1 min-w-0">
               <p className="dark:text-white text-gray-900 font-medium truncate">{pack.title}</p>
               <p className="text-xs dark:text-gray-400 text-gray-600">{pack.shop.name}</p>
-              <p className="text-sm text-primary font-bold mt-1">{formatPrice(pack.price_cents)} x {quantity}</p>
+              <p className="text-sm text-primary font-bold mt-1">
+                {formatPrice(pack.price_cents)} x {quantity}
+              </p>
             </div>
           </div>
 
@@ -74,7 +82,12 @@ export default function PackCheckoutSummary({
           {/* Metodo de pago */}
           <div className="flex items-center gap-2 text-sm dark:text-gray-400 text-gray-600">
             <CreditCard className="w-4 h-4 text-primary" />
-            <span>Metodo de pago: <strong className="dark:text-white text-gray-900">{paymentMethod === 'cash' ? 'Efectivo' : 'Demo'}</strong></span>
+            <span>
+              Metodo de pago:{' '}
+              <strong className="dark:text-white text-gray-900">
+                {paymentMethod === 'cash' ? 'Efectivo' : 'Demo'}
+              </strong>
+            </span>
           </div>
 
           {/* Info de recogida */}
@@ -83,7 +96,10 @@ export default function PackCheckoutSummary({
               <Calendar className="w-4 h-4 text-primary inline mr-1" />
               {pack.pickup_date && <span>{formatDate(pack.pickup_date)}</span>}
               {(pack.pickup_start_time || pack.pickup_end_time) && (
-                <span> de {pack.pickup_start_time?.slice(0,5)} a {pack.pickup_end_time?.slice(0,5)}</span>
+                <span>
+                  {' '}
+                  de {pack.pickup_start_time?.slice(0, 5)} a {pack.pickup_end_time?.slice(0, 5)}
+                </span>
               )}
             </div>
           )}

@@ -1,19 +1,19 @@
-'use client';
+'use client'
 
-import { useState } from 'react';
-import { Search, Filter } from 'lucide-react';
-import ReservationCard from './ReservationCard';
-import ReservationListSkeleton from './ReservationListSkeleton';
-import EmptyState from '@/components/ui/EmptyState';
-import type { ReservationWithDetails } from '@/types/reservation';
+import { useState } from 'react'
+import { Search, Filter } from 'lucide-react'
+import ReservationCard from './ReservationCard'
+import ReservationListSkeleton from './ReservationListSkeleton'
+import EmptyState from '@/components/ui/EmptyState'
+import type { ReservationWithDetails } from '@/types/reservation'
 
 interface ReservationListProps {
-  reservations: ReservationWithDetails[];
-  loading?: boolean;
-  onCancel?: (id: string) => void;
-  onConfirm?: (id: string) => void;
-  onComplete?: (id: string) => void;
-  showUserDetails?: boolean;
+  reservations: ReservationWithDetails[]
+  loading?: boolean
+  onCancel?: (id: string) => void
+  onConfirm?: (id: string) => void
+  onComplete?: (id: string) => void
+  showUserDetails?: boolean
 }
 
 const statusOptions = [
@@ -24,7 +24,7 @@ const statusOptions = [
   { value: 'ready_pickup', label: 'Listas para recoger' },
   { value: 'completed', label: 'Completadas' },
   { value: 'cancelled', label: 'Canceladas' },
-];
+]
 
 export default function ReservationList({
   reservations,
@@ -34,41 +34,46 @@ export default function ReservationList({
   onComplete,
   showUserDetails = false,
 }: ReservationListProps) {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState('all');
+  const [searchTerm, setSearchTerm] = useState('')
+  const [statusFilter, setStatusFilter] = useState('all')
 
   const filteredReservations = reservations.filter((res) => {
-    const matchesSearch = searchTerm === '' ||
+    const matchesSearch =
+      searchTerm === '' ||
       res.pack.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      res.shop.name.toLowerCase().includes(searchTerm.toLowerCase());
+      res.shop.name.toLowerCase().includes(searchTerm.toLowerCase())
 
-    let matchesStatus = true;
+    let matchesStatus = true
     if (statusFilter === 'active') {
-      matchesStatus = ['pending', 'confirmed', 'ready_pickup'].includes(res.status);
+      matchesStatus = ['pending', 'confirmed', 'ready_pickup'].includes(res.status)
     } else if (statusFilter !== 'all') {
-      matchesStatus = res.status === statusFilter;
+      matchesStatus = res.status === statusFilter
     }
 
-    return matchesSearch && matchesStatus;
-  });
+    return matchesSearch && matchesStatus
+  })
 
   if (loading) {
-    return <ReservationListSkeleton />;
+    return <ReservationListSkeleton />
   }
 
   if (filteredReservations.length === 0) {
     return (
       <EmptyState
         type="reservations"
-        action={searchTerm || statusFilter !== 'all' ? {
-          label: 'Limpiar filtros',
-          onClick: () => {
-            setSearchTerm('');
-            setStatusFilter('all');
-          },
-        } : undefined}
+        action={
+          searchTerm || statusFilter !== 'all'
+            ? {
+                label: 'Limpiar filtros',
+                onClick: () => {
+                  setSearchTerm('')
+                  setStatusFilter('all')
+                },
+              }
+            : undefined
+        }
       />
-    );
+    )
   }
 
   return (
@@ -94,7 +99,9 @@ export default function ReservationList({
             className="px-4 py-2.5 dark:bg-dark-muted bg-gray-50 dark:border-dark-border border-gray-200 rounded-xl text-sm dark:text-white text-gray-900 focus:border-primary focus:outline-none transition-all"
           >
             {statusOptions.map((opt) => (
-              <option key={opt.value} value={opt.value}>{opt.label}</option>
+              <option key={opt.value} value={opt.value}>
+                {opt.label}
+              </option>
             ))}
           </select>
         </div>
@@ -114,5 +121,5 @@ export default function ReservationList({
         ))}
       </div>
     </div>
-  );
+  )
 }

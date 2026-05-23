@@ -61,9 +61,7 @@ describe('PackGrid', () => {
 
   it('calls onReserve when a pack card is clicked', async () => {
     const handleReserve = vi.fn()
-    const { container } = render(
-      <PackGrid packs={mockPacks} loading={false} onReserve={handleReserve} />
-    )
+    const { container } = render(<PackGrid packs={mockPacks} loading={false} onReserve={handleReserve} />)
     const firstCard = container.querySelector('[data-testid="pack-card"]')
     if (firstCard) {
       firstCard.dispatchEvent(new MouseEvent('click', { bubbles: true }))

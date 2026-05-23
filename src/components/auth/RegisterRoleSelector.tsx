@@ -25,12 +25,18 @@ export default function RegisterRoleSelector({ role, onChange }: Props) {
           }`}
         >
           <div className="flex items-center justify-between mb-2">
-              <div className={`w-10 h-10 rounded-xl ${role === 'user' ? 'bg-primary/20' : 'dark:bg-white/10 bg-gray-200'} flex items-center justify-center`}>
-              <UserCheck className={`w-5 h-5 ${role === 'user' ? 'text-primary' : 'dark:text-gray-500 text-gray-400'}`} />
+            <div
+              className={`w-10 h-10 rounded-xl ${role === 'user' ? 'bg-primary/20' : 'dark:bg-white/10 bg-gray-200'} flex items-center justify-center`}
+            >
+              <UserCheck
+                className={`w-5 h-5 ${role === 'user' ? 'text-primary' : 'dark:text-gray-500 text-gray-400'}`}
+              />
             </div>
             {role === 'user' && <CheckCircle className="w-4 h-4 text-primary" />}
           </div>
-          <div className={`font-semibold ${role === 'user' ? 'text-primary' : 'dark:text-white text-gray-900'}`}>Usuario</div>
+          <div className={`font-semibold ${role === 'user' ? 'text-primary' : 'dark:text-white text-gray-900'}`}>
+            Usuario
+          </div>
           <p className="text-xs dark:text-gray-400 text-gray-600 mt-1">Reserva packs sorpresa</p>
         </motion.button>
 
@@ -46,12 +52,18 @@ export default function RegisterRoleSelector({ role, onChange }: Props) {
           }`}
         >
           <div className="flex items-center justify-between mb-2">
-              <div className={`w-10 h-10 rounded-xl ${role === 'comercio' ? 'bg-primary/20' : 'dark:bg-white/10 bg-gray-200'} flex items-center justify-center`}>
-              <StoreIcon className={`w-5 h-5 ${role === 'comercio' ? 'text-primary' : 'dark:text-gray-500 text-gray-400'}`} />
+            <div
+              className={`w-10 h-10 rounded-xl ${role === 'comercio' ? 'bg-primary/20' : 'dark:bg-white/10 bg-gray-200'} flex items-center justify-center`}
+            >
+              <StoreIcon
+                className={`w-5 h-5 ${role === 'comercio' ? 'text-primary' : 'dark:text-gray-500 text-gray-400'}`}
+              />
             </div>
             {role === 'comercio' && <CheckCircle className="w-4 h-4 text-primary" />}
           </div>
-          <div className={`font-semibold ${role === 'comercio' ? 'text-primary' : 'dark:text-white text-gray-900'}`}>Comercio</div>
+          <div className={`font-semibold ${role === 'comercio' ? 'text-primary' : 'dark:text-white text-gray-900'}`}>
+            Comercio
+          </div>
           <p className="text-xs dark:text-gray-400 text-gray-600 mt-1">Vende tus excedentes</p>
         </motion.button>
       </div>

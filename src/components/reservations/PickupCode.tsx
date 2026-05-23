@@ -25,16 +25,12 @@ export default function PickupCode({ code }: PickupCodeProps) {
     <div className="bg-primary/10 border border-primary/30 rounded-lg p-3 inline-block">
       <p className="text-xs text-gray-400">Código de recogida</p>
       <div className="flex items-center gap-2">
-        <p className="text-xl font-bold text-primary tracking-wider font-mono">
-          {code}
-        </p>
+        <p className="text-xl font-bold text-primary tracking-wider font-mono">{code}</p>
         <Button variant="outline" size="sm" onClick={handleCopy}>
           {copied ? '✓' : '📋'}
         </Button>
       </div>
-      {copied && (
-        <Toast message="Código copiado" type="success" onClose={() => setCopied(false)} />
-      )}
+      {copied && <Toast message="Código copiado" type="success" onClose={() => setCopied(false)} />}
     </div>
   )
 }

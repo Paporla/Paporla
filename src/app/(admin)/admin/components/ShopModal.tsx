@@ -1,33 +1,33 @@
-'use client';
+'use client'
 
-import { useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { X, Store, CheckCircle, Ban } from 'lucide-react';
-import Button from '@/components/ui/Button';
-import { Shop } from '@/types/shop';
+import { useEffect } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { X, Store, CheckCircle, Ban } from 'lucide-react'
+import Button from '@/components/ui/Button'
+import { Shop } from '@/types/shop'
 
 interface ShopModalProps {
-  isOpen: boolean;
-  shop: Shop | null;
-  onClose: () => void;
-  onVerify: (shopId: string, verified: boolean) => void;
-  onBan?: (shopId: string, banned: boolean) => void;
+  isOpen: boolean
+  shop: Shop | null
+  onClose: () => void
+  onVerify: (shopId: string, verified: boolean) => void
+  onBan?: (shopId: string, banned: boolean) => void
 }
 
 export default function ShopModal({ isOpen, shop, onClose, onVerify, onBan }: ShopModalProps) {
   // Prevenir scroll del body cuando el modal está abierto
   useEffect(() => {
     if (isOpen) {
-      document.body.style.overflow = 'hidden';
+      document.body.style.overflow = 'hidden'
     } else {
-      document.body.style.overflow = 'unset';
+      document.body.style.overflow = 'unset'
     }
     return () => {
-      document.body.style.overflow = 'unset';
-    };
-  }, [isOpen]);
+      document.body.style.overflow = 'unset'
+    }
+  }, [isOpen])
 
-  if (!shop) return null;
+  if (!shop) return null
 
   return (
     <AnimatePresence>
@@ -41,7 +41,7 @@ export default function ShopModal({ isOpen, shop, onClose, onVerify, onBan }: Sh
             onClick={onClose}
             className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[100]"
           />
-          
+
           {/* Modal centrado - FORZADO */}
           <div className="fixed inset-0 z-[101] flex items-center justify-center pointer-events-none">
             <motion.div
@@ -96,13 +96,10 @@ export default function ShopModal({ isOpen, shop, onClose, onVerify, onBan }: Sh
 
                   <div className="border-t dark:border-white/10 border-gray-200 pt-4 space-y-3">
                     <p className="text-sm dark:text-gray-400 text-gray-600 mb-2">Acciones</p>
-                    
+
                     <div className="flex gap-3">
                       {!shop.verified ? (
-                        <Button
-                          onClick={() => onVerify(shop.id, true)}
-                          className="flex-1 flex items-center gap-2"
-                        >
+                        <Button onClick={() => onVerify(shop.id, true)} className="flex-1 flex items-center gap-2">
                           <CheckCircle className="w-4 h-4" />
                           Verificar comercio
                         </Button>
@@ -155,5 +152,5 @@ export default function ShopModal({ isOpen, shop, onClose, onVerify, onBan }: Sh
         </>
       )}
     </AnimatePresence>
-  );
+  )
 }

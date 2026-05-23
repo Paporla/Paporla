@@ -1,25 +1,25 @@
-'use client';
+'use client'
 
-import { useState, useRef, useEffect } from 'react';
-import { Bell } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { useNotifications } from '@/hooks/useNotifications';
-import NotificationDropdown from './NotificationDropdown';
+import { useState, useRef, useEffect } from 'react'
+import { Bell } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { useNotifications } from '@/hooks/useNotifications'
+import NotificationDropdown from './NotificationDropdown'
 
 export default function NotificationBell() {
-  const [isOpen, setIsOpen] = useState(false);
-  const { unreadCount } = useNotifications();
-  const dropdownRef = useRef<HTMLDivElement>(null);
+  const [isOpen, setIsOpen] = useState(false)
+  const { unreadCount } = useNotifications()
+  const dropdownRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setIsOpen(false);
+        setIsOpen(false)
       }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
 
   return (
     <div className="relative" ref={dropdownRef}>
@@ -52,5 +52,5 @@ export default function NotificationBell() {
         )}
       </AnimatePresence>
     </div>
-  );
+  )
 }

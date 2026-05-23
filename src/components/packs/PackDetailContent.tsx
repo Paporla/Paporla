@@ -1,15 +1,15 @@
-'use client';
+'use client'
 
-import { CheckCircle, Leaf } from 'lucide-react';
-import { formatPrice } from '@/lib/utils/formatPrice';
+import { CheckCircle, Leaf } from 'lucide-react'
+import { formatPrice } from '@/lib/utils/formatPrice'
 
 interface PackDetailContentProps {
-  title: string;
-  description: string | null;
-  items?: string[] | null;
-  priceCents: number;
-  originalPriceCents: number | null;
-  endsAt: string | null;
+  title: string
+  description: string | null
+  items?: string[] | null
+  priceCents: number
+  originalPriceCents: number | null
+  endsAt: string | null
 }
 
 export default function PackDetailContent({
@@ -20,18 +20,14 @@ export default function PackDetailContent({
   originalPriceCents,
   endsAt,
 }: PackDetailContentProps) {
-  const savings = originalPriceCents
-    ? ((originalPriceCents - priceCents) / 100).toFixed(2)
-    : null;
+  const savings = originalPriceCents ? ((originalPriceCents - priceCents) / 100).toFixed(2) : null
 
   return (
     <div className="space-y-6">
       {/* Titulo y descripcion */}
       <div>
         <h1 className="text-xl font-black dark:text-white text-gray-900 mb-2">{title}</h1>
-        {description && (
-          <p className="text-sm dark:text-gray-400 text-gray-600 leading-relaxed">{description}</p>
-        )}
+        {description && <p className="text-sm dark:text-gray-400 text-gray-600 leading-relaxed">{description}</p>}
       </div>
 
       {/* Ahorro */}
@@ -71,11 +67,9 @@ export default function PackDetailContent({
       {/* Valido hasta */}
       {endsAt && (
         <div className="bg-yellow-500/5 border border-yellow-500/20 rounded-xl p-4">
-          <p className="text-xs text-yellow-400">
-            Valido hasta: {new Date(endsAt).toLocaleDateString()}
-          </p>
+          <p className="text-xs text-yellow-400">Valido hasta: {new Date(endsAt).toLocaleDateString()}</p>
         </div>
       )}
     </div>
-  );
+  )
 }

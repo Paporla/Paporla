@@ -1,18 +1,16 @@
-'use client';
+'use client'
 
-import { useState } from 'react';
-import { useNotifications } from '@/hooks/useNotifications';
-import NotificationCard from './NotificationCard';
-import Button from '@/components/ui/Button';
-import EmptyState from '@/components/ui/EmptyState';
+import { useState } from 'react'
+import { useNotifications } from '@/hooks/useNotifications'
+import NotificationCard from './NotificationCard'
+import Button from '@/components/ui/Button'
+import EmptyState from '@/components/ui/EmptyState'
 
 export default function NotificationList() {
-  const { notifications, loading, markAsRead, markAllAsRead, deleteNotification } = useNotifications();
-  const [filter, setFilter] = useState<'all' | 'unread'>('all');
+  const { notifications, loading, markAsRead, markAllAsRead, deleteNotification } = useNotifications()
+  const [filter, setFilter] = useState<'all' | 'unread'>('all')
 
-  const filteredNotifications = filter === 'all' 
-    ? notifications 
-    : notifications.filter(n => !n.is_read);
+  const filteredNotifications = filter === 'all' ? notifications : notifications.filter((n) => !n.is_read)
 
   if (loading) {
     return (
@@ -23,7 +21,7 @@ export default function NotificationList() {
           </div>
         ))}
       </div>
-    );
+    )
   }
 
   if (notifications.length === 0) {
@@ -32,10 +30,10 @@ export default function NotificationList() {
         type="reservations"
         action={{
           label: 'Explorar packs',
-          onClick: () => window.location.href = '/packs',
+          onClick: () => (window.location.href = '/packs'),
         }}
       />
-    );
+    )
   }
 
   return (
@@ -46,8 +44,8 @@ export default function NotificationList() {
           <button
             onClick={() => setFilter('all')}
             className={`px-3 py-1.5 rounded-lg text-sm transition-all ${
-              filter === 'all' 
-                ? 'bg-primary/20 text-primary' 
+              filter === 'all'
+                ? 'bg-primary/20 text-primary'
                 : 'dark:text-gray-500 text-gray-400 dark:hover:text-white hover:text-gray-900'
             }`}
           >
@@ -56,8 +54,8 @@ export default function NotificationList() {
           <button
             onClick={() => setFilter('unread')}
             className={`px-3 py-1.5 rounded-lg text-sm transition-all ${
-              filter === 'unread' 
-                ? 'bg-primary/20 text-primary' 
+              filter === 'unread'
+                ? 'bg-primary/20 text-primary'
                 : 'dark:text-gray-500 text-gray-400 dark:hover:text-white hover:text-gray-900'
             }`}
           >
@@ -81,5 +79,5 @@ export default function NotificationList() {
         ))}
       </div>
     </div>
-  );
+  )
 }

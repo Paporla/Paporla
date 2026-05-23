@@ -1,8 +1,12 @@
 'use client'
 
 interface Filters {
-  minPrice: number; maxPrice: number; showAvailableOnly: boolean
-  city: string; location: { lat: number; lng: number } | null; radiusKm: number
+  minPrice: number
+  maxPrice: number
+  showAvailableOnly: boolean
+  city: string
+  location: { lat: number; lng: number } | null
+  radiusKm: number
 }
 
 interface Props {
@@ -19,15 +23,20 @@ export default function ActiveFilterChips({ filters, onRemove }: Props) {
     { show: filters.showAvailableOnly, label: 'Solo disponibles', key: 'showAvailableOnly' },
   ]
 
-  const visible = chips.filter(c => c.show)
+  const visible = chips.filter((c) => c.show)
   if (visible.length === 0) return null
 
   return (
     <div className="flex flex-wrap gap-2">
-      {visible.map(chip => (
-        <span key={chip.key} className="px-3 py-1 rounded-full bg-primary/10 text-primary text-sm flex items-center gap-1">
+      {visible.map((chip) => (
+        <span
+          key={chip.key}
+          className="px-3 py-1 rounded-full bg-primary/10 text-primary text-sm flex items-center gap-1"
+        >
           {chip.label}
-          <button onClick={() => onRemove(chip.key)} className="hover:text-red-500">&times;</button>
+          <button onClick={() => onRemove(chip.key)} className="hover:text-red-500">
+            &times;
+          </button>
         </span>
       ))}
     </div>

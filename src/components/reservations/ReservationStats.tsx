@@ -1,13 +1,13 @@
-'use client';
+'use client'
 
-import { motion } from 'framer-motion';
-import { ShoppingBag, Clock, CheckCircle, XCircle } from 'lucide-react';
+import { motion } from 'framer-motion'
+import { ShoppingBag, Clock, CheckCircle, XCircle } from 'lucide-react'
 
 interface ReservationStatsProps {
-  total: number;
-  active: number;
-  completed: number;
-  cancelled: number;
+  total: number
+  active: number
+  completed: number
+  cancelled: number
 }
 
 export default function ReservationStats({ total, active, completed, cancelled }: ReservationStatsProps) {
@@ -16,7 +16,7 @@ export default function ReservationStats({ total, active, completed, cancelled }
     { label: 'Activas', value: active, icon: Clock, color: 'text-yellow-400' },
     { label: 'Completadas', value: completed, icon: CheckCircle, color: 'text-green-400' },
     { label: 'Canceladas', value: cancelled, icon: XCircle, color: 'text-red-400' },
-  ];
+  ]
 
   return (
     <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -34,5 +34,5 @@ export default function ReservationStats({ total, active, completed, cancelled }
         </motion.div>
       ))}
     </div>
-  );
+  )
 }

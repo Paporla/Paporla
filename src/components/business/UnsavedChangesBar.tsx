@@ -1,13 +1,13 @@
-'use client';
+'use client'
 
-import { Save } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { Save } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
 
 interface UnsavedChangesBarProps {
-  isDirty: boolean;
-  onSave: () => void;
-  onDiscard: () => void;
-  saving: boolean;
+  isDirty: boolean
+  onSave: () => void
+  onDiscard: () => void
+  saving: boolean
 }
 
 export default function UnsavedChangesBar({ isDirty, onSave, onDiscard, saving }: UnsavedChangesBarProps) {
@@ -25,7 +25,10 @@ export default function UnsavedChangesBar({ isDirty, onSave, onDiscard, saving }
             <span className="text-sm text-primary font-medium">Tienes cambios sin guardar</span>
           </div>
           <div className="flex items-center gap-3">
-            <button onClick={onDiscard} className="text-xs dark:text-gray-400 text-gray-600 dark:hover:text-white hover:text-gray-900 transition-colors">
+            <button
+              onClick={onDiscard}
+              className="text-xs dark:text-gray-400 text-gray-600 dark:hover:text-white hover:text-gray-900 transition-colors"
+            >
               Descartar
             </button>
             <button
@@ -40,5 +43,5 @@ export default function UnsavedChangesBar({ isDirty, onSave, onDiscard, saving }
         </motion.div>
       )}
     </AnimatePresence>
-  );
+  )
 }

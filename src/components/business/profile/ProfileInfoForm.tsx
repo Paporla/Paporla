@@ -1,7 +1,7 @@
-'use client';
+'use client'
 
-import { Building2, Store, Globe, MapPin, Phone, Link } from 'lucide-react';
-import Input from '@/components/ui/Input';
+import { Building2, Store, Globe, MapPin, Phone, Link } from 'lucide-react'
+import Input from '@/components/ui/Input'
 
 const CATEGORIES = [
   { id: 'bakery', name: 'Panadería' },
@@ -14,7 +14,7 @@ const CATEGORIES = [
   { id: 'supermarket', name: 'Supermercado' },
   { id: 'fastfood', name: 'Comida rápida' },
   { id: 'other', name: 'Otro' },
-];
+]
 
 const COUNTRIES = [
   { code: 'AR', name: 'Argentina' },
@@ -23,21 +23,21 @@ const COUNTRIES = [
   { code: 'PE', name: 'Perú' },
   { code: 'CL', name: 'Chile' },
   { code: 'VE', name: 'Venezuela' },
-];
+]
 
 interface ProfileInfoFormProps {
   formData: {
-    name: string;
-    description: string;
-    category: string;
-    address: string;
-    city: string;
-    country: string;
-    phone: string;
-    website: string;
-    instagram: string;
-  };
-  updateForm: (field: string, value: string) => void;
+    name: string
+    description: string
+    category: string
+    address: string
+    city: string
+    country: string
+    phone: string
+    website: string
+    instagram: string
+  }
+  updateForm: (field: string, value: string) => void
 }
 
 export default function ProfileInfoForm({ formData, updateForm }: ProfileInfoFormProps) {
@@ -159,5 +159,5 @@ export default function ProfileInfoForm({ formData, updateForm }: ProfileInfoFor
         placeholder="@tu_negocio"
       />
     </div>
-  );
+  )
 }

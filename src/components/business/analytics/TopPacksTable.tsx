@@ -1,19 +1,19 @@
-'use client';
+'use client'
 
-import { motion } from 'framer-motion';
-import Link from 'next/link';
-import { Package, TrendingUp, TrendingDown, Eye } from 'lucide-react';
+import { motion } from 'framer-motion'
+import Link from 'next/link'
+import { Package, TrendingUp, TrendingDown, Eye } from 'lucide-react'
 
 interface TopPack {
-  id: string;
-  title: string;
-  totalSold: number;
-  revenue: number;
-  cancellationRate: number;
+  id: string
+  title: string
+  totalSold: number
+  revenue: number
+  cancellationRate: number
 }
 
 interface TopPacksTableProps {
-  packs: TopPack[];
+  packs: TopPack[]
 }
 
 export default function TopPacksTable({ packs }: TopPacksTableProps) {
@@ -26,13 +26,15 @@ export default function TopPacksTable({ packs }: TopPacksTableProps) {
         </div>
         <div className="text-center py-8">
           <p className="dark:text-gray-500 text-gray-400 text-sm">No hay datos suficientes</p>
-          <p className="text-xs dark:text-gray-600 text-gray-400 mt-1">Los packs apareceran aqui cuando tengas ventas</p>
+          <p className="text-xs dark:text-gray-600 text-gray-400 mt-1">
+            Los packs apareceran aqui cuando tengas ventas
+          </p>
         </div>
       </div>
-    );
+    )
   }
 
-  const maxSold = packs[0]?.totalSold || 1;
+  const maxSold = packs[0]?.totalSold || 1
 
   return (
     <motion.div
@@ -50,12 +52,17 @@ export default function TopPacksTable({ packs }: TopPacksTableProps) {
           <Link key={pack.id} href={`/business/packs/${pack.id}`} className="block group">
             <div className="flex items-center gap-3 p-2.5 rounded-xl dark:hover:bg-white/5 hover:bg-gray-50 transition-colors">
               {/* Posición */}
-              <div className={`w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold ${
-                idx === 0 ? 'bg-amber-500/20 text-amber-400' :
-                idx === 1 ? 'bg-gray-400/20 text-gray-400' :
-                idx === 2 ? 'bg-orange-500/20 text-orange-400' :
-                'bg-dark-muted text-gray-500'
-              }`}>
+              <div
+                className={`w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold ${
+                  idx === 0
+                    ? 'bg-amber-500/20 text-amber-400'
+                    : idx === 1
+                      ? 'bg-gray-400/20 text-gray-400'
+                      : idx === 2
+                        ? 'bg-orange-500/20 text-orange-400'
+                        : 'bg-dark-muted text-gray-500'
+                }`}
+              >
                 {idx + 1}
               </div>
 
@@ -82,9 +89,11 @@ export default function TopPacksTable({ packs }: TopPacksTableProps) {
 
               {/* Tasa de cancelación */}
               {pack.cancellationRate > 0 && (
-                <div className={`flex items-center gap-1 text-xs ${
-                  pack.cancellationRate > 20 ? 'text-red-400' : 'text-gray-500'
-                }`}>
+                <div
+                  className={`flex items-center gap-1 text-xs ${
+                    pack.cancellationRate > 20 ? 'text-red-400' : 'text-gray-500'
+                  }`}
+                >
                   {pack.cancellationRate > 20 ? (
                     <TrendingDown className="w-3 h-3" />
                   ) : (
@@ -100,5 +109,5 @@ export default function TopPacksTable({ packs }: TopPacksTableProps) {
         ))}
       </div>
     </motion.div>
-  );
+  )
 }

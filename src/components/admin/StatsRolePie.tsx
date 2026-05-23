@@ -6,7 +6,9 @@ import { ChartTooltip } from './ChartTooltip'
 
 const COLORS = ['#27d3b8', '#ff8a3c', '#8b5cf6', '#3b82f6']
 
-interface Props { data: Array<{ name: string; value: number }> }
+interface Props {
+  data: Array<{ name: string; value: number }>
+}
 
 export default function StatsRolePie({ data }: Props) {
   return (
@@ -15,9 +17,20 @@ export default function StatsRolePie({ data }: Props) {
       <div className="flex items-center justify-center">
         <ResponsiveContainer width="100%" height={280}>
           <PieChart>
-            <Pie data={data} cx="50%" cy="50%" innerRadius={60} outerRadius={100} paddingAngle={4} dataKey="value"
-              animationBegin={200} animationDuration={1000}>
-              {data.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} stroke="transparent" />)}
+            <Pie
+              data={data}
+              cx="50%"
+              cy="50%"
+              innerRadius={60}
+              outerRadius={100}
+              paddingAngle={4}
+              dataKey="value"
+              animationBegin={200}
+              animationDuration={1000}
+            >
+              {data.map((_, i) => (
+                <Cell key={i} fill={COLORS[i % COLORS.length]} stroke="transparent" />
+              ))}
             </Pie>
             <Tooltip content={<ChartTooltip />} />
           </PieChart>

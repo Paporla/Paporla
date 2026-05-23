@@ -5,7 +5,9 @@ import Card from '@/components/ui/Card'
 import { ChartTooltip } from './ChartTooltip'
 import { Calendar, UserCheck } from 'lucide-react'
 
-interface Props { data: Array<{ name: string; reservations: number }> }
+interface Props {
+  data: Array<{ name: string; reservations: number }>
+}
 
 export default function StatsTopShops({ data }: Props) {
   return (
@@ -27,21 +29,38 @@ export default function StatsTopShops({ data }: Props) {
           <BarChart data={data} layout="vertical" margin={{ left: 20 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="#1a1a1a" horizontal={false} />
             <XAxis type="number" stroke="#333" fontSize={11} tickLine={false} axisLine={false} allowDecimals={false} />
-            <YAxis dataKey="name" type="category" stroke="#333" fontSize={11} tickLine={false} axisLine={false} width={120} />
+            <YAxis
+              dataKey="name"
+              type="category"
+              stroke="#333"
+              fontSize={11}
+              tickLine={false}
+              axisLine={false}
+              width={120}
+            />
             <Tooltip content={<ChartTooltip />} cursor={{ fill: 'rgba(255,255,255,0.03)' }} />
             <defs>
               <linearGradient id="barGradient" x1="0" y1="0" x2="1" y2="0">
-                <stop offset="0%" stopColor="#ff8a3c" /><stop offset="100%" stopColor="#27d3b8" />
+                <stop offset="0%" stopColor="#ff8a3c" />
+                <stop offset="100%" stopColor="#27d3b8" />
               </linearGradient>
             </defs>
-            <Bar dataKey="reservations" fill="url(#barGradient)" radius={[0, 6, 6, 0]} name="Reservas" animationDuration={800} />
+            <Bar
+              dataKey="reservations"
+              fill="url(#barGradient)"
+              radius={[0, 6, 6, 0]}
+              name="Reservas"
+              animationDuration={800}
+            />
           </BarChart>
         </ResponsiveContainer>
       ) : (
         <div className="text-center py-16">
           <Calendar className="w-12 h-12 text-gray-700 mx-auto mb-3" />
           <p className="dark:text-gray-500 text-gray-400 text-sm">No hay datos suficientes</p>
-          <p className="text-xs dark:text-gray-600 text-gray-500 mt-1">Las estadisticas apareceran cuando haya reservas</p>
+          <p className="text-xs dark:text-gray-600 text-gray-500 mt-1">
+            Las estadisticas apareceran cuando haya reservas
+          </p>
         </div>
       )}
     </Card>

@@ -1,13 +1,13 @@
-'use client';
+'use client'
 
-import { motion } from 'framer-motion';
-import Link from 'next/link';
-import { Sparkles, TrendingUp, CalendarCheck, ShoppingBag, Store } from 'lucide-react';
+import { motion } from 'framer-motion'
+import Link from 'next/link'
+import { Sparkles, TrendingUp, CalendarCheck, ShoppingBag, Store } from 'lucide-react'
 
 interface BusinessWelcomeBannerProps {
-  shopName: string;
-  todayReservations?: number;
-  weekGrowth?: number;
+  shopName: string
+  todayReservations?: number
+  weekGrowth?: number
 }
 
 export default function BusinessWelcomeBanner({
@@ -15,7 +15,7 @@ export default function BusinessWelcomeBanner({
   todayReservations = 0,
   weekGrowth = 0,
 }: BusinessWelcomeBannerProps) {
-  const isPositive = weekGrowth >= 0;
+  const isPositive = weekGrowth >= 0
 
   return (
     <motion.div
@@ -30,9 +30,7 @@ export default function BusinessWelcomeBanner({
         <div>
           <div className="flex items-center gap-2 mb-2">
             <Sparkles className="w-5 h-5 text-primary" />
-            <span className="text-xs font-medium text-primary uppercase tracking-wider">
-              Panel de Control
-            </span>
+            <span className="text-xs font-medium text-primary uppercase tracking-wider">Panel de Control</span>
           </div>
           <h1 className="text-2xl lg:text-3xl font-bold dark:text-white text-gray-900">
             Hola, <span className="text-primary">{shopName}</span>!
@@ -40,7 +38,7 @@ export default function BusinessWelcomeBanner({
           <p className="dark:text-gray-400 text-gray-600 text-sm mt-1">
             Gestiona tus packs o descubre nuevos comercios para inspirarte.
           </p>
-          
+
           {/* Enlaces rápidos a explorar */}
           <div className="flex gap-3 mt-4">
             <Link
@@ -78,7 +76,8 @@ export default function BusinessWelcomeBanner({
             </div>
             <div>
               <p className={`text-2xl font-bold ${isPositive ? 'text-green-400' : 'text-red-400'}`}>
-                {isPositive ? '+' : ''}{weekGrowth}%
+                {isPositive ? '+' : ''}
+                {weekGrowth}%
               </p>
               <p className="text-[10px] dark:text-gray-500 text-gray-400">vs semana pasada</p>
             </div>
@@ -86,5 +85,5 @@ export default function BusinessWelcomeBanner({
         </div>
       </div>
     </motion.div>
-  );
+  )
 }

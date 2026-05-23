@@ -11,18 +11,30 @@ export function welcomeTemplate(name: string) {
 <h2 style="color:#fff;font-size:28px;margin:0 0 4px;text-align:center;font-weight:800;">Bienvenido a Paporla</h2>
 <p style="color:#999;font-size:15px;line-height:1.7;margin:0 0 6px;text-align:center;">Hola <strong style="color:#fff;">${name}</strong>, gracias por unirte a la comunidad<br>que esta cambiando la forma de alimentarnos.</p>
 <p style="color:#666;font-size:13px;line-height:1.6;margin:0 0 6px;text-align:center;">Cada pack que rescates ayuda a reducir el desperdicio<br>de alimentos y apoya a los comercios locales.</p>
-${infoBlock('Como funciona', `
+${infoBlock(
+  'Como funciona',
+  `
 ${stepRow(1, '<strong style="color:#fff;">Explora</strong> packs sorpresa de comercios locales con hasta <strong style="color:' + primary + ';">70% de descuento</strong>')}
 ${stepRow(2, '<strong style="color:#fff;">Reserva</strong> el que mas te guste en segundos, sin complicaciones')}
 ${stepRow(3, '<strong style="color:#fff;">Recoge</strong> tu pedido en el horario indicado y disfruta', true)}
-`)}
+`,
+)}
 <div style="text-align:center;margin:28px 0 8px;">${ctaButton(baseUrl + '/packs', 'Explorar packs disponibles')}</div>`)
 }
 
 // ============================================
 // CONFIRMACION DE RESERVA
 // ============================================
-export function reservationConfirmationTemplate(data: { userName: string; packTitle: string; shopName: string; shopAddress: string | null; pickupCode: string; pickupDate: string | null; pickupTime: string | null; price: string }) {
+export function reservationConfirmationTemplate(data: {
+  userName: string
+  packTitle: string
+  shopName: string
+  shopAddress: string | null
+  pickupCode: string
+  pickupDate: string | null
+  pickupTime: string | null
+  price: string
+}) {
   return baseLayout(`
 <h2 style="color:#fff;font-size:28px;margin:0 0 4px;text-align:center;font-weight:800;">Reserva confirmada</h2>
 <p style="color:#aaa;font-size:15px;margin:0 0 4px;text-align:center;">Hola ${data.userName}, tu pack esta <strong style="color:${primary};">asegurado</strong>.</p>
@@ -60,7 +72,15 @@ ${ctaButton(resetLink, 'Restablecer contrasena')}
 // ============================================
 // RECORDATORIO DE RECOGIDA
 // ============================================
-export function pickupReminderTemplate(data: { userName: string; packTitle: string; shopName: string; shopAddress: string | null; pickupCode: string; pickupDate: string; pickupTime: string | null }) {
+export function pickupReminderTemplate(data: {
+  userName: string
+  packTitle: string
+  shopName: string
+  shopAddress: string | null
+  pickupCode: string
+  pickupDate: string
+  pickupTime: string | null
+}) {
   return baseLayout(`
 <h2 style="color:#fff;font-size:28px;margin:0 0 4px;text-align:center;font-weight:800;">Recoge tu pack hoy</h2>
 <p style="color:#aaa;font-size:15px;margin:0 0 4px;text-align:center;">Hola ${data.userName}, tu pack te espera.</p>

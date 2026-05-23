@@ -1,58 +1,63 @@
-﻿'use client';
+﻿'use client'
 
-import { useState } from 'react';
-import Link from 'next/link';
-import { Package, Plus } from 'lucide-react';
-import Button from '@/components/ui/Button';
-import Toast from '@/components/ui/Toast';
-import ConfirmModal from '@/components/ui/ConfirmModal';
-import LoadingSkeleton from '@/components/business/LoadingSkeleton';
-import { useBusinessPacks } from '@/components/business/packs/useBusinessPacks';
-import PacksStatsGrid from '@/components/business/packs/PacksStatsGrid';
-import PackFilters from '@/components/business/packs/PackFilters';
-import PackGroup from '@/components/business/packs/PackGroup';
+import { useState } from 'react'
+import Link from 'next/link'
+import { Package, Plus } from 'lucide-react'
+import Button from '@/components/ui/Button'
+import Toast from '@/components/ui/Toast'
+import ConfirmModal from '@/components/ui/ConfirmModal'
+import LoadingSkeleton from '@/components/business/LoadingSkeleton'
+import { useBusinessPacks } from '@/components/business/packs/useBusinessPacks'
+import PacksStatsGrid from '@/components/business/packs/PacksStatsGrid'
+import PackFilters from '@/components/business/packs/PackFilters'
+import PackGroup from '@/components/business/packs/PackGroup'
 
 export default function BusinessPacksPage() {
   const {
-    loading, error, success, setError, setSuccess,
-    searchTerm, setSearchTerm, packs, stats,
-    deleting, confirmDelete, handleDelete,
-  } = useBusinessPacks();
+    loading,
+    error,
+    success,
+    setError,
+    setSuccess,
+    searchTerm,
+    setSearchTerm,
+    packs,
+    stats,
+    deleting,
+    confirmDelete,
+    handleDelete,
+  } = useBusinessPacks()
 
-  const [filterStatus, setFilterStatus] = useState<'all' | 'active' | 'inactive'>('all');
-  const [modalOpen, setModalOpen] = useState(false);
-  const [packToDelete, setPackToDelete] = useState<string | null>(null);
+  const [filterStatus, setFilterStatus] = useState<'all' | 'active' | 'inactive'>('all')
+  const [modalOpen, setModalOpen] = useState(false)
+  const [packToDelete, setPackToDelete] = useState<string | null>(null)
 
   // Separar packs activos e inactivos
-  const activePacks = packs.filter(pack => pack.is_active);
-  const inactivePacks = packs.filter(pack => !pack.is_active);
+  const activePacks = packs.filter((pack) => pack.is_active)
+  const inactivePacks = packs.filter((pack) => !pack.is_active)
 
   // Filtrar por búsqueda
-  const filteredActive = activePacks.filter(pack =>
-    pack.title.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredActive = activePacks.filter((pack) => pack.title.toLowerCase().includes(searchTerm.toLowerCase()))
 
-  const filteredInactive = inactivePacks.filter(pack =>
-    pack.title.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredInactive = inactivePacks.filter((pack) => pack.title.toLowerCase().includes(searchTerm.toLowerCase()))
 
   const onDeleteClick = async (id: string) => {
-    const result = await confirmDelete(id);
+    const result = await confirmDelete(id)
     if (result) {
-      setPackToDelete(result);
-      setModalOpen(true);
+      setPackToDelete(result)
+      setModalOpen(true)
     }
-  };
+  }
 
   const onConfirmDelete = async () => {
     if (packToDelete) {
-      await handleDelete(packToDelete);
-      setModalOpen(false);
-      setPackToDelete(null);
+      await handleDelete(packToDelete)
+      setModalOpen(false)
+      setPackToDelete(null)
     }
-  };
+  }
 
-  if (loading) return <LoadingSkeleton />;
+  if (loading) return <LoadingSkeleton />
 
   return (
     <div className="space-y-8 pb-8">
@@ -92,12 +97,7 @@ export default function BusinessPacksPage() {
 
       {/* Packs Activos */}
       {filteredActive.length > 0 && (
-        <PackGroup
-          title="Packs Activos"
-          packs={filteredActive}
-          deleting={deleting}
-          onDeleteClick={onDeleteClick}
-        />
+        <PackGroup title="Packs Activos" packs={filteredActive} deleting={deleting} onDeleteClick={onDeleteClick} />
       )}
 
       {/* Historial (packs inactivos) */}
@@ -125,7 +125,9 @@ export default function BusinessPacksPage() {
             <Package className="w-10 h-10 text-primary" />
           </div>
           <p className="dark:text-gray-400 text-gray-600">No tienes packs creados</p>
-          <p className="text-xs dark:text-gray-500 text-gray-400 mt-1">Comienza a crear tu primer pack de rescate alimentario</p>
+          <p className="text-xs dark:text-gray-500 text-gray-400 mt-1">
+            Comienza a crear tu primer pack de rescate alimentario
+          </p>
           <Link href="/business/packs/new">
             <Button className="mt-4">Crear mi primer pack</Button>
           </Link>
@@ -145,5 +147,5 @@ export default function BusinessPacksPage() {
       {error && <Toast message={error} type="error" onClose={() => setError('')} />}
       {success && <Toast message={success} type="success" onClose={() => setSuccess('')} />}
     </div>
-  );
+  )
 }

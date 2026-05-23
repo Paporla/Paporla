@@ -16,8 +16,8 @@ interface NextPickupBannerProps {
 export default function NextPickupBanner({ reservation }: NextPickupBannerProps) {
   if (!reservation.pack || !reservation.shop) return null
 
-  const pickupDateTime = reservation.pickup_date 
-    ? `${formatDate(reservation.pickup_date)} ${reservation.pickup_end_time?.slice(0,5) || ''}`
+  const pickupDateTime = reservation.pickup_date
+    ? `${formatDate(reservation.pickup_date)} ${reservation.pickup_end_time?.slice(0, 5) || ''}`
     : 'Proximamente'
 
   const mapsUrl = reservation.shop.address
@@ -38,16 +38,20 @@ export default function NextPickupBanner({ reservation }: NextPickupBannerProps)
         {/* Label "PRÓXIMA RECOGIDA" */}
         <div className="flex items-center gap-2">
           <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
-          <span className="text-xs font-bold text-green-400 uppercase tracking-wider">
-            Proxima recogida
-          </span>
+          <span className="text-xs font-bold text-green-400 uppercase tracking-wider">Proxima recogida</span>
         </div>
 
         <div className="flex items-start gap-4">
           {/* Imagen del pack */}
           <div className="w-20 h-20 rounded-xl overflow-hidden bg-gray-800 flex-shrink-0 relative">
             {reservation.pack.image_url ? (
-              <Image src={reservation.pack.image_url} alt={reservation.pack.title} fill className="object-cover" sizes="80px" />
+              <Image
+                src={reservation.pack.image_url}
+                alt={reservation.pack.title}
+                fill
+                className="object-cover"
+                sizes="80px"
+              />
             ) : (
               <div className="w-full h-full flex items-center justify-center">
                 <Package className="w-8 h-8 text-gray-600" />
@@ -56,10 +60,16 @@ export default function NextPickupBanner({ reservation }: NextPickupBannerProps)
           </div>
 
           <div className="flex-1 min-w-0">
-            <Link href={`/packs/${reservation.pack_id}`} className="text-lg font-bold dark:text-white text-gray-900 hover:text-primary transition-colors">
+            <Link
+              href={`/packs/${reservation.pack_id}`}
+              className="text-lg font-bold dark:text-white text-gray-900 hover:text-primary transition-colors"
+            >
               {reservation.pack.title}
             </Link>
-            <Link href={`/shops/${reservation.shop.id}`} className="text-sm dark:text-gray-400 text-gray-600 hover:text-primary transition-colors block">
+            <Link
+              href={`/shops/${reservation.shop.id}`}
+              className="text-sm dark:text-gray-400 text-gray-600 hover:text-primary transition-colors block"
+            >
               {reservation.shop.name}
             </Link>
 
@@ -67,10 +77,7 @@ export default function NextPickupBanner({ reservation }: NextPickupBannerProps)
             {reservation.pickup_date && reservation.pickup_end_time && (
               <div className="mt-2 flex items-center gap-2">
                 <Clock className="w-4 h-4 text-primary" />
-                <CountdownTimer
-                  targetDate={reservation.pickup_date}
-                  targetEndTime={reservation.pickup_end_time}
-                />
+                <CountdownTimer targetDate={reservation.pickup_date} targetEndTime={reservation.pickup_end_time} />
               </div>
             )}
           </div>
@@ -80,9 +87,7 @@ export default function NextPickupBanner({ reservation }: NextPickupBannerProps)
         <div className="flex items-center justify-between dark:bg-black/40 bg-gray-100 rounded-xl p-3 border dark:border-white/5 border-gray-200">
           <div>
             <p className="text-xs dark:text-gray-500 text-gray-400">Codigo de recogida</p>
-            <p className="text-xl font-bold text-primary tracking-wider font-mono">
-              {reservation.pickup_code}
-            </p>
+            <p className="text-xl font-bold text-primary tracking-wider font-mono">{reservation.pickup_code}</p>
           </div>
           <CopyButton text={reservation.pickup_code} label="Copiar" />
         </div>

@@ -1,9 +1,9 @@
-'use client';
+'use client'
 
-import { motion } from 'framer-motion';
-import Link from 'next/link';
-import { ArrowLeft, Shield, Clock, AlertTriangle, CheckCircle, XCircle } from 'lucide-react';
-import Button from '@/components/ui/Button';
+import { motion } from 'framer-motion'
+import Link from 'next/link'
+import { ArrowLeft, Shield, Clock, AlertTriangle, CheckCircle, XCircle } from 'lucide-react'
+import Button from '@/components/ui/Button'
 
 export default function PoliticasRetiroPage() {
   return (
@@ -14,10 +14,7 @@ export default function PoliticasRetiroPage() {
       </div>
 
       <div className="relative z-10 max-w-3xl mx-auto">
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-        >
+        <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }}>
           <Link
             href="/packs"
             className="inline-flex items-center gap-2 dark:text-gray-400 text-gray-600 hover:text-primary transition-colors mb-6"
@@ -25,7 +22,7 @@ export default function PoliticasRetiroPage() {
             <ArrowLeft className="w-4 h-4" />
             Volver a packs
           </Link>
-          
+
           <h1 className="text-4xl md:text-5xl font-bold mb-4">
             <span className="text-gradient">Políticas de Retiro y Cancelación</span>
           </h1>
@@ -55,15 +52,24 @@ export default function PoliticasRetiroPage() {
               </li>
               <li className="flex items-start gap-2">
                 <CheckCircle className="w-4 h-4 text-green-400 mt-0.5 flex-shrink-0" />
-                <span>La hora límite de recogida se muestra claramente en el detalle de cada pack y en la confirmación de la reserva.</span>
+                <span>
+                  La hora límite de recogida se muestra claramente en el detalle de cada pack y en la confirmación de la
+                  reserva.
+                </span>
               </li>
               <li className="flex items-start gap-2">
                 <AlertTriangle className="w-4 h-4 text-yellow-400 mt-0.5 flex-shrink-0" />
-                <span>Si no retiras tu pedido dentro del horario establecido, la reserva caducará automáticamente y se marcará como <strong>&quot;No retirado&quot;</strong>.</span>
+                <span>
+                  Si no retiras tu pedido dentro del horario establecido, la reserva caducará automáticamente y se
+                  marcará como <strong>&quot;No retirado&quot;</strong>.
+                </span>
               </li>
               <li className="flex items-start gap-2">
                 <XCircle className="w-4 h-4 text-red-400 mt-0.5 flex-shrink-0" />
-                <span>Los packs no retirados no serán reembolsados, ya que son productos de rescate alimentario con disponibilidad limitada.</span>
+                <span>
+                  Los packs no retirados no serán reembolsados, ya que son productos de rescate alimentario con
+                  disponibilidad limitada.
+                </span>
               </li>
             </ul>
           </motion.div>
@@ -84,7 +90,13 @@ export default function PoliticasRetiroPage() {
             <ul className="space-y-3 dark:text-gray-400 text-gray-600 text-sm">
               <li className="flex items-start gap-2">
                 <CheckCircle className="w-4 h-4 text-green-400 mt-0.5 flex-shrink-0" />
-                <span>Puedes cancelar tu reserva en cualquier momento desde tu panel de <Link href="/dashboard" className="text-primary hover:underline">Mis Reservas</Link>.</span>
+                <span>
+                  Puedes cancelar tu reserva en cualquier momento desde tu panel de{' '}
+                  <Link href="/dashboard" className="text-primary hover:underline">
+                    Mis Reservas
+                  </Link>
+                  .
+                </span>
               </li>
               <li className="flex items-start gap-2">
                 <CheckCircle className="w-4 h-4 text-green-400 mt-0.5 flex-shrink-0" />
@@ -113,11 +125,19 @@ export default function PoliticasRetiroPage() {
             <ul className="space-y-3 dark:text-gray-400 text-gray-600 text-sm">
               <li className="flex items-start gap-2">
                 <CheckCircle className="w-4 h-4 text-green-400 mt-0.5 flex-shrink-0" />
-                <span>Al confirmar la reserva recibirás un <strong>código único</strong> que deberás presentar al comercio.</span>
+                <span>
+                  Al confirmar la reserva recibirás un <strong>código único</strong> que deberás presentar al comercio.
+                </span>
               </li>
               <li className="flex items-start gap-2">
                 <CheckCircle className="w-4 h-4 text-green-400 mt-0.5 flex-shrink-0" />
-                <span>El código puedes encontrarlo en tu panel de <Link href="/dashboard" className="text-primary hover:underline">Mis Reservas</Link> y en el email de confirmación.</span>
+                <span>
+                  El código puedes encontrarlo en tu panel de{' '}
+                  <Link href="/dashboard" className="text-primary hover:underline">
+                    Mis Reservas
+                  </Link>{' '}
+                  y en el email de confirmación.
+                </span>
               </li>
               <li className="flex items-start gap-2">
                 <AlertTriangle className="w-4 h-4 text-yellow-400 mt-0.5 flex-shrink-0" />
@@ -143,7 +163,9 @@ export default function PoliticasRetiroPage() {
               Si tienes algun problema con tu reserva, contactanos a traves de nuestro formulario de contacto.
             </p>
             <Link href="/contacto">
-              <Button variant="outline" size="sm">Contactar soporte</Button>
+              <Button variant="outline" size="sm">
+                Contactar soporte
+              </Button>
             </Link>
           </motion.div>
         </div>
@@ -155,5 +177,5 @@ export default function PoliticasRetiroPage() {
         </div>
       </div>
     </div>
-  );
+  )
 }

@@ -37,12 +37,16 @@ export default function PackFormPickupTime({ data, onChange }: Props) {
       </div>
 
       <div className="flex flex-wrap gap-2 mb-4">
-        {todayPresets.map(opt => {
+        {todayPresets.map((opt) => {
           const d = new Date(Date.now() + opt.days * 86400000)
           const dateStr = d.toISOString().split('T')[0]
           return (
-            <button key={opt.label} type="button" onClick={() => update({ pickup_date: dateStr })}
-              className={`px-4 py-2 rounded-full text-sm ${data.pickup_date === dateStr ? 'bg-primary text-black font-medium' : 'dark:bg-white/5 bg-gray-100 dark:text-gray-400 text-gray-600 dark:hover:bg-white/10 hover:bg-gray-200'}`}>
+            <button
+              key={opt.label}
+              type="button"
+              onClick={() => update({ pickup_date: dateStr })}
+              className={`px-4 py-2 rounded-full text-sm ${data.pickup_date === dateStr ? 'bg-primary text-black font-medium' : 'dark:bg-white/5 bg-gray-100 dark:text-gray-400 text-gray-600 dark:hover:bg-white/10 hover:bg-gray-200'}`}
+            >
               {opt.label} ({d.toLocaleDateString('es-ES', { weekday: 'short' })})
             </button>
           )
@@ -50,28 +54,57 @@ export default function PackFormPickupTime({ data, onChange }: Props) {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
-        <Input label="Fecha" type="date" value={data.pickup_date}
-          onChange={(e) => update({ pickup_date: e.target.value })} icon={<Calendar className="w-4 h-4" />} />
+        <Input
+          label="Fecha"
+          type="date"
+          value={data.pickup_date}
+          onChange={(e) => update({ pickup_date: e.target.value })}
+          icon={<Calendar className="w-4 h-4" />}
+        />
 
         <div>
           <label className="block text-sm font-medium dark:text-gray-400 text-gray-600 mb-2">Desde</label>
           <div className="flex gap-2 flex-wrap">
-            {startTimes.map(t => (
-              <button key={t} type="button" onClick={() => update({ pickup_start_time: t })}
-                className={`px-3 py-1.5 rounded-lg text-xs ${data.pickup_start_time === t ? 'bg-primary text-black font-medium' : 'dark:bg-white/5 bg-gray-100 dark:text-gray-400 text-gray-600 dark:hover:bg-white/10 hover:bg-gray-200'}`}>{t}</button>
+            {startTimes.map((t) => (
+              <button
+                key={t}
+                type="button"
+                onClick={() => update({ pickup_start_time: t })}
+                className={`px-3 py-1.5 rounded-lg text-xs ${data.pickup_start_time === t ? 'bg-primary text-black font-medium' : 'dark:bg-white/5 bg-gray-100 dark:text-gray-400 text-gray-600 dark:hover:bg-white/10 hover:bg-gray-200'}`}
+              >
+                {t}
+              </button>
             ))}
-            <Input type="time" value={data.pickup_start_time} onChange={(e) => update({ pickup_start_time: e.target.value })} className="w-28" placeholder="Hora" />
+            <Input
+              type="time"
+              value={data.pickup_start_time}
+              onChange={(e) => update({ pickup_start_time: e.target.value })}
+              className="w-28"
+              placeholder="Hora"
+            />
           </div>
         </div>
 
         <div>
           <label className="block text-sm font-medium dark:text-gray-400 text-gray-600 mb-2">Hasta</label>
           <div className="flex gap-2 flex-wrap">
-            {endTimes.map(t => (
-              <button key={t} type="button" onClick={() => update({ pickup_end_time: t })}
-                className={`px-3 py-1.5 rounded-lg text-xs ${data.pickup_end_time === t ? 'bg-primary text-black font-medium' : 'dark:bg-white/5 bg-gray-100 dark:text-gray-400 text-gray-600 dark:hover:bg-white/10 hover:bg-gray-200'}`}>{t}</button>
+            {endTimes.map((t) => (
+              <button
+                key={t}
+                type="button"
+                onClick={() => update({ pickup_end_time: t })}
+                className={`px-3 py-1.5 rounded-lg text-xs ${data.pickup_end_time === t ? 'bg-primary text-black font-medium' : 'dark:bg-white/5 bg-gray-100 dark:text-gray-400 text-gray-600 dark:hover:bg-white/10 hover:bg-gray-200'}`}
+              >
+                {t}
+              </button>
             ))}
-            <Input type="time" value={data.pickup_end_time} onChange={(e) => update({ pickup_end_time: e.target.value })} className="w-28" placeholder="Hora" />
+            <Input
+              type="time"
+              value={data.pickup_end_time}
+              onChange={(e) => update({ pickup_end_time: e.target.value })}
+              className="w-28"
+              placeholder="Hora"
+            />
           </div>
         </div>
       </div>

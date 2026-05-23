@@ -1,19 +1,19 @@
-'use client';
+'use client'
 
-import { useState } from 'react';
-import { AlertTriangle, Trash2, ChevronRight, CheckCircle } from 'lucide-react';
-import ConfirmModal from '@/components/ui/ConfirmModal';
+import { useState } from 'react'
+import { AlertTriangle, Trash2, ChevronRight, CheckCircle } from 'lucide-react'
+import ConfirmModal from '@/components/ui/ConfirmModal'
 
 interface ProfileSettingsFormProps {
-  onDelete: () => void;
+  onDelete: () => void
 }
 
 export default function ProfileSettingsForm({ onDelete }: ProfileSettingsFormProps) {
-  const [modalOpen, setModalOpen] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false)
 
   const handleDeleteClick = () => {
-    setModalOpen(true);
-  };
+    setModalOpen(true)
+  }
 
   return (
     <>
@@ -28,7 +28,9 @@ export default function ProfileSettingsForm({ onDelete }: ProfileSettingsFormPro
             <div className="flex items-center justify-between p-4 dark:bg-black/40 bg-gray-50 rounded-xl">
               <div>
                 <p className="text-sm font-medium dark:text-white text-gray-900">Desactivar comercio</p>
-                <p className="text-xs dark:text-gray-500 text-gray-400 mt-0.5">Tu comercio dejara de ser visible para los usuarios</p>
+                <p className="text-xs dark:text-gray-500 text-gray-400 mt-0.5">
+                  Tu comercio dejara de ser visible para los usuarios
+                </p>
               </div>
               <button
                 onClick={handleDeleteClick}
@@ -42,7 +44,9 @@ export default function ProfileSettingsForm({ onDelete }: ProfileSettingsFormPro
             <div className="flex items-center justify-between p-4 dark:bg-black/40 bg-gray-50 rounded-xl">
               <div>
                 <p className="text-sm font-medium dark:text-white text-gray-900">Transferir propiedad</p>
-                <p className="text-xs dark:text-gray-500 text-gray-400 mt-0.5">Transfiere este comercio a otro usuario</p>
+                <p className="text-xs dark:text-gray-500 text-gray-400 mt-0.5">
+                  Transfiere este comercio a otro usuario
+                </p>
               </div>
               <button className="flex items-center gap-2 text-sm dark:text-gray-400 text-gray-600 border dark:border-white/10 border-gray-200 dark:hover:border-white/30 hover:border-gray-300 px-4 py-2 rounded-xl transition-all">
                 <ChevronRight className="w-4 h-4" />
@@ -73,5 +77,5 @@ export default function ProfileSettingsForm({ onDelete }: ProfileSettingsFormPro
         cancelText="Cancelar"
       />
     </>
-  );
+  )
 }

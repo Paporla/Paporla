@@ -37,11 +37,9 @@ export default function PackFilters({ onFilterChange }: PackFiltersProps) {
           value={filters.search}
           onChange={(e) => handleChange('search', e.target.value)}
         />
-        
+
         <div>
-          <label className="block text-sm font-medium text-gray-300 mb-2">
-            Precio mínimo
-          </label>
+          <label className="block text-sm font-medium text-gray-300 mb-2">Precio mínimo</label>
           <input
             type="number"
             value={filters.minPrice}
@@ -49,11 +47,9 @@ export default function PackFilters({ onFilterChange }: PackFiltersProps) {
             className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white"
           />
         </div>
-        
+
         <div>
-          <label className="block text-sm font-medium text-gray-300 mb-2">
-            Precio máximo
-          </label>
+          <label className="block text-sm font-medium text-gray-300 mb-2">Precio máximo</label>
           <input
             type="number"
             value={filters.maxPrice}
@@ -61,7 +57,7 @@ export default function PackFilters({ onFilterChange }: PackFiltersProps) {
             className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white"
           />
         </div>
-        
+
         <div className="flex items-end">
           <label className="flex items-center gap-2 cursor-pointer">
             <input

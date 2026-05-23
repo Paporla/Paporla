@@ -1,7 +1,7 @@
-'use client';
+'use client'
 
-import Link from 'next/link';
-import { Clock } from 'lucide-react';
+import Link from 'next/link'
+import { Clock } from 'lucide-react'
 
 export default function DashboardEmptyState() {
   return (
@@ -12,5 +12,5 @@ export default function DashboardEmptyState() {
         Explorar packs disponibles →
       </Link>
     </div>
-  );
+  )
 }

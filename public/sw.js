@@ -1,17 +1,11 @@
 const CACHE_NAME = 'paporla-v1'
-const STATIC_ASSETS = [
-  '/',
-  '/packs',
-  '/shops',
-  '/favicon.svg',
-  '/images/logo-transparent.png',
-]
+const STATIC_ASSETS = ['/', '/packs', '/shops', '/favicon.svg', '/images/logo-transparent.png']
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
       return cache.addAll(STATIC_ASSETS).catch(() => {})
-    })
+    }),
   )
   self.skipWaiting()
 })
@@ -19,10 +13,8 @@ self.addEventListener('install', (event) => {
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((keys) => {
-      return Promise.all(
-        keys.filter((key) => key !== CACHE_NAME).map((key) => caches.delete(key))
-      )
-    })
+      return Promise.all(keys.filter((key) => key !== CACHE_NAME).map((key) => caches.delete(key)))
+    }),
   )
   self.clients.claim()
 })
@@ -36,7 +28,7 @@ self.addEventListener('fetch', (event) => {
         return new Response(JSON.stringify({ error: 'Sin conexion' }), {
           headers: { 'Content-Type': 'application/json' },
         })
-      })
+      }),
     )
     return
   }
@@ -45,18 +37,20 @@ self.addEventListener('fetch', (event) => {
     caches.match(event.request).then((cached) => {
       if (cached) return cached
 
-      return fetch(event.request).then((response) => {
-        const responseToCache = response.clone()
-        caches.open(CACHE_NAME).then((cache) => {
-          cache.put(event.request, responseToCache)
+      return fetch(event.request)
+        .then((response) => {
+          const responseToCache = response.clone()
+          caches.open(CACHE_NAME).then((cache) => {
+            cache.put(event.request, responseToCache)
+          })
+          return response
         })
-        return response
-      }).catch(() => {
-        if (event.request.headers.get('accept')?.includes('text/html')) {
-          return caches.match('/')
-        }
-      })
-    })
+        .catch(() => {
+          if (event.request.headers.get('accept')?.includes('text/html')) {
+            return caches.match('/')
+          }
+        })
+    }),
   )
 })
 
@@ -74,9 +68,7 @@ self.addEventListener('push', (event) => {
       actions: data.actions || [],
     }
 
-    event.waitUntil(
-      self.registration.showNotification(data.title || 'Paporla', options)
-    )
+    event.waitUntil(self.registration.showNotification(data.title || 'Paporla', options))
   } catch (e) {
     console.error('Push error:', e)
   }
@@ -94,6 +86,6 @@ self.addEventListener('notificationclick', (event) => {
         }
       }
       return self.clients.openWindow(url)
-    })
+    }),
   )
 })

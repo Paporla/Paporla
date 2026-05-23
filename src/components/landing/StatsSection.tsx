@@ -1,55 +1,54 @@
-'use client';
+'use client'
 
-import { motion, useInView } from 'framer-motion';
-import { useRef } from 'react';
-import { Eye, Package, DollarSign, TrendingUp } from 'lucide-react';
-import AnimatedCounter from '@/components/ui/AnimatedCounter';
+import { motion, useInView } from 'framer-motion'
+import { useRef } from 'react'
+import { Eye, Package, DollarSign, TrendingUp } from 'lucide-react'
+import AnimatedCounter from '@/components/ui/AnimatedCounter'
 
 const stats = [
-  { 
-    value: 1300, 
+  {
+    value: 1300,
     suffix: 'M',
-    label: 'toneladas de comida desperdiciadas al año', 
-    source: 'FAO', 
+    label: 'toneladas de comida desperdiciadas al año',
+    source: 'FAO',
     icon: Package,
     gradient: 'from-red-900/30 to-red-950/20',
     border: 'hover:border-red-500/50',
     iconBg: 'bg-red-500/10',
-    iconColor: 'text-red-400'
+    iconColor: 'text-red-400',
   },
-  { 
-    value: 1, 
+  {
+    value: 1,
     prefix: '$',
     suffix: 'B',
-    label: 'en pérdidas económicas anuales', 
-    source: 'Banco Mundial', 
+    label: 'en pérdidas económicas anuales',
+    source: 'Banco Mundial',
     icon: DollarSign,
     gradient: 'from-yellow-900/30 to-yellow-950/20',
     border: 'hover:border-yellow-500/50',
     iconBg: 'bg-yellow-500/10',
-    iconColor: 'text-yellow-400'
+    iconColor: 'text-yellow-400',
   },
-  { 
-    value: 8, 
+  {
+    value: 8,
     suffix: '%',
-    label: 'de emisiones globales de CO₂', 
-    source: 'UNEP', 
+    label: 'de emisiones globales de CO₂',
+    source: 'UNEP',
     icon: TrendingUp,
     gradient: 'from-green-900/30 to-green-950/20',
     border: 'hover:border-green-500/50',
     iconBg: 'bg-green-500/10',
-    iconColor: 'text-green-400'
+    iconColor: 'text-green-400',
   },
-];
+]
 
 export default function StatsSection() {
-  const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, margin: "-100px" });
+  const ref = useRef(null)
+  const isInView = useInView(ref, { once: true, margin: '-100px' })
 
   return (
     <section className="py-20 dark:bg-gradient-to-b dark:from-black dark:via-black dark:to-gray-950 bg-gradient-to-b from-gray-50 via-white to-gray-100">
       <div className="max-w-6xl mx-auto px-4">
-        
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -63,7 +62,9 @@ export default function StatsSection() {
           <h2 className="text-3xl md:text-4xl font-bold dark:text-white text-gray-900">
             El mundo pierde comida a <span className="text-primary">escala masiva</span>
           </h2>
-          <p className="dark:text-gray-500 text-gray-400 text-sm mt-2">Datos de la FAO, Banco Mundial y Naciones Unidas</p>
+          <p className="dark:text-gray-500 text-gray-400 text-sm mt-2">
+            Datos de la FAO, Banco Mundial y Naciones Unidas
+          </p>
         </motion.div>
 
         <div ref={ref} className="grid md:grid-cols-3 gap-6">
@@ -78,19 +79,16 @@ export default function StatsSection() {
               className={`group relative text-center p-6 rounded-2xl dark:bg-gradient-to-br bg-white border dark:border-white/10 border-gray-200 ${stat.border} transition-all duration-300 hover:-translate-y-2 hover:shadow-xl`}
             >
               <div className="absolute inset-0 rounded-2xl bg-gradient-to-t from-transparent via-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-              
-              <div className={`relative w-14 h-14 mx-auto mb-4 rounded-full ${stat.iconBg} flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}>
+
+              <div
+                className={`relative w-14 h-14 mx-auto mb-4 rounded-full ${stat.iconBg} flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}
+              >
                 <stat.icon className={`w-7 h-7 ${stat.iconColor}`} />
               </div>
-              
+
               <p className="text-4xl font-bold dark:text-white text-gray-900 group-hover:scale-105 transition-transform duration-300">
                 {isInView ? (
-                  <AnimatedCounter 
-                    value={stat.value} 
-                    suffix={stat.suffix}
-                    prefix={stat.prefix || ''}
-                    duration={2000}
-                  />
+                  <AnimatedCounter value={stat.value} suffix={stat.suffix} prefix={stat.prefix || ''} duration={2000} />
                 ) : (
                   <span>0{stat.suffix}</span>
                 )}
@@ -109,11 +107,14 @@ export default function StatsSection() {
           className="mt-12 text-center"
         >
           <p className="dark:text-gray-500 text-gray-400 text-sm max-w-2xl mx-auto">
-            Cada ano, mas de <span className="text-primary font-bold">1.300 millones de toneladas</span> de comida terminan en la basura. 
-            <span className="block mt-1">Paporla es parte de la solucion. <span className="text-primary">Te sumas?</span></span>
+            Cada ano, mas de <span className="text-primary font-bold">1.300 millones de toneladas</span> de comida
+            terminan en la basura.
+            <span className="block mt-1">
+              Paporla es parte de la solucion. <span className="text-primary">Te sumas?</span>
+            </span>
           </p>
         </motion.div>
       </div>
     </section>
-  );
+  )
 }

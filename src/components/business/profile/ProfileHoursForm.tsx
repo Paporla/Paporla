@@ -1,58 +1,67 @@
-'use client';
+'use client'
 
-import { Clock } from 'lucide-react';
+import { Clock } from 'lucide-react'
 
-const DAYS = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
+const DAYS = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo']
 
 interface HoursData {
-  [key: string]: { open: string; close: string; closed: boolean };
+  [key: string]: { open: string; close: string; closed: boolean }
 }
 
 interface ProfileHoursFormProps {
-  hours: HoursData;
-  onHoursChange: (hours: HoursData) => void;
+  hours: HoursData
+  onHoursChange: (hours: HoursData) => void
 }
 
 const presets = [
-  { label: 'Lun-Vie 8-20', action: (currentHours: HoursData) => {
-    const newHours = { ...currentHours };
-    DAYS.forEach(day => {
-      const isWeekend = day === 'Sábado' || day === 'Domingo';
-      newHours[day] = {
-        open: isWeekend ? '09:00' : '08:00',
-        close: isWeekend ? '18:00' : '20:00',
-        closed: isWeekend,
-      };
-    });
-    return newHours;
-  } },
-  { label: 'Todos los días', action: (currentHours: HoursData) => {
-    const newHours = { ...currentHours };
-    DAYS.forEach(day => {
-      newHours[day] = { open: '08:00', close: '20:00', closed: false };
-    });
-    return newHours;
-  } },
-  { label: '24 horas', action: (currentHours: HoursData) => {
-    const newHours = { ...currentHours };
-    DAYS.forEach(day => {
-      newHours[day] = { open: '00:00', close: '23:59', closed: false };
-    });
-    return newHours;
-  } },
-];
+  {
+    label: 'Lun-Vie 8-20',
+    action: (currentHours: HoursData) => {
+      const newHours = { ...currentHours }
+      DAYS.forEach((day) => {
+        const isWeekend = day === 'Sábado' || day === 'Domingo'
+        newHours[day] = {
+          open: isWeekend ? '09:00' : '08:00',
+          close: isWeekend ? '18:00' : '20:00',
+          closed: isWeekend,
+        }
+      })
+      return newHours
+    },
+  },
+  {
+    label: 'Todos los días',
+    action: (currentHours: HoursData) => {
+      const newHours = { ...currentHours }
+      DAYS.forEach((day) => {
+        newHours[day] = { open: '08:00', close: '20:00', closed: false }
+      })
+      return newHours
+    },
+  },
+  {
+    label: '24 horas',
+    action: (currentHours: HoursData) => {
+      const newHours = { ...currentHours }
+      DAYS.forEach((day) => {
+        newHours[day] = { open: '00:00', close: '23:59', closed: false }
+      })
+      return newHours
+    },
+  },
+]
 
 export default function ProfileHoursForm({ hours, onHoursChange }: ProfileHoursFormProps) {
   const updateHours = (day: string, field: string, value: string | boolean) => {
     onHoursChange({
       ...hours,
       [day]: { ...hours[day], [field]: value },
-    });
-  };
+    })
+  }
 
-  const applyPreset = (preset: typeof presets[0]) => {
-    onHoursChange(preset.action(hours));
-  };
+  const applyPreset = (preset: (typeof presets)[0]) => {
+    onHoursChange(preset.action(hours))
+  }
 
   return (
     <div className="dark:bg-black/40 bg-white dark:backdrop-blur-sm backdrop-blur-sm border dark:border-white/10 border-gray-200 rounded-2xl p-6 lg:p-8 space-y-6">
@@ -63,7 +72,7 @@ export default function ProfileHoursForm({ hours, onHoursChange }: ProfileHoursF
       <p className="text-sm dark:text-gray-400 text-gray-600">Define cuando los usuarios pueden recoger sus packs.</p>
 
       <div className="space-y-3">
-        {DAYS.map(day => (
+        {DAYS.map((day) => (
           <div
             key={day}
             className={`flex items-center gap-4 p-4 rounded-xl transition-all ${
@@ -71,7 +80,9 @@ export default function ProfileHoursForm({ hours, onHoursChange }: ProfileHoursF
             }`}
           >
             <div className="w-24 flex-shrink-0">
-              <p className={`text-sm font-medium ${hours[day]?.closed ? 'dark:text-gray-600 text-gray-400' : 'dark:text-white text-gray-900'}`}>
+              <p
+                className={`text-sm font-medium ${hours[day]?.closed ? 'dark:text-gray-600 text-gray-400' : 'dark:text-white text-gray-900'}`}
+              >
                 {day}
               </p>
             </div>
@@ -125,5 +136,5 @@ export default function ProfileHoursForm({ hours, onHoursChange }: ProfileHoursF
         ))}
       </div>
     </div>
-  );
+  )
 }

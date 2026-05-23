@@ -2,7 +2,9 @@
 
 import { motion } from 'framer-motion'
 
-interface Props { count: number }
+interface Props {
+  count: number
+}
 
 export default function PacksHeroSection({ count }: Props) {
   return (
@@ -10,7 +12,11 @@ export default function PacksHeroSection({ count }: Props) {
       <div className="absolute top-20 left-10 w-64 h-64 bg-primary/10 rounded-full blur-3xl animate-pulse" />
       <div className="absolute bottom-10 right-10 w-80 h-80 bg-secondary/10 rounded-full blur-3xl animate-pulse delay-1000" />
       <div className="container mx-auto px-4 relative">
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center max-w-3xl mx-auto">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-center max-w-3xl mx-auto"
+        >
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4 leading-tight">
             <span className="text-gradient">Packs Disponibles</span>
           </h1>

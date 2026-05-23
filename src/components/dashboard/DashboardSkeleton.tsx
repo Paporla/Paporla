@@ -1,4 +1,4 @@
-'use client';
+'use client'
 
 export default function DashboardSkeleton() {
   return (
@@ -11,5 +11,5 @@ export default function DashboardSkeleton() {
         </div>
       </div>
     </div>
-  );
+  )
 }

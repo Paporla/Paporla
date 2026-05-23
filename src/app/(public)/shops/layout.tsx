@@ -3,7 +3,8 @@ import { ReactNode } from 'react'
 
 export const metadata: Metadata = {
   title: 'Comercios asociados',
-  description: 'Conoce los comercios locales que se unen al rescate alimentario. Descubre dónde encontrar los mejores packs sorpresa cerca de ti.',
+  description:
+    'Conoce los comercios locales que se unen al rescate alimentario. Descubre dónde encontrar los mejores packs sorpresa cerca de ti.',
   openGraph: {
     title: 'Comercios asociados | Paporla',
     description: 'Conoce los comercios locales que se unen al rescate alimentario.',

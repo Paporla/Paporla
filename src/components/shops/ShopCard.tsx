@@ -1,22 +1,22 @@
-'use client';
+'use client'
 
-import Image from 'next/image';
-import Link from 'next/link';
-import { motion } from 'framer-motion';
-import { Store, MapPin, Star, CheckCircle } from 'lucide-react';
-import FavoriteButton from '@/components/favorites/FavoriteButton';
+import Image from 'next/image'
+import Link from 'next/link'
+import { motion } from 'framer-motion'
+import { Store, MapPin, Star, CheckCircle } from 'lucide-react'
+import FavoriteButton from '@/components/favorites/FavoriteButton'
 
 interface ShopCardProps {
   shop: {
-    id: string;
-    name: string;
-    description: string | null;
-    city: string | null;
-    cover_url: string | null;
-    rating: number;
-    verified: boolean;
-  };
-  index?: number;
+    id: string
+    name: string
+    description: string | null
+    city: string | null
+    cover_url: string | null
+    rating: number
+    verified: boolean
+  }
+  index?: number
 }
 
 export default function ShopCard({ shop, index = 0 }: ShopCardProps) {
@@ -30,13 +30,13 @@ export default function ShopCard({ shop, index = 0 }: ShopCardProps) {
         className="group relative cursor-pointer"
       >
         <div className="absolute -inset-0.5 bg-gradient-to-r from-primary/30 to-primary/10 rounded-2xl blur opacity-0 group-hover:opacity-100 transition duration-500" />
-        
+
         <div className="relative h-full rounded-2xl dark:bg-black/40 bg-white backdrop-blur-sm dark:border-white/10 border-gray-200 group-hover:border-primary/30 transition-all duration-300 overflow-hidden">
           {/* Imagen de portada */}
           <div className="h-40 dark:bg-gradient-to-br dark:from-gray-800 dark:to-gray-900 bg-gradient-to-br from-gray-100 to-gray-200 relative overflow-hidden">
             {shop.cover_url ? (
-              <Image 
-                src={shop.cover_url} 
+              <Image
+                src={shop.cover_url}
                 alt={shop.name}
                 fill
                 className="object-cover transform group-hover:scale-110 transition-transform duration-500"
@@ -48,7 +48,7 @@ export default function ShopCard({ shop, index = 0 }: ShopCardProps) {
               </div>
             )}
             <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
-            
+
             {/* Badge verificado */}
             {shop.verified && (
               <div className="absolute top-3 left-3 z-10">
@@ -80,9 +80,7 @@ export default function ShopCard({ shop, index = 0 }: ShopCardProps) {
             </div>
 
             {shop.description && (
-              <p className="dark:text-gray-400 text-gray-600 text-sm mb-3 line-clamp-2">
-                {shop.description}
-              </p>
+              <p className="dark:text-gray-400 text-gray-600 text-sm mb-3 line-clamp-2">{shop.description}</p>
             )}
 
             <div className="flex items-center gap-1 text-xs dark:text-gray-500 text-gray-400">
@@ -95,5 +93,5 @@ export default function ShopCard({ shop, index = 0 }: ShopCardProps) {
         </div>
       </motion.div>
     </Link>
-  );
+  )
 }

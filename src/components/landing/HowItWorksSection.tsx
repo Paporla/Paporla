@@ -1,14 +1,14 @@
-'use client';
+'use client'
 
-import { motion } from 'framer-motion';
-import { MagnifyingGlassIcon, CreditCardIcon, MapPinIcon, FaceSmileIcon } from '@heroicons/react/24/outline';
+import { motion } from 'framer-motion'
+import { MagnifyingGlassIcon, CreditCardIcon, MapPinIcon, FaceSmileIcon } from '@heroicons/react/24/outline'
 
 const steps = [
   { icon: MagnifyingGlassIcon, title: 'Explora', description: 'Busca packs cerca de ti' },
   { icon: CreditCardIcon, title: 'Reserva', description: 'Reserva tu pack favorito' },
   { icon: MapPinIcon, title: 'Recoge', description: 'Muestra tu código y recoge' },
   { icon: FaceSmileIcon, title: 'Disfruta', description: 'Comida que ayudó al planeta' },
-];
+]
 
 export default function HowItWorksSection() {
   return (
@@ -22,11 +22,11 @@ export default function HowItWorksSection() {
           <div className="w-1 h-6 bg-primary rounded-full" />
           <h2 className="dark:text-white text-gray-900 font-semibold text-lg">Como funciona</h2>
         </div>
-        
+
         <div className="space-y-4">
           {steps.map((step, idx) => (
-            <motion.div 
-              key={idx} 
+            <motion.div
+              key={idx}
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.3 + idx * 0.1 }}
@@ -47,5 +47,5 @@ export default function HowItWorksSection() {
         </div>
       </div>
     </motion.div>
-  );
+  )
 }

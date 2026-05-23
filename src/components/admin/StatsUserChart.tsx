@@ -7,7 +7,9 @@ import { ChartTooltip } from './ChartTooltip'
 
 type TimeRange = '7d' | '30d' | 'all'
 
-interface Props { data: Array<{ day: string; registrations: number }> }
+interface Props {
+  data: Array<{ day: string; registrations: number }>
+}
 
 export default function StatsUserChart({ data }: Props) {
   const [range, setRange] = useState<TimeRange>('30d')
@@ -19,12 +21,17 @@ export default function StatsUserChart({ data }: Props) {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h3 className="text-lg font-semibold dark:text-white text-gray-900">Registros de Usuarios</h3>
-          <p className="text-xs dark:text-gray-500 text-gray-400 mt-0.5">Ultimos {range === 'all' ? '30' : days} dias</p>
+          <p className="text-xs dark:text-gray-500 text-gray-400 mt-0.5">
+            Ultimos {range === 'all' ? '30' : days} dias
+          </p>
         </div>
         <div className="flex gap-1 dark:bg-white/5 bg-gray-100 rounded-lg p-0.5">
           {(['7d', '30d', 'all'] as TimeRange[]).map((r) => (
-            <button key={r} onClick={() => setRange(r)}
-              className={`text-[11px] font-medium px-2.5 py-1.5 rounded-md transition-all ${range === r ? 'bg-primary text-black' : 'dark:text-gray-500 text-gray-400 dark:hover:text-white hover:text-gray-900'}`}>
+            <button
+              key={r}
+              onClick={() => setRange(r)}
+              className={`text-[11px] font-medium px-2.5 py-1.5 rounded-md transition-all ${range === r ? 'bg-primary text-black' : 'dark:text-gray-500 text-gray-400 dark:hover:text-white hover:text-gray-900'}`}
+            >
               {r === '7d' ? '7D' : r === '30d' ? '30D' : 'Todo'}
             </button>
           ))}
@@ -42,7 +49,14 @@ export default function StatsUserChart({ data }: Props) {
           <XAxis dataKey="day" stroke="#333" fontSize={10} tickLine={false} axisLine={false} />
           <YAxis stroke="#333" fontSize={10} tickLine={false} axisLine={false} allowDecimals={false} />
           <Tooltip content={<ChartTooltip />} cursor={{ stroke: '#27d3b8', strokeWidth: 1, strokeDasharray: '4 4' }} />
-          <Area type="monotone" dataKey="registrations" stroke="#27d3b8" strokeWidth={2} fill="url(#userGradient)" name="Registros" />
+          <Area
+            type="monotone"
+            dataKey="registrations"
+            stroke="#27d3b8"
+            strokeWidth={2}
+            fill="url(#userGradient)"
+            name="Registros"
+          />
         </AreaChart>
       </ResponsiveContainer>
     </Card>

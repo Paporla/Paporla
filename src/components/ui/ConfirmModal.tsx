@@ -1,17 +1,17 @@
-'use client';
+'use client'
 
-import { motion, AnimatePresence } from 'framer-motion';
-import { AlertTriangle, X } from 'lucide-react';
-import Button from '@/components/ui/Button';
+import { motion, AnimatePresence } from 'framer-motion'
+import { AlertTriangle, X } from 'lucide-react'
+import Button from '@/components/ui/Button'
 
 interface ConfirmModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onConfirm: () => void;
-  title: string;
-  message: string;
-  confirmText?: string;
-  cancelText?: string;
+  isOpen: boolean
+  onClose: () => void
+  onConfirm: () => void
+  title: string
+  message: string
+  confirmText?: string
+  cancelText?: string
 }
 
 export default function ConfirmModal({
@@ -67,5 +67,5 @@ export default function ConfirmModal({
         </>
       )}
     </AnimatePresence>
-  );
+  )
 }

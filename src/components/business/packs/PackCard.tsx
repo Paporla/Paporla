@@ -29,11 +29,7 @@ export default function PackCard({ pack, index, deleting, onDeleteClick }: Props
   const pct = pack.total_stock > 0 ? Math.round((pack.remaining_stock / pack.total_stock) * 100) : 0
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: index * 0.05 }}
-    >
+    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.05 }}>
       <Card glass hover className="p-5 group">
         <div className="flex flex-col md:flex-row justify-between gap-4">
           <div className="flex-1">
@@ -74,12 +70,22 @@ export default function PackCard({ pack, index, deleting, onDeleteClick }: Props
 
           <div className="flex items-center gap-2">
             <Link href={`/business/packs/${pack.id}/duplicate`}>
-              <Button variant="outline" size="sm" className="p-2"><Copy className="w-4 h-4" /></Button>
+              <Button variant="outline" size="sm" className="p-2">
+                <Copy className="w-4 h-4" />
+              </Button>
             </Link>
             <Link href={`/business/packs/${pack.id}`}>
-              <Button variant="outline" size="sm" className="p-2"><Edit className="w-4 h-4" /></Button>
+              <Button variant="outline" size="sm" className="p-2">
+                <Edit className="w-4 h-4" />
+              </Button>
             </Link>
-            <Button variant="danger" size="sm" onClick={() => onDeleteClick(pack.id)} disabled={deleting === pack.id} className="p-2">
+            <Button
+              variant="danger"
+              size="sm"
+              onClick={() => onDeleteClick(pack.id)}
+              disabled={deleting === pack.id}
+              className="p-2"
+            >
               {deleting === pack.id ? (
                 <div className="w-4 h-4 border-2 border-red-400 border-t-transparent rounded-full animate-spin" />
               ) : (
@@ -89,14 +95,16 @@ export default function PackCard({ pack, index, deleting, onDeleteClick }: Props
           </div>
         </div>
 
-          <div className="mt-3">
+        <div className="mt-3">
           <div className="flex justify-between text-xs dark:text-gray-500 text-gray-400 mb-1">
             <span>Stock restante</span>
             <span>{pct}%</span>
           </div>
           <div className="h-1.5 dark:bg-gray-700 bg-gray-200 rounded-full overflow-hidden">
-            <div className="h-full bg-gradient-to-r from-primary to-primary/60 rounded-full transition-all duration-500"
-              style={{ width: `${pct}%` }} />
+            <div
+              className="h-full bg-gradient-to-r from-primary to-primary/60 rounded-full transition-all duration-500"
+              style={{ width: `${pct}%` }}
+            />
           </div>
         </div>
       </Card>

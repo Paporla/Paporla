@@ -1,16 +1,16 @@
-'use client';
+'use client'
 
-import { useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { X, Shield } from 'lucide-react';
-import Button from '@/components/ui/Button';
-import { UserProfile } from '@/lib/supabase/types';
+import { useEffect } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { X, Shield } from 'lucide-react'
+import Button from '@/components/ui/Button'
+import { UserProfile } from '@/lib/supabase/types'
 
 interface UserModalProps {
-  isOpen: boolean;
-  user: UserProfile | null;
-  onClose: () => void;
-  onSave: (userId: string, newRole: string) => void;
+  isOpen: boolean
+  user: UserProfile | null
+  onClose: () => void
+  onSave: (userId: string, newRole: string) => void
 }
 
 const roles = [
@@ -18,29 +18,29 @@ const roles = [
   { value: 'comercio', label: 'Comercio', color: 'text-secondary' },
   { value: 'admin', label: 'Administrador', color: 'text-purple-400' },
   { value: 'super_admin', label: 'Super Administrador', color: 'text-red-400' },
-];
+]
 
 export default function UserModal({ isOpen, user, onClose, onSave }: UserModalProps) {
   // Prevenir scroll del body cuando el modal está abierto
   useEffect(() => {
     if (isOpen) {
-      document.body.style.overflow = 'hidden';
+      document.body.style.overflow = 'hidden'
     } else {
-      document.body.style.overflow = 'unset';
+      document.body.style.overflow = 'unset'
     }
     return () => {
-      document.body.style.overflow = 'unset';
-    };
-  }, [isOpen]);
+      document.body.style.overflow = 'unset'
+    }
+  }, [isOpen])
 
-  if (!user) return null;
+  if (!user) return null
 
   const handleSave = (e: React.FormEvent) => {
-    e.preventDefault();
-    const formData = new FormData(e.target as HTMLFormElement);
-    const newRole = formData.get('role') as string;
-    onSave(user.id, newRole);
-  };
+    e.preventDefault()
+    const formData = new FormData(e.target as HTMLFormElement)
+    const newRole = formData.get('role') as string
+    onSave(user.id, newRole)
+  }
 
   return (
     <AnimatePresence>
@@ -54,7 +54,7 @@ export default function UserModal({ isOpen, user, onClose, onSave }: UserModalPr
             onClick={onClose}
             className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[100]"
           />
-          
+
           {/* Modal centrado - FORZADO */}
           <div className="fixed inset-0 z-[101] flex items-center justify-center pointer-events-none">
             <motion.div
@@ -83,23 +83,17 @@ export default function UserModal({ isOpen, user, onClose, onSave }: UserModalPr
                 {/* Body */}
                 <form onSubmit={handleSave} className="p-5 space-y-5">
                   <div>
-                    <label className="block text-sm font-medium dark:text-gray-400 text-gray-600 mb-1">
-                      Nombre
-                    </label>
+                    <label className="block text-sm font-medium dark:text-gray-400 text-gray-600 mb-1">Nombre</label>
                     <p className="dark:text-white text-gray-900 font-medium">{user.name || 'Sin nombre'}</p>
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium dark:text-gray-400 text-gray-600 mb-1">
-                      Email
-                    </label>
+                    <label className="block text-sm font-medium dark:text-gray-400 text-gray-600 mb-1">Email</label>
                     <p className="dark:text-white text-gray-900 font-medium">{user.email}</p>
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium dark:text-gray-400 text-gray-600 mb-2">
-                      Rol
-                    </label>
+                    <label className="block text-sm font-medium dark:text-gray-400 text-gray-600 mb-2">Rol</label>
                     <select
                       name="role"
                       defaultValue={user.role}
@@ -128,5 +122,5 @@ export default function UserModal({ isOpen, user, onClose, onSave }: UserModalPr
         </>
       )}
     </AnimatePresence>
-  );
-} 
+  )
+}

@@ -21,12 +21,12 @@ En tu proveedor de DNS (donde compraste el dominio), agrega estos registros:
 
 ### 1. SPF (Sender Policy Framework)
 
-| Campo | Valor |
-|-------|-------|
-| **Tipo** | `TXT` |
-| **Nombre/Host** | `@` |
-| **Valor** | `v=spf1 include:spf.resend.com ~all` |
-| **TTL** | `Auto` o `3600` |
+| Campo           | Valor                                |
+| --------------- | ------------------------------------ |
+| **Tipo**        | `TXT`                                |
+| **Nombre/Host** | `@`                                  |
+| **Valor**       | `v=spf1 include:spf.resend.com ~all` |
+| **TTL**         | `Auto` o `3600`                      |
 
 **Que hace:** Autoriza a Resend a enviar emails en nombre de paporla.com
 
@@ -36,17 +36,17 @@ En tu proveedor de DNS (donde compraste el dominio), agrega estos registros:
 
 Resend te dara **2 registros DKIM** unicos. Se ven asi:
 
-| Campo | Valor |
-|-------|-------|
-| **Tipo** | `TXT` |
-| **Nombre/Host** | `resend._domainkey` |
-| **Valor** | `k=rsa; p=MIGfMA0GCSqGSIb3DQEBAQUAA4GN...` (clave larga) |
+| Campo           | Valor                                                    |
+| --------------- | -------------------------------------------------------- |
+| **Tipo**        | `TXT`                                                    |
+| **Nombre/Host** | `resend._domainkey`                                      |
+| **Valor**       | `k=rsa; p=MIGfMA0GCSqGSIb3DQEBAQUAA4GN...` (clave larga) |
 
-| Campo | Valor |
-|-------|-------|
-| **Tipo** | `TXT` |
-| **Nombre/Host** | `resend2._domainkey` |
-| **Valor** | `k=rsa; p=MIGfMA0GCSqGSIb3DQEBAQUAA4GN...` (otra clave) |
+| Campo           | Valor                                                   |
+| --------------- | ------------------------------------------------------- |
+| **Tipo**        | `TXT`                                                   |
+| **Nombre/Host** | `resend2._domainkey`                                    |
+| **Valor**       | `k=rsa; p=MIGfMA0GCSqGSIb3DQEBAQUAA4GN...` (otra clave) |
 
 **Que hace:** Firma digitalmente los emails para verificar que son legitimos
 
@@ -54,16 +54,17 @@ Resend te dara **2 registros DKIM** unicos. Se ven asi:
 
 ### 3. DMARC (Domain-based Message Authentication)
 
-| Campo | Valor |
-|-------|-------|
-| **Tipo** | `TXT` |
-| **Nombre/Host** | `_dmarc` |
-| **Valor** | `v=DMARC1; p=quarantine; rua=mailto:dmarc@paporla.com; ruf=mailto:dmarc@paporla.com; fo=1` |
-| **TTL** | `Auto` o `3600` |
+| Campo           | Valor                                                                                      |
+| --------------- | ------------------------------------------------------------------------------------------ |
+| **Tipo**        | `TXT`                                                                                      |
+| **Nombre/Host** | `_dmarc`                                                                                   |
+| **Valor**       | `v=DMARC1; p=quarantine; rua=mailto:dmarc@paporla.com; ruf=mailto:dmarc@paporla.com; fo=1` |
+| **TTL**         | `Auto` o `3600`                                                                            |
 
 **Que hace:** Indica a Gmail/Yahoo que hacer con emails que fallan SPF/DKIM
 
 **Explicacion:**
+
 - `p=quarantine` = Emails sospechosos van a spam (no rechazados)
 - `rua=` = Reportes agregados diarios
 - `ruf=` = Reportes de fallos individuales
@@ -97,12 +98,12 @@ RESEND_FROM_EMAIL=noreply@paporla.com
 
 Los dominios nuevos necesitan "calentarse" para ganar reputacion:
 
-| Semana | Limite diario |
-|--------|---------------|
-| 1 | 50 emails/dia |
-| 2 | 100 emails/dia |
-| 3 | 500 emails/dia |
-| 4+ | Sin limite |
+| Semana | Limite diario  |
+| ------ | -------------- |
+| 1      | 50 emails/dia  |
+| 2      | 100 emails/dia |
+| 3      | 500 emails/dia |
+| 4+     | Sin limite     |
 
 Resend maneja esto automaticamente en su plan gratuito.
 

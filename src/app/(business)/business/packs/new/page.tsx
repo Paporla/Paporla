@@ -81,9 +81,8 @@ export default async function NewPackPage() {
                   Comercio suspendido
                 </h1>
                 <p className="dark:text-gray-400 text-gray-600 max-w-2xl">
-                  Tu comercio esta suspendido temporalmente. No puedes crear
-                  nuevos packs en este momento. Contacta con soporte si crees
-                  que se trata de un error.
+                  Tu comercio esta suspendido temporalmente. No puedes crear nuevos packs en este momento. Contacta con
+                  soporte si crees que se trata de un error.
                 </p>
               </div>
             </div>
@@ -112,21 +111,17 @@ export default async function NewPackPage() {
               </div>
 
               <div className="flex-1">
-                  <h1 className="text-3xl md:text-4xl font-bold dark:text-white text-gray-900 mb-2">
-                    Verificacion pendiente
-                  </h1>
+                <h1 className="text-3xl md:text-4xl font-bold dark:text-white text-gray-900 mb-2">
+                  Verificacion pendiente
+                </h1>
 
-                  <p className="dark:text-gray-400 text-gray-600 max-w-2xl mb-6">
-                    Tu comercio todavia no esta verificado. Puedes completar o
-                    revisar la informacion de tu perfil mientras esperas la
-                    aprobacion. Cuando el administrador verifique tu comercio,
-                    podras publicar packs.
-                  </p>
+                <p className="dark:text-gray-400 text-gray-600 max-w-2xl mb-6">
+                  Tu comercio todavia no esta verificado. Puedes completar o revisar la informacion de tu perfil
+                  mientras esperas la aprobacion. Cuando el administrador verifique tu comercio, podras publicar packs.
+                </p>
 
                 <Link href="/business/profile">
-                  <Button variant="outline">
-                    Ir al perfil del comercio
-                  </Button>
+                  <Button variant="outline">Ir al perfil del comercio</Button>
                 </Link>
               </div>
             </div>
@@ -155,22 +150,17 @@ export default async function NewPackPage() {
                   <PackagePlus className="w-5 h-5 text-primary" />
                 </div>
 
-                <h1 className="text-3xl md:text-4xl font-bold dark:text-white text-gray-900">
-                  Crear nuevo pack
-                </h1>
+                <h1 className="text-3xl md:text-4xl font-bold dark:text-white text-gray-900">Crear nuevo pack</h1>
               </div>
 
               <p className="dark:text-gray-400 text-gray-600 max-w-2xl">
-                Publica un pack sorpresa para que los usuarios puedan
-                reservarlo y recogerlo dentro del horario establecido.
+                Publica un pack sorpresa para que los usuarios puedan reservarlo y recogerlo dentro del horario
+                establecido.
               </p>
             </div>
 
             <div className="text-sm dark:text-gray-400 text-gray-600 dark:bg-white/5 bg-gray-100 dark:border-white/10 border-gray-200 rounded-2xl px-4 py-3">
-              Comercio:{' '}
-              <span className="dark:text-white text-gray-900 font-medium">
-                {shop.name}
-              </span>
+              Comercio: <span className="dark:text-white text-gray-900 font-medium">{shop.name}</span>
             </div>
           </div>
         </div>

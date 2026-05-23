@@ -1,21 +1,21 @@
-'use client';
+'use client'
 
-import { motion } from 'framer-motion';
+import { motion } from 'framer-motion'
 
 interface ReservationFiltersProps {
-  activeFilter: 'all' | 'confirmed';
-  onFilterChange: (filter: 'all' | 'confirmed') => void;
+  activeFilter: 'all' | 'confirmed'
+  onFilterChange: (filter: 'all' | 'confirmed') => void
   counts: {
-    all: number;
-    confirmed: number;
-  };
+    all: number
+    confirmed: number
+  }
 }
 
 export default function ReservationFilters({ activeFilter, onFilterChange, counts }: ReservationFiltersProps) {
-    const filters = [
+  const filters = [
     { value: 'all' as const, label: 'Todas', count: counts.all },
     { value: 'confirmed' as const, label: 'Confirmadas', count: counts.confirmed },
-  ];
+  ]
 
   return (
     <div className="flex gap-2 mb-4">
@@ -43,5 +43,5 @@ export default function ReservationFilters({ activeFilter, onFilterChange, count
         </button>
       ))}
     </div>
-  );
+  )
 }

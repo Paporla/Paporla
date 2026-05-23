@@ -43,20 +43,20 @@ function isDynamicSegment(segment: string): boolean {
 
 export default function Breadcrumbs() {
   const pathname = usePathname()
-  
+
   if (pathname === '/') return null
 
   const authPaths = ['login', 'register', 'forgot-password', 'reset-password']
-  if (authPaths.some(authPath => pathname.includes(authPath))) return null
+  if (authPaths.some((authPath) => pathname.includes(authPath))) return null
 
-  const pathSegments = pathname.split('/').filter(segment => segment !== '')
-  
+  const pathSegments = pathname.split('/').filter((segment) => segment !== '')
+
   const breadcrumbs = [{ href: '/', label: 'Inicio' }]
 
   let currentPath = ''
   for (const segment of pathSegments) {
     currentPath += '/' + segment
-    
+
     if (isDynamicSegment(segment)) {
       breadcrumbs.push({ href: currentPath, label: 'Detalle' })
     } else {
@@ -74,7 +74,7 @@ export default function Breadcrumbs() {
           <nav className="flex items-center gap-1 text-xs md:text-sm overflow-x-auto whitespace-nowrap scrollbar-hide">
             {breadcrumbs.map((item, index) => {
               const isLast = index === breadcrumbs.length - 1
-              
+
               return (
                 <div key={item.href} className="flex items-center">
                   {!isLast ? (

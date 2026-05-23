@@ -11,10 +11,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params
 
   try {
-    const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!
-    )
+    const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!)
 
     const { data: pack } = await supabase
       .from('packs')
@@ -25,7 +22,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     if (pack) {
       return {
         title: pack.title,
-        description: pack.description || `Pack sorpresa desde $${(pack.price_cents / 100).toFixed(2)} - Rescata comida, ahorra dinero.`,
+        description:
+          pack.description ||
+          `Pack sorpresa desde $${(pack.price_cents / 100).toFixed(2)} - Rescata comida, ahorra dinero.`,
         openGraph: {
           title: `${pack.title} | Paporla`,
           description: pack.description || `Pack sorpresa desde $${(pack.price_cents / 100).toFixed(2)}`,

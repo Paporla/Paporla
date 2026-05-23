@@ -12,16 +12,16 @@ interface AnimatedCounterProps {
   className?: string
 }
 
-export default function AnimatedCounter({ 
-  value, 
-  suffix = '', 
-  prefix = '', 
+export default function AnimatedCounter({
+  value,
+  suffix = '',
+  prefix = '',
   duration = 2000,
-  className = '' 
+  className = '',
 }: AnimatedCounterProps) {
   const [count, setCount] = useState(0)
   const ref = useRef(null)
-  const isInView = useInView(ref, { once: true, margin: "-100px" })
+  const isInView = useInView(ref, { once: true, margin: '-100px' })
 
   useEffect(() => {
     if (isInView) {
@@ -42,7 +42,9 @@ export default function AnimatedCounter({
 
   return (
     <span ref={ref} className={className}>
-      {prefix}{count.toLocaleString()}{suffix}
+      {prefix}
+      {count.toLocaleString()}
+      {suffix}
     </span>
   )
 }

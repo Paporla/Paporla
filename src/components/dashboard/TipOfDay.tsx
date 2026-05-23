@@ -17,11 +17,7 @@ interface TipOfDayProps {
 
 export default function TipOfDay({ tip }: TipOfDayProps) {
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.15 }}
-    >
+    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
       <div className="glass-card rounded-xl p-3 flex items-center gap-3">
         <span className="text-2xl">{tip.icon}</span>
         <p className="text-sm dark:text-gray-300 text-gray-700 flex-1">{tip.text}</p>

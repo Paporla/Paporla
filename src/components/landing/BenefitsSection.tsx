@@ -1,7 +1,7 @@
-'use client';
+'use client'
 
-import { motion } from 'framer-motion';
-import { MapPin, Clock, Gift, Shield, DollarSign, Heart } from 'lucide-react';
+import { motion } from 'framer-motion'
+import { MapPin, Clock, Gift, Shield, DollarSign, Heart } from 'lucide-react'
 
 const benefits = [
   { icon: DollarSign, title: 'Ahorro', description: 'Hasta 70% de descuento en comida de calidad' },
@@ -10,7 +10,7 @@ const benefits = [
   { icon: Gift, title: 'Sorpresa', description: 'Varía cada día. Nunca es aburrido' },
   { icon: Shield, title: 'Transparencia', description: 'Promesas claras. Sin letra chica' },
   { icon: Heart, title: 'Rescate', description: 'Comida que iba a la basura ahora se salva' },
-];
+]
 
 export default function BenefitsSection() {
   return (
@@ -42,7 +42,7 @@ export default function BenefitsSection() {
               className="group relative text-center p-6 rounded-2xl dark:bg-gradient-to-br dark:from-gray-900/50 dark:to-gray-950/50 bg-white border dark:border-white/10 border-gray-200 hover:border-primary/30 transition-all duration-300"
             >
               <div className="absolute inset-0 rounded-2xl bg-gradient-to-t from-transparent via-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-              
+
               <div className="relative w-14 h-14 mx-auto mb-4 rounded-full dark:bg-white/5 bg-gray-100 flex items-center justify-center group-hover:scale-110 group-hover:bg-primary/10 transition-all duration-300">
                 <benefit.icon className="w-7 h-7 text-primary" />
               </div>
@@ -57,5 +57,5 @@ export default function BenefitsSection() {
         </div>
       </div>
     </section>
-  );
+  )
 }

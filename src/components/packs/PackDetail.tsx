@@ -1,28 +1,28 @@
-'use client';
+'use client'
 
-import { useRouter } from 'next/navigation';
-import type { PackWithShop } from '@/types/pack';
-import PackDetailHeader from './PackDetailHeader';
-import PackDetailHero from './PackDetailHero';
-import PackDetailShopInfo from './PackDetailShopInfo';
-import PackDetailContent from './PackDetailContent';
-import PackDetailActions from './PackDetailActions';
+import { useRouter } from 'next/navigation'
+import type { PackWithShop } from '@/types/pack'
+import PackDetailHeader from './PackDetailHeader'
+import PackDetailHero from './PackDetailHero'
+import PackDetailShopInfo from './PackDetailShopInfo'
+import PackDetailContent from './PackDetailContent'
+import PackDetailActions from './PackDetailActions'
 
 interface PackDetailProps {
-  pack: PackWithShop;
-  onClose?: () => void;
+  pack: PackWithShop
+  onClose?: () => void
 }
 
 export default function PackDetail({ pack, onClose }: PackDetailProps) {
-  const router = useRouter();
+  const router = useRouter()
 
   const handleBack = () => {
     if (onClose) {
-      onClose();
+      onClose()
     } else {
-      router.back();
+      router.back()
     }
-  };
+  }
 
   return (
     <div className="fixed inset-0 z-40 bg-dark overflow-y-auto">
@@ -36,10 +36,7 @@ export default function PackDetail({ pack, onClose }: PackDetailProps) {
           onBack={handleBack}
         />
 
-        <PackDetailHero
-          imageUrl={pack.image_url ?? null}
-          title={pack.title}
-        />
+        <PackDetailHero imageUrl={pack.image_url ?? null} title={pack.title} />
       </div>
 
       <div className="p-5 pb-32 space-y-6">
@@ -73,5 +70,5 @@ export default function PackDetail({ pack, onClose }: PackDetailProps) {
         onSuccess={onClose}
       />
     </div>
-  );
+  )
 }

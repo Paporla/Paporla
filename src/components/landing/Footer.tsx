@@ -1,12 +1,12 @@
-'use client';
+'use client'
 
-import Image from 'next/image';
-import { motion } from 'framer-motion';
-import Link from 'next/link';
-import { Heart } from 'lucide-react';
+import Image from 'next/image'
+import { motion } from 'framer-motion'
+import Link from 'next/link'
+import { Heart } from 'lucide-react'
 
 export default function Footer() {
-  const currentYear = new Date().getFullYear();
+  const currentYear = new Date().getFullYear()
 
   return (
     <footer className="border-t dark:border-white/10 border-gray-200 py-8 md:py-10 mt-8 md:mt-12">
@@ -23,11 +23,21 @@ export default function Footer() {
             <span>Paporla - Rescatando comida, alimentando esperanzas</span>
           </div>
           <div className="flex gap-6 md:gap-8">
-            <Link href="/legal/terminos" className="hover:text-primary transition-colors">Terminos</Link>
-            <Link href="/legal/privacidad" className="hover:text-primary transition-colors">Privacidad</Link>
-            <Link href="/legal/cookies" className="hover:text-primary transition-colors">Cookies</Link>
-            <Link href="/legal/legal-bases" className="hover:text-primary transition-colors">Bases Legales</Link>
-            <Link href="/contacto" className="hover:text-primary transition-colors">Contacto</Link>
+            <Link href="/legal/terminos" className="hover:text-primary transition-colors">
+              Terminos
+            </Link>
+            <Link href="/legal/privacidad" className="hover:text-primary transition-colors">
+              Privacidad
+            </Link>
+            <Link href="/legal/cookies" className="hover:text-primary transition-colors">
+              Cookies
+            </Link>
+            <Link href="/legal/legal-bases" className="hover:text-primary transition-colors">
+              Bases Legales
+            </Link>
+            <Link href="/contacto" className="hover:text-primary transition-colors">
+              Contacto
+            </Link>
           </div>
           <motion.p whileHover={{ scale: 1.05 }} className="flex items-center gap-1">
             &copy; {currentYear} Paporla - Hecho con <Heart className="w-3 h-3 text-primary inline" /> para el planeta
@@ -35,5 +45,5 @@ export default function Footer() {
         </div>
       </div>
     </footer>
-  );
+  )
 }

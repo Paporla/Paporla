@@ -1,17 +1,17 @@
-'use client';
+'use client'
 
-import Link from 'next/link';
-import { Bell, CheckCheck } from 'lucide-react';
-import { useNotifications } from '@/hooks/useNotifications';
-import NotificationCard from './NotificationCard';
+import Link from 'next/link'
+import { Bell, CheckCheck } from 'lucide-react'
+import { useNotifications } from '@/hooks/useNotifications'
+import NotificationCard from './NotificationCard'
 
 interface NotificationDropdownProps {
-  onClose: () => void;
+  onClose: () => void
 }
 
 export default function NotificationDropdown({ onClose }: NotificationDropdownProps) {
-  const { notifications, unreadCount, markAsRead, markAllAsRead, deleteNotification } = useNotifications();
-  const recentNotifications = notifications.slice(0, 5);
+  const { notifications, unreadCount, markAsRead, markAllAsRead, deleteNotification } = useNotifications()
+  const recentNotifications = notifications.slice(0, 5)
 
   return (
     <div className="dark:bg-gray-900 bg-white dark:border-gray-700 border-gray-200 rounded-2xl shadow-2xl overflow-hidden">
@@ -21,9 +21,7 @@ export default function NotificationDropdown({ onClose }: NotificationDropdownPr
           <Bell className="w-4 h-4 text-primary" />
           <h3 className="font-semibold dark:text-white text-gray-900">Notificaciones</h3>
           {unreadCount > 0 && (
-            <span className="text-xs bg-primary/20 text-primary px-1.5 py-0.5 rounded-full">
-              {unreadCount}
-            </span>
+            <span className="text-xs bg-primary/20 text-primary px-1.5 py-0.5 rounded-full">{unreadCount}</span>
           )}
         </div>
         {unreadCount > 0 && (
@@ -60,15 +58,11 @@ export default function NotificationDropdown({ onClose }: NotificationDropdownPr
       {/* Footer */}
       {notifications.length > 5 && (
         <div className="p-3 dark:border-gray-700 border-gray-200 text-center">
-          <Link
-            href="/dashboard/notifications"
-            onClick={onClose}
-            className="text-xs text-primary hover:underline"
-          >
+          <Link href="/dashboard/notifications" onClick={onClose} className="text-xs text-primary hover:underline">
             Ver todas las notificaciones →
           </Link>
         </div>
       )}
     </div>
-  );
+  )
 }

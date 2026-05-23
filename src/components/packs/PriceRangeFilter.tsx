@@ -1,15 +1,15 @@
-'use client';
+'use client'
 
-import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { DollarSign } from 'lucide-react';
+import { useState, useEffect } from 'react'
+import { motion } from 'framer-motion'
+import { DollarSign } from 'lucide-react'
 
 interface PriceRangeFilterProps {
-  minPrice: number;
-  maxPrice: number;
-  onPriceChange: (min: number, max: number) => void;
-  minLimit?: number;
-  maxLimit?: number;
+  minPrice: number
+  maxPrice: number
+  onPriceChange: (min: number, max: number) => void
+  minLimit?: number
+  maxLimit?: number
 }
 
 export default function PriceRangeFilter({
@@ -19,29 +19,29 @@ export default function PriceRangeFilter({
   minLimit = 0,
   maxLimit = 100000,
 }: PriceRangeFilterProps) {
-  const [localMin, setLocalMin] = useState(minPrice);
-  const [localMax, setLocalMax] = useState(maxPrice);
+  const [localMin, setLocalMin] = useState(minPrice)
+  const [localMax, setLocalMax] = useState(maxPrice)
 
   useEffect(() => {
-    setLocalMin(minPrice);
-    setLocalMax(maxPrice);
-  }, [minPrice, maxPrice]);
+    setLocalMin(minPrice)
+    setLocalMax(maxPrice)
+  }, [minPrice, maxPrice])
 
   const handleMinChange = (value: number) => {
-    const newMin = Math.min(value, localMax - 100);
-    setLocalMin(newMin);
-    onPriceChange(newMin, localMax);
-  };
+    const newMin = Math.min(value, localMax - 100)
+    setLocalMin(newMin)
+    onPriceChange(newMin, localMax)
+  }
 
   const handleMaxChange = (value: number) => {
-    const newMax = Math.max(value, localMin + 100);
-    setLocalMax(newMax);
-    onPriceChange(localMin, newMax);
-  };
+    const newMax = Math.max(value, localMin + 100)
+    setLocalMax(newMax)
+    onPriceChange(localMin, newMax)
+  }
 
   const formatPrice = (price: number) => {
-    return `$${(price / 100).toFixed(2)}`;
-  };
+    return `$${(price / 100).toFixed(2)}`
+  }
 
   return (
     <div className="space-y-4">
@@ -75,7 +75,7 @@ export default function PriceRangeFilter({
           onChange={(e) => handleMinChange(Number(e.target.value))}
           className="absolute top-0 left-0 w-full h-2 opacity-0 cursor-pointer"
         />
-        
+
         <input
           type="range"
           min={minLimit}
@@ -125,5 +125,5 @@ export default function PriceRangeFilter({
         </div>
       </div>
     </div>
-  );
+  )
 }

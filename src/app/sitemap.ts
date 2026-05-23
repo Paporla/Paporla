@@ -58,16 +58,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   // Páginas dinámicas: packs activos
   try {
-    const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!
-    )
+    const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!)
 
-    const { data: packs } = await supabase
-      .from('packs')
-      .select('id, updated_at')
-      .eq('is_active', true)
-      .limit(100)
+    const { data: packs } = await supabase.from('packs').select('id, updated_at').eq('is_active', true).limit(100)
 
     const packPages = (packs || []).map((pack) => ({
       url: `${siteUrl}/packs/${pack.id}`,
@@ -77,10 +70,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }))
 
     // Páginas dinámicas: comercios
-    const { data: shops } = await supabase
-      .from('shops')
-      .select('id, updated_at')
-      .limit(100)
+    const { data: shops } = await supabase.from('shops').select('id, updated_at').limit(100)
 
     const shopPages = (shops || []).map((shop) => ({
       url: `${siteUrl}/shops/${shop.id}`,

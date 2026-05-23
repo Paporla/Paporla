@@ -57,33 +57,25 @@ export default function UsersTable({ users, currentUserId, onEdit, onDelete }: U
                   <span className="dark:text-gray-400 text-gray-600 text-sm">{user.phone || '—'}</span>
                 </td>
                 <td className="px-4 py-3">
-                    <span className={`text-xs px-2 py-1 rounded-full ${roleLabels[user.role]?.color || 'dark:bg-gray-500/20 bg-gray-200 dark:text-gray-400 text-gray-600'}`}>
+                  <span
+                    className={`text-xs px-2 py-1 rounded-full ${roleLabels[user.role]?.color || 'dark:bg-gray-500/20 bg-gray-200 dark:text-gray-400 text-gray-600'}`}
+                  >
                     {roleLabels[user.role]?.label || user.role}
                   </span>
                 </td>
                 <td className="px-4 py-3">
-                    <div className="flex items-center gap-1 text-xs dark:text-gray-500 text-gray-400">
+                  <div className="flex items-center gap-1 text-xs dark:text-gray-500 text-gray-400">
                     <Calendar className="w-3 h-3" />
                     {formatDate(user.created_at)}
                   </div>
                 </td>
                 <td className="px-4 py-3">
                   <div className="flex items-center justify-center gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => onEdit(user)}
-                      className="p-1.5"
-                    >
+                    <Button variant="outline" size="sm" onClick={() => onEdit(user)} className="p-1.5">
                       <Edit className="w-4 h-4" />
                     </Button>
                     {currentUserId !== user.id && (
-                      <Button
-                        variant="danger"
-                        size="sm"
-                        onClick={() => onDelete(user.id)}
-                        className="p-1.5"
-                      >
+                      <Button variant="danger" size="sm" onClick={() => onDelete(user.id)} className="p-1.5">
                         <Trash2 className="w-4 h-4" />
                       </Button>
                     )}
@@ -94,7 +86,7 @@ export default function UsersTable({ users, currentUserId, onEdit, onDelete }: U
           </tbody>
         </table>
       </div>
-      
+
       {users.length === 0 && (
         <div className="text-center py-12">
           <Shield className="w-12 h-12 dark:text-gray-600 text-gray-400 mx-auto mb-3" />

@@ -1,39 +1,40 @@
-'use client';
+'use client'
 
-import { useState, useMemo } from 'react';
-import { motion } from 'framer-motion';
-import { Store, Search, MapPin } from 'lucide-react';
-import { useShops } from '@/hooks/useShops';
-import ShopCard from '@/components/shops/ShopCard';
+import { useState, useMemo } from 'react'
+import { motion } from 'framer-motion'
+import { Store, Search, MapPin } from 'lucide-react'
+import { useShops } from '@/hooks/useShops'
+import ShopCard from '@/components/shops/ShopCard'
 
 export default function ShopsPage() {
-  const { shops, loading } = useShops();
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCity, setSelectedCity] = useState<string>('all');
+  const { shops, loading } = useShops()
+  const [searchTerm, setSearchTerm] = useState('')
+  const [selectedCity, setSelectedCity] = useState<string>('all')
 
   // Obtener ciudades únicas
   const cities = useMemo(() => {
-    const uniqueCities = [...new Set(shops.map(shop => shop.city).filter(Boolean))];
-    return uniqueCities as string[];
-  }, [shops]);
+    const uniqueCities = [...new Set(shops.map((shop) => shop.city).filter(Boolean))]
+    return uniqueCities as string[]
+  }, [shops])
 
   // Filtrar comercios
   const filteredShops = useMemo(() => {
-    let filtered = [...shops];
+    let filtered = [...shops]
 
     if (searchTerm) {
-      filtered = filtered.filter(shop =>
-        shop.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        shop.description?.toLowerCase().includes(searchTerm.toLowerCase())
-      );
+      filtered = filtered.filter(
+        (shop) =>
+          shop.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          shop.description?.toLowerCase().includes(searchTerm.toLowerCase()),
+      )
     }
 
     if (selectedCity !== 'all') {
-      filtered = filtered.filter(shop => shop.city === selectedCity);
+      filtered = filtered.filter((shop) => shop.city === selectedCity)
     }
 
-    return filtered;
-  }, [shops, searchTerm, selectedCity]);
+    return filtered
+  }, [shops, searchTerm, selectedCity])
 
   if (loading) {
     return (
@@ -61,7 +62,7 @@ export default function ShopsPage() {
           </div>
         </div>
       </div>
-    );
+    )
   }
 
   return (
@@ -70,7 +71,7 @@ export default function ShopsPage() {
       <div className="relative overflow-hidden bg-gradient-to-br from-primary/5 via-transparent to-secondary/5 pt-20 pb-12">
         <div className="absolute top-20 left-10 w-64 h-64 bg-primary/10 rounded-full blur-3xl animate-pulse" />
         <div className="absolute bottom-10 right-10 w-80 h-80 bg-secondary/10 rounded-full blur-3xl animate-pulse delay-1000" />
-        
+
         <div className="container mx-auto px-4 relative">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -81,7 +82,7 @@ export default function ShopsPage() {
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4 leading-tight">
               <span className="text-gradient">Comercios Asociados</span>
             </h1>
-            
+
             <p className="dark:text-gray-400 text-gray-600 text-lg max-w-2xl mx-auto">
               Descubre los comercios que se unen al rescate alimentario
             </p>
@@ -106,7 +107,7 @@ export default function ShopsPage() {
               className="w-full pl-10 pr-4 py-2.5 rounded-xl dark:bg-white/5 bg-white dark:border-white/10 border-gray-200 dark:text-white text-gray-900 placeholder-gray-500 focus:border-primary focus:outline-none transition-all"
             />
           </div>
-          
+
           {cities.length > 0 && (
             <div className="relative">
               <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 dark:text-gray-500 text-gray-400" />
@@ -116,8 +117,10 @@ export default function ShopsPage() {
                 className="pl-10 pr-8 py-2.5 rounded-xl dark:bg-white/5 bg-white dark:border-white/10 border-gray-200 dark:text-white text-gray-900 text-sm focus:border-primary focus:outline-none transition-all appearance-none"
               >
                 <option value="all">Todas las ciudades</option>
-                {cities.map(city => (
-                  <option key={city} value={city}>{city}</option>
+                {cities.map((city) => (
+                  <option key={city} value={city}>
+                    {city}
+                  </option>
                 ))}
               </select>
             </div>
@@ -140,5 +143,5 @@ export default function ShopsPage() {
         )}
       </div>
     </div>
-  );
+  )
 }

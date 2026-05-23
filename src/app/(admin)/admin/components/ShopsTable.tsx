@@ -41,9 +41,7 @@ export default function ShopsTable({ shops, onEdit, onVerify, onBan, onDelete }:
                 <td className="px-4 py-3">
                   <div>
                     <p className="font-medium dark:text-white text-gray-900">{shop.name}</p>
-                    {shop.phone && (
-                      <p className="text-xs dark:text-gray-500 text-gray-400 mt-0.5">{shop.phone}</p>
-                    )}
+                    {shop.phone && <p className="text-xs dark:text-gray-500 text-gray-400 mt-0.5">{shop.phone}</p>}
                   </div>
                 </td>
                 <td className="px-4 py-3">
@@ -75,12 +73,7 @@ export default function ShopsTable({ shops, onEdit, onVerify, onBan, onDelete }:
                 </td>
                 <td className="px-4 py-3">
                   <div className="flex items-center justify-center gap-2 flex-wrap">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => onEdit(shop)}
-                      className="p-1.5"
-                    >
+                    <Button variant="outline" size="sm" onClick={() => onEdit(shop)} className="p-1.5">
                       <Edit className="w-4 h-4" />
                     </Button>
                     {!shop.verified && (
@@ -93,29 +86,19 @@ export default function ShopsTable({ shops, onEdit, onVerify, onBan, onDelete }:
                       </Button>
                     )}
                     {shop.verified && (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => onVerify(shop.id, false)}
-                        className="p-1.5"
-                      >
+                      <Button variant="outline" size="sm" onClick={() => onVerify(shop.id, false)} className="p-1.5">
                         <EyeOff className="w-4 h-4" />
                       </Button>
                     )}
                     <Button
-                      variant={shop.banned ? "outline" : "danger"}
+                      variant={shop.banned ? 'outline' : 'danger'}
                       size="sm"
                       onClick={() => onBan(shop.id, !shop.banned)}
                       className="p-1.5"
                     >
                       {shop.banned ? <Eye className="w-4 h-4" /> : <XCircle className="w-4 h-4" />}
                     </Button>
-                    <Button
-                      variant="danger"
-                      size="sm"
-                      onClick={() => onDelete(shop.id)}
-                      className="p-1.5"
-                    >
+                    <Button variant="danger" size="sm" onClick={() => onDelete(shop.id)} className="p-1.5">
                       <Trash2 className="w-4 h-4" />
                     </Button>
                   </div>
@@ -125,7 +108,7 @@ export default function ShopsTable({ shops, onEdit, onVerify, onBan, onDelete }:
           </tbody>
         </table>
       </div>
-      
+
       {shops.length === 0 && (
         <div className="text-center py-12">
           <Store className="w-12 h-12 dark:text-gray-600 text-gray-400 mx-auto mb-3" />

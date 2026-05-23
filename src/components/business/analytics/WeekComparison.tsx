@@ -4,7 +4,9 @@ import { motion } from 'framer-motion'
 import { TrendingUp, TrendingDown, Minus, Calendar } from 'lucide-react'
 import type { WeeklyComparison } from './useBusinessAnalytics'
 
-interface Props { comparison: WeeklyComparison }
+interface Props {
+  comparison: WeeklyComparison
+}
 
 function ChangeBadge({ value, suffix = '%' }: { value: number; suffix?: string }) {
   const color = value > 0 ? 'text-green-400' : value < 0 ? 'text-red-400' : 'text-gray-400'
@@ -14,7 +16,9 @@ function ChangeBadge({ value, suffix = '%' }: { value: number; suffix?: string }
   return (
     <div className={`flex items-center gap-1 ${color} ${bg} px-2.5 py-1 rounded-lg text-xs font-bold`}>
       <Icon className="w-3.5 h-3.5" />
-      {value > 0 ? '+' : ''}{value}{suffix}
+      {value > 0 ? '+' : ''}
+      {value}
+      {suffix}
     </div>
   )
 }
@@ -40,13 +44,17 @@ export default function WeekComparison({ comparison }: Props) {
             <div className="dark:bg-dark-muted/50 bg-gray-50 rounded-xl p-3">
               <p className="text-xs dark:text-gray-500 text-gray-400">Esta semana</p>
               <div className="flex items-center gap-2 mt-1">
-                <span className="text-2xl font-bold dark:text-white text-gray-900">{comparison.currentWeek.reservations}</span>
+                <span className="text-2xl font-bold dark:text-white text-gray-900">
+                  {comparison.currentWeek.reservations}
+                </span>
                 <ChangeBadge value={comparison.reservationChange} />
               </div>
             </div>
             <div className="dark:bg-dark-muted/50 bg-gray-50 rounded-xl p-3">
               <p className="text-xs dark:text-gray-500 text-gray-400">Semana anterior</p>
-              <p className="text-2xl font-bold dark:text-gray-400 text-gray-500 mt-1">{comparison.lastWeek.reservations}</p>
+              <p className="text-2xl font-bold dark:text-gray-400 text-gray-500 mt-1">
+                {comparison.lastWeek.reservations}
+              </p>
             </div>
           </div>
         </div>
@@ -58,15 +66,15 @@ export default function WeekComparison({ comparison }: Props) {
             <div className="dark:bg-dark-muted/50 bg-gray-50 rounded-xl p-3">
               <p className="text-xs dark:text-gray-500 text-gray-400">Esta semana</p>
               <div className="flex items-center gap-2 mt-1">
-                <span className="text-2xl font-bold text-green-400">
-                  ${comparison.currentWeek.revenue.toFixed(2)}
-                </span>
+                <span className="text-2xl font-bold text-green-400">${comparison.currentWeek.revenue.toFixed(2)}</span>
                 <ChangeBadge value={comparison.revenueChange} />
               </div>
             </div>
             <div className="dark:bg-dark-muted/50 bg-gray-50 rounded-xl p-3">
               <p className="text-xs dark:text-gray-500 text-gray-400">Semana anterior</p>
-              <p className="text-2xl font-bold dark:text-gray-400 text-gray-500 mt-1">${comparison.lastWeek.revenue.toFixed(2)}</p>
+              <p className="text-2xl font-bold dark:text-gray-400 text-gray-500 mt-1">
+                ${comparison.lastWeek.revenue.toFixed(2)}
+              </p>
             </div>
           </div>
         </div>

@@ -3,13 +3,13 @@
 // ============================================
 
 // Estados de reserva (coinciden con la DB)
-export type ReservationStatus = 
-  | 'pending' 
-  | 'confirmed' 
-  | 'ready_pickup' 
-  | 'picked_up' 
-  | 'cancelled' 
-  | 'expired' 
+export type ReservationStatus =
+  | 'pending'
+  | 'confirmed'
+  | 'ready_pickup'
+  | 'picked_up'
+  | 'cancelled'
+  | 'expired'
   | 'no_show'
 
 // Métodos de pago

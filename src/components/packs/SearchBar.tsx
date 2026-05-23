@@ -1,12 +1,12 @@
-'use client';
+'use client'
 
-import { Search, X } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { Search, X } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
 
 interface SearchBarProps {
-  value: string;
-  onChange: (value: string) => void;
-  placeholder?: string;
+  value: string
+  onChange: (value: string) => void
+  placeholder?: string
 }
 
 export default function SearchBar({ value, onChange, placeholder = 'Buscar packs, comercios...' }: SearchBarProps) {
@@ -34,5 +34,5 @@ export default function SearchBar({ value, onChange, placeholder = 'Buscar packs
         )}
       </AnimatePresence>
     </div>
-  );
+  )
 }

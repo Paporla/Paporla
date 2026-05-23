@@ -1,14 +1,14 @@
-'use client';
+'use client'
 
-import { motion } from 'framer-motion';
-import Link from 'next/link';
-import { Sparkles, Package, ShoppingBag, Store, Award } from 'lucide-react';
+import { motion } from 'framer-motion'
+import Link from 'next/link'
+import { Sparkles, Package, ShoppingBag, Store, Award } from 'lucide-react'
 
 interface UserWelcomeBannerProps {
-  userName: string;
-  packsRescued?: number;
-  level?: string;
-  points?: number;
+  userName: string
+  packsRescued?: number
+  level?: string
+  points?: number
 }
 
 export default function UserWelcomeBanner({
@@ -30,18 +30,15 @@ export default function UserWelcomeBanner({
         <div className="flex-1">
           <div className="flex items-center gap-2 mb-2">
             <Sparkles className="w-5 h-5 text-primary" />
-            <span className="text-xs font-medium text-primary uppercase tracking-wider">
-              Panel de Control
-            </span>
+            <span className="text-xs font-medium text-primary uppercase tracking-wider">Panel de Control</span>
           </div>
           <h1 className="text-2xl lg:text-3xl font-bold dark:text-white text-gray-900">
             Hola, <span className="text-primary">{userName}</span>!
           </h1>
           <p className="dark:text-gray-400 text-gray-600 text-sm mt-1">
-            Has rescatado <span className="text-primary font-bold">{packsRescued}</span> packs.
-            Sigue salvando comida!
+            Has rescatado <span className="text-primary font-bold">{packsRescued}</span> packs. Sigue salvando comida!
           </p>
-          
+
           {/* Enlaces rapidos a explorar */}
           <div className="flex gap-3 mt-4">
             <Link
@@ -85,5 +82,5 @@ export default function UserWelcomeBanner({
         </div>
       </div>
     </motion.div>
-  );
+  )
 }

@@ -1,14 +1,14 @@
-'use client';
+'use client'
 
-import { Image, AlertTriangle } from 'lucide-react';
-import ImageUpload from '@/components/ui/ImageUpload';
+import { Image, AlertTriangle } from 'lucide-react'
+import ImageUpload from '@/components/ui/ImageUpload'
 
 interface ProfileImagesFormProps {
-  logoUrl: string;
-  coverUrl: string;
-  onLogoChange: (url: string) => void;
-  onCoverChange: (url: string) => void;
-  shopId: string;
+  logoUrl: string
+  coverUrl: string
+  onLogoChange: (url: string) => void
+  onCoverChange: (url: string) => void
+  shopId: string
 }
 
 export default function ProfileImagesForm({
@@ -50,5 +50,5 @@ export default function ProfileImagesForm({
         </p>
       </div>
     </div>
-  );
+  )
 }

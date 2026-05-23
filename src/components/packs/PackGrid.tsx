@@ -12,13 +12,7 @@ interface PackGridProps {
   glassCard?: boolean
 }
 
-export default function PackGrid({ 
-  packs, 
-  loading, 
-  onReserve, 
-  showShopName = true,
-  glassCard = false 
-}: PackGridProps) {
+export default function PackGrid({ packs, loading, onReserve, showShopName = true, glassCard = false }: PackGridProps) {
   if (loading) {
     return <PackGridSkeleton />
   }
@@ -37,13 +31,7 @@ export default function PackGrid({
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       {packs.map((pack) => (
-        <PackCard
-          key={pack.id}
-          pack={pack}
-          onReserve={onReserve}
-          showShopName={showShopName}
-          glass={glassCard}
-        />
+        <PackCard key={pack.id} pack={pack} onReserve={onReserve} showShopName={showShopName} glass={glassCard} />
       ))}
     </div>
   )

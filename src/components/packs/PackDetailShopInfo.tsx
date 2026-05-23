@@ -1,17 +1,17 @@
-'use client';
+'use client'
 
-import { Star, MapPin, Phone, CheckCircle, Clock, Store } from 'lucide-react';
+import { Star, MapPin, Phone, CheckCircle, Clock, Store } from 'lucide-react'
 
 interface PackDetailShopInfoProps {
-  shopName: string;
-  shopRating: number;
-  shopVerified: boolean;
-  shopAddress: string | null;
-  shopCity: string | null;
-  shopPhone: string | null;
-  pickupDate: string | null;
-  pickupStartTime: string | null;
-  pickupEndTime: string | null;
+  shopName: string
+  shopRating: number
+  shopVerified: boolean
+  shopAddress: string | null
+  shopCity: string | null
+  shopPhone: string | null
+  pickupDate: string | null
+  pickupStartTime: string | null
+  pickupEndTime: string | null
 }
 
 export default function PackDetailShopInfo({
@@ -25,9 +25,8 @@ export default function PackDetailShopInfo({
   pickupStartTime,
   pickupEndTime,
 }: PackDetailShopInfoProps) {
-  const pickupTime = pickupStartTime && pickupEndTime
-    ? `${pickupStartTime.slice(0,5)} - ${pickupEndTime.slice(0,5)}`
-    : null;
+  const pickupTime =
+    pickupStartTime && pickupEndTime ? `${pickupStartTime.slice(0, 5)} - ${pickupEndTime.slice(0, 5)}` : null
 
   return (
     <div className="space-y-4">
@@ -39,9 +38,7 @@ export default function PackDetailShopInfo({
         <div className="flex-1">
           <div className="flex items-center gap-2">
             <h2 className="font-bold dark:text-white text-gray-900">{shopName}</h2>
-            {shopVerified && (
-              <CheckCircle className="w-4 h-4 text-primary" />
-            )}
+            {shopVerified && <CheckCircle className="w-4 h-4 text-primary" />}
           </div>
           <div className="flex items-center gap-2 text-xs dark:text-gray-500 text-gray-400">
             <div className="flex items-center gap-0.5">
@@ -96,13 +93,9 @@ export default function PackDetailShopInfo({
               })}
             </p>
           )}
-          {pickupTime && (
-            <p className="text-sm text-primary font-medium mt-1">
-              {pickupTime}
-            </p>
-          )}
+          {pickupTime && <p className="text-sm text-primary font-medium mt-1">{pickupTime}</p>}
         </div>
       )}
     </div>
-  );
+  )
 }

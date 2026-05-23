@@ -28,7 +28,7 @@ export default function AvatarMenu() {
     return user.name.charAt(0).toUpperCase()
   }
 
-      const getPanelRoute = () => {
+  const getPanelRoute = () => {
     const role = user?.role
     if (role === 'comercio') return '/business'
     if (role === 'admin' || role === 'super_admin') return '/admin'
@@ -46,7 +46,7 @@ export default function AvatarMenu() {
 
   return (
     <div className="flex items-center gap-3">
-            {/* Boton Panel - usa button + router para navegacion controlada */}
+      {/* Boton Panel - usa button + router para navegacion controlada */}
       <button
         onClick={() => {
           setIsOpen(false)
@@ -72,10 +72,7 @@ export default function AvatarMenu() {
 
       {/* Avatar con menu desplegable */}
       <div className="relative" ref={menuRef}>
-        <button
-          onClick={() => setIsOpen(!isOpen)}
-          className="flex items-center gap-2 focus:outline-none"
-        >
+        <button onClick={() => setIsOpen(!isOpen)} className="flex items-center gap-2 focus:outline-none">
           {user?.avatar_url ? (
             <Image
               src={user.avatar_url}
@@ -86,9 +83,7 @@ export default function AvatarMenu() {
             />
           ) : (
             <div className="w-9 h-9 rounded-full bg-gradient-to-br from-primary/30 to-primary/10 border border-primary flex items-center justify-center">
-              <span className="text-primary font-bold text-sm">
-                {getInitials()}
-              </span>
+              <span className="text-primary font-bold text-sm">{getInitials()}</span>
             </div>
           )}
         </button>
@@ -108,13 +103,11 @@ export default function AvatarMenu() {
                   <p className="text-sm font-semibold dark:text-white text-gray-900 truncate">{user?.name}</p>
                   <p className="text-xs dark:text-gray-400 text-gray-600 truncate mt-0.5">{user?.email}</p>
                   <div className="mt-2">
-                    <span className="text-xs bg-primary/20 text-primary px-2 py-0.5 rounded-full">
-                      {getRoleName()}
-                    </span>
+                    <span className="text-xs bg-primary/20 text-primary px-2 py-0.5 rounded-full">{getRoleName()}</span>
                   </div>
                 </div>
-                
-                                                                <button
+
+                <button
                   onClick={() => {
                     setIsOpen(false)
                     const role = user?.role
@@ -127,7 +120,7 @@ export default function AvatarMenu() {
                   <UserCircle className="w-5 h-5 text-primary group-hover:scale-110 transition-transform" />
                   <span>Mi Perfil</span>
                 </button>
-                
+
                 <button
                   onClick={() => {
                     setIsOpen(false)

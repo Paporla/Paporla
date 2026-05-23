@@ -1,13 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect, notFound } from 'next/navigation'
 import Link from 'next/link'
-import {
-  ArrowLeft,
-  Copy,
-  Package,
-  ShieldAlert,
-  AlertTriangle,
-} from 'lucide-react'
+import { ArrowLeft, Copy, Package, ShieldAlert, AlertTriangle } from 'lucide-react'
 import Button from '@/components/ui/Button'
 import PackFormSimplified from '@/components/business/PackFormSimplified'
 
@@ -95,9 +89,8 @@ export default async function EditPackPage({ params }: EditPackPageProps) {
                   Comercio suspendido
                 </h1>
                 <p className="dark:text-gray-400 text-gray-600 max-w-2xl">
-                  Tu comercio esta suspendido temporalmente. No puedes editar
-                  packs en este momento. Contacta con soporte si crees que se
-                  trata de un error.
+                  Tu comercio esta suspendido temporalmente. No puedes editar packs en este momento. Contacta con
+                  soporte si crees que se trata de un error.
                 </p>
               </div>
             </div>
@@ -148,15 +141,12 @@ export default async function EditPackPage({ params }: EditPackPageProps) {
                 </h1>
 
                 <p className="dark:text-gray-400 text-gray-600 max-w-2xl mb-6">
-                  Tu comercio todavia no esta verificado. Puedes editar
-                  informacion basica, pero no podras publicar packs activos
-                  hasta que el administrador apruebe tu comercio.
+                  Tu comercio todavia no esta verificado. Puedes editar informacion basica, pero no podras publicar
+                  packs activos hasta que el administrador apruebe tu comercio.
                 </p>
 
                 <Link href="/business/profile">
-                  <Button variant="outline">
-                    Ir al perfil del comercio
-                  </Button>
+                  <Button variant="outline">Ir al perfil del comercio</Button>
                 </Link>
               </div>
             </div>
@@ -170,10 +160,7 @@ export default async function EditPackPage({ params }: EditPackPageProps) {
     )
   }
 
-  const isFinalStatus =
-    pack.status === 'sold_out' ||
-    pack.status === 'expired' ||
-    pack.status === 'deleted'
+  const isFinalStatus = pack.status === 'sold_out' || pack.status === 'expired' || pack.status === 'deleted'
 
   return (
     <div className="space-y-8">
@@ -195,21 +182,15 @@ export default async function EditPackPage({ params }: EditPackPageProps) {
                 </div>
 
                 <div>
-                  <h1 className="text-3xl md:text-4xl font-bold dark:text-white text-gray-900">
-                    Editar pack
-                  </h1>
-                  <p className="dark:text-gray-400 text-gray-600 mt-1">
-                    Modifica la informacion de tu pack
-                  </p>
+                  <h1 className="text-3xl md:text-4xl font-bold dark:text-white text-gray-900">Editar pack</h1>
+                  <p className="dark:text-gray-400 text-gray-600 mt-1">Modifica la informacion de tu pack</p>
                 </div>
               </div>
 
               <div className="flex flex-wrap gap-2 mt-4">
                 <span className="inline-flex items-center rounded-full border dark:border-white/10 border-gray-200 dark:bg-white/5 bg-gray-100 px-3 py-1 text-xs dark:text-gray-300 text-gray-700">
                   Estado:{' '}
-                  <span className="ml-1 dark:text-white text-gray-900 font-medium">
-                    {pack.status || 'active'}
-                  </span>
+                  <span className="ml-1 dark:text-white text-gray-900 font-medium">{pack.status || 'active'}</span>
                 </span>
 
                 <span className="inline-flex items-center rounded-full border dark:border-white/10 border-gray-200 dark:bg-white/5 bg-gray-100 px-3 py-1 text-xs dark:text-gray-300 text-gray-700">
@@ -220,10 +201,7 @@ export default async function EditPackPage({ params }: EditPackPageProps) {
                 </span>
 
                 <span className="inline-flex items-center rounded-full border dark:border-white/10 border-gray-200 dark:bg-white/5 bg-gray-100 px-3 py-1 text-xs dark:text-gray-300 text-gray-700">
-                  Comercio:{' '}
-                  <span className="ml-1 dark:text-white text-gray-900 font-medium">
-                    {shop.name}
-                  </span>
+                  Comercio: <span className="ml-1 dark:text-white text-gray-900 font-medium">{shop.name}</span>
                 </span>
               </div>
             </div>
@@ -244,15 +222,12 @@ export default async function EditPackPage({ params }: EditPackPageProps) {
             <AlertTriangle className="w-5 h-5 text-yellow-400 shrink-0 mt-0.5" />
 
             <div>
-              <h2 className="text-sm font-semibold text-yellow-200">
-                Este pack tiene un estado final
-              </h2>
+              <h2 className="text-sm font-semibold text-yellow-200">Este pack tiene un estado final</h2>
 
               <p className="text-sm text-yellow-100/70 mt-1">
-                Este pack está marcado como{' '}
-                <span className="font-medium">{pack.status}</span>. Puedes
-                revisar o duplicar la información, pero para nuevas ventas lo
-                más recomendable es duplicarlo y publicar un pack nuevo.
+                Este pack está marcado como <span className="font-medium">{pack.status}</span>. Puedes revisar o
+                duplicar la información, pero para nuevas ventas lo más recomendable es duplicarlo y publicar un pack
+                nuevo.
               </p>
             </div>
           </div>

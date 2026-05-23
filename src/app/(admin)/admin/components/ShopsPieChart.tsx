@@ -1,26 +1,50 @@
-'use client';
+'use client'
 
-import Card from '@/components/ui/Card';
-import { Store, CheckCircle, Clock, Ban } from 'lucide-react';
+import Card from '@/components/ui/Card'
+import { Store, CheckCircle, Clock, Ban } from 'lucide-react'
 
 interface ShopsPieChartProps {
-  verified: number;
-  pending: number;
-  banned: number;
-  total: number;
+  verified: number
+  pending: number
+  banned: number
+  total: number
 }
 
 export default function ShopsPieChart({ verified, pending, banned, total }: ShopsPieChartProps) {
   const getPercentage = (value: number) => {
-    if (total === 0) return 0;
-    return Math.round((value / total) * 100);
-  };
+    if (total === 0) return 0
+    return Math.round((value / total) * 100)
+  }
 
   const stats = [
-    { label: 'Verificados', value: verified, percentage: getPercentage(verified), icon: CheckCircle, color: 'text-green-400', bg: 'bg-green-500/10', barColor: 'bg-green-500' },
-    { label: 'Pendientes', value: pending, percentage: getPercentage(pending), icon: Clock, color: 'text-yellow-400', bg: 'bg-yellow-500/10', barColor: 'bg-yellow-500' },
-    { label: 'Baneados', value: banned, percentage: getPercentage(banned), icon: Ban, color: 'text-red-400', bg: 'bg-red-500/10', barColor: 'bg-red-500' },
-  ];
+    {
+      label: 'Verificados',
+      value: verified,
+      percentage: getPercentage(verified),
+      icon: CheckCircle,
+      color: 'text-green-400',
+      bg: 'bg-green-500/10',
+      barColor: 'bg-green-500',
+    },
+    {
+      label: 'Pendientes',
+      value: pending,
+      percentage: getPercentage(pending),
+      icon: Clock,
+      color: 'text-yellow-400',
+      bg: 'bg-yellow-500/10',
+      barColor: 'bg-yellow-500',
+    },
+    {
+      label: 'Baneados',
+      value: banned,
+      percentage: getPercentage(banned),
+      icon: Ban,
+      color: 'text-red-400',
+      bg: 'bg-red-500/10',
+      barColor: 'bg-red-500',
+    },
+  ]
 
   if (total === 0) {
     return (
@@ -33,7 +57,7 @@ export default function ShopsPieChart({ verified, pending, banned, total }: Shop
           <p className="dark:text-gray-400 text-gray-600">No hay comercios registrados</p>
         </div>
       </Card>
-    );
+    )
   }
 
   return (
@@ -42,7 +66,7 @@ export default function ShopsPieChart({ verified, pending, banned, total }: Shop
         <Store className="w-5 h-5 text-primary" />
         Estado de Comercios
       </h3>
-      
+
       <div className="space-y-4">
         {stats.map((stat) => (
           <div key={stat.label} className="space-y-1">
@@ -59,7 +83,7 @@ export default function ShopsPieChart({ verified, pending, banned, total }: Shop
               </div>
             </div>
             <div className="h-1.5 dark:bg-gray-800 bg-gray-200 rounded-full overflow-hidden">
-              <div 
+              <div
                 className={`h-full ${stat.barColor} rounded-full transition-all duration-500`}
                 style={{ width: `${stat.percentage}%` }}
               />
@@ -75,5 +99,5 @@ export default function ShopsPieChart({ verified, pending, banned, total }: Shop
         </div>
       </div>
     </Card>
-  );
+  )
 }

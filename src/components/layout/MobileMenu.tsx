@@ -16,11 +16,15 @@ export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
   const getDashboardLink = () => {
     if (!user) return '/dashboard'
     switch (user.role) {
-      case 'user': return '/dashboard'
-      case 'comercio': return '/business'
+      case 'user':
+        return '/dashboard'
+      case 'comercio':
+        return '/business'
       case 'admin':
-      case 'super_admin': return '/admin'
-      default: return '/dashboard'
+      case 'super_admin':
+        return '/admin'
+      default:
+        return '/dashboard'
     }
   }
 
@@ -48,7 +52,7 @@ export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
-              
+
               <nav className="mt-8 flex flex-col gap-4">
                 <Link href="/packs" onClick={onClose} className="text-gray-300 hover:text-primary">
                   Ver Packs
@@ -59,7 +63,7 @@ export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
                 <Link href="/about" onClick={onClose} className="text-gray-300 hover:text-primary">
                   Sobre Nosotros
                 </Link>
-                
+
                 {user ? (
                   <>
                     <Link href={getDashboardLink()} onClick={onClose}>
@@ -67,7 +71,14 @@ export default function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
                         Mi Panel
                       </Button>
                     </Link>
-                    <Button variant="primary" size="sm" onClick={() => { signOut(); onClose(); }}>
+                    <Button
+                      variant="primary"
+                      size="sm"
+                      onClick={() => {
+                        signOut()
+                        onClose()
+                      }}
+                    >
                       Cerrar Sesión
                     </Button>
                   </>

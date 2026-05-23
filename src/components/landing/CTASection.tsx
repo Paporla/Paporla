@@ -1,8 +1,8 @@
-'use client';
+'use client'
 
-import { motion } from 'framer-motion';
-import Link from 'next/link';
-import { ArrowRight, Sparkles, UserPlus } from 'lucide-react';
+import { motion } from 'framer-motion'
+import Link from 'next/link'
+import { ArrowRight, Sparkles, UserPlus } from 'lucide-react'
 
 export default function CTASection() {
   return (
@@ -17,24 +17,24 @@ export default function CTASection() {
           className="relative group"
         >
           <div className="absolute -inset-0.5 bg-gradient-to-r from-primary/20 to-primary/10 rounded-2xl blur-xl opacity-0 group-hover:opacity-40 transition duration-500" />
-          
+
           <div className="relative dark:bg-gradient-to-br dark:from-primary/10 dark:to-primary/5 bg-primary/5 rounded-2xl p-10 md:p-12 text-center border border-primary/20 backdrop-blur-sm">
             <motion.div
               animate={{ rotate: 360 }}
-              transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+              transition={{ duration: 20, repeat: Infinity, ease: 'linear' }}
               className="w-16 h-16 mx-auto mb-5 rounded-full bg-primary/20 flex items-center justify-center"
             >
               <Sparkles className="w-8 h-8 text-primary" />
             </motion.div>
-            
+
             <h2 className="text-2xl md:text-3xl font-bold dark:text-white text-gray-900 mb-3">
               Listo para <span className="text-primary">rescatar comida</span>?
             </h2>
-            
+
             <p className="dark:text-gray-400 text-gray-600 mb-6 max-w-md mx-auto">
               Unete a miles de personas que ya estan ahorrando mientras ayudan al planeta.
             </p>
-            
+
             <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
               <Link
                 href="/packs"
@@ -90,5 +90,5 @@ export default function CTASection() {
         </motion.div>
       </div>
     </section>
-  );
+  )
 }

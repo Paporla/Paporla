@@ -1,8 +1,8 @@
-'use client';
+'use client'
 
-import Script from 'next/script';
+import Script from 'next/script'
 
-const GTM_ID = 'GTM-MKZBFF58';
+const GTM_ID = 'GTM-MKZBFF58'
 
 export default function GoogleTagManager() {
   return (
@@ -31,5 +31,5 @@ export default function GoogleTagManager() {
         />
       </noscript>
     </>
-  );
+  )
 }

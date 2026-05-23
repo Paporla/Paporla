@@ -1,26 +1,26 @@
-'use client';
+'use client'
 
-import { useState } from 'react';
-import { Copy, Check } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useState } from 'react'
+import { Copy, Check } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
 
 interface CopyButtonProps {
-  text: string;
-  label?: string;
+  text: string
+  label?: string
 }
 
 export default function CopyButton({ text, label = 'Copiar' }: CopyButtonProps) {
-  const [copied, setCopied] = useState(false);
+  const [copied, setCopied] = useState(false)
 
   const handleCopy = async () => {
     try {
-      await navigator.clipboard.writeText(text);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      await navigator.clipboard.writeText(text)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
     } catch (err) {
-      console.error('Error copying:', err);
+      console.error('Error copying:', err)
     }
-  };
+  }
 
   return (
     <button
@@ -53,5 +53,5 @@ export default function CopyButton({ text, label = 'Copiar' }: CopyButtonProps) 
         )}
       </AnimatePresence>
     </button>
-  );
+  )
 }

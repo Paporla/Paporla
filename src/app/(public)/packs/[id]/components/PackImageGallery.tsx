@@ -11,18 +11,9 @@ interface PackImageGalleryProps {
   isAvailable: boolean
 }
 
-export default function PackImageGallery({
-  imageUrl,
-  title,
-  discount,
-  isAvailable
-}: PackImageGalleryProps) {
+export default function PackImageGallery({ imageUrl, title, discount, isAvailable }: PackImageGalleryProps) {
   return (
-    <motion.div
-      initial={{ opacity: 0, x: -20 }}
-      animate={{ opacity: 1, x: 0 }}
-      className="relative"
-    >
+    <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="relative">
       <div className="relative h-80 md:h-96 rounded-2xl overflow-hidden glass-card">
         {imageUrl ? (
           <Image

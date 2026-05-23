@@ -1,8 +1,8 @@
-'use client';
+'use client'
 
-import { useState } from 'react';
-import { motion } from 'framer-motion';
-import { Send, CheckCircle, AlertCircle, MapPin, Phone, Mail, Clock } from 'lucide-react';
+import { useState } from 'react'
+import { motion } from 'framer-motion'
+import { Send, CheckCircle, AlertCircle, MapPin, Phone, Mail, Clock } from 'lucide-react'
 
 export default function ContactoPage() {
   const [formData, setFormData] = useState({
@@ -10,24 +10,24 @@ export default function ContactoPage() {
     email: '',
     subject: '',
     message: '',
-  });
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle');
+  })
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle')
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
+    e.preventDefault()
+    setIsSubmitting(true)
     setTimeout(() => {
-      setSubmitStatus('success');
-      setIsSubmitting(false);
-      setFormData({ name: '', email: '', subject: '', message: '' });
-      setTimeout(() => setSubmitStatus('idle'), 5000);
-    }, 1500);
-  };
+      setSubmitStatus('success')
+      setIsSubmitting(false)
+      setFormData({ name: '', email: '', subject: '', message: '' })
+      setTimeout(() => setSubmitStatus('idle'), 5000)
+    }, 1500)
+  }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
-  };
+    setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }))
+  }
 
   return (
     <div className="min-h-screen">
@@ -35,7 +35,7 @@ export default function ContactoPage() {
       <div className="relative overflow-hidden bg-gradient-to-br from-primary/5 via-transparent to-secondary/5 pt-20 pb-12">
         <div className="absolute top-20 left-10 w-72 h-72 bg-primary/10 rounded-full blur-3xl animate-pulse" />
         <div className="absolute bottom-10 right-10 w-96 h-96 bg-secondary/10 rounded-full blur-3xl animate-pulse delay-1000" />
-        
+
         <div className="container mx-auto px-4 relative">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -47,8 +47,7 @@ export default function ContactoPage() {
               <span className="text-gradient">Contáctanos</span>
             </h1>
             <p className="text-gray-600 dark:text-gray-300 text-lg md:text-xl">
-              ¿Tienes preguntas, sugerencias o quieres colaborar con nosotros? 
-              Estamos aquí para ayudarte.
+              ¿Tienes preguntas, sugerencias o quieres colaborar con nosotros? Estamos aquí para ayudarte.
             </p>
           </motion.div>
         </div>
@@ -67,20 +66,40 @@ export default function ContactoPage() {
               <h2 className="text-2xl font-bold mb-6 text-gradient">Información</h2>
               <div className="space-y-4">
                 <div className="flex items-start gap-4 p-3 rounded-xl dark:hover:bg-white/5 hover:bg-gray-100 transition-all">
-                  <div className="p-3 rounded-xl bg-primary/10"><MapPin className="w-5 h-5 text-primary" /></div>
-                  <div><h3 className="font-semibold">Dirección</h3><p className="text-gray-600 dark:text-gray-300">Caracas, Venezuela</p></div>
+                  <div className="p-3 rounded-xl bg-primary/10">
+                    <MapPin className="w-5 h-5 text-primary" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold">Dirección</h3>
+                    <p className="text-gray-600 dark:text-gray-300">Caracas, Venezuela</p>
+                  </div>
                 </div>
                 <div className="flex items-start gap-4 p-3 rounded-xl dark:hover:bg-white/5 hover:bg-gray-100 transition-all">
-                  <div className="p-3 rounded-xl bg-primary/10"><Phone className="w-5 h-5 text-primary" /></div>
-                  <div><h3 className="font-semibold">Teléfono</h3><p className="text-gray-600 dark:text-gray-300">+58 212 555 1234</p></div>
+                  <div className="p-3 rounded-xl bg-primary/10">
+                    <Phone className="w-5 h-5 text-primary" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold">Teléfono</h3>
+                    <p className="text-gray-600 dark:text-gray-300">+58 212 555 1234</p>
+                  </div>
                 </div>
                 <div className="flex items-start gap-4 p-3 rounded-xl dark:hover:bg-white/5 hover:bg-gray-100 transition-all">
-                  <div className="p-3 rounded-xl bg-primary/10"><Mail className="w-5 h-5 text-primary" /></div>
-                  <div><h3 className="font-semibold">Email</h3><p className="text-gray-600 dark:text-gray-300">hola@paporla.com</p></div>
+                  <div className="p-3 rounded-xl bg-primary/10">
+                    <Mail className="w-5 h-5 text-primary" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold">Email</h3>
+                    <p className="text-gray-600 dark:text-gray-300">hola@paporla.com</p>
+                  </div>
                 </div>
                 <div className="flex items-start gap-4 p-3 rounded-xl dark:hover:bg-white/5 hover:bg-gray-100 transition-all">
-                  <div className="p-3 rounded-xl bg-primary/10"><Clock className="w-5 h-5 text-primary" /></div>
-                  <div><h3 className="font-semibold">Horario</h3><p className="text-gray-600 dark:text-gray-300">Lun - Vie: 9am - 6pm</p></div>
+                  <div className="p-3 rounded-xl bg-primary/10">
+                    <Clock className="w-5 h-5 text-primary" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold">Horario</h3>
+                    <p className="text-gray-600 dark:text-gray-300">Lun - Vie: 9am - 6pm</p>
+                  </div>
                 </div>
               </div>
             </div>
@@ -99,44 +118,72 @@ export default function ContactoPage() {
 
               {submitStatus === 'success' && (
                 <div className="mb-6 p-4 rounded-xl bg-green-500/10 border border-green-500/20 text-green-600 dark:text-green-400 flex items-center gap-3">
-                  <CheckCircle className="w-5 h-5" /><span>¡Mensaje enviado! Te responderemos pronto.</span>
+                  <CheckCircle className="w-5 h-5" />
+                  <span>¡Mensaje enviado! Te responderemos pronto.</span>
                 </div>
               )}
 
               {submitStatus === 'error' && (
                 <div className="mb-6 p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 flex items-center gap-3">
-                  <AlertCircle className="w-5 h-5" /><span>Error al enviar. Por favor, intenta nuevamente.</span>
+                  <AlertCircle className="w-5 h-5" />
+                  <span>Error al enviar. Por favor, intenta nuevamente.</span>
                 </div>
               )}
 
               <form onSubmit={handleSubmit} className="space-y-5">
                 <div className="grid md:grid-cols-2 gap-5">
                   <div>
-                    <label className="block text-sm font-medium dark:text-gray-300 text-gray-700 mb-2">Nombre completo *</label>
-                    <input type="text" name="name" value={formData.name} onChange={handleChange} required
+                    <label className="block text-sm font-medium dark:text-gray-300 text-gray-700 mb-2">
+                      Nombre completo *
+                    </label>
+                    <input
+                      type="text"
+                      name="name"
+                      value={formData.name}
+                      onChange={handleChange}
+                      required
                       className="w-full px-4 py-3 rounded-xl dark:bg-white/10 bg-white dark:border-gray-600 border-gray-200 dark:text-white text-gray-900 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
-                      placeholder="Tu nombre" />
+                      placeholder="Tu nombre"
+                    />
                   </div>
                   <div>
                     <label className="block text-sm font-medium dark:text-gray-300 text-gray-700 mb-2">Email *</label>
-                    <input type="email" name="email" value={formData.email} onChange={handleChange} required
+                    <input
+                      type="email"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleChange}
+                      required
                       className="w-full px-4 py-3 rounded-xl dark:bg-white/10 bg-white dark:border-gray-600 border-gray-200 dark:text-white text-gray-900 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
-                      placeholder="tu@email.com" />
+                      placeholder="tu@email.com"
+                    />
                   </div>
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium dark:text-gray-300 text-gray-700 mb-2">Asunto *</label>
-                  <input type="text" name="subject" value={formData.subject} onChange={handleChange} required
+                  <input
+                    type="text"
+                    name="subject"
+                    value={formData.subject}
+                    onChange={handleChange}
+                    required
                     className="w-full px-4 py-3 rounded-xl dark:bg-white/10 bg-white dark:border-gray-600 border-gray-200 dark:text-white text-gray-900 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
-                    placeholder="Sobre que quieres hablar?" />
+                    placeholder="Sobre que quieres hablar?"
+                  />
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium dark:text-gray-300 text-gray-700 mb-2">Mensaje *</label>
-                  <textarea name="message" rows={6} value={formData.message} onChange={handleChange} required
+                  <textarea
+                    name="message"
+                    rows={6}
+                    value={formData.message}
+                    onChange={handleChange}
+                    required
                     className="w-full px-4 py-3 rounded-xl dark:bg-white/10 bg-white dark:border-gray-600 border-gray-200 dark:text-white text-gray-900 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all resize-none"
-                    placeholder="Cuentanos detalladamente tu mensaje..." />
+                    placeholder="Cuentanos detalladamente tu mensaje..."
+                  />
                 </div>
 
                 <motion.button
@@ -148,9 +195,15 @@ export default function ContactoPage() {
                     ${isSubmitting ? 'bg-gray-500 cursor-not-allowed' : 'bg-gradient-to-r from-primary to-primary/80 hover:shadow-lg hover:shadow-primary/25'}`}
                 >
                   {isSubmitting ? (
-                    <><div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />Enviando...</>
+                    <>
+                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      Enviando...
+                    </>
                   ) : (
-                    <><Send className="w-5 h-5" />Enviar mensaje</>
+                    <>
+                      <Send className="w-5 h-5" />
+                      Enviar mensaje
+                    </>
                   )}
                 </motion.button>
               </form>
@@ -185,5 +238,5 @@ export default function ContactoPage() {
         </motion.div>
       </div>
     </div>
-  );
+  )
 }

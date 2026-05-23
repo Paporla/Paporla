@@ -1,24 +1,24 @@
-﻿'use client';
+﻿'use client'
 
-import { useParams } from 'next/navigation';
-import { useShop } from '@/hooks/useShop';
-import ShopDetailHeader from '@/components/shops/ShopDetailHeader';
-import ShopDetailInfo from '@/components/shops/ShopDetailInfo';
-import ShopDetailPacks from '@/components/shops/ShopDetailPacks';
-import { useEffect } from 'react';
-import PageLoader from '@/components/ui/PageLoader';
-import { Store } from 'lucide-react';
+import { useParams } from 'next/navigation'
+import { useShop } from '@/hooks/useShop'
+import ShopDetailHeader from '@/components/shops/ShopDetailHeader'
+import ShopDetailInfo from '@/components/shops/ShopDetailInfo'
+import ShopDetailPacks from '@/components/shops/ShopDetailPacks'
+import { useEffect } from 'react'
+import PageLoader from '@/components/ui/PageLoader'
+import { Store } from 'lucide-react'
 
 export default function ShopDetailPage() {
-  const params = useParams();
-  const shopId = params.id as string;
-  const { shop, packs, loading, error } = useShop(shopId);
+  const params = useParams()
+  const shopId = params.id as string
+  const { shop, packs, loading, error } = useShop(shopId)
 
   useEffect(() => {
     if (shop?.name) {
-      document.title = shop.name + ' | Paporla';
+      document.title = shop.name + ' | Paporla'
     }
-  }, [shop?.name]);
+  }, [shop?.name])
 
   if (loading) {
     return (
@@ -27,7 +27,7 @@ export default function ShopDetailPage() {
           <PageLoader />
         </div>
       </div>
-    );
+    )
   }
 
   if (error || !shop) {
@@ -41,7 +41,7 @@ export default function ShopDetailPage() {
           <p className="dark:text-gray-400 text-gray-600">El comercio que buscas no existe o no esta disponible</p>
         </div>
       </div>
-    );
+    )
   }
 
   return (
@@ -60,5 +60,5 @@ export default function ShopDetailPage() {
         </div>
       </div>
     </div>
-  );
+  )
 }

@@ -4,7 +4,8 @@ export default function manifest(): MetadataRoute.Manifest {
   return {
     name: 'Paporla - Rescate Alimentario',
     short_name: 'Paporla',
-    description: 'Rescata comida, no la dejes perder. Conectamos comercios con excedentes de comida con personas que necesitan alimentarse.',
+    description:
+      'Rescata comida, no la dejes perder. Conectamos comercios con excedentes de comida con personas que necesitan alimentarse.',
     start_url: '/',
     display: 'standalone',
     background_color: '#ffffff',

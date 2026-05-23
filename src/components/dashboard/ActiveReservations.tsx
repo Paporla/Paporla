@@ -14,12 +14,7 @@ interface ActiveReservationsProps {
   activeRef?: React.RefObject<HTMLDivElement>
 }
 
-export default function ActiveReservations({ 
-  reservations, 
-  onCancel, 
-  cancelling,
-  activeRef 
-}: ActiveReservationsProps) {
+export default function ActiveReservations({ reservations, onCancel, cancelling, activeRef }: ActiveReservationsProps) {
   return (
     <motion.div
       ref={activeRef}
@@ -34,7 +29,7 @@ export default function ActiveReservations({
           <span className="text-sm dark:text-gray-400 text-gray-600 ml-2">({reservations.length})</span>
         )}
       </h2>
-      
+
       {reservations.length === 0 ? (
         <Card glass className="text-center py-8">
           <Package className="w-12 h-12 dark:text-gray-600 text-gray-400 mx-auto mb-3" />
@@ -44,7 +39,7 @@ export default function ActiveReservations({
           </Link>
         </Card>
       ) : (
-        reservations.map(reservation => (
+        reservations.map((reservation) => (
           <ReservationCard
             key={reservation.id}
             reservation={reservation}

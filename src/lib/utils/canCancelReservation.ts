@@ -25,7 +25,7 @@ export function canCancelReservation(reservation: {
 
   // Construir la fecha y hora de recogida
   const pickupDate = new Date(reservation.pickup_date)
-  
+
   if (reservation.pickup_start_time) {
     const [hours, minutes] = reservation.pickup_start_time.split(':').map(Number)
     pickupDate.setHours(hours, minutes, 0, 0)
@@ -41,7 +41,7 @@ export function canCancelReservation(reservation: {
   if (diffHours < 2) {
     return {
       allowed: false,
-      reason: `La reserva vence en menos de 2 horas (${Math.max(0, Math.floor(diffHours * 60))} min restantes). Ya no puedes cancelarla.`
+      reason: `La reserva vence en menos de 2 horas (${Math.max(0, Math.floor(diffHours * 60))} min restantes). Ya no puedes cancelarla.`,
     }
   }
 

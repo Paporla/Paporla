@@ -1,22 +1,22 @@
-﻿'use client';
+﻿'use client'
 
-import { useEffect, useState } from 'react';
-import { usePathname } from 'next/navigation';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useEffect, useState } from 'react'
+import { usePathname } from 'next/navigation'
+import { motion, AnimatePresence } from 'framer-motion'
 
 export default function RouteLoader() {
-  const pathname = usePathname();
-  const [isLoading, setIsLoading] = useState(false);
-  const [prevPath, setPrevPath] = useState(pathname);
+  const pathname = usePathname()
+  const [isLoading, setIsLoading] = useState(false)
+  const [prevPath, setPrevPath] = useState(pathname)
 
   useEffect(() => {
     if (pathname !== prevPath) {
-      setIsLoading(true);
-      setPrevPath(pathname);
-      const timer = setTimeout(() => setIsLoading(false), 500);
-      return () => clearTimeout(timer);
+      setIsLoading(true)
+      setPrevPath(pathname)
+      const timer = setTimeout(() => setIsLoading(false), 500)
+      return () => clearTimeout(timer)
     }
-  }, [pathname, prevPath]);
+  }, [pathname, prevPath])
 
   return (
     <AnimatePresence>
@@ -30,5 +30,5 @@ export default function RouteLoader() {
         />
       )}
     </AnimatePresence>
-  );
+  )
 }

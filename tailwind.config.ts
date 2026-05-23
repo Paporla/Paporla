@@ -36,14 +36,14 @@ const config: Config = {
         },
       },
       boxShadow: {
-        'neon': '0 0 20px rgba(0, 255, 136, 0.3)',
+        neon: '0 0 20px rgba(0, 255, 136, 0.3)',
         'neon-lg': '0 0 30px rgba(0, 255, 136, 0.4)',
         'neon-xl': '0 0 40px rgba(0, 255, 136, 0.5)',
-        'card': '0 4px 24px rgba(0,0,0,0.3)',
+        card: '0 4px 24px rgba(0,0,0,0.3)',
         'card-hover': '0 8px 40px rgba(0,0,0,0.4)',
       },
       borderRadius: {
-        'card': '0.75rem',
+        card: '0.75rem',
         'card-lg': '1rem',
       },
       animation: {
@@ -52,7 +52,7 @@ const config: Config = {
         'slide-up': 'slideUp 0.3s ease-out',
         'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
         'spin-slow': 'spin 3s linear infinite',
-        'glow': 'glow 2s ease-in-out infinite alternate',
+        glow: 'glow 2s ease-in-out infinite alternate',
       },
       keyframes: {
         fadeIn: {

@@ -5,7 +5,9 @@ import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import { DollarSign } from 'lucide-react'
 import type { TrendPoint } from './useBusinessAnalytics'
 
-interface Props { data: TrendPoint[] }
+interface Props {
+  data: TrendPoint[]
+}
 
 export default function RevenueTrendChart({ data }: Props) {
   if (data.length === 0) return null
@@ -31,8 +33,11 @@ export default function RevenueTrendChart({ data }: Props) {
             <YAxis tick={{ fill: '#666', fontSize: 11 }} axisLine={false} tickLine={false} />
             <Tooltip
               contentStyle={{
-                background: '#1a1a2e', border: '1px solid rgba(255,255,255,0.1)',
-                borderRadius: '12px', color: '#fff', fontSize: '12px',
+                background: '#1a1a2e',
+                border: '1px solid rgba(255,255,255,0.1)',
+                borderRadius: '12px',
+                color: '#fff',
+                fontSize: '12px',
               }}
               formatter={(value: number) => [`$${value.toFixed(2)}`]}
             />

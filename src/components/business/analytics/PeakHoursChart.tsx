@@ -5,7 +5,9 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 import { Clock } from 'lucide-react'
 import type { PeakHour } from './useBusinessAnalytics'
 
-interface Props { data: PeakHour[] }
+interface Props {
+  data: PeakHour[]
+}
 
 export default function PeakHoursChart({ data }: Props) {
   if (data.length === 0) {
@@ -43,11 +45,21 @@ export default function PeakHoursChart({ data }: Props) {
           <BarChart data={data} layout="vertical" margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" horizontal={false} />
             <XAxis type="number" tick={{ fill: '#666', fontSize: 11 }} axisLine={false} tickLine={false} />
-            <YAxis dataKey="hour" type="category" tick={{ fill: '#888', fontSize: 11 }} axisLine={false} tickLine={false} width={50} />
+            <YAxis
+              dataKey="hour"
+              type="category"
+              tick={{ fill: '#888', fontSize: 11 }}
+              axisLine={false}
+              tickLine={false}
+              width={50}
+            />
             <Tooltip
               contentStyle={{
-                background: '#1a1a2e', border: '1px solid rgba(255,255,255,0.1)',
-                borderRadius: '12px', color: '#fff', fontSize: '12px',
+                background: '#1a1a2e',
+                border: '1px solid rgba(255,255,255,0.1)',
+                borderRadius: '12px',
+                color: '#fff',
+                fontSize: '12px',
               }}
               formatter={(value: number) => [`${value} recogidas`]}
             />
