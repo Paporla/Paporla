@@ -90,6 +90,22 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="es" suppressHydrationWarning>
       <head>
         <ThemeScript />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              '@context': 'https://schema.org',
+              '@type': 'Organization',
+              name: 'Paporla',
+              description:
+                'Rescate Alimentario - Conectamos comercios con excedentes de comida con personas que necesitan alimentarse.',
+              url: process.env.NEXT_PUBLIC_SITE_URL || 'https://paporla.com',
+              logo: (process.env.NEXT_PUBLIC_SITE_URL || 'https://paporla.com') + '/favicon.svg',
+              sameAs: ['https://instagram.com/paporla'],
+              address: { '@type': 'PostalAddress', addressLocality: 'Caracas', addressCountry: 'VE' },
+            }),
+          }}
+        />
       </head>
       <body className={inter.className}>
         <GoogleTagManager />

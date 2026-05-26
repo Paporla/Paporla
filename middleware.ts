@@ -1,6 +1,7 @@
 ﻿import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 import { applyRateLimit } from '@/lib/middleware/rateLimit'
+import { ROLES, isAdmin } from '@/lib/constants/roles'
 
 export async function middleware(request: NextRequest) {
   // Rate limiting para API routes
@@ -90,32 +91,28 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(new URL('/login', request.url))
     }
 
-    let role = 'user'
-
     if (user) {
-      const { data: profile } = await supabase.from('user_profiles').select('role').eq('id', user.id).maybeSingle()
-
-      role = profile?.role || 'user'
+      // Obtener rol desde metadata del JWT (evita consulta a DB en cada request)
+      const role = (user?.user_metadata?.role as string) || ROLES.USER
 
       // Si ya esta logueado y entra a login/register, redirigir a su panel
       if (isAuthPage) {
-        const dest =
-          role === 'comercio' ? '/business' : role === 'admin' || role === 'super_admin' ? '/admin' : '/dashboard'
+        const dest = role === ROLES.COMERCIO ? '/business' : isAdmin(role) ? '/admin' : '/dashboard'
         return NextResponse.redirect(new URL(dest, request.url))
       }
 
       // Proteccion por roles
-      if (isDashboardPath && role !== 'user') {
-        const dest = role === 'comercio' ? '/business' : '/admin'
+      if (isDashboardPath && role !== ROLES.USER) {
+        const dest = role === ROLES.COMERCIO ? '/business' : '/admin'
         return NextResponse.redirect(new URL(dest, request.url))
       }
 
-      if (isBusinessPath && role !== 'comercio' && role !== 'admin' && role !== 'super_admin') {
+      if (isBusinessPath && role !== ROLES.COMERCIO && !isAdmin(role)) {
         return NextResponse.redirect(new URL('/dashboard', request.url))
       }
 
-      if (isAdminPath && role !== 'admin' && role !== 'super_admin') {
-        const dest = role === 'comercio' ? '/business' : '/dashboard'
+      if (isAdminPath && !isAdmin(role)) {
+        const dest = role === ROLES.COMERCIO ? '/business' : '/dashboard'
         return NextResponse.redirect(new URL(dest, request.url))
       }
     }

@@ -5,6 +5,7 @@
 import { useEffect, useState, useCallback } from 'react'
 import { supabaseBrowser } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
+import { ROLES, isAdmin } from '@/lib/constants/roles'
 
 export type UserRole = 'user' | 'comercio' | 'admin' | 'super_admin'
 
@@ -38,8 +39,8 @@ export function useAuth() {
 
   const redirectByRole = (role?: string | null) => {
     let target = '/dashboard'
-    if (role === 'comercio') target = '/business'
-    else if (role === 'admin' || role === 'super_admin') target = '/admin'
+    if (role === ROLES.COMERCIO) target = '/business'
+    else if (role && isAdmin(role)) target = '/admin'
 
     // Usar router.replace para evitar recarga completa de pagina
     router.replace(target)
@@ -175,7 +176,7 @@ export function useAuth() {
       throw new Error('Error al crear usuario')
     }
 
-    if (role === 'comercio' && shopData?.name) {
+    if (role === ROLES.COMERCIO && shopData?.name) {
       const { error: shopError } = await supabase.from('shops').insert({
         owner_id: data.user.id,
         name: shopData.name,
@@ -219,14 +220,17 @@ export function useAuth() {
   }
 
   async function notifyAdminsOfNewUser(name: string, role: string, shopName?: string) {
-    const { data: admins } = await supabase.from('user_profiles').select('id').in('role', ['admin', 'super_admin'])
+    const { data: admins } = await supabase
+      .from('user_profiles')
+      .select('id')
+      .in('role', [ROLES.ADMIN, ROLES.SUPER_ADMIN])
     if (!admins || admins.length === 0) return
 
     const { sendBatchNotifications } = await import('@/lib/notifications/sendNotification')
     const notifications = admins.map((admin) => ({
       userId: admin.id,
       type: 'new_user' as const,
-      message: `${name || 'Usuario'} se registro como ${role === 'comercio' ? 'comercio' : 'usuario'}${role === 'comercio' && shopName ? ' - ' + shopName : ''}`,
+      message: `${name || 'Usuario'} se registro como ${role === ROLES.COMERCIO ? 'comercio' : 'usuario'}${role === ROLES.COMERCIO && shopName ? ' - ' + shopName : ''}`,
     }))
     await sendBatchNotifications(notifications)
   }

@@ -2,10 +2,11 @@
 
 import Image from 'next/image'
 import { useState } from 'react'
-import { useParams, useRouter } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useQuery } from '@tanstack/react-query'
 import {
+  AlertCircle,
   ArrowLeft,
   Home,
   Package,
@@ -14,7 +15,6 @@ import {
   Clock,
   Store,
   CheckCircle,
-  AlertCircle,
   Shield,
   Star,
   Truck,
@@ -31,7 +31,7 @@ import PackReservationModal from '@/components/packs/PackReservationModal'
 import { formatPrice } from '@/lib/utils/formatPrice'
 import { formatDate } from '@/lib/utils/formatDate'
 
-interface Pack {
+export interface SerializedPack {
   id: string
   title: string
   description: string | null
@@ -54,13 +54,17 @@ interface Pack {
     city: string | null
     phone: string | null
     logo_url: string | null
-    rating: number
+    rating: number | null
     verified: boolean
   }
 }
 
-export default function PackDetailPage() {
-  const params = useParams()
+interface Props {
+  initialPack: SerializedPack
+  packId: string
+}
+
+export default function PackDetailClient({ initialPack, packId }: Props) {
   const router = useRouter()
   const { user } = useAuth()
   const [reserving, setReserving] = useState(false)
@@ -80,14 +84,15 @@ export default function PackDetailPage() {
   const [paymentMethod, setPaymentMethod] = useState<'cash' | 'demo'>('cash')
   const [acceptedPolicies, setAcceptedPolicies] = useState(false)
 
+  // React Query con datos iniciales del servidor (SSR + revalidacion en cliente)
   const { data: pack, isLoading: loading } = useQuery({
-    queryKey: ['pack-detail', params.id],
+    queryKey: ['pack-detail', packId],
     queryFn: async () => {
       const supabase = supabaseBrowser()
       const { data, error } = await supabase
         .from('packs')
         .select('*, shop:shops (id, name, description, address, city, phone, logo_url, rating, verified)')
-        .eq('id', params.id)
+        .eq('id', packId)
         .eq('is_active', true)
         .is('deleted_at', null)
         .maybeSingle()
@@ -96,14 +101,11 @@ export default function PackDetailPage() {
         throw new Error('Pack no encontrado')
       }
 
-      return data as Pack
+      return data as unknown as SerializedPack
     },
+    initialData: initialPack,
     staleTime: 30 * 1000,
   })
-
-  if (error && !loading && !pack) {
-    setTimeout(() => router.push('/packs'), 2000)
-  }
 
   const handleReserve = () => {
     if (!user) {

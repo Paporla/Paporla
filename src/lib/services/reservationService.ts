@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { getSupabaseAdmin } from '@/lib/supabase/admin'
 import { sendReservationConfirmationEmail } from '@/lib/email'
+import { ROLES, isAdmin } from '@/lib/constants/roles'
 
 const VALID_STATUS_TRANSITIONS: Record<string, string[]> = {
   pending: ['confirmed', 'cancelled'],
@@ -23,8 +24,8 @@ export async function getUserReservations(userId: string, shopId?: string) {
 
   if (shopId) {
     const { data: profile } = await supabase.from('user_profiles').select('role').eq('id', userId).maybeSingle()
-    const isAdmin = profile?.role === 'admin' || profile?.role === 'super_admin'
-    if (!isAdmin) {
+    const userIsAdmin = profile?.role ? isAdmin(profile.role) : false
+    if (!userIsAdmin) {
       const { data: shop } = await supabase.from('shops').select('owner_id').eq('id', shopId).maybeSingle()
       if (!shop || shop.owner_id !== userId) return { error: 'No autorizado', status: 403 }
     }
@@ -129,14 +130,15 @@ export async function updateReservation(userId: string, body: { id: string; stat
   }
 
   const { data: profile } = await supabase.from('user_profiles').select('role').eq('id', userId).maybeSingle()
-  const isAdmin = profile?.role === 'admin' || profile?.role === 'super_admin'
+  const userIsAdmin = profile?.role ? isAdmin(profile.role) : false
   const isOwner = reservation.user_id === userId
   const { data: shop } = await supabase.from('shops').select('owner_id').eq('id', reservation.shop_id).maybeSingle()
   const isShopOwner = shop?.owner_id === userId
 
-  if (!isOwner && !isShopOwner && !isAdmin) return { error: 'No autorizado', status: 403 }
-  if (status === 'cancelled' && !isOwner && !isAdmin) return { error: 'Solo el usuario puede cancelar', status: 403 }
-  if (status === 'confirmed' && !isShopOwner && !isAdmin)
+  if (!isOwner && !isShopOwner && !userIsAdmin) return { error: 'No autorizado', status: 403 }
+  if (status === 'cancelled' && !isOwner && !userIsAdmin)
+    return { error: 'Solo el usuario puede cancelar', status: 403 }
+  if (status === 'confirmed' && !isShopOwner && !userIsAdmin)
     return { error: 'Solo el comercio puede confirmar', status: 403 }
 
   const updates: Record<string, unknown> = { status }
@@ -198,7 +200,10 @@ async function notifyCancellation(
   }
 
   if (cancelReason === 'problema') {
-    const { data: admins } = await supabase.from('user_profiles').select('id').in('role', ['admin', 'super_admin'])
+    const { data: admins } = await supabase
+      .from('user_profiles')
+      .select('id')
+      .in('role', [ROLES.ADMIN, ROLES.SUPER_ADMIN])
     admins?.forEach((admin) => {
       notifications.push({
         user_id: admin.id,
