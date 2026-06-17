@@ -12,10 +12,6 @@ const stats = [
     label: 'toneladas de comida desperdiciadas al año',
     source: 'FAO',
     icon: Package,
-    gradient: 'from-red-900/30 to-red-950/20',
-    border: 'hover:border-red-500/50',
-    iconBg: 'bg-red-500/10',
-    iconColor: 'text-red-400',
   },
   {
     value: 1,
@@ -24,10 +20,6 @@ const stats = [
     label: 'en pérdidas económicas anuales',
     source: 'Banco Mundial',
     icon: DollarSign,
-    gradient: 'from-yellow-900/30 to-yellow-950/20',
-    border: 'hover:border-yellow-500/50',
-    iconBg: 'bg-yellow-500/10',
-    iconColor: 'text-yellow-400',
   },
   {
     value: 8,
@@ -35,10 +27,6 @@ const stats = [
     label: 'de emisiones globales de CO₂',
     source: 'UNEP',
     icon: TrendingUp,
-    gradient: 'from-green-900/30 to-green-950/20',
-    border: 'hover:border-green-500/50',
-    iconBg: 'bg-green-500/10',
-    iconColor: 'text-green-400',
   },
 ]
 
@@ -47,7 +35,7 @@ export default function StatsSection() {
   const isInView = useInView(ref, { once: true, margin: '-100px' })
 
   return (
-    <section className="py-20 dark:bg-gradient-to-b dark:from-black dark:via-black dark:to-gray-950 bg-gradient-to-b from-gray-50 via-white to-gray-100">
+    <section className="py-20">
       <div className="max-w-6xl mx-auto px-4">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -55,7 +43,7 @@ export default function StatsSection() {
           viewport={{ once: true }}
           className="text-center mb-12"
         >
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-red-500/10 border border-red-500/20 text-red-400 mb-4 animate-pulse">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 text-primary mb-4">
             <Eye className="w-4 h-4" />
             <span className="text-sm font-medium">El problema es real</span>
           </div>
@@ -76,14 +64,12 @@ export default function StatsSection() {
               viewport={{ once: true }}
               transition={{ delay: idx * 0.1 }}
               whileHover={{ y: -5 }}
-              className={`group relative text-center p-6 rounded-2xl dark:bg-gradient-to-br bg-white border dark:border-white/10 border-gray-200 ${stat.border} transition-all duration-300 hover:-translate-y-2 hover:shadow-xl`}
+              className="group relative text-center p-6 rounded-2xl bg-gradient-to-br from-primary/[0.18] to-primary/[0.05] border border-white/10 hover:border-primary/30 transition-all duration-300"
             >
               <div className="absolute inset-0 rounded-2xl bg-gradient-to-t from-transparent via-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
-              <div
-                className={`relative w-14 h-14 mx-auto mb-4 rounded-full ${stat.iconBg} flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}
-              >
-                <stat.icon className={`w-7 h-7 ${stat.iconColor}`} />
+              <div className="relative w-14 h-14 mx-auto mb-4 rounded-full bg-primary/10 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                <stat.icon className="w-7 h-7 text-primary" />
               </div>
 
               <p className="text-4xl font-bold dark:text-white text-gray-900 group-hover:scale-105 transition-transform duration-300">
@@ -107,10 +93,10 @@ export default function StatsSection() {
           className="mt-12 text-center"
         >
           <p className="dark:text-gray-500 text-gray-400 text-sm max-w-2xl mx-auto">
-            Cada ano, mas de <span className="text-primary font-bold">1.300 millones de toneladas</span> de comida
+            Cada año, más de <span className="text-primary font-bold">1.300 millones de toneladas</span> de comida
             terminan en la basura.
             <span className="block mt-1">
-              Paporla es parte de la solucion. <span className="text-primary">Te sumas?</span>
+              Paporla es parte de la solución. <span className="text-primary">¿Te sumas?</span>
             </span>
           </p>
         </motion.div>

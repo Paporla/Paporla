@@ -10,7 +10,9 @@ export default function Error({ error: _error, reset }: { error: Error & { diges
           <span className="text-3xl">!</span>
         </div>
         <h1 className="text-2xl font-bold mb-2">Algo salió mal</h1>
-        <p className="text-gray-400 mb-6">Ocurrió un error inesperado. Por favor, intentá de nuevo.</p>
+        <p className="dark:text-gray-400 text-gray-500 mb-6">
+          Ocurrió un error inesperado. Por favor, intentá de nuevo.
+        </p>
         <Button onClick={reset} variant="primary">
           Reintentar
         </Button>

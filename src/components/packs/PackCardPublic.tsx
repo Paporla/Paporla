@@ -7,6 +7,7 @@ import { formatPrice } from '@/lib/utils/formatPrice'
 
 export interface PublicPack {
   id: string
+  shop_id: string
   title: string
   description: string
   price_cents: number

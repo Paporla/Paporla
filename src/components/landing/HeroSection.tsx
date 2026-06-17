@@ -2,8 +2,7 @@
 
 import { motion } from 'framer-motion'
 import Link from 'next/link'
-import { ArrowRight, Sparkles } from 'lucide-react'
-import { ShieldCheckIcon, ArrowPathIcon } from '@heroicons/react/24/outline'
+import { ArrowRight, Sparkles, ShieldCheck, RefreshCw } from 'lucide-react'
 import HowItWorksSection from './HowItWorksSection'
 
 export default function HeroSection() {
@@ -31,7 +30,7 @@ export default function HeroSection() {
               className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/30 text-primary mb-6"
             >
               <Sparkles className="w-4 h-4" />
-              <span className="text-sm font-medium">Lanzando en Caracas - 2026</span>
+              <span className="text-sm font-medium">Lanzando en Chile - 2026</span>
             </motion.div>
 
             <motion.h1
@@ -77,7 +76,7 @@ export default function HeroSection() {
                 href="/shops"
                 className="inline-flex items-center justify-center px-8 py-3 rounded-full border border-primary/40 dark:text-white text-gray-900 font-semibold hover:bg-primary/10 transition text-center"
               >
-                Soy comercio
+                Registra tu comercio
               </Link>
             </motion.div>
 
@@ -85,14 +84,14 @@ export default function HeroSection() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.6 }}
-              className="flex items-center justify-start gap-8 pt-4 border-t dark:border-white/10 border-gray-300"
+              className="flex items-center justify-center gap-8 pt-4 border-t dark:border-white/10 border-gray-300"
             >
               <div className="flex items-center gap-2">
-                <ShieldCheckIcon className="w-5 h-5 text-primary" />
+                <ShieldCheck className="w-5 h-5 text-primary" />
                 <span className="text-sm dark:text-gray-300 text-gray-600">Comercios verificados</span>
               </div>
               <div className="flex items-center gap-2">
-                <ArrowPathIcon className="w-5 h-5 text-primary" />
+                <RefreshCw className="w-5 h-5 text-primary" />
                 <span className="text-sm dark:text-gray-300 text-gray-600">Reserva inmediata</span>
               </div>
             </motion.div>

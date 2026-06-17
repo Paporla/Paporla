@@ -96,7 +96,8 @@ export default function LocationTab({ formData, updateForm, onDetectLocation, lo
       </div>
       <div className="bg-black/40 border border-white/10 rounded-xl p-4">
         <p className="text-xs text-gray-500">
-          <strong>Ejemplo:</strong> Caracas → Lat: 10.4961, Lng: -66.8983. Puedes obtener coordenadas desde Google Maps.
+          <strong>Ejemplo:</strong> Santiago → Lat: -33.4489, Lng: -70.6693. Puedes obtener coordenadas desde Google
+          Maps.
         </p>
       </div>
     </div>

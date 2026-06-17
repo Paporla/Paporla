@@ -1,7 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
-
-export type UserRole = 'user' | 'comercio' | 'admin' | 'super_admin'
+import type { UserRole } from '@/types/user'
 
 export async function requireAuth(allowedRoles?: UserRole[]) {
   const supabase = await createClient()

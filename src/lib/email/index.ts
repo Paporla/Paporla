@@ -1,4 +1,5 @@
 import { Resend } from 'resend'
+import * as Sentry from '@sentry/nextjs'
 import {
   welcomeTemplate,
   reservationConfirmationTemplate,
@@ -8,6 +9,23 @@ import {
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 const senderEmail = process.env.RESEND_FROM_EMAIL || 'noreply@paporla.com'
+
+const isDev = process.env.NODE_ENV === 'development'
+
+function logDebug(...args: unknown[]) {
+  if (isDev) {
+    console.log('[Email]', ...args)
+  }
+}
+
+function logError(context: string, error: unknown) {
+  if (isDev) {
+    console.error(`[Email Error] ${context}:`, error)
+  }
+  if (!isDev) {
+    Sentry.captureException(error, { tags: { email_context: context } })
+  }
+}
 
 export interface ReservationData {
   userName: string
@@ -30,86 +48,60 @@ export interface PickupReminderData {
   pickupTime: string | null
 }
 
-export async function sendWelcomeEmail(email: string, name: string) {
+async function sendEmail(params: { to: string; subject: string; html: string; text: string }) {
+  const { to, subject, html, text } = params
   try {
     const { data, error } = await resend.emails.send({
       from: `Paporla <${senderEmail}>`,
-      to: email,
-      subject: 'Bienvenido a Paporla - Rescate Alimentario',
-      html: welcomeTemplate(name),
-      text: `Bienvenido a Paporla, ${name}! Gracias por unirte a la comunidad que esta cambiando la forma de alimentarnos. Explora packs disponibles en nuestra web.`,
+      to,
+      subject,
+      html,
+      text,
     })
     if (error) {
-      console.error('[Email Error] Welcome:', error)
+      logError(subject, error)
       return { success: false, error }
     }
-    console.log('[Email Sent] Welcome to:', email)
+    logDebug('Sent:', subject, 'to:', to)
     return { success: true, data }
   } catch (err) {
-    console.error('[Email Exception] Welcome:', err)
+    logError(subject, err)
     return { success: false, error: err }
   }
+}
+
+export async function sendWelcomeEmail(email: string, name: string) {
+  return sendEmail({
+    to: email,
+    subject: 'Bienvenido a Paporla - Rescate Alimentario',
+    html: welcomeTemplate(name),
+    text: `Bienvenido a Paporla, ${name}! Gracias por unirte a la comunidad que esta cambiando la forma de alimentarnos. Explora packs disponibles en nuestra web.`,
+  })
 }
 
 export async function sendReservationConfirmationEmail(email: string, data: ReservationData) {
-  try {
-    const { data: res, error } = await resend.emails.send({
-      from: `Paporla <${senderEmail}>`,
-      to: email,
-      subject: `Tu reserva de ${data.packTitle} esta confirmada - Paporla`,
-      html: reservationConfirmationTemplate(data),
-      text: `Tu reserva esta confirmada. Pack: ${data.packTitle}. Comercio: ${data.shopName}. Codigo de recogida: ${data.pickupCode}. Presenta este codigo al llegar al comercio.`,
-    })
-    if (error) {
-      console.error('[Email Error] Reservation:', error)
-      return { success: false, error }
-    }
-    console.log('[Email Sent] Reservation to:', email)
-    return { success: true, data: res }
-  } catch (err) {
-    console.error('[Email Exception] Reservation:', err)
-    return { success: false, error: err }
-  }
+  return sendEmail({
+    to: email,
+    subject: `Tu reserva de ${data.packTitle} esta confirmada - Paporla`,
+    html: reservationConfirmationTemplate(data),
+    text: `Tu reserva esta confirmada. Pack: ${data.packTitle}. Comercio: ${data.shopName}. Codigo de recogida: ${data.pickupCode}. Presenta este codigo al llegar al comercio.`,
+  })
 }
 
 export async function sendPickupReminderEmail(email: string, data: PickupReminderData) {
-  try {
-    const { data: res, error } = await resend.emails.send({
-      from: `Paporla <${senderEmail}>`,
-      to: email,
-      subject: `Recuerda recoger tu pack de ${data.packTitle} hoy - Paporla`,
-      html: pickupReminderTemplate(data),
-      text: `Recuerda recoger tu pack hoy. Pack: ${data.packTitle}. Comercio: ${data.shopName}. Codigo: ${data.pickupCode}.`,
-    })
-    if (error) {
-      console.error('[Email Error] Reminder:', error)
-      return { success: false, error }
-    }
-    console.log('[Email Sent] Reminder to:', email)
-    return { success: true, data: res }
-  } catch (err) {
-    console.error('[Email Exception] Reminder:', err)
-    return { success: false, error: err }
-  }
+  return sendEmail({
+    to: email,
+    subject: `Recuerda recoger tu pack de ${data.packTitle} hoy - Paporla`,
+    html: pickupReminderTemplate(data),
+    text: `Recuerda recoger tu pack hoy. Pack: ${data.packTitle}. Comercio: ${data.shopName}. Codigo: ${data.pickupCode}.`,
+  })
 }
 
 export async function sendPasswordResetEmail(email: string, resetLink: string) {
-  try {
-    const { data, error } = await resend.emails.send({
-      from: `Paporla <${senderEmail}>`,
-      to: email,
-      subject: 'Restablece tu contrasena - Paporla',
-      html: passwordResetTemplate(resetLink),
-      text: `Recibimos una solicitud para restablecer tu contrasena. Haz clic en este enlace: ${resetLink}. Si no solicitaste este cambio, ignora este mensaje.`,
-    })
-    if (error) {
-      console.error('[Email Error] Reset:', error)
-      return { success: false, error }
-    }
-    console.log('[Email Sent] Reset to:', email)
-    return { success: true, data }
-  } catch (err) {
-    console.error('[Email Exception] Reset:', err)
-    return { success: false, error: err }
-  }
+  return sendEmail({
+    to: email,
+    subject: 'Restablece tu contraseña - Paporla',
+    html: passwordResetTemplate(resetLink),
+    text: `Recibimos una solicitud para restablecer tu contraseña. Haz clic en este enlace: ${resetLink}. Si no solicitaste este cambio, ignora este mensaje.`,
+  })
 }

@@ -145,7 +145,7 @@ export default function ImageUpload({
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.9 }}
               onClick={() => fileInputRef.current?.click()}
-              className="w-full h-40 rounded-xl border-2 border-dashed dark:border-gray-600 border-gray-300 dark:bg-gray-50 bg-gray-50 hover:border-primary/50 dark:hover:bg-gray-100 hover:bg-gray-100 transition-all cursor-pointer flex flex-col items-center justify-center gap-2"
+              className="w-full h-40 rounded-xl border-2 border-dashed dark:border-gray-600 border-gray-300 dark:bg-gray-800/30 bg-gray-100 hover:border-primary/50 dark:hover:bg-gray-700/40 hover:bg-gray-200 transition-all cursor-pointer flex flex-col items-center justify-center gap-2"
             >
               {uploading ? (
                 <Loader2 className="w-8 h-8 text-primary animate-spin" />

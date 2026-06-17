@@ -95,7 +95,7 @@ export default function CookiesPage() {
               </div>
               <div className="flex items-center gap-1">
                 <Shield className="w-4 h-4" />
-                RGPD / Ley Infogobierno
+                RGPD / Ley de Protección de Datos
               </div>
             </div>
           </motion.div>

@@ -1,34 +1,10 @@
-﻿// src/hooks/useAuth.ts
-
-'use client'
+﻿'use client'
 
 import { useEffect, useState, useCallback } from 'react'
 import { supabaseBrowser } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import { ROLES, isAdmin } from '@/lib/constants/roles'
-
-export type UserRole = 'user' | 'comercio' | 'admin' | 'super_admin'
-
-export type UserProfile = {
-  id: string
-  email: string | null
-  name: string | null
-  phone: string | null
-  role: UserRole
-  avatar_url: string | null
-  email_confirmed: boolean | null
-  created_at: string | null
-}
-
-export type SignUpRole = 'user' | 'comercio'
-
-export type ShopData = {
-  name?: string
-  description?: string | null
-  address?: string | null
-  city?: string | null
-  phone?: string | null
-}
+import type { UserProfile, UserRole, SignUpRole, ShopData } from '@/types/user'
 
 export function useAuth() {
   const supabase = supabaseBrowser()
@@ -48,20 +24,23 @@ export function useAuth() {
 
   const PROFILE_FIELDS = 'id, email, name, phone, role, avatar_url, email_confirmed, created_at'
 
-  const fetchProfile = async (userId: string) => {
-    const { data: profile, error } = await supabase
-      .from('user_profiles')
-      .select(PROFILE_FIELDS)
-      .eq('id', userId)
-      .maybeSingle()
+  const fetchProfile = useCallback(
+    async (userId: string) => {
+      const { data: profile, error } = await supabase
+        .from('user_profiles')
+        .select(PROFILE_FIELDS)
+        .eq('id', userId)
+        .maybeSingle()
 
-    if (error) {
-      console.error('Error obteniendo perfil:', error)
-      throw error
-    }
+      if (error) {
+        console.error('Error obteniendo perfil:', error)
+        throw error
+      }
 
-    return profile as UserProfile | null
-  }
+      return profile as UserProfile | null
+    },
+    [supabase],
+  )
 
   const getUser = useCallback(
     async (skipLoading = false) => {
@@ -102,7 +81,7 @@ export function useAuth() {
         setLoading(false)
       }
     },
-    [supabase],
+    [fetchProfile, supabase],
   )
 
   useEffect(() => {

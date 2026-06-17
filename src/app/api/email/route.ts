@@ -90,9 +90,9 @@ export async function POST(request: Request) {
         break
 
       case 'password_reset':
-        subject = 'Restablece tu contrasena - Paporla'
+        subject = 'Restablece tu contraseña - Paporla'
         html = passwordResetTemplate(String(safeData.resetLink || ''))
-        text = `Recibimos una solicitud para restablecer tu contrasena. Haz clic en este enlace: ${safeData.resetLink || ''}`
+        text = `Recibimos una solicitud para restablecer tu contraseña. Haz clic en este enlace: ${safeData.resetLink || ''}`
         break
 
       case 'pickup_reminder':

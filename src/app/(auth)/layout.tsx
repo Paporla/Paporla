@@ -9,10 +9,10 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
   const pathname = usePathname()
 
   const titles: Record<string, { title: string; subtitle: string }> = {
-    '/login': { title: 'Bienvenido de vuelta', subtitle: 'Inicia sesion para continuar' },
-    '/register': { title: 'Crea tu cuenta', subtitle: 'Unete a la comunidad que rescata comida' },
-    '/forgot-password': { title: 'Olvidaste tu contrasena?', subtitle: 'Te ayudamos a recuperarla' },
-    '/reset-password': { title: 'Nueva contrasena', subtitle: 'Ingresa tu nueva contrasena' },
+    '/login': { title: 'Bienvenido de vuelta', subtitle: 'Inicia sesión para continuar' },
+    '/register': { title: 'Crea tu cuenta', subtitle: 'Únete a la comunidad que rescata comida' },
+    '/forgot-password': { title: '¿Olvidaste tu contraseña?', subtitle: 'Te ayudamos a recuperarla' },
+    '/reset-password': { title: 'Nueva contraseña', subtitle: 'Ingresa tu nueva contraseña' },
   }
 
   const current = titles[pathname] || titles['/login']

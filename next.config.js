@@ -57,16 +57,18 @@ const nextConfig = {
 
 const { withSentryConfig } = require('@sentry/nextjs')
 
-module.exports = withSentryConfig(nextConfig, {
+const sentryOptions = {
   org: process.env.SENTRY_ORG,
   project: process.env.SENTRY_PROJECT,
-  silent: !process.env.CI,
+  silent: true,
   widenClientFileUpload: true,
   tunnelRoute: '/monitoring',
   hideSourceMaps: true,
-  webpack: {
-    treeshake: {
-      removeDebugLogging: true,
-    },
-  },
-})
+}
+
+// Solo activar monitoreo en producción
+if (process.env.NODE_ENV !== 'production') {
+  module.exports = nextConfig
+} else {
+  module.exports = withSentryConfig(nextConfig, sentryOptions)
+}

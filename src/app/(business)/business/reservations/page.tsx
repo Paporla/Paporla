@@ -166,7 +166,7 @@ export default function BusinessReservationsPage() {
             <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-primary/10 flex items-center justify-center">
               <ShoppingBag className="w-10 h-10 text-primary" />
             </div>
-            <p className="text-gray-400">No hay reservas</p>
+            <p className="dark:text-gray-400 text-gray-500">No hay reservas</p>
             <p className="text-xs text-gray-500 mt-1">Las reservas aparecerán aquí cuando lleguen</p>
           </Card>
         )}

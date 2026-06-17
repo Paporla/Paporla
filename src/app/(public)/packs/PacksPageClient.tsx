@@ -3,8 +3,7 @@
 import { useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/hooks/useAuth'
-import { supabaseBrowser } from '@/lib/supabase/client'
-import { usePublicPacks } from '@/components/packs/usePublicPacks'
+import { usePublicPacks } from '@/hooks/usePublicPacks'
 import PackFiltersAdvanced from '@/components/packs/PackFiltersAdvanced'
 import PackCardPublic from '@/components/packs/PackCardPublic'
 import Pagination from '@/components/ui/Pagination'
@@ -12,14 +11,12 @@ import EmptyState from '@/components/ui/EmptyState'
 import Toast from '@/components/ui/Toast'
 import PacksHeroSection from '@/components/packs/PacksHeroSection'
 import PacksLoadingGrid from '@/components/packs/PacksLoadingGrid'
-import { formatPrice } from '@/lib/utils/formatPrice'
 
 const ITEMS_PER_PAGE = 9
 
 export default function PacksPage() {
   const router = useRouter()
   const { user } = useAuth()
-  const supabase = supabaseBrowser()
   const { packs, loading, error, setError, setFilters } = usePublicPacks()
   const [currentPage, setCurrentPage] = useState(1)
   const [reserving, setReserving] = useState<string | null>(null)
@@ -38,39 +35,27 @@ export default function PacksPage() {
       router.push('/login')
       return
     }
+
+    const pack = packs.find((p) => p.id === packId)
+    if (!pack?.shop_id) {
+      setError('No se pudo identificar el comercio')
+      return
+    }
+
     setReserving(packId)
     setError('')
 
     try {
-      const { data, error: rpcError } = await supabase.rpc('create_reservation_atomic', {
-        p_pack_id: packId,
-        p_quantity: 1,
-        p_payment_method: 'cash',
+      const response = await fetch('/api/reservations', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ pack_id: packId, shop_id: pack.shop_id, quantity: 1 }),
       })
 
-      if (rpcError) throw rpcError
-      if (!data?.success) throw new Error(data?.error || 'Error al reservar')
+      const result = await response.json()
 
-      // Enviar email de confirmacion
-      try {
-        const pack = packs.find((p) => p.id === packId)
-        await fetch('/api/email', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            type: 'reservation',
-            email: user.email,
-            data: {
-              userName: user.name || 'Usuario',
-              packTitle: pack?.title || 'Pack',
-              shopName: pack?.shop_name || 'Comercio',
-              pickupCode: data.pickup_code,
-              price: pack ? formatPrice(pack.price_cents) : '',
-            },
-          }),
-        })
-      } catch (emailErr) {
-        console.error('Error enviando email:', emailErr)
+      if (!result.success) {
+        throw new Error(result.error || 'Error al realizar la reserva')
       }
 
       router.push('/dashboard?reserved=true')

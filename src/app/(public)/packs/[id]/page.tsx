@@ -29,15 +29,15 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   return {
     title: pack.title,
-    description: pack.description?.slice(0, 160) || `Pack sorpresa disponible en Caracas - ${pack.title}`,
+    description: pack.description?.slice(0, 160) || `Pack sorpresa disponible - ${pack.title}`,
     openGraph: {
       title: `${pack.title} | Paporla`,
-      description: pack.description?.slice(0, 160) || 'Pack sorpresa de comida con descuento en Caracas.',
+      description: pack.description?.slice(0, 160) || 'Pack sorpresa de comida con descuento.',
       images: pack.image_url ? [{ url: pack.image_url, width: 1200, height: 630, alt: pack.title }] : [],
     },
     twitter: {
       title: `${pack.title} | Paporla`,
-      description: pack.description?.slice(0, 160) || 'Pack sorpresa de comida con descuento en Caracas.',
+      description: pack.description?.slice(0, 160) || 'Pack sorpresa de comida con descuento.',
       images: pack.image_url ? [pack.image_url] : [],
     },
   }

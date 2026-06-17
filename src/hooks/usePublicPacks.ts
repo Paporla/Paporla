@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo } from 'react'
 import { supabaseBrowser } from '@/lib/supabase/client'
-import type { PublicPack } from './PackCardPublic'
+import type { PublicPack } from '@/components/packs/PackCardPublic'
 
 interface Filters {
   search: string
@@ -25,6 +25,22 @@ export function usePublicPacks() {
     city: '',
   })
 
+  const loadPacks = async () => {
+    setLoading(true)
+    setError('')
+    try {
+      const { data, error: err } = await supabase
+        .from('available_packs')
+        .select('*')
+        .order('created_at', { ascending: false })
+      if (err) setError(err.message)
+      else setAllPacks((data as PublicPack[]) || [])
+    } catch {
+      setError('Error al cargar packs')
+    }
+    setLoading(false)
+  }
+
   useEffect(() => {
     loadPacks()
   }, [])
@@ -33,7 +49,7 @@ export function usePublicPacks() {
     let f = [...allPacks]
     if (filters.search) {
       const q = filters.search.toLowerCase()
-      f = f.filter((p) => p.title.toLowerCase().includes(q) || p.description.toLowerCase().includes(q))
+      f = f.filter((p) => p.title?.toLowerCase().includes(q) || p.description?.toLowerCase().includes(q))
     }
     if (filters.minPrice > 0) f = f.filter((p) => p.price_cents >= filters.minPrice)
     if (filters.maxPrice < 100000) f = f.filter((p) => p.price_cents <= filters.maxPrice)
@@ -41,18 +57,6 @@ export function usePublicPacks() {
     if (filters.city) f = f.filter((p) => p.shop_city === filters.city)
     return f
   }, [allPacks, filters])
-
-  const loadPacks = async () => {
-    setLoading(true)
-    const { data, error: err } = await supabase
-      .from('available_packs')
-      .select('*')
-      .order('created_at', { ascending: false })
-
-    if (err) setError(err.message)
-    else setAllPacks(data || [])
-    setLoading(false)
-  }
 
   return { allPacks, packs: filteredPacks, loading, error, setError, filters, setFilters, reload: loadPacks }
 }

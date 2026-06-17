@@ -6,6 +6,13 @@ import Link from 'next/link'
 import { motion } from 'framer-motion'
 import { Heart, Mail, MapPin, Clock, Phone, ChevronUp, Shield, FileText, Cookie, Scale } from 'lucide-react'
 
+const FOOTER_CONFIG = {
+  address: process.env.NEXT_PUBLIC_COMPANY_ADDRESS || 'Santiago, Chile',
+  phone: process.env.NEXT_PUBLIC_COMPANY_PHONE || '+56 9 1234 5678',
+  email: process.env.NEXT_PUBLIC_CONTACT_EMAIL || 'hola@paporla.com',
+  hours: 'Lun - Vie: 9am - 6pm',
+}
+
 export default function Footer() {
   const [showScrollTop, setShowScrollTop] = useState(false)
   const currentYear = new Date().getFullYear()
@@ -51,7 +58,7 @@ export default function Footer() {
         </motion.button>
       )}
 
-      <footer className="relative mt-20 dark:bg-gradient-to-b dark:from-black dark:to-gray-950 bg-gradient-to-b from-gray-50 to-white dark:border-t border-t border-primary/20">
+      <footer className="relative bg-gray-50 dark:bg-transparent">
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="absolute bottom-0 left-0 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
           <div className="absolute top-0 right-0 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
@@ -124,19 +131,21 @@ export default function Footer() {
               <ul className="space-y-3 text-center md:text-left">
                 <li className="flex items-center gap-3 dark:text-gray-400 text-gray-600 text-sm justify-center md:justify-start">
                   <MapPin className="w-4 h-4 text-primary flex-shrink-0" />
-                  <span>Caracas, Venezuela</span>
+                  <span>{FOOTER_CONFIG.address}</span>
                 </li>
                 <li className="flex items-center gap-3 dark:text-gray-400 text-gray-600 text-sm justify-center md:justify-start">
                   <Mail className="w-4 h-4 text-primary flex-shrink-0" />
-                  <span>123456789</span>
+                  <a href={`mailto:${FOOTER_CONFIG.email}`} className="hover:text-primary transition-colors">
+                    {FOOTER_CONFIG.email}
+                  </a>
                 </li>
                 <li className="flex items-center gap-3 dark:text-gray-400 text-gray-600 text-sm justify-center md:justify-start">
                   <Phone className="w-4 h-4 text-primary flex-shrink-0" />
-                  <span>123456789</span>
+                  <span>{FOOTER_CONFIG.phone}</span>
                 </li>
                 <li className="flex items-center gap-3 dark:text-gray-400 text-gray-600 text-sm justify-center md:justify-start">
                   <Clock className="w-4 h-4 text-primary flex-shrink-0" />
-                  <span>Lun - Vie: 9am - 6pm</span>
+                  <span>{FOOTER_CONFIG.hours}</span>
                 </li>
               </ul>
             </div>

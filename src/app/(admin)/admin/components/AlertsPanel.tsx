@@ -80,38 +80,38 @@ export default function AlertsPanel() {
   const supabase = supabaseBrowser()
 
   useEffect(() => {
+    const loadAlerts = async () => {
+      setLoading(true)
+
+      // Get recent critical/warning activity logs
+      const { data: logs } = await supabase
+        .from('activity_logs')
+        .select('*')
+        .in('severity', ['warning', 'error', 'critical'])
+        .order('created_at', { ascending: false })
+        .limit(5)
+
+      if (logs && logs.length > 0) {
+        const mappedAlerts: Alert[] = logs.map(
+          (log: { id: string; severity: string; title: string; description: string | null; created_at: string }) => ({
+            id: log.id,
+            level: log.severity === 'critical' ? 'critical' : log.severity === 'warning' ? 'warning' : 'info',
+            title: log.title,
+            description: log.description || '',
+            time: formatTime(log.created_at),
+            action: 'Ver mas',
+            actionLink: '/admin',
+          }),
+        )
+        setAlerts(mappedAlerts)
+      } else {
+        setAlerts([])
+      }
+      setLoading(false)
+    }
+
     loadAlerts()
   }, [])
-
-  const loadAlerts = async () => {
-    setLoading(true)
-
-    // Get recent critical/warning activity logs
-    const { data: logs } = await supabase
-      .from('activity_logs')
-      .select('*')
-      .in('severity', ['warning', 'error', 'critical'])
-      .order('created_at', { ascending: false })
-      .limit(5)
-
-    if (logs && logs.length > 0) {
-      const mappedAlerts: Alert[] = logs.map(
-        (log: { id: string; severity: string; title: string; description: string | null; created_at: string }) => ({
-          id: log.id,
-          level: log.severity === 'critical' ? 'critical' : log.severity === 'warning' ? 'warning' : 'info',
-          title: log.title,
-          description: log.description || '',
-          time: formatTime(log.created_at),
-          action: 'Ver mas',
-          actionLink: '/admin',
-        }),
-      )
-      setAlerts(mappedAlerts)
-    } else {
-      setAlerts([])
-    }
-    setLoading(false)
-  }
 
   if (loading) {
     return (

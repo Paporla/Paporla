@@ -11,7 +11,7 @@ export default function LegalBasesPage() {
             <h1 className="text-4xl md:text-5xl font-bold mb-4">
               <span className="text-gradient">Bases Legales</span>
             </h1>
-            <p className="text-gray-600 dark:text-gray-300 text-lg">Marco legal que regula Paporla en Venezuela</p>
+            <p className="text-gray-600 dark:text-gray-300 text-lg">Marco legal que regula Paporla en Chile</p>
             <p className="text-gray-500 dark:text-gray-400 text-sm mt-4">Última actualización: 15 de Enero de 2025</p>
           </motion.div>
         </div>
@@ -22,30 +22,30 @@ export default function LegalBasesPage() {
           <section>
             <h2 className="text-2xl font-bold text-gradient mb-4">1. Base Constitucional</h2>
             <p className="dark:text-gray-300 text-gray-700 leading-relaxed">
-              Paporla se fundamenta en los siguientes artículos de la
-              <strong> Constitución de la República Bolivariana de Venezuela</strong>:
+              Paporla se fundamenta en los siguientes cuerpos legales de la
+              <strong> República de Chile</strong>:
             </p>
             <ul className="list-disc pl-6 mt-3 space-y-2 dark:text-gray-300 text-gray-700">
               <li>
-                <strong>Artículo 305:</strong> Promueve la seguridad alimentaria y la soberanía agroalimentaria como
-                parte fundamental del desarrollo económico y social.
+                <strong>Constitución Política de Chile:</strong> Garantiza el derecho a la seguridad alimentaria y al
+                libre ejercicio de actividades económicas.
               </li>
               <li>
-                <strong>Artículo 112:</strong> Garantiza el derecho al libre ejercicio de actividades económicas y
-                comerciales, dentro de un marco de justicia social.
+                <strong>Código de Comercio:</strong> Regula las transacciones comerciales electrónicas y la relación
+                entre comercios y consumidores.
               </li>
               <li>
-                <strong>Artículo 118:</strong> Reconoce el derecho de los trabajadores y la comunidad a participar en
-                beneficios económicos e iniciativas de desarrollo local.
+                <strong>Ley 19.496:</strong> Ley de Protección de los Derechos de los Consumidores, que establece los
+                derechos y obligaciones en las relaciones de consumo.
               </li>
             </ul>
           </section>
 
           <section>
-            <h2 className="text-2xl font-bold text-gradient mb-4">2. Ley Orgánica de Protección al Consumidor</h2>
+            <h2 className="text-2xl font-bold text-gradient mb-4">2. Ley de Protección al Consumidor</h2>
             <p className="dark:text-gray-300 text-gray-700 leading-relaxed">
-              Nos regimos por la <strong>Ley Orgánica de Protección al Consumidor y Usuario</strong>
-              (Gaceta Oficial N° 39.358 del 18 de noviembre de 2011), que establece:
+              Nos regimos por la <strong>Ley 19.496 de Protección de los Derechos de los Consumidores</strong>
+              de Chile, que establece:
             </p>
             <div className="mt-4 space-y-4">
               <div>
@@ -69,20 +69,17 @@ export default function LegalBasesPage() {
             <div className="mt-4 p-4 rounded-lg bg-primary/5 border border-primary/20">
               <p className="text-sm dark:text-gray-300 text-gray-700">
                 📞 <strong>Para denuncias:</strong> Puedes contactar al
-                <strong>
-                  {' '}
-                  INDEPABIS (Instituto para la Defensa de las Personas en el Acceso a los Bienes y Servicios)
-                </strong>
-                o a nuestro equipo de soporte en <strong>soporte@paporla.com</strong>
+                <strong> SERNAC (Servicio Nacional del Consumidor)</strong>o a nuestro equipo de soporte en{' '}
+                <strong>soporte@paporla.com</strong>
               </p>
             </div>
           </section>
 
           <section>
-            <h2 className="text-2xl font-bold text-gradient mb-4">3. Ley Infogobierno y Protección de Datos</h2>
+            <h2 className="text-2xl font-bold text-gradient mb-4">3. Ley de Protección de Datos</h2>
             <p className="dark:text-gray-300 text-gray-700 leading-relaxed">
-              En cumplimiento de la <strong>Ley Orgánica de Protección de Datos Personales e Infogobierno</strong>
-              (Gaceta Oficial N° 39.060 del 13 de enero de 2011), Paporla:
+              En cumplimiento de la <strong>Ley 19.628 de Protección de la Vida Privada</strong>
+              de Chile, Paporla:
             </p>
             <ul className="list-disc pl-6 mt-3 space-y-2 dark:text-gray-300 text-gray-700">
               <li>Solo recopila datos con consentimiento explícito y para fines legítimos.</li>
@@ -100,12 +97,10 @@ export default function LegalBasesPage() {
           </section>
 
           <section>
-            <h2 className="text-2xl font-bold text-gradient mb-4">
-              4. Ley sobre Mensajes de Datos y Firmas Electrónicas
-            </h2>
+            <h2 className="text-2xl font-bold text-gradient mb-4">4. Ley de Comercio Electrónico</h2>
             <p className="dark:text-gray-300 text-gray-700 leading-relaxed">
-              Nos regimos por la <strong>Ley sobre Mensajes de Datos y Firmas Electrónicas</strong>
-              (Gaceta Oficial N° 37.148 del 28 de febrero de 2001), que otorga:
+              Nos regimos por la <strong>Ley 19.799 de Documentos Electrónicos y Firma Electrónica</strong>
+              de Chile, que otorga:
             </p>
             <ul className="list-disc pl-6 mt-3 space-y-2 dark:text-gray-300 text-gray-700">
               <li>
@@ -129,14 +124,16 @@ export default function LegalBasesPage() {
             </p>
             <ul className="list-disc pl-6 mt-3 space-y-2 dark:text-gray-300 text-gray-700">
               <li>
-                <strong>Reglamento General de la Ley de Salud:</strong> Normas sanitarias para establecimientos de
-                alimentos.
+                <strong>Código Sanitario de Chile:</strong> Normas sanitarias para establecimientos de alimentos (DFL
+                725/1967).
               </li>
               <li>
-                <strong>Normas COVENIN:</strong> Estándares venezolanos para manipulación y conservación de alimentos.
+                <strong>Reglamento Sanitario de los Alimentos (RSA):</strong> Estándares para manipulación y
+                conservación de alimentos (DS 977/1996).
               </li>
               <li>
-                <strong>Permiso sanitario:</strong> Todo comercio debe contar con registro sanitario vigente.
+                <strong>Resolución Sanitaria:</strong> Todo comercio debe contar con resolución sanitaria vigente
+                otorgada por la SEREMI de Salud.
               </li>
             </ul>
             <div className="mt-4 p-4 rounded-lg bg-yellow-500/10 border border-yellow-500/20">
@@ -165,8 +162,8 @@ export default function LegalBasesPage() {
               </li>
             </ul>
             <p className="mt-4 dark:text-gray-300 text-gray-700">
-              Al expandirnos a otros países de Latinoamérica, Paporla se registrará ante las autoridades locales (RNE,
-              CNPD, ARCSA, etc.) y adaptará sus términos a la legislación específica de cada jurisdicción.
+              Al expandirnos a otros países de Latinoamérica, Paporla se registrará ante las autoridades locales y
+              adaptará sus términos a la legislación específica de cada jurisdicción.
             </p>
           </section>
 
@@ -177,7 +174,7 @@ export default function LegalBasesPage() {
                 📧 <strong>Email:</strong> legal@paporla.com
               </p>
               <p>
-                📍 <strong>Dirección:</strong> Caracas, Venezuela
+                📍 <strong>Dirección:</strong> Santiago, Chile
               </p>
               <p>
                 🌐 <strong>Web:</strong>{' '}

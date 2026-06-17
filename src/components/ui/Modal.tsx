@@ -64,7 +64,7 @@ export default function Modal({ isOpen, onClose, children, title }: ModalProps) 
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="fixed inset-0 dark:bg-black/70 bg-black/50 backdrop-blur-sm z-50"
+            className="fixed inset-0 dark:bg-black/70 bg-black/30 backdrop-blur-sm z-50"
             aria-hidden="true"
           />
           <motion.div

@@ -71,7 +71,7 @@ export default function ContactoPage() {
                   </div>
                   <div>
                     <h3 className="font-semibold">Dirección</h3>
-                    <p className="text-gray-600 dark:text-gray-300">Caracas, Venezuela</p>
+                    <p className="text-gray-600 dark:text-gray-300">Santiago, Chile</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-4 p-3 rounded-xl dark:hover:bg-white/5 hover:bg-gray-100 transition-all">
@@ -80,7 +80,7 @@ export default function ContactoPage() {
                   </div>
                   <div>
                     <h3 className="font-semibold">Teléfono</h3>
-                    <p className="text-gray-600 dark:text-gray-300">+58 212 555 1234</p>
+                    <p className="text-gray-600 dark:text-gray-300">+56 2 555 1234</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-4 p-3 rounded-xl dark:hover:bg-white/5 hover:bg-gray-100 transition-all">
@@ -98,7 +98,7 @@ export default function ContactoPage() {
                   </div>
                   <div>
                     <h3 className="font-semibold">Horario</h3>
-                    <p className="text-gray-600 dark:text-gray-300">Lun - Vie: 9am - 6pm</p>
+                    <p className="text-gray-600 dark:text-gray-300">Lun - Vie: 9:00 - 18:00</p>
                   </div>
                 </div>
               </div>
@@ -221,11 +221,11 @@ export default function ContactoPage() {
           <div className="glass-card rounded-2xl overflow-hidden backdrop-blur-sm">
             <div className="p-6 border-b border-gray-200 dark:border-gray-700">
               <h3 className="text-xl font-bold text-gradient">Nuestra ubicación</h3>
-              <p className="text-gray-600 dark:text-gray-400">Caracas, Venezuela</p>
+              <p className="text-gray-600 dark:text-gray-400">Santiago, Chile</p>
             </div>
             <div className="h-[400px] w-full bg-gray-200 dark:bg-gray-800">
               <iframe
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d62764.93507540573!2d-66.94754884999999!3d10.4805937!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8c2a58ad8992abff%3A0xf04d64210fa29a80!2sCaracas%2C%20Venezuela!5e0!3m2!1ses!2s!4v1700000000000!5m2!1ses!2s"
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d212947.85738063756!2d-70.77446280531235!3d-33.44789663054944!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x9662c5410425af2f%3A0x505e1131102b91d!2sSantiago%2C%20Chile!5e0!3m2!1ses!2s!4v1700000000000!5m2!1ses!2s"
                 width="100%"
                 height="100%"
                 style={{ border: 0 }}

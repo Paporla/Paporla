@@ -83,7 +83,7 @@ export default function PrivacidadPage() {
               </div>
               <div className="flex items-center gap-1">
                 <Shield className="w-4 h-4" />
-                Ley Infogobierno - Venezuela
+                Ley de Protección de Datos - Chile
               </div>
             </div>
           </motion.div>
@@ -446,9 +446,8 @@ export default function PrivacidadPage() {
                   5. Derechos ARCO
                 </h2>
                 <p className="dark:text-gray-300 text-gray-700 mb-3">
-                  En cumplimiento con la{' '}
-                  <strong>Ley Orgánica de Protección de Datos e Infogobierno de Venezuela</strong> y legislaciones
-                  similares (LGPD en Brasil, Ley 1581 en Colombia, etc.), usted tiene derecho a:
+                  En cumplimiento con la <strong>Ley 19.628 de Protección de la Vida Privada de Chile</strong> y
+                  legislaciones similares (LGPD en Brasil, Ley 1581 en Colombia, etc.), usted tiene derecho a:
                 </p>
 
                 <div className="grid md:grid-cols-2 gap-4 mt-4">
@@ -703,13 +702,13 @@ export default function PrivacidadPage() {
                   </div>
                   <div className="flex items-center gap-3 p-3 rounded-lg dark:bg-white/5 bg-gray-100">
                     <MapPin className="w-5 h-5 text-primary" />
-                    📍 <strong>Dirección:</strong> Caracas, Venezuela (Oficina de Protección de Datos)
+                    📍 <strong>Dirección:</strong> Santiago, Chile (Oficina de Protección de Datos)
                   </div>
                   <div className="flex items-center gap-3 p-3 rounded-lg dark:bg-white/5 bg-gray-100">
                     <Phone className="w-5 h-5 text-primary" />
                     📞 <strong>Teléfono:</strong>{' '}
                     <a href="tel:+582125551234" className="text-primary hover:underline">
-                      +58 212 555 1234
+                      +56 2 555 1234
                     </a>{' '}
                     (Ext. 158)
                   </div>

@@ -47,25 +47,25 @@ export default function RecentActivity() {
   const [showAll, setShowAll] = useState(false)
 
   useEffect(() => {
-    loadActivities()
-  }, [])
+    const loadActivities = async () => {
+      setLoading(true)
 
-  const loadActivities = async () => {
-    setLoading(true)
+      const { data, error } = await supabase
+        .from('activity_logs')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(showAll ? 50 : 10)
 
-    const { data, error } = await supabase
-      .from('activity_logs')
-      .select('*')
-      .order('created_at', { ascending: false })
-      .limit(showAll ? 50 : 10)
-
-    if (error) {
-      console.error('Error loading activities:', error)
-    } else {
-      setActivities(data || [])
+      if (error) {
+        console.error('Error loading activities:', error)
+      } else {
+        setActivities(data || [])
+      }
+      setLoading(false)
     }
-    setLoading(false)
-  }
+
+    loadActivities()
+  }, [showAll])
 
   const displayedActivities = showAll ? activities : activities.slice(0, 5)
 

@@ -110,7 +110,7 @@ describe('registerSchema', () => {
       password: 'Password123',
       name: 'Test User',
       role: 'user',
-      phone: '+58 412 1234567',
+      phone: '+56 9 12345678',
     })
     expect(result.success).toBe(true)
   })

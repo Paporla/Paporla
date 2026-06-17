@@ -35,7 +35,7 @@ export default function RegisterForm() {
     }
     if (field === 'confirmPassword') {
       if (value !== formData.password) {
-        setFieldErrors((prev) => ({ ...prev, confirmPassword: 'Las contrasenas no coinciden' }))
+        setFieldErrors((prev) => ({ ...prev, confirmPassword: 'Las contraseñas no coinciden' }))
       } else {
         setFieldErrors((prev) => ({ ...prev, confirmPassword: undefined }))
       }
@@ -69,7 +69,7 @@ export default function RegisterForm() {
     }
 
     if (formData.password !== formData.confirmPassword) {
-      errors.confirmPassword = 'Las contrasenas no coinciden'
+      errors.confirmPassword = 'Las contraseñas no coinciden'
     }
 
     setFieldErrors(errors)
@@ -151,7 +151,7 @@ export default function RegisterForm() {
       <div className="text-center text-sm dark:text-gray-400 text-gray-600 pt-2">
         Ya tienes cuenta?{' '}
         <Link href="/login" className="text-primary hover:underline font-medium inline-flex items-center gap-1">
-          Inicia sesion aqui <ArrowRight className="w-3 h-3" />
+          Inicia sesión aquí <ArrowRight className="w-3 h-3" />
         </Link>
       </div>
 

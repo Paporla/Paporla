@@ -79,7 +79,38 @@ export default function BusinessProfilePage() {
   })
 
   useEffect(() => {
-    if (user?.id) loadShop()
+    if (!user?.id) return
+
+    const loadShop = async () => {
+      const { data } = await supabase.from('shops').select('*').eq('owner_id', user.id).maybeSingle()
+      if (data) {
+        setShop(data)
+        setFormData({
+          name: data.name || '',
+          description: data.description || '',
+          category: data.category || '',
+          address: data.address || '',
+          city: data.city || '',
+          country: data.country || 'VE',
+          latitude: data.latitude ? data.latitude.toString() : '',
+          longitude: data.longitude ? data.longitude.toString() : '',
+          phone: data.phone || '',
+          website: data.website || '',
+          instagram: data.instagram || '',
+          logoUrl: data.logo_url || '',
+          coverUrl: data.cover_url || '',
+          verified: data.verified || false,
+        })
+        if (data.hours) {
+          try {
+            setHours((prev) => ({ ...prev, ...JSON.parse(data.hours || '{}') }))
+          } catch {}
+        }
+      }
+      setLoading(false)
+    }
+
+    loadShop()
   }, [user])
 
   useEffect(() => {
@@ -87,35 +118,6 @@ export default function BusinessProfilePage() {
       if (autoSaveRef.current) clearTimeout(autoSaveRef.current)
     }
   }, [])
-
-  const loadShop = async () => {
-    const { data } = await supabase.from('shops').select('*').eq('owner_id', user?.id).maybeSingle()
-    if (data) {
-      setShop(data)
-      setFormData({
-        name: data.name || '',
-        description: data.description || '',
-        category: data.category || '',
-        address: data.address || '',
-        city: data.city || '',
-        country: data.country || 'VE',
-        latitude: data.latitude ? data.latitude.toString() : '',
-        longitude: data.longitude ? data.longitude.toString() : '',
-        phone: data.phone || '',
-        website: data.website || '',
-        instagram: data.instagram || '',
-        logoUrl: data.logo_url || '',
-        coverUrl: data.cover_url || '',
-        verified: data.verified || false,
-      })
-      if (data.hours) {
-        try {
-          setHours((prev) => ({ ...prev, ...JSON.parse(data.hours || '{}') }))
-        } catch {}
-      }
-    }
-    setLoading(false)
-  }
 
   const updateForm = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }))

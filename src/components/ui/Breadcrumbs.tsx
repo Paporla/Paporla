@@ -22,10 +22,10 @@ const routeLabels: Record<string, string> = {
   new: 'Crear',
   duplicate: 'Duplicar',
   edit: 'Editar',
-  login: 'Iniciar Sesion',
+  login: 'Iniciar Sesión',
   register: 'Registrarse',
-  'forgot-password': 'Recuperar Contrasena',
-  'reset-password': 'Restablecer Contrasena',
+  'forgot-password': 'Recuperar Contraseña',
+  'reset-password': 'Restablecer Contraseña',
   legal: 'Legal',
   terminos: 'Terminos y Condiciones',
   privacidad: 'Politica de Privacidad',
@@ -68,7 +68,7 @@ export default function Breadcrumbs() {
   if (breadcrumbs.length <= 2 && breadcrumbs[1]?.href === '/') return null
 
   return (
-    <div className="border-b dark:border-gray-700 border-gray-200">
+    <div className="border-b dark:border-gray-700 dark:bg-transparent bg-gray-50/80">
       <div className="container mx-auto px-4">
         <div className="py-2.5">
           <nav className="flex items-center gap-1 text-xs md:text-sm overflow-x-auto whitespace-nowrap scrollbar-hide">
@@ -80,7 +80,7 @@ export default function Breadcrumbs() {
                   {!isLast ? (
                     <Link
                       href={item.href}
-                      className="flex items-center gap-1 dark:text-gray-400 text-gray-600 hover:text-primary transition-colors"
+                      className="flex items-center gap-1 dark:text-gray-400 text-gray-500 hover:text-primary transition-colors"
                     >
                       {index === 0 && <Home className="w-3 h-3" />}
                       <span>{item.label}</span>

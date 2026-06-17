@@ -79,7 +79,7 @@ export default function Pagination({ currentPage, totalPages, onPageChange, sibl
             onClick={() => typeof page === 'number' && onPageChange(page)}
             className={`min-w-[40px] h-10 px-3 rounded-lg font-medium transition-all duration-300 ${
               page === currentPage
-                ? 'bg-gradient-to-r from-primary to-primary/80 dark:text-white text-gray-900 shadow-lg shadow-primary/25'
+                ? 'bg-gradient-to-r from-primary to-primary/80 text-white shadow-lg shadow-primary/25'
                 : page === '...'
                   ? 'cursor-default text-gray-500'
                   : 'hover:bg-primary/10 text-gray-700 dark:text-gray-300'

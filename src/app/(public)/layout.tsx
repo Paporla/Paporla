@@ -9,7 +9,7 @@ export default function PublicLayout({ children }: { children: ReactNode }) {
   return (
     <>
       <Header />
-      <div className="pt-16 md:pt-20">
+      <div className="pt-16 md:pt-20 dark:bg-gradient-to-b dark:from-primary/[0.18] dark:via-black dark:to-primary/[0.18]">
         <Breadcrumbs />
         <Suspense
           fallback={
@@ -20,12 +20,12 @@ export default function PublicLayout({ children }: { children: ReactNode }) {
             </div>
           }
         >
-          <main id="main-content">
+          <main id="main-content" tabIndex={-1}>
             <PageTransition>{children}</PageTransition>
           </main>
         </Suspense>
+        <Footer />
       </div>
-      <Footer />
     </>
   )
 }

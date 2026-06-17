@@ -1,16 +1,6 @@
-export type UserRole = 'user' | 'comercio' | 'admin' | 'super_admin'
+import type { UserRole, UserProfile } from '@/types/user'
 
-export interface UserProfile {
-  id: string
-  email: string | null
-  name: string | null
-  phone: string | null
-  role: UserRole
-  avatar_url: string | null
-  email_confirmed: boolean
-  last_login: string | null
-  created_at: string
-}
+export type { UserRole, UserProfile }
 
 export interface Shop {
   id: string

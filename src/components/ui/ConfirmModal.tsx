@@ -43,7 +43,7 @@ export default function ConfirmModal({
             <div className="dark:bg-gray-900 bg-white rounded-2xl border dark:border-gray-700 border-gray-200 shadow-2xl overflow-hidden">
               <div className="p-6 text-center">
                 <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-red-500/10 flex items-center justify-center">
-                  <AlertTriangle className="w-8 h-8 text-red-400" />
+                  <AlertTriangle className="w-8 h-8 dark:text-red-400 text-red-600" />
                 </div>
                 <h3 className="text-xl font-semibold dark:text-white text-gray-900 mb-2">{title}</h3>
                 <p className="dark:text-gray-400 text-gray-600 text-sm">{message}</p>

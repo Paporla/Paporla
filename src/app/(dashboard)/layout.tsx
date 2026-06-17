@@ -16,7 +16,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
         <div className="flex-1 lg:ml-72">
           <div className="pt-4 pb-20 lg:pb-12">
             <Breadcrumbs />
-            <main id="main-content" className="pb-12">
+            <main id="main-content" tabIndex={-1} className="pb-12">
               <div className="container-page px-4 max-w-7xl mx-auto">
                 <Suspense
                   fallback={

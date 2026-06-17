@@ -20,7 +20,6 @@ export const metadata: Metadata = {
   keywords: [
     'rescate alimentario',
     'comida',
-    'Caracas',
     'desperdicio',
     'packs sorpresa',
     'excedentes',
@@ -67,11 +66,14 @@ export const metadata: Metadata = {
     },
   },
   icons: {
-    icon: '/favicon.svg',
-    shortcut: '/favicon.svg',
-    apple: '/favicon.svg',
+    icon: [
+      { url: '/favicon/favicon.ico', sizes: 'any' },
+      { url: '/favicon/favicon.svg', type: 'image/svg+xml' },
+      { url: '/favicon/favicon-96x96.png', sizes: '96x96', type: 'image/png' },
+    ],
+    apple: '/favicon/apple-touch-icon.png',
   },
-  manifest: '/site.webmanifest',
+  manifest: '/favicon/site.webmanifest',
 }
 
 export const viewport: Viewport = {
@@ -102,7 +104,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               url: process.env.NEXT_PUBLIC_SITE_URL || 'https://paporla.com',
               logo: (process.env.NEXT_PUBLIC_SITE_URL || 'https://paporla.com') + '/favicon.svg',
               sameAs: ['https://instagram.com/paporla'],
-              address: { '@type': 'PostalAddress', addressLocality: 'Caracas', addressCountry: 'VE' },
+              address: { '@type': 'PostalAddress', addressLocality: '', addressCountry: '' },
             }),
           }}
         />

@@ -72,7 +72,7 @@ export default function TerminosPage() {
               </div>
               <div className="flex items-center gap-1">
                 <MapPin className="w-4 h-4" />
-                Aplica para Venezuela y Latinoamérica
+                Aplica para Chile y Latinoamérica
               </div>
             </div>
           </motion.div>
@@ -123,8 +123,8 @@ export default function TerminosPage() {
                     términos, no debe utilizar nuestros servicios.
                   </p>
                   <p>
-                    Estos términos constituyen un acuerdo legal entre usted y Paporla, aplicable tanto en Venezuela como
-                    en los demás países de Latinoamérica donde operemos.
+                    Estos términos constituyen un acuerdo legal entre usted y Paporla, aplicable tanto en Chile como en
+                    los demás países de Latinoamérica donde operemos.
                   </p>
                   <div className="p-4 rounded-lg bg-yellow-500/10 border border-yellow-500/20 mt-4">
                     <p className="text-sm flex items-start gap-2">
@@ -409,8 +409,8 @@ export default function TerminosPage() {
                   9. Privacidad y Protección de Datos
                 </h2>
                 <p className="dark:text-gray-300 text-gray-700">
-                  En cumplimiento de la Ley Orgánica de Protección de Datos e Infogobierno de Venezuela y legislaciones
-                  similares en Latinoamérica, Paporla:
+                  En cumplimiento de la Ley de Protección de la Vida Privada de Chile y legislaciones similares en
+                  Latinoamérica, Paporla:
                 </p>
                 <ul className="list-none space-y-2 mt-3">
                   <li className="flex items-start gap-2">
@@ -471,8 +471,8 @@ export default function TerminosPage() {
                   11. Jurisdicción y Ley Aplicable
                 </h2>
                 <p className="dark:text-gray-300 text-gray-700">
-                  Para operaciones en Venezuela, estos términos se rigen por las leyes de la República Bolivariana de
-                  Venezuela. Cualquier controversia será sometida a los tribunales competentes de Caracas.
+                  Para operaciones en Chile, estos términos se rigen por las leyes de la República de Chile. Cualquier
+                  controversia será sometida a los tribunales competentes de Santiago.
                 </p>
                 <p className="dark:text-gray-300 text-gray-700 mt-3">
                   Para operaciones en otros países de Latinoamérica, se aplicarán las leyes locales correspondientes y
@@ -500,7 +500,7 @@ export default function TerminosPage() {
                     </a>
                   </p>
                   <p className="flex items-center gap-2">
-                    <MapPin className="w-4 h-4 text-primary" /> Dirección: Caracas, Venezuela
+                    <MapPin className="w-4 h-4 text-primary" /> Dirección: Santiago, Chile
                   </p>
                   <p className="flex items-center gap-2">
                     <Globe className="w-4 h-4 text-primary" /> Web:{' '}

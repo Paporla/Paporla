@@ -1,34 +1,30 @@
 'use client'
 
 import { useQuery } from '@tanstack/react-query'
-import { supabaseBrowser } from '@/lib/supabase/client'
 import { PackWithShop } from '@/types/pack'
 
 const PACKS_QUERY_KEY = 'packs'
 
-async function fetchPacks(shopId?: string, client = supabaseBrowser()) {
-  let query = client
-    .from('packs')
-    .select('*,shop:shops(name,address,phone,verified)')
-    .eq('is_active', true)
-    .gt('remaining_stock', 0)
+async function apiFetch<T>(url: string): Promise<T> {
+  const response = await fetch(url)
+  if (!response.ok) {
+    const err = await response.json()
+    throw new Error(err.error || 'Error al obtener packs')
+  }
+  const data = await response.json()
+  if (!data.success) throw new Error(data.error || 'Error en la solicitud')
+  return data as T
+}
 
-  if (shopId) query = query.eq('shop_id', shopId)
-
-  const { data, error } = await query.order('created_at', { ascending: false })
-  if (error) throw error
-  return data as PackWithShop[]
+async function fetchPacks(shopId?: string) {
+  const url = shopId ? `/api/packs?shopId=${shopId}` : '/api/packs'
+  const data = await apiFetch<{ success: boolean; packs: PackWithShop[] }>(url)
+  return data.packs
 }
 
 async function fetchPackById(id: string) {
-  const { data, error } = await supabaseBrowser()
-    .from('packs')
-    .select('*,shop:shops(name,address,phone,verified,description)')
-    .eq('id', id)
-    .maybeSingle()
-
-  if (error) throw error
-  return data as PackWithShop
+  const data = await apiFetch<{ success: boolean; pack: PackWithShop }>(`/api/packs?id=${id}`)
+  return data.pack
 }
 
 export function usePacks(shopId?: string) {

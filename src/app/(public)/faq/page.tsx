@@ -33,7 +33,7 @@ const faqs: FaqItem[] = [
   {
     question: '¿Qué es Paporla?',
     answer:
-      'Paporla es una plataforma de rescate alimentario que conecta comercios con excedentes de comida con personas que buscan alimentos a precio reducido en Caracas. Ayudamos a reducir el desperdicio alimentario mientras ahorras dinero.',
+      'Paporla es una plataforma de rescate alimentario que conecta comercios con excedentes de comida con personas que buscan alimentos a precio reducido. Ayudamos a reducir el desperdicio alimentario mientras ahorras dinero.',
     icon: HelpCircle,
     category: 'general',
   },

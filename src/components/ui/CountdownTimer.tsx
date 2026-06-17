@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { motion } from 'framer-motion'
 
 interface CountdownTimerProps {
@@ -11,7 +11,7 @@ interface CountdownTimerProps {
 
 export default function CountdownTimer({ targetDate, targetEndTime, onExpired }: CountdownTimerProps) {
   const [timeLeft, setTimeLeft] = useState<string>('')
-  const [expired, setExpired] = useState(false)
+  const expiredRef = useRef(false)
 
   useEffect(() => {
     const calculateTimeLeft = () => {
@@ -26,8 +26,8 @@ export default function CountdownTimer({ targetDate, targetEndTime, onExpired }:
 
       if (diff <= 0) {
         setTimeLeft('Vencido')
-        if (!expired) {
-          setExpired(true)
+        if (!expiredRef.current) {
+          expiredRef.current = true
           onExpired?.()
         }
         return
@@ -50,9 +50,9 @@ export default function CountdownTimer({ targetDate, targetEndTime, onExpired }:
     calculateTimeLeft()
     const timer = setInterval(calculateTimeLeft, 1000)
     return () => clearInterval(timer)
-  }, [targetDate, targetEndTime])
+  }, [targetDate, targetEndTime, onExpired])
 
-  if (expired) {
+  if (expiredRef.current) {
     return (
       <motion.span
         initial={{ opacity: 0, scale: 0.9 }}

@@ -45,7 +45,7 @@ export default function ForgotPasswordPage() {
           <span className="text-gradient">Revisa tu correo</span>
         </h2>
         <p className="dark:text-gray-400 text-gray-600">
-          Te enviamos un enlace a <strong className="text-primary">{email}</strong> para restablecer tu contrasena.
+          Te enviamos un enlace a <strong className="text-primary">{email}</strong> para restablecer tu contraseña.
         </p>
         <Link href="/login" className="text-primary hover:underline inline-flex items-center gap-1 mt-4">
           <ArrowLeft className="w-4 h-4" />
@@ -59,7 +59,7 @@ export default function ForgotPasswordPage() {
     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
       <form onSubmit={handleSubmit} className="space-y-6">
         <p className="dark:text-gray-400 text-gray-600 text-sm text-center">
-          Ingresa tu correo electronico y te enviaremos un enlace para restablecer tu contrasena.
+          Ingresa tu correo electronico y te enviaremos un enlace para restablecer tu contraseña.
         </p>
 
         <Input

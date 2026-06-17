@@ -18,12 +18,14 @@ interface ButtonProps extends MotionProps {
 }
 
 const variants = {
-  primary: 'bg-gradient-to-r from-primary to-primary/80 text-dark font-bold hover:shadow-lg hover:shadow-primary/25',
-  secondary: 'dark:bg-gray-800 bg-gray-200 dark:text-white text-gray-900 dark:hover:bg-gray-700 hover:bg-gray-300',
+  primary:
+    'bg-gradient-to-r from-primary to-primary/80 dark:text-dark text-white font-bold hover:shadow-lg hover:shadow-primary/25',
+  secondary: 'dark:bg-gray-800 bg-gray-200 dark:text-white text-gray-800 dark:hover:bg-gray-700 hover:bg-gray-300',
   outline: 'border border-primary/30 text-primary hover:bg-primary/10 hover:border-primary/60',
   ghost:
     'dark:text-gray-400 text-gray-600 dark:hover:text-white hover:text-gray-900 dark:hover:bg-white/5 hover:bg-gray-100',
-  danger: 'bg-red-500/80 dark:text-white text-gray-900 hover:bg-red-600 border border-red-500/20',
+  danger:
+    'dark:bg-red-500/20 bg-red-50 dark:text-red-400 text-red-700 hover:dark:bg-red-500/30 hover:bg-red-100 dark:border-red-500/20 border-red-300',
 }
 
 const sizes = {

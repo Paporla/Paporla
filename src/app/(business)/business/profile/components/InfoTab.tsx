@@ -22,7 +22,6 @@ const COUNTRIES = [
   { code: 'MX', name: 'Mexico' },
   { code: 'PE', name: 'Peru' },
   { code: 'CL', name: 'Chile' },
-  { code: 'VE', name: 'Venezuela' },
 ]
 
 interface ProfileFormData {
@@ -103,7 +102,7 @@ export default function InfoTab({ formData, updateForm }: InfoTabProps) {
           label="Ciudad"
           value={formData.city}
           onChange={(e) => updateForm('city', e.target.value)}
-          placeholder="Caracas"
+          placeholder="Santiago"
           icon={<Building2 className="w-4 h-4 text-primary" />}
         />
         <div className="space-y-2">
@@ -129,7 +128,7 @@ export default function InfoTab({ formData, updateForm }: InfoTabProps) {
           label="Telefono"
           value={formData.phone}
           onChange={(e) => updateForm('phone', e.target.value)}
-          placeholder="+58 212 555 1234"
+          placeholder="+56 9 5555 1234"
           icon={<Phone className="w-4 h-4 text-primary" />}
         />
         <Input

@@ -73,7 +73,7 @@ export default function RegisterFormFields({
 
         <div className="relative">
           <Input
-            label="Contrasena"
+            label="Contraseña"
             type={showPassword ? 'text' : 'password'}
             placeholder="******"
             value={formData.password}
@@ -93,7 +93,7 @@ export default function RegisterFormFields({
         </div>
 
         <Input
-          label="Confirmar contrasena"
+          label="Confirmar contraseña"
           type="password"
           placeholder="******"
           value={formData.confirmPassword}
@@ -117,7 +117,7 @@ export default function RegisterFormFields({
 
         <Input
           label="Telefono (opcional)"
-          placeholder="+58 212 555 1234"
+          placeholder="+56 9 5555 1234"
           value={formData.phone}
           onChange={(e) => update({ phone: e.target.value })}
           onBlur={() => onFieldBlur?.('phone')}

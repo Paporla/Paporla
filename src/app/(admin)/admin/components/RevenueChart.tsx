@@ -45,42 +45,42 @@ export default function RevenueChart() {
   const [growth, setGrowth] = useState(0)
 
   useEffect(() => {
-    loadRevenueData()
-  }, [])
+    const loadRevenueData = async () => {
+      setLoading(true)
 
-  const loadRevenueData = async () => {
-    setLoading(true)
+      const { data, error } = await supabase.from('revenue_metrics').select('*').order('month', { ascending: true })
 
-    const { data, error } = await supabase.from('revenue_metrics').select('*').order('month', { ascending: true })
+      if (error) {
+        console.error('Error loading revenue data:', error)
+      } else if (data && data.length > 0) {
+        // Formatear meses
+        const formattedData = data.map((item: RevenueData) => ({
+          ...item,
+          month: new Date(item.month).toLocaleDateString('es', { month: 'short' }),
+          total_revenue_cents: item.total_revenue_cents || 0,
+          total_commissions_cents: item.total_commissions_cents || 0,
+        }))
+        setData(formattedData)
 
-    if (error) {
-      console.error('Error loading revenue data:', error)
-    } else if (data && data.length > 0) {
-      // Formatear meses
-      const formattedData = data.map((item: RevenueData) => ({
-        ...item,
-        month: new Date(item.month).toLocaleDateString('es', { month: 'short' }),
-        total_revenue_cents: item.total_revenue_cents || 0,
-        total_commissions_cents: item.total_commissions_cents || 0,
-      }))
-      setData(formattedData)
+        // Calcular total de ingresos
+        const total = formattedData.reduce((sum, item) => sum + item.total_revenue_cents, 0)
+        setTotalRevenue(total)
 
-      // Calcular total de ingresos
-      const total = formattedData.reduce((sum, item) => sum + item.total_revenue_cents, 0)
-      setTotalRevenue(total)
-
-      // Calcular crecimiento (comparar últimos 2 meses)
-      if (formattedData.length >= 2) {
-        const lastMonth = formattedData[formattedData.length - 1].total_revenue_cents
-        const prevMonth = formattedData[formattedData.length - 2].total_revenue_cents
-        if (prevMonth > 0) {
-          const growthPercent = ((lastMonth - prevMonth) / prevMonth) * 100
-          setGrowth(Math.round(growthPercent))
+        // Calcular crecimiento (comparar últimos 2 meses)
+        if (formattedData.length >= 2) {
+          const lastMonth = formattedData[formattedData.length - 1].total_revenue_cents
+          const prevMonth = formattedData[formattedData.length - 2].total_revenue_cents
+          if (prevMonth > 0) {
+            const growthPercent = ((lastMonth - prevMonth) / prevMonth) * 100
+            setGrowth(Math.round(growthPercent))
+          }
         }
       }
+      setLoading(false)
     }
-    setLoading(false)
-  }
+
+    loadRevenueData()
+  }, [])
 
   if (loading) {
     return (

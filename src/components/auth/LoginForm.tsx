@@ -88,7 +88,7 @@ export default function LoginForm() {
         localStorage.removeItem('remembered_email')
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error al iniciar sesion')
+      setError(err instanceof Error ? err.message : 'Error al iniciar sesión')
     } finally {
       setLoading(false)
     }
@@ -114,7 +114,7 @@ export default function LoginForm() {
 
       <div className="relative">
         <Input
-          label="Contrasena"
+          label="Contraseña"
           type={showPassword ? 'text' : 'password'}
           placeholder="••••••••"
           value={password}
@@ -150,12 +150,12 @@ export default function LoginForm() {
         </label>
 
         <Link href="/forgot-password" className="text-sm text-primary hover:underline transition-colors">
-          Olvidaste tu contrasena?
+          ¿Olvidaste tu contraseña?
         </Link>
       </div>
 
       <Button type="submit" className="w-full py-2.5" disabled={loading}>
-        {loading ? 'Iniciando sesion...' : 'Iniciar Sesion'}
+        {loading ? 'Iniciando sesión...' : 'Iniciar Sesión'}
       </Button>
 
       <div className="text-center text-sm dark:text-gray-400 text-gray-600">

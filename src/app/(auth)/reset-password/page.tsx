@@ -33,13 +33,13 @@ export default function ResetPasswordPage() {
     setError('')
 
     if (password !== confirmPassword) {
-      setError('Las contrasenas no coinciden')
+      setError('Las contraseñas no coinciden')
       setLoading(false)
       return
     }
 
     if (password.length < 8) {
-      setError('La contrasena debe tener al menos 8 caracteres')
+      setError('La contraseña debe tener al menos 8 caracteres')
       setLoading(false)
       return
     }
@@ -64,7 +64,7 @@ export default function ResetPasswordPage() {
         <h2 className="text-2xl font-bold">
           <span className="text-gradient">Contrasena actualizada!</span>
         </h2>
-        <p className="dark:text-gray-400 text-gray-600">Tu contrasena ha sido cambiada exitosamente.</p>
+        <p className="dark:text-gray-400 text-gray-600">Tu contraseña ha sido cambiada exitosamente.</p>
         <p className="text-sm dark:text-gray-500 text-gray-400">Seras redirigido al inicio de sesion...</p>
         <Link href="/login" className="text-primary hover:underline inline-flex items-center gap-1 mt-2">
           Ir ahora <ArrowLeft className="w-4 h-4" />
@@ -76,11 +76,11 @@ export default function ResetPasswordPage() {
   return (
     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
       <form onSubmit={handleSubmit} className="space-y-6">
-        <p className="dark:text-gray-400 text-gray-600 text-sm text-center">Ingresa tu nueva contrasena.</p>
+        <p className="dark:text-gray-400 text-gray-600 text-sm text-center">Ingresa tu nueva contraseña.</p>
 
         <div className="relative">
           <Input
-            label="Nueva contrasena"
+            label="Nueva contraseña"
             type={showPassword ? 'text' : 'password'}
             placeholder="••••••••"
             value={password}
@@ -98,7 +98,7 @@ export default function ResetPasswordPage() {
         </div>
 
         <Input
-          label="Confirmar nueva contrasena"
+          label="Confirmar nueva contraseña"
           type="password"
           placeholder="••••••••"
           value={confirmPassword}
@@ -108,14 +108,14 @@ export default function ResetPasswordPage() {
         />
 
         <div className="text-sm dark:text-gray-400 text-gray-600 space-y-1">
-          <p>La contrasena debe tener:</p>
+          <p>La contraseña debe tener:</p>
           <ul className="list-disc list-inside ml-2">
             <li>Al menos 8 caracteres</li>
           </ul>
         </div>
 
         <Button type="submit" className="w-full" disabled={loading}>
-          {loading ? 'Cargando...' : 'Actualizar contrasena'}
+          {loading ? 'Cargando...' : 'Actualizar contraseña'}
         </Button>
 
         <div className="text-center">

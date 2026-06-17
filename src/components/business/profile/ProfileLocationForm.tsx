@@ -118,7 +118,8 @@ export default function ProfileLocationForm({
 
       <div className="dark:bg-black/40 bg-gray-50 border dark:border-white/10 border-gray-200 rounded-xl p-4">
         <p className="text-xs dark:text-gray-500 text-gray-400">
-          <strong>Ejemplo:</strong> Caracas → Lat: 10.4961, Lng: -66.8983. Puedes obtener coordenadas desde Google Maps.
+          <strong>Ejemplo:</strong> Santiago → Lat: -33.4489, Lng: -70.6693. Puedes obtener coordenadas desde Google
+          Maps.
         </p>
       </div>
     </div>

@@ -1,12 +1,44 @@
 // ============================================
+// Configuracion centralizada de emails
+// ============================================
+
+export const EMAIL_CONFIG = {
+  baseUrl: process.env.NEXT_PUBLIC_SITE_URL || 'https://paporla.com',
+  contactEmail: process.env.NEXT_PUBLIC_CONTACT_EMAIL || 'hola@paporla.com',
+  companyName: 'Paporla',
+  companySlogan: 'Rescate Alimentario',
+  companyAddress: process.env.NEXT_PUBLIC_COMPANY_ADDRESS || 'Santiago, Chile',
+  currentYear: new Date().getFullYear(),
+  socialLinks: {
+    instagram: 'https://instagram.com/paporla',
+  },
+}
+
+// ============================================
 // Componentes HTML reutilizables para emails
 // ============================================
 
-const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://paporla.vercel.app'
 const primary = '#00ff88'
 const primaryRgb = '0, 255, 136'
 
+function getFooter() {
+  const { baseUrl, contactEmail, companyName, companySlogan, companyAddress, currentYear } = EMAIL_CONFIG
+  return `
+<tr><td style="padding:24px 32px;text-align:center;border-top:1px solid rgba(255,255,255,0.05);background:rgba(255,255,255,0.02);">
+<p style="color:#444;font-size:11px;line-height:1.8;margin:0 0 12px;">${companyName} &mdash; ${companySlogan}<br>${companyAddress}</p>
+<p style="margin:0 0 16px;">
+<a href="${baseUrl}" style="color:#555;text-decoration:none;font-size:11px;margin:0 8px;">Web</a>
+<span style="color:#333;font-size:11px;">&middot;</span>
+<a href="${baseUrl}/faq" style="color:#555;text-decoration:none;font-size:11px;margin:0 8px;">FAQ</a>
+<span style="color:#333;font-size:11px;">&middot;</span>
+<a href="mailto:${contactEmail}" style="color:${primary};text-decoration:none;font-size:11px;margin:0 8px;">Contacto</a>
+</p>
+<p style="color:#333;font-size:10px;margin:0;line-height:1.6;">&copy; ${currentYear} ${companyName}. Todos los derechos reservados.<br>Si no solicitaste este correo, ignoralo.</p>
+</td></tr>`
+}
+
 export function baseLayout(content: string) {
+  const { baseUrl } = EMAIL_CONFIG
   return `<!DOCTYPE html>
 <html lang="es">
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>Paporla</title></head>
@@ -18,26 +50,7 @@ export function baseLayout(content: string) {
 <img src="${baseUrl}/images/banner-optimized.webp" alt="Paporla" style="width:100%;max-width:600px;height:auto;display:block;" width="600" />
 </td></tr>
 <tr><td style="padding:36px 32px 24px;">${content}</td></tr>
-<tr><td style="padding:0 32px 20px;">
-<table width="100%" cellpadding="0" cellspacing="0" style="background:rgba(${primaryRgb},0.04);border-radius:12px;border:1px solid rgba(${primaryRgb},0.1);padding:16px;">
-<tr>
-<td style="text-align:center;width:33%;padding:8px 4px;"><p style="margin:0;color:${primary};font-size:18px;font-weight:800;">+2,847</p><p style="margin:4px 0 0;color:#555;font-size:10px;text-transform:uppercase;letter-spacing:0.5px;">Packs Rescatados</p></td>
-<td style="text-align:center;width:33%;padding:8px 4px;border-left:1px solid rgba(255,255,255,0.05);border-right:1px solid rgba(255,255,255,0.05);"><p style="margin:0;color:${primary};font-size:18px;font-weight:800;">+3.4T</p><p style="margin:4px 0 0;color:#555;font-size:10px;text-transform:uppercase;letter-spacing:0.5px;">CO2 Evitado</p></td>
-<td style="text-align:center;width:33%;padding:8px 4px;"><p style="margin:0;color:${primary};font-size:18px;font-weight:800;">15</p><p style="margin:4px 0 0;color:#555;font-size:10px;text-transform:uppercase;letter-spacing:0.5px;">Comercios Aliados</p></td>
-</tr>
-</table>
-</td></tr>
-<tr><td style="padding:24px 32px;text-align:center;border-top:1px solid rgba(255,255,255,0.05);background:rgba(255,255,255,0.02);">
-<p style="color:#444;font-size:11px;line-height:1.8;margin:0 0 12px;">Paporla &mdash; Rescate Alimentario<br>Caracas, Venezuela</p>
-<p style="margin:0 0 16px;">
-<a href="${baseUrl}" style="color:#555;text-decoration:none;font-size:11px;margin:0 8px;">Web</a>
-<span style="color:#333;font-size:11px;">&middot;</span>
-<a href="${baseUrl}/faq" style="color:#555;text-decoration:none;font-size:11px;margin:0 8px;">FAQ</a>
-<span style="color:#333;font-size:11px;">&middot;</span>
-<a href="mailto:hola@paporla.com" style="color:${primary};text-decoration:none;font-size:11px;margin:0 8px;">Contacto</a>
-</p>
-<p style="color:#333;font-size:10px;margin:0;line-height:1.6;">&copy; 2026 Paporla. Todos los derechos reservados.<br>Si no solicitaste este correo, ignoralo.</p>
-</td></tr>
+${getFooter()}
 </table>
 </td></tr>
 </table>

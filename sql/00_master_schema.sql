@@ -81,7 +81,7 @@ CREATE TABLE public.shops (
   deleted_at TIMESTAMPTZ,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW(),
-  country TEXT DEFAULT 'Venezuela',
+  country TEXT DEFAULT '',
   category TEXT,
   website TEXT,
   instagram TEXT,

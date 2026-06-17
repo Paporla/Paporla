@@ -18,7 +18,7 @@ export default function CTASection() {
         >
           <div className="absolute -inset-0.5 bg-gradient-to-r from-primary/20 to-primary/10 rounded-2xl blur-xl opacity-0 group-hover:opacity-40 transition duration-500" />
 
-          <div className="relative dark:bg-gradient-to-br dark:from-primary/10 dark:to-primary/5 bg-primary/5 rounded-2xl p-10 md:p-12 text-center border border-primary/20 backdrop-blur-sm">
+          <div className="relative bg-gradient-to-br from-primary/[0.18] to-primary/[0.05] rounded-2xl p-10 md:p-12 text-center border border-primary/20 backdrop-blur-sm">
             <motion.div
               animate={{ rotate: 360 }}
               transition={{ duration: 20, repeat: Infinity, ease: 'linear' }}
@@ -47,7 +47,7 @@ export default function CTASection() {
                 href="/shops"
                 className="inline-flex items-center justify-center px-8 py-3 rounded-full border border-primary/40 dark:text-white text-gray-900 font-semibold hover:bg-primary/10 transition text-center"
               >
-                Soy comercio
+                Registra tu comercio
               </Link>
             </div>
 
@@ -72,7 +72,7 @@ export default function CTASection() {
                 href="/login"
                 className="inline-flex items-center justify-center gap-1 dark:text-gray-400 text-gray-500 text-sm hover:text-primary transition-colors"
               >
-                Ya tienes cuenta? <span className="text-primary">Iniciar sesion</span>
+                ¿Ya tienes cuenta? <span className="text-primary">Iniciar sesión</span>
               </Link>
             </div>
 

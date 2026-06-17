@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { CreditCard, Package } from 'lucide-react'
 import Button from '@/components/ui/Button'
 import { formatPrice } from '@/lib/utils/formatPrice'
-import type { UserProfile } from '@/hooks/useAuth'
+import type { UserProfile } from '@/types/user'
 
 interface PackPaymentPanelProps {
   packId: string

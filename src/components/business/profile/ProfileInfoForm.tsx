@@ -22,7 +22,6 @@ const COUNTRIES = [
   { code: 'MX', name: 'México' },
   { code: 'PE', name: 'Perú' },
   { code: 'CL', name: 'Chile' },
-  { code: 'VE', name: 'Venezuela' },
 ]
 
 interface ProfileInfoFormProps {
@@ -111,7 +110,7 @@ export default function ProfileInfoForm({ formData, updateForm }: ProfileInfoFor
           label="Ciudad"
           value={formData.city}
           onChange={(e) => updateForm('city', e.target.value)}
-          placeholder="Caracas"
+          placeholder="Santiago"
           icon={<Building2 className="w-4 h-4 text-primary" />}
         />
 
@@ -139,7 +138,7 @@ export default function ProfileInfoForm({ formData, updateForm }: ProfileInfoFor
           label="Teléfono"
           value={formData.phone}
           onChange={(e) => updateForm('phone', e.target.value)}
-          placeholder="+58 212 555 1234"
+          placeholder="+56 9 5555 1234"
           icon={<Phone className="w-4 h-4 text-primary" />}
         />
 

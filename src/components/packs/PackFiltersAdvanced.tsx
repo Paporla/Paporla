@@ -36,7 +36,7 @@ const defaultFilters: Filters = {
 export default function PackFiltersAdvanced({
   onFilterChange,
   initialFilters = {},
-  cities = ['Caracas', 'Barquisimeto', 'Maracaibo', 'Valencia', 'Maracay'],
+  cities = ['Santiago', 'Valparaíso', 'Concepción', 'La Serena', 'Antofagasta'],
 }: Props) {
   const [isOpen, setIsOpen] = useState(false)
   const [filters, setFilters] = useState<Filters>({ ...defaultFilters, ...initialFilters })
@@ -75,8 +75,10 @@ export default function PackFiltersAdvanced({
     else if (key === 'showAvailableOnly') update('showAvailableOnly', false)
   }
 
+  // Notificar filtros iniciales al montar
   useEffect(() => {
-    notify(filters)
+    onFilterChange(filters)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   return (

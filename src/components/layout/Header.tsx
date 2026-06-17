@@ -45,15 +45,13 @@ export default function Header() {
 
   if (!mounted || loading) {
     return (
-      <nav
-        className={`fixed top-0 left-0 right-0 z-[60] h-16 ${isDark ? 'bg-black/80 backdrop-blur-xl border-b border-gray-800' : 'bg-white/80 backdrop-blur-xl border-b border-gray-200'}`}
-      />
+      <nav className="fixed top-0 left-0 right-0 z-[60] h-16 dark:bg-black/80 bg-white/80 backdrop-blur-xl dark:border-b dark:border-gray-800 border-b border-gray-200" />
     )
   }
 
   return (
     <nav
-      className={`fixed top-0 left-0 right-0 z-[60] transition-all duration-300 ${isScrolled ? (isDark ? 'bg-black/80 backdrop-blur-xl border-b border-gray-800' : 'bg-white/80 backdrop-blur-xl border-b border-gray-200') : 'bg-transparent'}`}
+      className={`fixed top-0 left-0 right-0 z-[60] transition-all duration-300 ${isScrolled ? (isDark ? 'bg-gradient-to-b from-primary/[0.18] to-black/80 backdrop-blur-xl border-b border-primary/10' : 'bg-white/80 backdrop-blur-xl border-b border-gray-200') : 'bg-transparent'}`}
     >
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
@@ -102,7 +100,7 @@ export default function Header() {
                 href="/login"
                 className="px-5 py-2 rounded-full bg-primary text-black font-medium hover:bg-primary/90 transition-all shadow-lg shadow-primary/20"
               >
-                Iniciar Sesion
+                Iniciar Sesión
               </Link>
             )}
 

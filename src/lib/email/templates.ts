@@ -1,6 +1,15 @@
-import { ctaButton, glowCodeBox, detailsCard, detailItem, infoBlock, stepRow, baseLayout } from './components'
+import {
+  ctaButton,
+  glowCodeBox,
+  detailsCard,
+  detailItem,
+  infoBlock,
+  stepRow,
+  baseLayout,
+  EMAIL_CONFIG,
+} from './components'
 
-const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://paporla.vercel.app'
+const { baseUrl } = EMAIL_CONFIG
 const primary = '#00ff88'
 
 // ============================================
@@ -45,7 +54,7 @@ ${glowCodeBox(data.pickupCode, 'Tu codigo de recogida')}
 ${detailsCard(`
 ${detailItem('Pack', data.packTitle)}
 ${detailItem('Comercio', data.shopName)}
-${data.shopAddress ? detailItem('Direccion', data.shopAddress) : ''}
+${data.shopAddress ? detailItem('Dirección', data.shopAddress) : ''}
 ${data.pickupDate ? detailItem('Recoger el', data.pickupDate, true) : ''}
 ${data.pickupTime ? detailItem('Horario', data.pickupTime) : ''}
 ${detailItem('Total pagado', data.price, true)}
@@ -90,7 +99,7 @@ ${glowCodeBox(data.pickupCode, 'Tu codigo de recogida')}
 ${detailsCard(`
 ${detailItem('Pack', data.packTitle)}
 ${detailItem('Comercio', data.shopName)}
-${data.shopAddress ? detailItem('Direccion', data.shopAddress) : ''}
+${data.shopAddress ? detailItem('Dirección', data.shopAddress) : ''}
 ${detailItem('Fecha limite', data.pickupDate, true)}
 ${data.pickupTime ? detailItem('Horario', data.pickupTime) : ''}
 `)}

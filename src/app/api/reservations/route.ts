@@ -2,15 +2,35 @@
 import { NextResponse } from 'next/server'
 import { getUserReservations, createReservation, updateReservation } from '@/lib/services/reservationService'
 
-export async function GET(request: Request) {
+async function authenticateUser() {
   const supabase = await createClient()
   const {
     data: { user },
   } = await supabase.auth.getUser()
+  return user
+}
+
+export async function GET(request: Request) {
+  const user = await authenticateUser()
   if (!user) return NextResponse.json({ success: false, error: 'No autorizado' }, { status: 401 })
 
   const { searchParams } = new URL(request.url)
   const shopId = searchParams.get('shopId')
+  const reservationId = searchParams.get('id')
+
+  // Si se pide una reserva específica
+  if (reservationId) {
+    const supabase = await createClient()
+    const { data, error } = await supabase
+      .from('reservations')
+      .select(
+        '*,pack:packs(id,title,description,price_cents,image_url),shop:shops(id,name,address,phone,latitude,longitude,city),user:user_profiles(id,name,email,phone)',
+      )
+      .eq('id', reservationId)
+      .maybeSingle()
+    if (error) return NextResponse.json({ success: false, error: error.message }, { status: 500 })
+    return NextResponse.json({ success: true, reservation: data })
+  }
 
   const result = (await getUserReservations(user.id, shopId || undefined)) as {
     error?: string
@@ -22,13 +42,10 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
-  const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  const user = await authenticateUser()
   if (!user) return NextResponse.json({ success: false, error: 'No autorizado' }, { status: 401 })
 
-  let body: { pack_id?: string; shop_id?: string; quantity?: number }
+  let body: { pack_id?: string; shop_id?: string; quantity?: number; payment_method?: string }
   try {
     body = await request.json()
   } catch {
@@ -52,13 +69,10 @@ export async function POST(request: Request) {
 }
 
 export async function PUT(request: Request) {
-  const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  const user = await authenticateUser()
   if (!user) return NextResponse.json({ success: false, error: 'No autorizado' }, { status: 401 })
 
-  let body: { id?: string; status?: string; cancel_reason?: string }
+  let body: { id?: string; status?: string; cancel_reason?: string; pickup_code?: string }
   try {
     body = await request.json()
   } catch {
@@ -67,6 +81,20 @@ export async function PUT(request: Request) {
 
   if (!body.id || !body.status) {
     return NextResponse.json({ success: false, error: 'ID y status requeridos' }, { status: 400 })
+  }
+
+  // Para validar pickup por código
+  if (body.status === 'validate_pickup') {
+    const supabase = await createClient()
+    const { data: result, error } = await supabase.rpc('validate_pickup', {
+      p_pickup_code: body.pickup_code || '',
+    })
+    if (error) return NextResponse.json({ success: false, error: error.message }, { status: 500 })
+    const rpcResult = result as { success: boolean; error?: string }
+    if (!rpcResult.success) {
+      return NextResponse.json({ success: false, error: rpcResult.error || 'Código inválido' }, { status: 400 })
+    }
+    return NextResponse.json({ success: true, data: rpcResult })
   }
 
   const validStatuses = ['pending', 'confirmed', 'cancelled', 'picked_up', 'no_show']

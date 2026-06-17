@@ -46,8 +46,8 @@ export default function ReservationFilters({
           onClick={() => setShowFilters(!showFilters)}
           className="flex items-center gap-2 px-4 py-2 rounded-xl bg-dark-muted border border-dark-border hover:border-primary/30 transition-all"
         >
-          <Filter className="w-4 h-4 text-gray-400" />
-          <span className="text-sm text-gray-400">Filtros</span>
+          <Filter className="w-4 h-4 dark:text-gray-400 text-gray-500" />
+          <span className="text-sm dark:text-gray-400 text-gray-500">Filtros</span>
           {statusFilter !== 'all' && <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />}
         </button>
       </div>
