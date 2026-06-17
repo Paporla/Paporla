@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback } from 'react'
 import { supabaseBrowser } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import { ROLES, isAdmin } from '@/lib/constants/roles'
-import type { UserProfile, UserRole, SignUpRole, ShopData } from '@/types/user'
+import type { UserProfile, SignUpRole, ShopData } from '@/types/user'
 
 export function useAuth() {
   const supabase = supabaseBrowser()
