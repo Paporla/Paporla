@@ -1,6 +1,6 @@
 'use client'
 
-import { Image, AlertTriangle } from 'lucide-react'
+import { Image as ImageIcon, AlertTriangle } from 'lucide-react'
 import ImageUpload from '@/components/ui/ImageUpload'
 
 interface ProfileImagesFormProps {
@@ -21,7 +21,7 @@ export default function ProfileImagesForm({
   return (
     <div className="dark:bg-black/40 bg-white dark:backdrop-blur-sm backdrop-blur-sm border dark:border-white/10 border-gray-200 rounded-2xl p-6 lg:p-8 space-y-8">
       <h2 className="text-lg font-bold dark:text-white text-gray-900 flex items-center gap-2">
-        <Image className="w-5 h-5 text-primary" />
+        <ImageIcon className="w-5 h-5 text-primary" />
         Imágenes del comercio
       </h2>
 

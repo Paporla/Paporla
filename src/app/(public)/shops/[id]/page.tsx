@@ -22,7 +22,7 @@ export default function ShopDetailPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen dark:bg-gradient-to-br dark:from-[#0a0a1a] dark:via-[#0f0f1a] dark:to-[#020205] bg-gray-50">
+      <div className="min-h-screen">
         <div className="container mx-auto px-4 py-12">
           <PageLoader />
         </div>
@@ -32,7 +32,7 @@ export default function ShopDetailPage() {
 
   if (error || !shop) {
     return (
-      <div className="min-h-screen dark:bg-gradient-to-br dark:from-[#0a0a1a] dark:via-[#0f0f1a] dark:to-[#020205] bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-red-500/10 flex items-center justify-center">
             <Store className="w-10 h-10 text-red-400" />
@@ -45,7 +45,7 @@ export default function ShopDetailPage() {
   }
 
   return (
-    <div className="min-h-screen dark:bg-gradient-to-br dark:from-[#0a0a1a] dark:via-[#0f0f1a] dark:to-[#020205] bg-gray-50 pb-12">
+    <div className="min-h-screen pb-12">
       <ShopDetailHeader
         shop={{
           ...shop,

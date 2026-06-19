@@ -111,6 +111,7 @@ export default function BusinessProfilePage() {
     }
 
     loadShop()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user])
 
   useEffect(() => {

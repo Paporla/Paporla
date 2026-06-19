@@ -111,6 +111,7 @@ export default function AlertsPanel() {
     }
 
     loadAlerts()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   if (loading) {

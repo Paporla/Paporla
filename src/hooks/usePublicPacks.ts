@@ -43,6 +43,7 @@ export function usePublicPacks() {
 
   useEffect(() => {
     loadPacks()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const filteredPacks = useMemo(() => {

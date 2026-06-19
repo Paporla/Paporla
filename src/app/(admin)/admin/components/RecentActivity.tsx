@@ -65,6 +65,7 @@ export default function RecentActivity() {
     }
 
     loadActivities()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [showAll])
 
   const displayedActivities = showAll ? activities : activities.slice(0, 5)

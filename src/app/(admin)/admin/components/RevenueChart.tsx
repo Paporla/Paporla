@@ -80,6 +80,7 @@ export default function RevenueChart() {
     }
 
     loadRevenueData()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   if (loading) {
