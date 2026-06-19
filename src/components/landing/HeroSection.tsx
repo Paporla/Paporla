@@ -2,7 +2,7 @@
 
 import { motion } from 'framer-motion'
 import Link from 'next/link'
-import { ArrowRight, Sparkles, ShieldCheck, RefreshCw } from 'lucide-react'
+import { ArrowRight, ShieldCheck, RefreshCw } from 'lucide-react'
 import HowItWorksSection from './HowItWorksSection'
 
 export default function HeroSection() {
@@ -23,16 +23,6 @@ export default function HeroSection() {
             transition={{ duration: 0.6 }}
             className="text-left"
           >
-            <motion.div
-              initial={{ opacity: 0, scale: 0 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ type: 'spring', delay: 0.2 }}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/30 text-primary mb-6"
-            >
-              <Sparkles className="w-4 h-4" />
-              <span className="text-sm font-medium">Lanzando en Chile - 2026</span>
-            </motion.div>
-
             <motion.h1
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}

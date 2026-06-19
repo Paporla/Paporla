@@ -68,7 +68,7 @@ export default function TodayPickups({ shopId }: Props) {
       return pickup
     },
     onSuccess: (pickup) => {
-      setToast({ message: 'Recogida validada para ' + pickup.user_name, type: 'success' })
+      setToast({ message: `Recogida validada para ${pickup.user_name}`, type: 'success' })
       queryClient.invalidateQueries({ queryKey: ['today-pickups', shopId] })
     },
     onError: (err: Error) => {

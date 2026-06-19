@@ -2,7 +2,7 @@
 
 import { motion, useInView } from 'framer-motion'
 import { useRef } from 'react'
-import { Eye, Package, DollarSign, TrendingUp } from 'lucide-react'
+import { Package, DollarSign, TrendingUp } from 'lucide-react'
 import AnimatedCounter from '@/components/ui/AnimatedCounter'
 
 const stats = [
@@ -43,10 +43,6 @@ export default function StatsSection() {
           viewport={{ once: true }}
           className="text-center mb-12"
         >
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 text-primary mb-4">
-            <Eye className="w-4 h-4" />
-            <span className="text-sm font-medium">El problema es real</span>
-          </div>
           <h2 className="text-3xl md:text-4xl font-bold dark:text-white text-gray-900">
             El mundo pierde comida a <span className="text-primary">escala masiva</span>
           </h2>

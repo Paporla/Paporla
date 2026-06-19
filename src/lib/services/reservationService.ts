@@ -182,7 +182,7 @@ async function notifyCancellation(
   notifications.push({
     user_id: updated.user_id,
     type: 'cancellation',
-    message: `Tu reserva para "${pack?.title || 'Pack'}" fue cancelada${cancelReason ? ': ' + cancelReason : ''}`,
+    message: `Tu reserva para "${pack?.title || 'Pack'}" fue cancelada${cancelReason ? `: ${cancelReason}` : ''}`,
     reservation_id: updated.id,
     is_read: false,
     sent_at: new Date().toISOString(),

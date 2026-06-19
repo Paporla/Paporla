@@ -35,7 +35,7 @@ export default function ProfileLocationForm({
         setLocating(false)
       },
       (err) => {
-        alert('Error al detectar ubicación: ' + err.message)
+        alert(`Error al detectar ubicación: ${err.message}`)
         setLocating(false)
       },
     )

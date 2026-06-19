@@ -65,7 +65,7 @@ export default function ShopDetailPacks({ packs, shopName: _shopName, shopAddres
 
           const pickupTime =
             pack.pickup_start_time && pack.pickup_end_time
-              ? pack.pickup_start_time.slice(0, 5) + ' - ' + pack.pickup_end_time.slice(0, 5)
+              ? `${pack.pickup_start_time.slice(0, 5)} - ${pack.pickup_end_time.slice(0, 5)}`
               : null
 
           const isLowStock = pack.remaining_stock <= 3
@@ -78,7 +78,7 @@ export default function ShopDetailPacks({ packs, shopName: _shopName, shopAddres
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: idx * 0.08 }}
             >
-              <Link href={'/packs/' + pack.id}>
+              <Link href={`/packs/${pack.id}`}>
                 <div className="group dark:bg-black/40 bg-white backdrop-blur-sm dark:border-white/10 border-gray-200 hover:border-primary/30 rounded-2xl overflow-hidden transition-all duration-300 h-full">
                   {/* Imagen */}
                   <div className="relative h-36 md:h-44 overflow-hidden dark:bg-[#0a0a1a] bg-gray-100">

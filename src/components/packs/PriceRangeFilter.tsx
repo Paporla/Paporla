@@ -89,14 +89,14 @@ export default function PriceRangeFilter({
         <div className="relative flex justify-between mt-2">
           <motion.div
             className="text-xs text-gray-600 dark:text-gray-400"
-            animate={{ x: (localMin / maxLimit) * 100 + '%' }}
+            animate={{ x: `${(localMin / maxLimit) * 100}%` }}
             transition={{ type: 'spring', stiffness: 300, damping: 30 }}
           >
             {formatPrice(localMin)}
           </motion.div>
           <motion.div
             className="text-xs text-gray-600 dark:text-gray-400"
-            animate={{ x: (localMax / maxLimit) * 100 - 100 + '%' }}
+            animate={{ x: `${(localMax / maxLimit) * 100 - 100}%` }}
             transition={{ type: 'spring', stiffness: 300, damping: 30 }}
           >
             {formatPrice(localMax)}

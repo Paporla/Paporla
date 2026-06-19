@@ -69,9 +69,9 @@ const formatTime = (date: string) => {
   const hours = Math.floor(minutes / 60)
   const days = Math.floor(hours / 24)
   if (minutes < 1) return 'Ahora'
-  if (minutes < 60) return 'Hace ' + minutes + ' min'
-  if (hours < 24) return 'Hace ' + hours + ' h'
-  return 'Hace ' + days + ' d'
+  if (minutes < 60) return `Hace ${minutes} min`
+  if (hours < 24) return `Hace ${hours} h`
+  return `Hace ${days} d`
 }
 
 export default function AlertsPanel() {
@@ -152,10 +152,10 @@ export default function AlertsPanel() {
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: i * 0.05 }}
-                className={styles.bg + ' ' + styles.border + ' border rounded-xl p-4 flex items-start gap-3'}
+                className={`${styles.bg} ${styles.border} border rounded-xl p-4 flex items-start gap-3`}
               >
-                <div className={'p-2 rounded-lg ' + styles.iconBg + ' flex-shrink-0'}>
-                  <Icon className={'w-4 h-4 ' + styles.iconColor} />
+                <div className={`p-2 rounded-lg ${styles.iconBg} flex-shrink-0`}>
+                  <Icon className={`w-4 h-4 ${styles.iconColor}`} />
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium dark:text-white text-gray-900">{alert.title}</p>
@@ -164,13 +164,9 @@ export default function AlertsPanel() {
                     {alert.action && alert.actionLink && (
                       <a
                         href={alert.actionLink}
-                        className={
-                          'text-[10px] font-semibold ' +
-                          styles.actionText +
-                          ' ' +
-                          styles.actionBg +
-                          ' px-3 py-1 rounded-lg transition-colors'
-                        }
+                        className={`text-[10px] font-semibold ${styles.actionText} ${
+                          styles.actionBg
+                        } px-3 py-1 rounded-lg transition-colors`}
                       >
                         {alert.action}
                       </a>

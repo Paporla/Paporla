@@ -118,7 +118,7 @@ export default function PackDetailClient({ initialPack, packId }: Props) {
       return
     }
     if (quantity > pack.remaining_stock) {
-      setError('Solo quedan ' + pack.remaining_stock + ' unidades disponibles')
+      setError(`Solo quedan ${pack.remaining_stock} unidades disponibles`)
       return
     }
     setShowSummary(true)

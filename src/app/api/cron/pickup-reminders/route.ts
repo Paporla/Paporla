@@ -65,7 +65,7 @@ export async function GET(request: Request) {
           .eq('user_id', userId)
           .eq('type', 'pickup_reminder')
           .eq('reservation_id', reservationId)
-          .gte('created_at', today + 'T00:00:00')
+          .gte('created_at', `${today}T00:00:00`)
           .maybeSingle()
 
         if (!existing) {
@@ -107,7 +107,7 @@ export async function GET(request: Request) {
             .eq('user_id', ownerId)
             .eq('type', 'pickup_reminder')
             .eq('reservation_id', reservationId)
-            .gte('created_at', today + 'T00:00:00')
+            .gte('created_at', `${today}T00:00:00`)
             .maybeSingle()
 
           if (!existingShopNotif) {

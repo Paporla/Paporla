@@ -145,7 +145,7 @@ export function useAuth() {
           phone: phone || null,
           shop_name: role === 'comercio' ? shopData?.name || name : null,
         },
-        emailRedirectTo: window.location.origin + '/callback',
+        emailRedirectTo: `${window.location.origin}/callback`,
       },
     })
 
@@ -209,7 +209,7 @@ export function useAuth() {
     const notifications = admins.map((admin) => ({
       userId: admin.id,
       type: 'new_user' as const,
-      message: `${name || 'Usuario'} se registro como ${role === ROLES.COMERCIO ? 'comercio' : 'usuario'}${role === ROLES.COMERCIO && shopName ? ' - ' + shopName : ''}`,
+      message: `${name || 'Usuario'} se registro como ${role === ROLES.COMERCIO ? 'comercio' : 'usuario'}${role === ROLES.COMERCIO && shopName ? ` - ${shopName}` : ''}`,
     }))
     await sendBatchNotifications(notifications)
   }

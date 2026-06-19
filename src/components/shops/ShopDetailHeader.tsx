@@ -123,7 +123,7 @@ export default function ShopDetailHeader({ shop }: ShopDetailHeaderProps) {
               )}
               {shop.website && (
                 <a
-                  href={shop.website.startsWith('http') ? shop.website : 'https://' + shop.website}
+                  href={shop.website.startsWith('http') ? shop.website : `https://${shop.website}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-1 px-3 py-1.5 dark:bg-white/5 bg-gray-100 dark:border-white/10 border-gray-200 rounded-lg dark:text-gray-400 text-gray-600 text-xs hover:text-primary hover:border-primary/30 transition-all"

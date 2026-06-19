@@ -23,12 +23,12 @@ export function welcomeTemplate(name: string) {
 ${infoBlock(
   'Como funciona',
   `
-${stepRow(1, '<strong style="color:#fff;">Explora</strong> packs sorpresa de comercios locales con hasta <strong style="color:' + primary + ';">70% de descuento</strong>')}
+${stepRow(1, `<strong style="color:#fff;">Explora</strong> packs sorpresa de comercios locales con hasta <strong style="color:${primary};">70% de descuento</strong>`)}
 ${stepRow(2, '<strong style="color:#fff;">Reserva</strong> el que mas te guste en segundos, sin complicaciones')}
 ${stepRow(3, '<strong style="color:#fff;">Recoge</strong> tu pedido en el horario indicado y disfruta', true)}
 `,
 )}
-<div style="text-align:center;margin:28px 0 8px;">${ctaButton(baseUrl + '/packs', 'Explorar packs disponibles')}</div>`)
+<div style="text-align:center;margin:28px 0 8px;">${ctaButton(`${baseUrl}/packs`, 'Explorar packs disponibles')}</div>`)
 }
 
 // ============================================
@@ -60,7 +60,7 @@ ${data.pickupTime ? detailItem('Horario', data.pickupTime) : ''}
 ${detailItem('Total pagado', data.price, true)}
 `)}
 <p style="color:#666;font-size:12px;line-height:1.6;text-align:center;margin:16px 0 20px;">Recuerda pasar dentro del horario indicado.<br>Si no puedes asistir, cancela desde tu panel.</p>
-<div style="text-align:center;margin:8px 0;">${ctaButton(baseUrl + '/dashboard', 'Ver mis reservas')}</div>`)
+<div style="text-align:center;margin:8px 0;">${ctaButton(`${baseUrl}/dashboard`, 'Ver mis reservas')}</div>`)
 }
 
 // ============================================
@@ -104,5 +104,5 @@ ${detailItem('Fecha limite', data.pickupDate, true)}
 ${data.pickupTime ? detailItem('Horario', data.pickupTime) : ''}
 `)}
 <p style="color:#666;font-size:12px;line-height:1.6;text-align:center;margin:16px 0 20px;">Si no puedes asistir, cancela desde tu panel<br>para que otro usuario pueda disfrutarlo.</p>
-<div style="text-align:center;margin:8px 0;">${ctaButton(baseUrl + '/dashboard', 'Ver detalles')}</div>`)
+<div style="text-align:center;margin:8px 0;">${ctaButton(`${baseUrl}/dashboard`, 'Ver detalles')}</div>`)
 }

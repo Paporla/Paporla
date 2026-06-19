@@ -73,14 +73,12 @@ export default function AdminQuickActions() {
           >
             <Link
               href={action.href}
-              className={
-                'flex items-center gap-3 p-4 rounded-xl ' +
-                action.bg +
-                ' dark:hover:bg-white/10 hover:bg-gray-200 dark:border-white/5 border-gray-200 dark:hover:border-white/20 hover:border-gray-300 transition-all duration-200 group text-left w-full'
-              }
+              className={`flex items-center gap-3 p-4 rounded-xl ${
+                action.bg
+              } dark:hover:bg-white/10 hover:bg-gray-200 dark:border-white/5 border-gray-200 dark:hover:border-white/20 hover:border-gray-300 transition-all duration-200 group text-left w-full`}
             >
               <div className="p-2 rounded-lg dark:bg-black/50 bg-gray-200 group-hover:scale-110 transition-transform">
-                <action.icon className={'w-4 h-4 ' + action.color} />
+                <action.icon className={`w-4 h-4 ${action.color}`} />
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">

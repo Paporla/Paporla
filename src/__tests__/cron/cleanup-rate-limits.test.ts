@@ -7,7 +7,7 @@ vi.mock('@/lib/supabase/admin', () => ({
   validateCronRequest: (request: Request) => {
     const authHeader = request.headers.get('authorization')
     const secret = process.env.CRON_SECRET
-    return !!(secret && authHeader === 'Bearer ' + secret)
+    return !!(secret && authHeader === `Bearer ${secret}`)
   },
 }))
 

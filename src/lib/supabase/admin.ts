@@ -20,5 +20,5 @@ export function validateCronRequest(request: Request): boolean {
     return false
   }
 
-  return authHeader === 'Bearer ' + cronSecret
+  return authHeader === `Bearer ${cronSecret}`
 }

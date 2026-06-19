@@ -43,7 +43,7 @@ export default function StatsSummaryCards({ summary, growth }: Props) {
           >
             <Card glass className="p-5">
               <div className="flex items-start justify-between mb-3">
-                <div className="p-2.5 rounded-xl" style={{ backgroundColor: card.color + '20' }}>
+                <div className="p-2.5 rounded-xl" style={{ backgroundColor: `${card.color}20` }}>
                   <card.icon className="w-5 h-5" style={{ color: card.color }} />
                 </div>
                 {growthVal !== undefined && growthVal !== 0 && (

@@ -55,7 +55,7 @@ export default function Breadcrumbs() {
 
   let currentPath = ''
   for (const segment of pathSegments) {
-    currentPath += '/' + segment
+    currentPath += `/${segment}`
 
     if (isDynamicSegment(segment)) {
       breadcrumbs.push({ href: currentPath, label: 'Detalle' })

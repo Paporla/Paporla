@@ -16,7 +16,7 @@ export default function ShopDetailPage() {
 
   useEffect(() => {
     if (shop?.name) {
-      document.title = shop.name + ' | Paporla'
+      document.title = `${shop.name} | Paporla`
     }
   }, [shop?.name])
 

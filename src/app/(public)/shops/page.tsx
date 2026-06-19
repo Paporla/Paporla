@@ -38,7 +38,7 @@ export default function ShopsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen dark:bg-black bg-gray-50">
+      <div className="min-h-screen">
         <div className="container mx-auto px-4 py-12">
           <div className="animate-pulse">
             <div className="h-8 w-48 dark:bg-gray-800 bg-gray-200 rounded mb-2 mx-auto" />
@@ -66,7 +66,7 @@ export default function ShopsPage() {
   }
 
   return (
-    <div className="min-h-screen dark:bg-black bg-gray-50">
+    <div className="min-h-screen">
       {/* HEADER */}
       <div className="relative overflow-hidden bg-gradient-to-br from-primary/5 via-transparent to-secondary/5 pt-20 pb-12">
         <div className="absolute top-20 left-10 w-64 h-64 bg-primary/10 rounded-full blur-3xl animate-pulse" />

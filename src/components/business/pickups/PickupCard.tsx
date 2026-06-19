@@ -61,11 +61,7 @@ export default function PickupCard({ pickup, index, validating, onValidate }: Pr
         setError('Ventana de recogida expirada')
       } else {
         setError(
-          'Aun no es la hora (' +
-            pickup.pickup_start_time?.slice(0, 5) +
-            ' - ' +
-            pickup.pickup_end_time?.slice(0, 5) +
-            ')',
+          `Aun no es la hora (${pickup.pickup_start_time?.slice(0, 5)} - ${pickup.pickup_end_time?.slice(0, 5)})`,
         )
       }
       return
@@ -95,14 +91,13 @@ export default function PickupCard({ pickup, index, validating, onValidate }: Pr
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: 20, height: 0, marginBottom: 0 }}
       transition={{ delay: index * 0.05 }}
-      className={
-        'dark:bg-gradient-to-r dark:from-white/5 from-gray-50 to-transparent border rounded-xl p-4 transition-all ' +
-        (afterWindow
+      className={`dark:bg-gradient-to-r dark:from-white/5 from-gray-50 to-transparent border rounded-xl p-4 transition-all ${
+        afterWindow
           ? 'border-red-500/30 dark:bg-red-500/5 bg-red-500/5'
           : inWindow
             ? 'border-primary/30'
-            : 'dark:border-white/10 border-gray-200')
-      }
+            : 'dark:border-white/10 border-gray-200'
+      }`}
     >
       <div className="flex items-start justify-between gap-4">
         <div className="flex-1 min-w-0">
@@ -183,7 +178,7 @@ export default function PickupCard({ pickup, index, validating, onValidate }: Pr
             size="sm"
             onClick={handleStart}
             disabled={validating === pickup.id || afterWindow}
-            className={'flex items-center gap-1 ' + (afterWindow ? 'opacity-50 cursor-not-allowed' : '')}
+            className={`flex items-center gap-1 ${afterWindow ? 'opacity-50 cursor-not-allowed' : ''}`}
           >
             <CheckCircle className="w-4 h-4" /> Validar recogida
           </Button>

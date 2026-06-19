@@ -72,7 +72,7 @@ export default function ShopDetailInfo({ shop, packsCount }: ShopDetailInfoProps
           )}
 
           {shop.phone && (
-            <a href={'tel:' + shop.phone} className="flex items-center gap-3 text-sm group">
+            <a href={`tel:${shop.phone}`} className="flex items-center gap-3 text-sm group">
               <Phone className="w-4 h-4 text-primary flex-shrink-0" />
               <span className="dark:text-gray-400 text-gray-600 group-hover:text-primary transition-colors">
                 {shop.phone}
@@ -82,7 +82,7 @@ export default function ShopDetailInfo({ shop, packsCount }: ShopDetailInfoProps
 
           {shop.website && (
             <a
-              href={shop.website.startsWith('http') ? shop.website : 'https://' + shop.website}
+              href={shop.website.startsWith('http') ? shop.website : `https://${shop.website}`}
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-3 text-sm group"
@@ -96,7 +96,7 @@ export default function ShopDetailInfo({ shop, packsCount }: ShopDetailInfoProps
 
           {shop.instagram && (
             <a
-              href={'https://instagram.com/' + shop.instagram.replace('@', '')}
+              href={`https://instagram.com/${shop.instagram.replace('@', '')}`}
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-3 text-sm group"
@@ -174,13 +174,12 @@ export default function ShopDetailInfo({ shop, packsCount }: ShopDetailInfoProps
                     return (
                       <div
                         key={day}
-                        className={
-                          'flex items-center justify-between py-2 px-3 rounded-lg text-sm ' +
-                          (isToday ? 'bg-primary/5 border border-primary/10' : '')
-                        }
+                        className={`flex items-center justify-between py-2 px-3 rounded-lg text-sm ${
+                          isToday ? 'bg-primary/5 border border-primary/10' : ''
+                        }`}
                       >
                         <span
-                          className={'font-medium ' + (isToday ? 'text-primary' : 'dark:text-gray-400 text-gray-600')}
+                          className={`font-medium ${isToday ? 'text-primary' : 'dark:text-gray-400 text-gray-600'}`}
                         >
                           {day}
                         </span>
@@ -189,7 +188,7 @@ export default function ShopDetailInfo({ shop, packsCount }: ShopDetailInfoProps
                             isToday ? 'dark:text-white text-gray-900 font-medium' : 'dark:text-gray-500 text-gray-400'
                           }
                         >
-                          {h?.closed ? 'Cerrado' : (h?.open || '--:--') + ' - ' + (h?.close || '--:--')}
+                          {h?.closed ? 'Cerrado' : `${h?.open || '--:--'} - ${h?.close || '--:--'}`}
                         </span>
                       </div>
                     )
@@ -205,7 +204,7 @@ export default function ShopDetailInfo({ shop, packsCount }: ShopDetailInfoProps
       {shop.latitude && shop.longitude && (
         <div className="border-t dark:border-white/5 border-gray-200 pt-4">
           <a
-            href={'https://www.google.com/maps?q=' + shop.latitude + ',' + shop.longitude}
+            href={`https://www.google.com/maps?q=${shop.latitude},${shop.longitude}`}
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center justify-center gap-2 py-3 px-4 bg-primary/10 border border-primary/20 hover:bg-primary/20 rounded-xl text-primary text-sm font-medium transition-all w-full"
