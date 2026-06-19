@@ -105,7 +105,7 @@ export default function ShopDetailHeader({ shop }: ShopDetailHeaderProps) {
 
             {/* Info chips */}
             <div className="flex flex-wrap gap-2">
-              {(shop.address || shop.city) && (
+              {(shop.address ?? shop.city) && (
                 <span className="inline-flex items-center gap-1 px-3 py-1.5 dark:bg-white/5 bg-gray-100 dark:border-white/10 border-gray-200 rounded-lg dark:text-gray-400 text-gray-600 text-xs">
                   <MapPin className="w-3.5 h-3.5 text-primary" />
                   {shop.address}

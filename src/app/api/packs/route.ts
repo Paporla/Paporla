@@ -19,7 +19,7 @@ export async function GET(request: Request) {
     searchParams.get('id') || undefined,
     searchParams.get('shopId') || undefined,
   )) as PackResult
-  if (result.error) return NextResponse.json({ success: false, error: result.error }, { status: result.status || 500 })
+  if (result.error) return NextResponse.json({ success: false, error: result.error }, { status: result.status ?? 500 })
   if (searchParams.get('id')) return NextResponse.json({ success: true, pack: result.data }, { headers: cacheHeaders })
   return NextResponse.json({ success: true, packs: result.data }, { headers: cacheHeaders })
 }
@@ -40,13 +40,13 @@ export async function POST(request: Request) {
 
   const parsed = packSchema.safeParse(body)
   if (!parsed.success) {
-    const firstError = parsed.error.errors[0]?.message || 'Datos inválidos'
+    const firstError = parsed.error.errors[0]?.message ?? 'Datos inválidos'
     return NextResponse.json({ success: false, error: firstError }, { status: 400 })
   }
 
   const result = (await createPack(user.id, body)) as PackResult
-  if (result.error) return NextResponse.json({ success: false, error: result.error }, { status: result.status || 500 })
-  return NextResponse.json({ success: true, pack: result.data }, { status: result.status || 201 })
+  if (result.error) return NextResponse.json({ success: false, error: result.error }, { status: result.status ?? 500 })
+  return NextResponse.json({ success: true, pack: result.data }, { status: result.status ?? 201 })
 }
 
 export async function PUT(request: Request) {
@@ -74,7 +74,7 @@ export async function PUT(request: Request) {
 
   const updateResult = (await updatePack(user.id, filteredBody)) as PackResult
   if (updateResult.error)
-    return NextResponse.json({ success: false, error: updateResult.error }, { status: updateResult.status || 500 })
+    return NextResponse.json({ success: false, error: updateResult.error }, { status: updateResult.status ?? 500 })
   return NextResponse.json({ success: true, pack: updateResult.data })
 }
 
@@ -91,6 +91,6 @@ export async function DELETE(request: Request) {
 
   const deleteResult = (await deletePack(user.id, id)) as PackResult & { data?: { success: boolean } }
   if (deleteResult.error)
-    return NextResponse.json({ success: false, error: deleteResult.error }, { status: deleteResult.status || 500 })
+    return NextResponse.json({ success: false, error: deleteResult.error }, { status: deleteResult.status ?? 500 })
   return NextResponse.json({ success: true, message: 'Pack eliminado' })
 }

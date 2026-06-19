@@ -57,8 +57,8 @@ export default function RevenueChart() {
         const formattedData = data.map((item: RevenueData) => ({
           ...item,
           month: new Date(item.month).toLocaleDateString('es', { month: 'short' }),
-          total_revenue_cents: item.total_revenue_cents || 0,
-          total_commissions_cents: item.total_commissions_cents || 0,
+          total_revenue_cents: item.total_revenue_cents ?? 0,
+          total_commissions_cents: item.total_commissions_cents ?? 0,
         }))
         setData(formattedData)
 

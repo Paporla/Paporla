@@ -69,7 +69,7 @@ export default function BusinessSidebar() {
         <div className="flex items-center gap-2">
           <Store className="w-4 h-4 text-primary" />
           <span className="text-sm font-medium dark:text-white text-gray-900 truncate">
-            {user?.name || 'Mi Comercio'}
+            {user?.name ?? 'Mi Comercio'}
           </span>
         </div>
         <div className="flex items-center gap-1 mt-1">

@@ -84,13 +84,13 @@ export default function ProfilePreview({ formData, hours: _hours, onBack }: Prof
               </div>
             )}
             <div>
-              <h3 className="font-bold dark:text-white text-gray-900">{formData.name || 'Mi Comercio'}</h3>
-              <p className="text-xs dark:text-gray-500 text-gray-400">{formData.city || 'Sin ciudad'}</p>
+              <h3 className="font-bold dark:text-white text-gray-900">{formData.name ?? 'Mi Comercio'}</h3>
+              <p className="text-xs dark:text-gray-500 text-gray-400">{formData.city ?? 'Sin ciudad'}</p>
             </div>
           </div>
 
           <p className="text-sm dark:text-gray-400 text-gray-600 leading-relaxed">
-            {formData.description || 'Sin descripcion'}
+            {formData.description ?? 'Sin descripcion'}
           </p>
 
           <div className="space-y-2 text-xs dark:text-gray-500 text-gray-400">

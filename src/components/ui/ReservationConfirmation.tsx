@@ -95,7 +95,7 @@ export default function ReservationConfirmation({ reservation, onClose }: Reserv
           </div>
 
           {/* Informacion de recogida */}
-          {(reservation.pickup_date || reservation.pickup_start_time) && (
+          {(reservation.pickup_date ?? reservation.pickup_start_time) && (
             <div className="border-t dark:border-gray-700 border-gray-200 pt-4">
               <h3 className="font-semibold dark:text-white text-gray-900 mb-2">Informacion de recogida</h3>
               <div className="space-y-2">
@@ -105,7 +105,7 @@ export default function ReservationConfirmation({ reservation, onClose }: Reserv
                     <span>{new Date(reservation.pickup_date).toLocaleDateString()}</span>
                   </div>
                 )}
-                {(reservation.pickup_start_time || reservation.pickup_end_time) && (
+                {(reservation.pickup_start_time ?? reservation.pickup_end_time) && (
                   <div className="flex items-center gap-2 text-sm dark:text-gray-400 text-gray-600">
                     <Clock className="w-4 h-4 text-primary" />
                     <span>

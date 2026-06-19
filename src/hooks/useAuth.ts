@@ -142,7 +142,7 @@ export function useAuth() {
         data: {
           name,
           role,
-          phone: phone || null,
+          phone: phone ?? null,
           shop_name: role === 'comercio' ? shopData?.name || name : null,
         },
         emailRedirectTo: `${window.location.origin}/callback`,
@@ -159,10 +159,10 @@ export function useAuth() {
       const { error: shopError } = await supabase.from('shops').insert({
         owner_id: data.user.id,
         name: shopData.name,
-        description: shopData.description || null,
-        address: shopData.address || null,
-        city: shopData.city || null,
-        phone: shopData.phone || null,
+        description: shopData.description ?? null,
+        address: shopData.address ?? null,
+        city: shopData.city ?? null,
+        phone: shopData.phone ?? null,
       })
       if (shopError) console.error('[ShopCreation] Error:', shopError)
     }
@@ -209,7 +209,7 @@ export function useAuth() {
     const notifications = admins.map((admin) => ({
       userId: admin.id,
       type: 'new_user' as const,
-      message: `${name || 'Usuario'} se registro como ${role === ROLES.COMERCIO ? 'comercio' : 'usuario'}${role === ROLES.COMERCIO && shopName ? ` - ${shopName}` : ''}`,
+      message: `${name ?? 'Usuario'} se registro como ${role === ROLES.COMERCIO ? 'comercio' : 'usuario'}${role === ROLES.COMERCIO && shopName ? ` - ${shopName}` : ''}`,
     }))
     await sendBatchNotifications(notifications)
   }

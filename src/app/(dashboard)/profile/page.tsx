@@ -26,8 +26,8 @@ export default function ProfilePage() {
   const { user, signOut, getUser } = useAuth()
   const queryClient = useQueryClient()
   const [formData, setFormData] = useState({
-    name: user?.name || '',
-    phone: user?.phone || '',
+    name: user?.name ?? '',
+    phone: user?.phone ?? '',
   })
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
@@ -48,14 +48,14 @@ export default function ProfilePage() {
         .eq('user_id', user.id)
         .eq('status', 'picked_up')
 
-      const completed = (rawReservations || []) as { id: string; total_price_cents: number; pack_id: string }[]
+      const completed = (rawReservations ?? []) as { id: string; total_price_cents: number; pack_id: string }[]
       const packsRescued = completed.length
       const packIds = completed.map((r) => r.pack_id)
       const { data: packs } =
         packIds.length > 0
           ? await supabase.from('packs').select('id, original_price_cents').in('id', packIds)
           : { data: [] }
-      const packPriceMap = new Map((packs || []).map((p) => [p.id, p.original_price_cents]))
+      const packPriceMap = new Map((packs ?? []).map((p) => [p.id, p.original_price_cents]))
       const moneySavedCents = completed.reduce((sum: number, r) => {
         const original = packPriceMap.get(r.pack_id) || r.total_price_cents
         const saved = original - r.total_price_cents
@@ -132,22 +132,22 @@ export default function ProfilePage() {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <Card glass className="p-4 text-center">
           <Package className="w-6 h-6 text-primary mx-auto mb-2" />
-          <p className="text-2xl font-bold dark:text-white text-gray-900">{stats?.packsRescued || 0}</p>
+          <p className="text-2xl font-bold dark:text-white text-gray-900">{stats?.packsRescued ?? 0}</p>
           <p className="text-xs dark:text-gray-500 text-gray-400">Packs rescatados</p>
         </Card>
         <Card glass className="p-4 text-center">
           <DollarSign className="w-6 h-6 text-green-400 mx-auto mb-2" />
-          <p className="text-2xl font-bold dark:text-white text-gray-900">${(stats?.moneySaved || 0).toFixed(0)}</p>
+          <p className="text-2xl font-bold dark:text-white text-gray-900">${(stats?.moneySaved ?? 0).toFixed(0)}</p>
           <p className="text-xs dark:text-gray-500 text-gray-400">Ahorrado</p>
         </Card>
         <Card glass className="p-4 text-center">
           <Leaf className="w-6 h-6 text-green-400 mx-auto mb-2" />
-          <p className="text-2xl font-bold dark:text-white text-gray-900">{stats?.co2Avoided || '0kg'}</p>
+          <p className="text-2xl font-bold dark:text-white text-gray-900">{stats?.co2Avoided ?? '0kg'}</p>
           <p className="text-xs dark:text-gray-500 text-gray-400">CO2 evitado</p>
         </Card>
         <Card glass className="p-4 text-center">
           <Award className="w-6 h-6 text-primary mx-auto mb-2" />
-          <p className="text-2xl font-bold dark:text-white text-gray-900">{stats?.points || 0}</p>
+          <p className="text-2xl font-bold dark:text-white text-gray-900">{stats?.points ?? 0}</p>
           <p className="text-xs dark:text-gray-500 text-gray-400">Puntos</p>
         </Card>
       </div>
@@ -156,20 +156,20 @@ export default function ProfilePage() {
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
             <Award className="w-5 h-5 text-primary" />
-            <h3 className="font-bold dark:text-white text-gray-900">Nivel {stats?.level || 'Aprendiz'}</h3>
+            <h3 className="font-bold dark:text-white text-gray-900">Nivel {stats?.level ?? 'Aprendiz'}</h3>
           </div>
-          <span className="text-xs dark:text-gray-500 text-gray-400">{stats?.points || 0} pts</span>
+          <span className="text-xs dark:text-gray-500 text-gray-400">{stats?.points ?? 0} pts</span>
         </div>
         <div className="h-2 dark:bg-gray-800 bg-gray-200 rounded-full overflow-hidden">
           <div
             className="h-full bg-gradient-to-r from-primary to-primary/60 rounded-full transition-all duration-500"
-            style={{ width: `${Math.min(100, ((stats?.points || 0) / 500) * 100)}%` }}
+            style={{ width: `${Math.min(100, ((stats?.points ?? 0) / 500) * 100)}%` }}
           />
         </div>
         <p className="text-xs dark:text-gray-500 text-gray-400 mt-2">
-          {(stats?.points || 0) >= 500
+          {(stats?.points ?? 0) >= 500
             ? 'Has alcanzado el nivel maximo!'
-            : `Faltan ${500 - (stats?.points || 0)} puntos para llegar a Rescatador Elite`}
+            : `Faltan ${500 - (stats?.points ?? 0)} puntos para llegar a Rescatador Elite`}
         </p>
       </Card>
 
@@ -190,7 +190,7 @@ export default function ProfilePage() {
 
           <Input
             label="Correo electronico"
-            value={user?.email || ''}
+            value={user?.email ?? ''}
             disabled
             icon={<Mail className="w-4 h-4 text-gray-500" />}
             className="opacity-70 cursor-not-allowed"

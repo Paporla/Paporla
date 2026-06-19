@@ -14,7 +14,7 @@ export function useAdminCounts() {
         supabase.from('packs').select('*', { count: 'exact', head: true }),
         supabase.from('reservations').select('*', { count: 'exact', head: true }),
       ])
-      const shops = (shopsResult.data || []) as { verified: boolean; banned: boolean }[]
+      const shops = (shopsResult.data ?? []) as { verified: boolean; banned: boolean }[]
       return {
         users: users.count ?? 0,
         shops: shopsResult.count ?? 0,

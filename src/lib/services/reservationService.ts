@@ -36,7 +36,7 @@ export async function getUserReservations(userId: string, shopId?: string) {
 
   const { data, error } = await query.order('created_at', { ascending: false })
   if (error) return { error: error.message, status: 500 }
-  return { data: data || [] }
+  return { data: data ?? [] }
 }
 
 export async function createReservation(userId: string, body: { pack_id: string; shop_id: string; quantity?: number }) {
@@ -56,7 +56,7 @@ export async function createReservation(userId: string, body: { pack_id: string;
   const result = rpcResult as { success: boolean; reservation_id?: string; pickup_code?: string; error?: string }
 
   if (!result.success) {
-    return { error: result.error || 'Error al crear la reserva', status: 400 }
+    return { error: result.error ?? 'Error al crear la reserva', status: 400 }
   }
 
   const { data: reservation } = await supabase
@@ -89,9 +89,9 @@ async function notifyReservationCreated(userId: string, reservation: Record<stri
 
   if (userProfile?.email) {
     sendReservationConfirmationEmail(userProfile.email, {
-      userName: userProfile.name || 'Usuario',
-      packTitle: pack?.title || 'Pack',
-      shopName: shop?.name || 'Comercio',
+      userName: userProfile.name ?? 'Usuario',
+      packTitle: pack?.title ?? 'Pack',
+      shopName: shop?.name ?? 'Comercio',
       shopAddress: null,
       pickupCode: (reservation.pickup_code as string) || 'XXXXXX',
       pickupDate: (reservation.pickup_date as string) || null,
@@ -104,7 +104,7 @@ async function notifyReservationCreated(userId: string, reservation: Record<stri
     await supabase.from('notifications').insert({
       user_id: shop.owner_id,
       type: 'new_reservation',
-      message: `Nueva reserva de ${userProfile?.name || 'un usuario'} para "${pack?.title || 'Pack'}"`,
+      message: `Nueva reserva de ${userProfile?.name ?? 'un usuario'} para "${pack?.title ?? 'Pack'}"`,
       reservation_id: reservation.id as string,
       is_read: false,
       sent_at: new Date().toISOString(),
@@ -182,7 +182,7 @@ async function notifyCancellation(
   notifications.push({
     user_id: updated.user_id,
     type: 'cancellation',
-    message: `Tu reserva para "${pack?.title || 'Pack'}" fue cancelada${cancelReason ? `: ${cancelReason}` : ''}`,
+    message: `Tu reserva para "${pack?.title ?? 'Pack'}" fue cancelada${cancelReason ? `: ${cancelReason}` : ''}`,
     reservation_id: updated.id,
     is_read: false,
     sent_at: new Date().toISOString(),
@@ -192,7 +192,7 @@ async function notifyCancellation(
     notifications.push({
       user_id: shop.owner_id,
       type: 'user_cancelled',
-      message: `${userProfile?.name || 'Un usuario'} cancelo su reserva para "${pack?.title || 'Pack'}"`,
+      message: `${userProfile?.name ?? 'Un usuario'} cancelo su reserva para "${pack?.title ?? 'Pack'}"`,
       reservation_id: updated.id,
       is_read: false,
       sent_at: new Date().toISOString(),
@@ -208,7 +208,7 @@ async function notifyCancellation(
       notifications.push({
         user_id: admin.id,
         type: 'incidence',
-        message: `Cancelacion con problema: ${userProfile?.name || 'Usuario'} - "${pack?.title || 'Pack'}"`,
+        message: `Cancelacion con problema: ${userProfile?.name ?? 'Usuario'} - "${pack?.title ?? 'Pack'}"`,
         reservation_id: updated.id,
         is_read: false,
         sent_at: new Date().toISOString(),

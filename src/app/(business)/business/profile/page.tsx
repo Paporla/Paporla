@@ -86,24 +86,24 @@ export default function BusinessProfilePage() {
       if (data) {
         setShop(data)
         setFormData({
-          name: data.name || '',
-          description: data.description || '',
-          category: data.category || '',
-          address: data.address || '',
-          city: data.city || '',
-          country: data.country || 'VE',
+          name: data.name ?? '',
+          description: data.description ?? '',
+          category: data.category ?? '',
+          address: data.address ?? '',
+          city: data.city ?? '',
+          country: data.country ?? 'VE',
           latitude: data.latitude ? data.latitude.toString() : '',
           longitude: data.longitude ? data.longitude.toString() : '',
-          phone: data.phone || '',
-          website: data.website || '',
-          instagram: data.instagram || '',
-          logoUrl: data.logo_url || '',
-          coverUrl: data.cover_url || '',
-          verified: data.verified || false,
+          phone: data.phone ?? '',
+          website: data.website ?? '',
+          instagram: data.instagram ?? '',
+          logoUrl: data.logo_url ?? '',
+          coverUrl: data.cover_url ?? '',
+          verified: data.verified ?? false,
         })
         if (data.hours) {
           try {
-            setHours((prev) => ({ ...prev, ...JSON.parse(data.hours || '{}') }))
+            setHours((prev) => ({ ...prev, ...JSON.parse(data.hours ?? '{}') }))
           } catch {}
         }
       }
@@ -135,18 +135,18 @@ export default function BusinessProfilePage() {
       const shopData = {
         owner_id: user!.id,
         name: formData.name,
-        description: formData.description || null,
-        category: formData.category || null,
-        address: formData.address || null,
-        city: formData.city || null,
+        description: formData.description ?? null,
+        category: formData.category ?? null,
+        address: formData.address ?? null,
+        city: formData.city ?? null,
         country: formData.country,
         latitude: formData.latitude ? parseFloat(formData.latitude) : null,
         longitude: formData.longitude ? parseFloat(formData.longitude) : null,
-        phone: formData.phone || null,
-        website: formData.website || null,
-        instagram: formData.instagram || null,
-        logo_url: formData.logoUrl || null,
-        cover_url: formData.coverUrl || null,
+        phone: formData.phone ?? null,
+        website: formData.website ?? null,
+        instagram: formData.instagram ?? null,
+        logo_url: formData.logoUrl ?? null,
+        cover_url: formData.coverUrl ?? null,
         hours: JSON.stringify(hours),
       }
 
@@ -159,7 +159,7 @@ export default function BusinessProfilePage() {
         setShop(newShop)
       }
 
-      setToast({ message: toastMessage || 'Perfil actualizado correctamente', type: 'success' })
+      setToast({ message: toastMessage ?? 'Perfil actualizado correctamente', type: 'success' })
       setIsDirty(false)
     } catch (err: unknown) {
       setToast({ message: err instanceof Error ? err.message : 'Error al guardar los cambios', type: 'error' })
@@ -172,24 +172,24 @@ export default function BusinessProfilePage() {
   const handleDiscard = () => {
     if (shop) {
       setFormData({
-        name: shop.name || '',
-        description: shop.description || '',
-        category: shop.category || '',
-        address: shop.address || '',
-        city: shop.city || '',
-        country: shop.country || 'VE',
+        name: shop.name ?? '',
+        description: shop.description ?? '',
+        category: shop.category ?? '',
+        address: shop.address ?? '',
+        city: shop.city ?? '',
+        country: shop.country ?? 'VE',
         latitude: shop.latitude ? shop.latitude.toString() : '',
         longitude: shop.longitude ? shop.longitude.toString() : '',
-        phone: shop.phone || '',
-        website: shop.website || '',
-        instagram: shop.instagram || '',
-        logoUrl: shop.logo_url || '',
-        coverUrl: shop.cover_url || '',
-        verified: shop.verified || false,
+        phone: shop.phone ?? '',
+        website: shop.website ?? '',
+        instagram: shop.instagram ?? '',
+        logoUrl: shop.logo_url ?? '',
+        coverUrl: shop.cover_url ?? '',
+        verified: shop.verified ?? false,
       })
       if (shop.hours) {
         try {
-          setHours((prev) => ({ ...prev, ...JSON.parse(shop.hours || '{}') }))
+          setHours((prev) => ({ ...prev, ...JSON.parse(shop.hours ?? '{}') }))
         } catch {}
       }
     }

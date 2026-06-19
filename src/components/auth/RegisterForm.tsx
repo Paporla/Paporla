@@ -56,7 +56,7 @@ export default function RegisterForm() {
       email: formData.email,
       password: formData.password,
       name: formData.name,
-      phone: formData.phone || undefined,
+      phone: formData.phone ?? undefined,
       role: formData.role,
       shopName: formData.role === 'comercio' ? formData.shopName : undefined,
     })
@@ -101,7 +101,7 @@ export default function RegisterForm() {
         formData.role,
         formData.phone,
         formData.role === 'comercio'
-          ? { name: formData.shopName, description: null, address: null, city: null, phone: formData.phone || null }
+          ? { name: formData.shopName, description: null, address: null, city: null, phone: formData.phone ?? null }
           : undefined,
       )
     } catch (err) {

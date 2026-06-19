@@ -33,7 +33,7 @@ export default function AdminShopsPage() {
       const { data, error } = await supabase.from('shops').select('*').order('created_at', { ascending: false })
 
       if (error) throw error
-      return (data || []) as Shop[]
+      return (data ?? []) as Shop[]
     },
     staleTime: 30 * 1000,
   })

@@ -28,8 +28,8 @@ export async function GET() {
         uptime: process.uptime(),
         database: 'connected',
         responseTimeMs: Date.now() - start,
-        version: process.env.npm_package_version || '1.0.0',
-        environment: process.env.NODE_ENV || 'development',
+        version: process.env.npm_package_version ?? '1.0.0',
+        environment: process.env.NODE_ENV ?? 'development',
       },
       {
         headers: {

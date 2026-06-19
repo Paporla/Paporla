@@ -26,18 +26,18 @@ export async function GET(request: Request) {
 
     const { data: profile } = await supabase.from('user_profiles').select('role, name').eq('id', user.id).maybeSingle()
 
-    const role = profile?.role || 'user'
+    const role = profile?.role ?? 'user'
 
     // Enviar email de bienvenida (no bloqueante)
     if (user.email) {
-      const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || requestUrl.origin
+      const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? requestUrl.origin
       fetch(`${baseUrl}/api/email`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           type: 'welcome',
           email: user.email,
-          data: { name: profile?.name || 'Usuario' },
+          data: { name: profile?.name ?? 'Usuario' },
         }),
       }).catch((err) => console.error('[Callback] Error welcome email:', err))
     }

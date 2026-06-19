@@ -23,11 +23,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       return {
         title: pack.title,
         description:
-          pack.description ||
+          pack.description ??
           `Pack sorpresa desde $${(pack.price_cents / 100).toFixed(2)} - Rescata comida, ahorra dinero.`,
         openGraph: {
           title: `${pack.title} | Paporla`,
-          description: pack.description || `Pack sorpresa desde $${(pack.price_cents / 100).toFixed(2)}`,
+          description: pack.description ?? `Pack sorpresa desde $${(pack.price_cents / 100).toFixed(2)}`,
         },
       }
     }

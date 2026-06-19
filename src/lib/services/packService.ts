@@ -26,7 +26,7 @@ export async function getPacks(packId?: string, shopId?: string) {
 
   const { data, error } = await query.order('created_at', { ascending: false })
   if (error) return { error: error.message, status: 500 }
-  return { data: data || [] }
+  return { data: data ?? [] }
 }
 
 async function getProfile(userId: string) {

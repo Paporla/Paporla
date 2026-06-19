@@ -53,7 +53,7 @@ export async function POST(request: Request) {
     shopName: (shopData?.name as string) || undefined,
   })
   if (!parsed.success) {
-    const firstError = parsed.error.errors[0]?.message || 'Datos inválidos'
+    const firstError = parsed.error.errors[0]?.message ?? 'Datos inválidos'
     return NextResponse.json({ success: false, error: firstError }, { status: 400 })
   }
 
@@ -65,7 +65,7 @@ export async function POST(request: Request) {
   const { data: authData, error: authError } = await supabase.auth.signUp({
     email: validEmail,
     password: validPassword,
-    options: { data: { name: validName || '', role: userRole } },
+    options: { data: { name: validName ?? '', role: userRole } },
   })
 
   if (authError) {
@@ -79,7 +79,7 @@ export async function POST(request: Request) {
   if (userRole === 'comercio' && shopData) {
     const { error: shopError } = await supabase.from('shops').insert({
       owner_id: authData.user.id,
-      name: String(shopData.name || ''),
+      name: String(shopData.name ?? ''),
       description: shopData.description ? String(shopData.description) : null,
       address: shopData.address ? String(shopData.address) : null,
       city: shopData.city ? String(shopData.city) : null,

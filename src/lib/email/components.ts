@@ -3,11 +3,11 @@
 // ============================================
 
 export const EMAIL_CONFIG = {
-  baseUrl: process.env.NEXT_PUBLIC_SITE_URL || 'https://paporla.com',
-  contactEmail: process.env.NEXT_PUBLIC_CONTACT_EMAIL || 'hola@paporla.com',
+  baseUrl: process.env.NEXT_PUBLIC_SITE_URL ?? 'https://paporla.com',
+  contactEmail: process.env.NEXT_PUBLIC_CONTACT_EMAIL ?? 'hola@paporla.com',
   companyName: 'Paporla',
   companySlogan: 'Rescate Alimentario',
-  companyAddress: process.env.NEXT_PUBLIC_COMPANY_ADDRESS || 'Santiago, Chile',
+  companyAddress: process.env.NEXT_PUBLIC_COMPANY_ADDRESS ?? 'Santiago, Chile',
   currentYear: new Date().getFullYear(),
   socialLinks: {
     instagram: 'https://instagram.com/paporla',

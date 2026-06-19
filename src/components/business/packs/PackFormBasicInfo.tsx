@@ -66,7 +66,7 @@ export default function PackFormBasicInfo({ data, onChange, shopId: _shopId, onE
             step="0.01"
             placeholder="9.99"
             value={data.price_cents / 100}
-            onChange={(e) => update({ price_cents: Math.round(parseFloat(e.target.value || '0') * 100) })}
+            onChange={(e) => update({ price_cents: Math.round(parseFloat(e.target.value ?? '0') * 100) })}
             icon={<DollarSign className="w-4 h-4" />}
             required
           />

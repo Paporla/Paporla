@@ -46,7 +46,7 @@ export default function GeolocationFilter({ onLocationChange, defaultRadius = 10
             `https://nominatim.openstreetmap.org/reverse?format=json&lat=${coords.lat}&lon=${coords.lng}&zoom=10&addressdetails=1`,
           )
           const data = await response.json()
-          const city = data.address?.city || data.address?.town || data.address?.state || 'tu ubicación'
+          const city = data.address?.city ?? data.address?.town ?? data.address?.state ?? 'tu ubicación'
           setLocationName(city)
         } catch (err) {
           console.error('Error en reverse geocoding:', err)

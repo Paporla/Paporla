@@ -32,12 +32,12 @@ export async function GET(request: Request) {
     return NextResponse.json({ success: true, reservation: data })
   }
 
-  const result = (await getUserReservations(user.id, shopId || undefined)) as {
+  const result = (await getUserReservations(user.id, shopId ?? undefined)) as {
     error?: string
     status?: number
     data?: unknown
   }
-  if (result.error) return NextResponse.json({ success: false, error: result.error }, { status: result.status || 500 })
+  if (result.error) return NextResponse.json({ success: false, error: result.error }, { status: result.status ?? 500 })
   return NextResponse.json({ success: true, reservations: result.data })
 }
 
@@ -64,8 +64,8 @@ export async function POST(request: Request) {
     status?: number
     data?: unknown
   }
-  if (result.error) return NextResponse.json({ success: false, error: result.error }, { status: result.status || 500 })
-  return NextResponse.json({ success: true, reservation: result.data }, { status: result.status || 201 })
+  if (result.error) return NextResponse.json({ success: false, error: result.error }, { status: result.status ?? 500 })
+  return NextResponse.json({ success: true, reservation: result.data }, { status: result.status ?? 201 })
 }
 
 export async function PUT(request: Request) {
@@ -87,12 +87,12 @@ export async function PUT(request: Request) {
   if (body.status === 'validate_pickup') {
     const supabase = await createClient()
     const { data: result, error } = await supabase.rpc('validate_pickup', {
-      p_pickup_code: body.pickup_code || '',
+      p_pickup_code: body.pickup_code ?? '',
     })
     if (error) return NextResponse.json({ success: false, error: error.message }, { status: 500 })
     const rpcResult = result as { success: boolean; error?: string }
     if (!rpcResult.success) {
-      return NextResponse.json({ success: false, error: rpcResult.error || 'Código inválido' }, { status: 400 })
+      return NextResponse.json({ success: false, error: rpcResult.error ?? 'Código inválido' }, { status: 400 })
     }
     return NextResponse.json({ success: true, data: rpcResult })
   }
@@ -107,6 +107,6 @@ export async function PUT(request: Request) {
     status?: number
     data?: unknown
   }
-  if (result.error) return NextResponse.json({ success: false, error: result.error }, { status: result.status || 500 })
+  if (result.error) return NextResponse.json({ success: false, error: result.error }, { status: result.status ?? 500 })
   return NextResponse.json({ success: true, reservation: result.data })
 }

@@ -54,11 +54,11 @@ export async function GET(request: Request) {
       return NextResponse.json(
         {
           success: true,
-          results: data || [],
-          total: count || 0,
+          results: data ?? [],
+          total: count ?? 0,
           page,
           pageSize,
-          totalPages: Math.ceil((count || 0) / pageSize),
+          totalPages: Math.ceil((count ?? 0) / pageSize),
         },
         { headers: cacheHeaders },
       )
@@ -108,11 +108,11 @@ export async function GET(request: Request) {
     return NextResponse.json(
       {
         success: true,
-        results: data || [],
-        total: count || 0,
+        results: data ?? [],
+        total: count ?? 0,
         page,
         pageSize,
-        totalPages: Math.ceil((count || 0) / pageSize),
+        totalPages: Math.ceil((count ?? 0) / pageSize),
       },
       { headers: cacheHeaders },
     )

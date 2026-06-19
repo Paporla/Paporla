@@ -58,8 +58,8 @@ export function useNotifications() {
     if (error) {
       setError(error.message)
     } else {
-      setNotifications(data || [])
-      setUnreadCount(data?.filter((n) => !n.is_read).length || 0)
+      setNotifications(data ?? [])
+      setUnreadCount(data?.filter((n) => !n.is_read).length ?? 0)
     }
 
     setLoading(false)

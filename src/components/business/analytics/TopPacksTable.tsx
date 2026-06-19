@@ -34,7 +34,7 @@ export default function TopPacksTable({ packs }: TopPacksTableProps) {
     )
   }
 
-  const maxSold = packs[0]?.totalSold || 1
+  const maxSold = packs[0]?.totalSold ?? 1
 
   return (
     <motion.div

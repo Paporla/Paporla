@@ -119,14 +119,14 @@ export function packToFormData(pack: {
   const tomorrow = new Date(Date.now() + 86400000).toISOString().split('T')[0]
   return {
     title: pack.title,
-    description: pack.description || '',
+    description: pack.description ?? '',
     price_cents: pack.price_cents,
-    original_price_cents: pack.original_price_cents || 0,
+    original_price_cents: pack.original_price_cents ?? 0,
     total_stock: pack.total_stock,
-    pickup_date: pack.pickup_date || tomorrow,
+    pickup_date: pack.pickup_date ?? tomorrow,
     pickup_start_time: pack.pickup_start_time?.slice(0, 5) || '',
     pickup_end_time: pack.pickup_end_time?.slice(0, 5) || '',
-    image_url: pack.image_url || pack.shopLogo || '',
+    image_url: pack.image_url ?? pack.shopLogo ?? '',
     is_active: pack.is_active,
   }
 }
@@ -156,14 +156,14 @@ export function buildPackInsertData(shopId: string, data: PackFormData, isNew: b
     title: data.title.trim(),
     description: data.description.trim() || null,
     price_cents: data.price_cents,
-    original_price_cents: data.original_price_cents || null,
+    original_price_cents: data.original_price_cents ?? null,
     total_stock: data.total_stock,
-    pickup_date: data.pickup_date || null,
-    pickup_start_time: data.pickup_start_time || null,
-    pickup_end_time: data.pickup_end_time || null,
+    pickup_date: data.pickup_date ?? null,
+    pickup_start_time: data.pickup_start_time ?? null,
+    pickup_end_time: data.pickup_end_time ?? null,
     starts_at: startsAt,
     ends_at: endsAt,
-    image_url: data.image_url || null,
+    image_url: data.image_url ?? null,
     is_active: data.is_active,
   }
 

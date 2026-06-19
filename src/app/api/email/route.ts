@@ -15,7 +15,7 @@ function isValidEmail(email: string): boolean {
 }
 
 const resend = new Resend(process.env.RESEND_API_KEY)
-const senderEmail = process.env.RESEND_FROM_EMAIL || 'noreply@paporla.com'
+const senderEmail = process.env.RESEND_FROM_EMAIL ?? 'noreply@paporla.com'
 
 export async function POST(request: Request) {
   try {
@@ -61,7 +61,7 @@ export async function POST(request: Request) {
       )
     }
 
-    const safeData = data || {}
+    const safeData = data ?? {}
 
     let subject = ''
     let html = ''
@@ -70,43 +70,43 @@ export async function POST(request: Request) {
     switch (type) {
       case 'welcome':
         subject = 'Bienvenido a Paporla - Rescate Alimentario'
-        html = welcomeTemplate(String(safeData.name || 'Usuario'))
-        text = `Bienvenido a Paporla, ${String(safeData.name || 'Usuario')}! Gracias por unirte a la comunidad que esta cambiando la forma de alimentarnos. Explora packs disponibles en nuestra web.`
+        html = welcomeTemplate(String(safeData.name ?? 'Usuario'))
+        text = `Bienvenido a Paporla, ${String(safeData.name ?? 'Usuario')}! Gracias por unirte a la comunidad que esta cambiando la forma de alimentarnos. Explora packs disponibles en nuestra web.`
         break
 
       case 'reservation':
-        subject = `Tu reserva de ${String(safeData.packTitle || 'Pack')} esta confirmada - Paporla`
+        subject = `Tu reserva de ${String(safeData.packTitle ?? 'Pack')} esta confirmada - Paporla`
         html = reservationConfirmationTemplate({
-          userName: String(safeData.userName || 'Usuario'),
-          packTitle: String(safeData.packTitle || 'Pack'),
-          shopName: String(safeData.shopName || 'Comercio'),
+          userName: String(safeData.userName ?? 'Usuario'),
+          packTitle: String(safeData.packTitle ?? 'Pack'),
+          shopName: String(safeData.shopName ?? 'Comercio'),
           shopAddress: safeData.shopAddress ? String(safeData.shopAddress) : null,
-          pickupCode: String(safeData.pickupCode || 'XXXXXX'),
+          pickupCode: String(safeData.pickupCode ?? 'XXXXXX'),
           pickupDate: safeData.pickupDate ? String(safeData.pickupDate) : null,
           pickupTime: safeData.pickupTime ? String(safeData.pickupTime) : null,
-          price: String(safeData.price || ''),
+          price: String(safeData.price ?? ''),
         })
-        text = `Tu reserva esta confirmada. Pack: ${String(safeData.packTitle || 'Pack')}. Comercio: ${String(safeData.shopName || 'Comercio')}. Codigo de recogida: ${String(safeData.pickupCode || 'XXXXXX')}.`
+        text = `Tu reserva esta confirmada. Pack: ${String(safeData.packTitle ?? 'Pack')}. Comercio: ${String(safeData.shopName ?? 'Comercio')}. Codigo de recogida: ${String(safeData.pickupCode ?? 'XXXXXX')}.`
         break
 
       case 'password_reset':
         subject = 'Restablece tu contraseña - Paporla'
-        html = passwordResetTemplate(String(safeData.resetLink || ''))
-        text = `Recibimos una solicitud para restablecer tu contraseña. Haz clic en este enlace: ${safeData.resetLink || ''}`
+        html = passwordResetTemplate(String(safeData.resetLink ?? ''))
+        text = `Recibimos una solicitud para restablecer tu contraseña. Haz clic en este enlace: ${safeData.resetLink ?? ''}`
         break
 
       case 'pickup_reminder':
-        subject = `Recuerda recoger tu pack de ${String(safeData.packTitle || 'Pack')} hoy - Paporla`
+        subject = `Recuerda recoger tu pack de ${String(safeData.packTitle ?? 'Pack')} hoy - Paporla`
         html = pickupReminderTemplate({
-          userName: String(safeData.userName || 'Usuario'),
-          packTitle: String(safeData.packTitle || 'Pack'),
-          shopName: String(safeData.shopName || 'Comercio'),
+          userName: String(safeData.userName ?? 'Usuario'),
+          packTitle: String(safeData.packTitle ?? 'Pack'),
+          shopName: String(safeData.shopName ?? 'Comercio'),
           shopAddress: safeData.shopAddress ? String(safeData.shopAddress) : null,
-          pickupCode: String(safeData.pickupCode || 'XXXXXX'),
-          pickupDate: String(safeData.pickupDate || ''),
+          pickupCode: String(safeData.pickupCode ?? 'XXXXXX'),
+          pickupDate: String(safeData.pickupDate ?? ''),
           pickupTime: safeData.pickupTime ? String(safeData.pickupTime) : null,
         })
-        text = `Recuerda recoger tu pack hoy. Pack: ${String(safeData.packTitle || 'Pack')}. Comercio: ${String(safeData.shopName || 'Comercio')}. Codigo: ${String(safeData.pickupCode || 'XXXXXX')}.`
+        text = `Recuerda recoger tu pack hoy. Pack: ${String(safeData.packTitle ?? 'Pack')}. Comercio: ${String(safeData.shopName ?? 'Comercio')}. Codigo: ${String(safeData.pickupCode ?? 'XXXXXX')}.`
         break
     }
 
@@ -127,7 +127,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: false, error: error.message }, { status: 500 })
     }
 
-    console.log(`[Email API Sent] ${type} to:`, email)
+    console.warn(`[Email API Sent] ${type} to:`, email)
     return NextResponse.json({ success: true, data: res })
   } catch (err: unknown) {
     console.error('[Email API Exception]:', err)

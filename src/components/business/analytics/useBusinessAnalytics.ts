@@ -84,7 +84,7 @@ function computeAnalytics(reservations: AnalyticsReservation[], packs: Analytics
   const completed = reservations.filter((r) => r.status === 'picked_up')
   const cancelled = reservations.filter((r) => r.status === 'cancelled')
   const noShows = reservations.filter((r) => r.status === 'no_show' || r.status === 'expired')
-  const totalRevenue = completed.reduce((sum, r) => sum + (r.total_price_cents || 0), 0)
+  const totalRevenue = completed.reduce((sum, r) => sum + (r.total_price_cents ?? 0), 0)
 
   const activePacks = packs.filter((p) => p.is_active && p.remaining_stock > 0).length
 
@@ -110,7 +110,7 @@ function computeAnalytics(reservations: AnalyticsReservation[], packs: Analytics
     reservationTrend.push({ date: dateStr.slice(5), value: dayReservations.length })
     const dayRevenue = dayReservations
       .filter((r) => r.status === 'picked_up')
-      .reduce((sum, r) => sum + (r.total_price_cents || 0), 0)
+      .reduce((sum, r) => sum + (r.total_price_cents ?? 0), 0)
     revenueTrend.push({ date: dateStr.slice(5), value: dayRevenue / 100 })
   }
 
@@ -132,11 +132,11 @@ function computeAnalytics(reservations: AnalyticsReservation[], packs: Analytics
   reservations.forEach((r) => {
     const packId = r.pack_id
     if (!packSales[packId]) {
-      packSales[packId] = { sold: 0, revenue: 0, cancelled: 0, title: r.pack?.title || 'Pack' }
+      packSales[packId] = { sold: 0, revenue: 0, cancelled: 0, title: r.pack?.title ?? 'Pack' }
     }
     if (r.status === 'picked_up') {
       packSales[packId].sold++
-      packSales[packId].revenue += (r.total_price_cents || 0) / 100
+      packSales[packId].revenue += (r.total_price_cents ?? 0) / 100
     }
     if (r.status === 'cancelled') {
       packSales[packId].cancelled++
@@ -179,10 +179,10 @@ function computeAnalytics(reservations: AnalyticsReservation[], packs: Analytics
 
   const thisWeekRev = thisWeek
     .filter((r) => r.status === 'picked_up')
-    .reduce((sum, r) => sum + (r.total_price_cents || 0), 0)
+    .reduce((sum, r) => sum + (r.total_price_cents ?? 0), 0)
   const lastWeekRev = lastWeek
     .filter((r) => r.status === 'picked_up')
-    .reduce((sum, r) => sum + (r.total_price_cents || 0), 0)
+    .reduce((sum, r) => sum + (r.total_price_cents ?? 0), 0)
 
   const weeklyComparison: WeeklyComparison = {
     currentWeek: { reservations: thisWeek.length, revenue: thisWeekRev / 100 },
@@ -223,7 +223,7 @@ export function useBusinessAnalytics() {
         .from('packs')
         .select('id, title, is_active, remaining_stock, price_cents')
         .eq('shop_id', shop!.id)
-      return (data || []) as AnalyticsPack[]
+      return (data ?? []) as AnalyticsPack[]
     },
     enabled: !!shop,
     staleTime: 60 * 1000,
@@ -238,19 +238,19 @@ export function useBusinessAnalytics() {
         .select('*, pack:packs(title)')
         .eq('shop_id', shop!.id)
         .order('created_at', { ascending: true })
-      return (data || []) as AnalyticsReservation[]
+      return (data ?? []) as AnalyticsReservation[]
     },
     enabled: !!shop,
     staleTime: 60 * 1000,
   })
 
   const loading = shopLoading || packsResult.isLoading || reservationsResult.isLoading
-  const packs = packsResult.data || []
-  const rawReservations = reservationsResult.data || []
+  const packs = packsResult.data ?? []
+  const rawReservations = reservationsResult.data ?? []
 
   const computed =
     rawReservations.length > 0
-      ? computeAnalytics(rawReservations, packs, shop?.id || '')
+      ? computeAnalytics(rawReservations, packs, shop?.id ?? '')
       : {
           summary: {
             totalRevenue: 0,

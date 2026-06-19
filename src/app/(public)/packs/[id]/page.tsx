@@ -63,13 +63,13 @@ export default async function PackDetailPage({ params }: Props) {
   }
 
   // JSON-LD para rich results de Google
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://paporla.com'
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://paporla.com'
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'Product',
     name: initialPack.title,
-    description: initialPack.description || `Pack sorpresa de ${initialPack.shop?.name || 'comercio local'}`,
-    image: initialPack.image_url || undefined,
+    description: initialPack.description ?? `Pack sorpresa de ${initialPack.shop?.name ?? 'comercio local'}`,
+    image: initialPack.image_url ?? undefined,
     offers: {
       '@type': 'Offer',
       price: (initialPack.price_cents / 100).toFixed(2),

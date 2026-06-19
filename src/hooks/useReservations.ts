@@ -10,7 +10,7 @@ const RESERVATIONS_QUERY_KEY = 'reservations'
 async function apiFetch<T>(url: string, options?: RequestInit): Promise<T> {
   const response = await fetch(url, options)
   const data = await response.json()
-  if (!data.success) throw new Error(data.error || 'Error en la solicitud')
+  if (!data.success) throw new Error(data.error ?? 'Error en la solicitud')
   return data as T
 }
 
@@ -93,7 +93,7 @@ export function useReservations() {
   return {
     reservations,
     loading: isLoading,
-    error: error?.message || null,
+    error: error?.message ?? null,
     createReservation: createReservation.mutateAsync,
     cancelReservation: cancelReservation.mutateAsync,
     validatePickup: validatePickup.mutateAsync,

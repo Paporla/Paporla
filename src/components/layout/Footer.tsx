@@ -7,9 +7,9 @@ import { motion } from 'framer-motion'
 import { Heart, Mail, MapPin, Clock, Phone, ChevronUp, Shield, FileText, Cookie, Scale } from 'lucide-react'
 
 const FOOTER_CONFIG = {
-  address: process.env.NEXT_PUBLIC_COMPANY_ADDRESS || 'Santiago, Chile',
-  phone: process.env.NEXT_PUBLIC_COMPANY_PHONE || '+56 9 1234 5678',
-  email: process.env.NEXT_PUBLIC_CONTACT_EMAIL || 'hola@paporla.com',
+  address: process.env.NEXT_PUBLIC_COMPANY_ADDRESS ?? 'Santiago, Chile',
+  phone: process.env.NEXT_PUBLIC_COMPANY_PHONE ?? '+56 9 1234 5678',
+  email: process.env.NEXT_PUBLIC_CONTACT_EMAIL ?? 'hola@paporla.com',
   hours: 'Lun - Vie: 9am - 6pm',
 }
 

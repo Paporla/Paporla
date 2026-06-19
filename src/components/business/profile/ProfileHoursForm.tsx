@@ -102,7 +102,7 @@ export default function ProfileHoursForm({ hours, onHoursChange }: ProfileHoursF
                 <span className="dark:text-gray-600 text-gray-400 text-sm">a</span>
                 <input
                   type="time"
-                  value={hours[day]?.close || '18:00'}
+                  value={hours[day]?.close ?? '18:00'}
                   onChange={(e) => updateHours(day, 'close', e.target.value)}
                   className="dark:bg-black/60 bg-gray-50 border dark:border-white/10 border-gray-200 rounded-lg px-3 py-2 text-sm dark:text-white text-gray-900 focus:border-primary focus:outline-none"
                 />

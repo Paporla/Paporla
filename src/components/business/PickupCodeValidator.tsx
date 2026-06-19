@@ -33,7 +33,7 @@ export default function PickupCodeValidator() {
       })
 
       if (rpcError) {
-        setResult({ state: 'error', message: rpcError.message || 'Error al validar el codigo.' })
+        setResult({ state: 'error', message: rpcError.message ?? 'Error al validar el codigo.' })
         setCode('')
         return
       }
@@ -53,10 +53,10 @@ export default function PickupCodeValidator() {
 
       setResult({
         state: 'success',
-        message: data.message || 'Recogida validada exitosamente!',
+        message: data.message ?? 'Recogida validada exitosamente!',
         userName: 'Usuario',
         packTitle: 'Pack',
-        quantity: reservation?.quantity || 1,
+        quantity: reservation?.quantity ?? 1,
       })
       setCode('')
     } catch {

@@ -59,7 +59,7 @@ export default function UserSidebar() {
             <span className="text-primary text-sm font-bold">{user?.name?.charAt(0) || 'U'}</span>
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium dark:text-white text-gray-900 truncate">{user?.name || 'Usuario'}</p>
+            <p className="text-sm font-medium dark:text-white text-gray-900 truncate">{user?.name ?? 'Usuario'}</p>
             <p className="text-[10px] dark:text-gray-500 text-gray-500">{user?.email}</p>
           </div>
         </div>

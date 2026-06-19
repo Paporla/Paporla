@@ -2,7 +2,7 @@ import type { MetadataRoute } from 'next'
 import { createClient } from '@supabase/supabase-js'
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://paporla.com'
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://paporla.com'
 
   // Páginas estáticas
   const staticPages = [
@@ -62,9 +62,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
     const { data: packs } = await supabase.from('packs').select('id, updated_at').eq('is_active', true).limit(100)
 
-    const packPages = (packs || []).map((pack) => ({
+    const packPages = (packs ?? []).map((pack) => ({
       url: `${siteUrl}/packs/${pack.id}`,
-      lastModified: new Date(pack.updated_at || Date.now()),
+      lastModified: new Date(pack.updated_at ?? Date.now()),
       changeFrequency: 'hourly' as const,
       priority: 0.8,
     }))
@@ -72,9 +72,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // Páginas dinámicas: comercios
     const { data: shops } = await supabase.from('shops').select('id, updated_at').limit(100)
 
-    const shopPages = (shops || []).map((shop) => ({
+    const shopPages = (shops ?? []).map((shop) => ({
       url: `${siteUrl}/shops/${shop.id}`,
-      lastModified: new Date(shop.updated_at || Date.now()),
+      lastModified: new Date(shop.updated_at ?? Date.now()),
       changeFrequency: 'weekly' as const,
       priority: 0.7,
     }))

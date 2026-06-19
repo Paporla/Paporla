@@ -85,7 +85,7 @@ export default function ShopCard({ shop, index = 0 }: ShopCardProps) {
 
             <div className="flex items-center gap-1 text-xs dark:text-gray-500 text-gray-400">
               <MapPin className="w-3 h-3" />
-              <span>{shop.city || 'Ubicación no especificada'}</span>
+              <span>{shop.city ?? 'Ubicación no especificada'}</span>
             </div>
           </div>
 

@@ -35,7 +35,7 @@ export function useAdminDashboard() {
             .select('*', { count: 'exact', head: true })
             .gte('created_at', `${day}T00:00:00`)
             .lt('created_at', `${day}T23:59:59`)
-          return { day: day.slice(5), reservations: count || 0 }
+          return { day: day.slice(5), reservations: count ?? 0 }
         }),
       )
       return byDay
@@ -54,7 +54,7 @@ export function useAdminDashboard() {
   }
 
   return {
-    loading: countsQuery.isLoading || chartQuery.isLoading,
+    loading: countsQuery.isLoading ?? chartQuery.isLoading,
     stats: {
       totalUsers: data.users,
       totalShops: data.shops,

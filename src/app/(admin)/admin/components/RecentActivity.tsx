@@ -59,7 +59,7 @@ export default function RecentActivity() {
       if (error) {
         console.error('Error loading activities:', error)
       } else {
-        setActivities(data || [])
+        setActivities(data ?? [])
       }
       setLoading(false)
     }

@@ -27,7 +27,7 @@ export default function UserDashboardPage() {
 
     const totalPacksRescued = completed.length
     const co2Saved = Math.round(totalPacksRescued * 1.2)
-    const moneySavedCents = completed.reduce((sum, r) => sum + (r.total_price_cents || 0), 0)
+    const moneySavedCents = completed.reduce((sum, r) => sum + (r.total_price_cents ?? 0), 0)
     const points = totalPacksRescued * 10
 
     let level = 'Aprendiz'
@@ -40,7 +40,7 @@ export default function UserDashboardPage() {
       id: r.id,
       type: 'reservation' as const,
       title: r.pack.title,
-      description: `${r.shop.name} - ${r.quantity || 1}x`,
+      description: `${r.shop.name} - ${r.quantity ?? 1}x`,
       status: r.status,
       created_at: r.created_at,
       link: '/reservations',
@@ -67,7 +67,7 @@ export default function UserDashboardPage() {
   return (
     <motion.div variants={pageVariants} initial="initial" animate="animate" className="space-y-8 pb-8">
       <UserWelcomeBanner
-        userName={user?.name || 'Usuario'}
+        userName={user?.name ?? 'Usuario'}
         packsRescued={stats.totalPacksRescued}
         level={stats.level}
         points={stats.points}

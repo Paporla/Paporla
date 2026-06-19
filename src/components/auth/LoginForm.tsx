@@ -56,9 +56,7 @@ export default function LoginForm() {
       const errors: { email?: string; password?: string } = {}
       result.error.issues.forEach((issue) => {
         const field = issue.path[0] as keyof typeof errors
-        if (!errors[field]) {
-          errors[field] = issue.message
-        }
+        errors[field] ??= issue.message
       })
       setFieldErrors(errors)
       return false

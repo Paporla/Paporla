@@ -110,7 +110,7 @@ export async function POST(request: Request) {
         user_id: userId,
         type,
         message,
-        reservation_id: reservationId || null,
+        reservation_id: reservationId ?? null,
         is_read: false,
         sent_at: new Date().toISOString(),
       })
@@ -199,7 +199,7 @@ export async function PUT(request: Request) {
         user_id: notif.userId,
         type: notif.type,
         message: notif.message,
-        reservation_id: notif.reservationId || null,
+        reservation_id: notif.reservationId ?? null,
         is_read: false,
         sent_at: new Date().toISOString(),
       })

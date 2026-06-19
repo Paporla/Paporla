@@ -29,7 +29,7 @@ export const metadata: Metadata = {
   authors: [{ name: 'Paporla', url: 'https://paporla.com' }],
   creator: 'Paporla',
   publisher: 'Paporla',
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://paporla.com'),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? 'https://paporla.com'),
   openGraph: {
     type: 'website',
     locale: 'es_ES',
@@ -101,8 +101,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               name: 'Paporla',
               description:
                 'Rescate Alimentario - Conectamos comercios con excedentes de comida con personas que necesitan alimentarse.',
-              url: process.env.NEXT_PUBLIC_SITE_URL || 'https://paporla.com',
-              logo: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://paporla.com'}/favicon.svg`,
+              url: process.env.NEXT_PUBLIC_SITE_URL ?? 'https://paporla.com',
+              logo: `${process.env.NEXT_PUBLIC_SITE_URL ?? 'https://paporla.com'}/favicon.svg`,
               sameAs: ['https://instagram.com/paporla'],
               address: { '@type': 'PostalAddress', addressLocality: '', addressCountry: '' },
             }),

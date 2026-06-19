@@ -148,7 +148,7 @@ export default function PackDetailClient({ initialPack, packId }: Props) {
             type: 'reservation',
             email: user.email,
             data: {
-              userName: user.name || 'Usuario',
+              userName: user.name ?? 'Usuario',
               packTitle: pack.title,
               shopName: pack.shop.name,
               pickupCode: data.pickup_code,
@@ -305,7 +305,7 @@ export default function PackDetailClient({ initialPack, packId }: Props) {
               </div>
             )}
 
-            {(pack.pickup_date || pack.pickup_start_time) && (
+            {(pack.pickup_date ?? pack.pickup_start_time) && (
               <div className="p-4 glass-card rounded-xl">
                 <h3 className="font-semibold dark:text-white text-gray-900 mb-3 flex items-center gap-2">
                   <Clock className="w-4 h-4 text-primary" />
@@ -318,7 +318,7 @@ export default function PackDetailClient({ initialPack, packId }: Props) {
                       <span>{formatDate(pack.pickup_date)}</span>
                     </div>
                   )}
-                  {(pack.pickup_start_time || pack.pickup_end_time) && (
+                  {(pack.pickup_start_time ?? pack.pickup_end_time) && (
                     <div className="flex items-center gap-2 dark:text-gray-400 text-gray-600">
                       <Clock className="w-4 h-4" />
                       <span>

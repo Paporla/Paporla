@@ -37,7 +37,7 @@ export default function BusinessDashboard() {
   }
 
   // Convertir reservas recientes a formato de actividad
-  const activities = (recentReservations || []).map((r) => ({
+  const activities = (recentReservations ?? []).map((r) => ({
     id: r.id,
     type: 'reservation' as const,
     title: r.pack.title,

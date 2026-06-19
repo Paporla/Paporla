@@ -25,7 +25,7 @@ export default function ImageUpload({
 }: ImageUploadProps) {
   const supabase = supabaseBrowser()
   const [uploading, setUploading] = useState(false)
-  const [preview, setPreview] = useState<string | null>(existingImage || null)
+  const [preview, setPreview] = useState<string | null>(existingImage ?? null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {

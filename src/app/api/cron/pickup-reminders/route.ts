@@ -52,12 +52,12 @@ export async function GET(request: Request) {
       if (diffMinutes >= 15 && diffMinutes <= 60) {
         const packData = reservation.pack as { title?: string; shop_id?: string } | null
         const shopData = reservation.shop as { name?: string; address?: string; owner_id?: string } | null
-        const packTitle = packData?.title || 'Pack'
-        const shopName = shopData?.name || 'Comercio'
-        const shopAddress = shopData?.address || null
+        const packTitle = packData?.title ?? 'Pack'
+        const shopName = shopData?.name ?? 'Comercio'
+        const shopAddress = shopData?.address ?? null
         const userId = reservation.user_id
         const reservationId = reservation.id
-        const pickupTimeStr = reservation.pickup_start_time || '00:00'
+        const pickupTimeStr = reservation.pickup_start_time ?? '00:00'
 
         const { data: existing } = await supabase
           .from('notifications')
@@ -88,12 +88,12 @@ export async function GET(request: Request) {
 
         if (userEmail?.email) {
           await sendPickupReminderEmail(userEmail.email, {
-            userName: userEmail.name || 'Usuario',
+            userName: userEmail.name ?? 'Usuario',
             packTitle,
             shopName,
             shopAddress,
-            pickupCode: reservation.pickup_code || 'N/A',
-            pickupDate: reservation.pickup_date || today,
+            pickupCode: reservation.pickup_code ?? 'N/A',
+            pickupDate: reservation.pickup_date ?? today,
             pickupTime: pickupTimeStr,
           })
           emailCount++

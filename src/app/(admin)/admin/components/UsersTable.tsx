@@ -46,7 +46,7 @@ export default function UsersTable({ users, currentUserId, onEdit, onDelete }: U
               >
                 <td className="px-4 py-3">
                   <div>
-                    <p className="font-medium dark:text-white text-gray-900">{user.name || 'Sin nombre'}</p>
+                    <p className="font-medium dark:text-white text-gray-900">{user.name ?? 'Sin nombre'}</p>
                     <p className="text-xs dark:text-gray-500 text-gray-400 flex items-center gap-1 mt-0.5">
                       <Mail className="w-3 h-3" />
                       {user.email}
@@ -54,11 +54,11 @@ export default function UsersTable({ users, currentUserId, onEdit, onDelete }: U
                   </div>
                 </td>
                 <td className="px-4 py-3">
-                  <span className="dark:text-gray-400 text-gray-600 text-sm">{user.phone || '—'}</span>
+                  <span className="dark:text-gray-400 text-gray-600 text-sm">{user.phone ?? '—'}</span>
                 </td>
                 <td className="px-4 py-3">
                   <span
-                    className={`text-xs px-2 py-1 rounded-full ${roleLabels[user.role]?.color || 'dark:bg-gray-500/20 bg-gray-200 dark:text-gray-400 text-gray-600'}`}
+                    className={`text-xs px-2 py-1 rounded-full ${roleLabels[user.role]?.color ?? 'dark:bg-gray-500/20 bg-gray-200 dark:text-gray-400 text-gray-600'}`}
                   >
                     {roleLabels[user.role]?.label || user.role}
                   </span>

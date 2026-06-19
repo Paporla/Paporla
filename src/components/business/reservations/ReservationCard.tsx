@@ -31,6 +31,7 @@ export default function ReservationCard({
   compact = false,
 }: ReservationCardProps) {
   const sharedConfig = STATUS_CONFIG[reservation.status] || STATUS_CONFIG.pending
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const iconMap: Record<string, any> = {
     pending: Clock,
     confirmed: CheckCircle,

@@ -38,7 +38,7 @@ export function useShops() {
     if (error) {
       setError(error.message)
     } else {
-      setShops(data || [])
+      setShops(data ?? [])
     }
     setLoading(false)
   }, [supabase])

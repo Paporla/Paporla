@@ -70,7 +70,7 @@ export default function StatsSection() {
 
               <p className="text-4xl font-bold dark:text-white text-gray-900 group-hover:scale-105 transition-transform duration-300">
                 {isInView ? (
-                  <AnimatedCounter value={stat.value} suffix={stat.suffix} prefix={stat.prefix || ''} duration={2000} />
+                  <AnimatedCounter value={stat.value} suffix={stat.suffix} prefix={stat.prefix ?? ''} duration={2000} />
                 ) : (
                   <span>0{stat.suffix}</span>
                 )}

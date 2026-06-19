@@ -54,7 +54,7 @@ export default function UserReservationsPage() {
     })
 
     if (!cancelCheck.allowed) {
-      setError(cancelCheck.reason || 'No puedes cancelar esta reserva')
+      setError(cancelCheck.reason ?? 'No puedes cancelar esta reserva')
       return
     }
 
@@ -179,7 +179,7 @@ export default function UserReservationsPage() {
                           <div className="flex-1">
                             <div className="flex items-center gap-2 mb-2 flex-wrap">
                               <h3 className="text-lg font-semibold dark:text-white text-gray-900 group-hover:text-primary transition-colors">
-                                {reservation.pack?.title || 'Pack'}
+                                {reservation.pack?.title ?? 'Pack'}
                               </h3>
                               <span
                                 className={`text-xs px-2 py-0.5 rounded-full flex items-center gap-1 ${config.bg} ${config.color}`}
@@ -191,7 +191,7 @@ export default function UserReservationsPage() {
 
                             <Link href={`/shops/${reservation.shop?.id}`}>
                               <p className="text-sm dark:text-gray-400 text-gray-600 hover:text-primary transition-colors">
-                                {reservation.shop?.name || 'Comercio'}
+                                {reservation.shop?.name ?? 'Comercio'}
                               </p>
                             </Link>
 
@@ -205,7 +205,7 @@ export default function UserReservationsPage() {
                             <div className="flex flex-wrap gap-3 text-xs dark:text-gray-500 text-gray-400 mt-2">
                               <span>{formatDate(reservation.created_at)}</span>
                               <span>
-                                {formatPrice(reservation.total_price_cents)} ({reservation.quantity || 1}x)
+                                {formatPrice(reservation.total_price_cents)} ({reservation.quantity ?? 1}x)
                               </span>
                             </div>
                           </div>
@@ -295,9 +295,9 @@ export default function UserReservationsPage() {
                         <div className="flex justify-between items-center">
                           <div>
                             <h3 className="font-bold dark:text-white text-gray-900">
-                              {reservation.pack?.title || 'Pack'}
+                              {reservation.pack?.title ?? 'Pack'}
                             </h3>
-                            <p className="text-sm text-gray-400">{reservation.shop?.name || 'Comercio'}</p>
+                            <p className="text-sm text-gray-400">{reservation.shop?.name ?? 'Comercio'}</p>
                             <p className="text-xs text-gray-500 mt-1">{formatPrice(reservation.total_price_cents)}</p>
                           </div>
                           <span
@@ -355,9 +355,9 @@ export default function UserReservationsPage() {
                         <div className="flex justify-between items-center">
                           <div>
                             <h3 className="font-bold dark:text-white text-gray-900">
-                              {reservation.pack?.title || 'Pack'}
+                              {reservation.pack?.title ?? 'Pack'}
                             </h3>
-                            <p className="text-sm text-gray-400">{reservation.shop?.name || 'Comercio'}</p>
+                            <p className="text-sm text-gray-400">{reservation.shop?.name ?? 'Comercio'}</p>
                             <p className="text-xs text-gray-500 mt-1">{formatPrice(reservation.total_price_cents)}</p>
                             {reservation.pickup_date && (
                               <p className="text-[10px] text-orange-400 mt-1">
@@ -420,9 +420,9 @@ export default function UserReservationsPage() {
                         <div className="flex justify-between items-center">
                           <div>
                             <h3 className="font-bold dark:text-white text-gray-900">
-                              {reservation.pack?.title || 'Pack'}
+                              {reservation.pack?.title ?? 'Pack'}
                             </h3>
-                            <p className="text-sm text-gray-400">{reservation.shop?.name || 'Comercio'}</p>
+                            <p className="text-sm text-gray-400">{reservation.shop?.name ?? 'Comercio'}</p>
                             <p className="text-xs text-gray-500 mt-1">{formatPrice(reservation.total_price_cents)}</p>
                           </div>
                           <span

@@ -82,11 +82,11 @@ export default function PackReservationModal({
             </span>
           </div>
 
-          {(pack.pickup_date || pack.pickup_start_time) && (
+          {(pack.pickup_date ?? pack.pickup_start_time) && (
             <div className="text-sm dark:text-gray-400 text-gray-600 space-y-1">
               <Calendar className="w-4 h-4 text-primary inline mr-1" />
               {pack.pickup_date && <span>{formatDate(pack.pickup_date)}</span>}
-              {(pack.pickup_start_time || pack.pickup_end_time) && (
+              {(pack.pickup_start_time ?? pack.pickup_end_time) && (
                 <span>
                   {' '}
                   de {pack.pickup_start_time?.slice(0, 5)} a {pack.pickup_end_time?.slice(0, 5)}

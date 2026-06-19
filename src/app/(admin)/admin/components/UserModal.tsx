@@ -84,7 +84,7 @@ export default function UserModal({ isOpen, user, onClose, onSave }: UserModalPr
                 <form onSubmit={handleSave} className="p-5 space-y-5">
                   <div>
                     <label className="block text-sm font-medium dark:text-gray-400 text-gray-600 mb-1">Nombre</label>
-                    <p className="dark:text-white text-gray-900 font-medium">{user.name || 'Sin nombre'}</p>
+                    <p className="dark:text-white text-gray-900 font-medium">{user.name ?? 'Sin nombre'}</p>
                   </div>
 
                   <div>

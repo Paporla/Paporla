@@ -76,7 +76,7 @@ export default function AvatarMenu() {
           {user?.avatar_url ? (
             <Image
               src={user.avatar_url}
-              alt={user.name || 'Avatar'}
+              alt={user.name ?? 'Avatar'}
               width={36}
               height={36}
               className="w-9 h-9 rounded-full object-cover border-2 border-primary"

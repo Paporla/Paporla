@@ -33,7 +33,7 @@ export default function AdminUsersPage() {
       const { data, error } = await supabase.from('user_profiles').select('*').order('created_at', { ascending: false })
 
       if (error) throw error
-      return (data || []) as UserProfile[]
+      return (data ?? []) as UserProfile[]
     },
     staleTime: 30 * 1000,
   })

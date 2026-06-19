@@ -45,7 +45,7 @@ export default function ShopsTable({ shops, onEdit, onVerify, onBan, onDelete }:
                   </div>
                 </td>
                 <td className="px-4 py-3">
-                  <span className="dark:text-gray-400 text-gray-600 text-sm">{shop.address || '—'}</span>
+                  <span className="dark:text-gray-400 text-gray-600 text-sm">{shop.address ?? '—'}</span>
                 </td>
                 <td className="px-4 py-3">
                   <div className="flex gap-2 flex-wrap">

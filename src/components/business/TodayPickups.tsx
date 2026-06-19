@@ -47,7 +47,7 @@ export default function TodayPickups({ shopId }: Props) {
         (data as RawReservation[]).map(async (r) => {
           const { data: u } = await supabase.from('user_profiles').select('name').eq('id', r.user_id).maybeSingle()
           const { data: p } = await supabase.from('packs').select('title').eq('id', r.pack_id).maybeSingle()
-          return { ...r, user_name: u?.name || 'Usuario', pack_title: p?.title || 'Pack' } as PickupItem
+          return { ...r, user_name: u?.name ?? 'Usuario', pack_title: p?.title ?? 'Pack' } as PickupItem
         }),
       )
       return enriched

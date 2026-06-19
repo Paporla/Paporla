@@ -55,7 +55,7 @@ export default function PacksPage() {
       const result = await response.json()
 
       if (!result.success) {
-        throw new Error(result.error || 'Error al realizar la reserva')
+        throw new Error(result.error ?? 'Error al realizar la reserva')
       }
 
       router.push('/dashboard?reserved=true')

@@ -31,7 +31,7 @@ export function useAdminStats() {
             .select('*', { count: 'exact', head: true })
             .gte('created_at', `${day}T00:00:00`)
             .lt('created_at', `${day}T23:59:59`)
-          return { day: day.slice(5), registrations: count || 0 }
+          return { day: day.slice(5), registrations: count ?? 0 }
         }),
       )
       return byDay
@@ -55,7 +55,7 @@ export function useAdminStats() {
             .from('user_profiles')
             .select('*', { count: 'exact', head: true })
             .eq('role', r)
-          return { name: labels[r] || r, value: count || 0 }
+          return { name: labels[r] || r, value: count ?? 0 }
         }),
       )
       return roleData

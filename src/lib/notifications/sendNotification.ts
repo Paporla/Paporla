@@ -14,7 +14,7 @@ export async function sendNotification({ userId, type, message, reservationId }:
       user_id: userId,
       type,
       message,
-      reservation_id: reservationId || null,
+      reservation_id: reservationId ?? null,
       is_read: false,
       sent_at: new Date().toISOString(),
     })
@@ -36,7 +36,7 @@ export async function sendBatchNotifications(notifications: SendNotificationPara
       user_id: n.userId,
       type: n.type,
       message: n.message,
-      reservation_id: n.reservationId || null,
+      reservation_id: n.reservationId ?? null,
       is_read: false,
       sent_at: new Date().toISOString(),
     }))

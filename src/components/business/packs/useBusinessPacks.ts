@@ -37,7 +37,7 @@ export function useBusinessPacks() {
         .eq('shop_id', shop!.id)
         .order('created_at', { ascending: false })
       if (error) throw error
-      return (data || []) as BusinessPack[]
+      return (data ?? []) as BusinessPack[]
     },
     enabled: !!shop,
     staleTime: 30 * 1000,
@@ -109,7 +109,7 @@ export function useBusinessPacks() {
   }
 
   return {
-    shopId: shop?.id || null,
+    shopId: shop?.id ?? null,
     loading,
     error,
     success,

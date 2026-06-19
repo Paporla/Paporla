@@ -190,7 +190,7 @@ export default async function EditPackPage({ params }: EditPackPageProps) {
               <div className="flex flex-wrap gap-2 mt-4">
                 <span className="inline-flex items-center rounded-full border dark:border-white/10 border-gray-200 dark:bg-white/5 bg-gray-100 px-3 py-1 text-xs dark:text-gray-300 text-gray-700">
                   Estado:{' '}
-                  <span className="ml-1 dark:text-white text-gray-900 font-medium">{pack.status || 'active'}</span>
+                  <span className="ml-1 dark:text-white text-gray-900 font-medium">{pack.status ?? 'active'}</span>
                 </span>
 
                 <span className="inline-flex items-center rounded-full border dark:border-white/10 border-gray-200 dark:bg-white/5 bg-gray-100 px-3 py-1 text-xs dark:text-gray-300 text-gray-700">

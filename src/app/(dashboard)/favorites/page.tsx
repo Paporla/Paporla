@@ -65,7 +65,7 @@ export default function FavoritesPage() {
         .order('created_at', { ascending: false })
 
       if (error) throw error
-      return (data || []) as unknown as FavoriteShop[]
+      return (data ?? []) as unknown as FavoriteShop[]
     },
     enabled: !!user,
     staleTime: 30 * 1000,

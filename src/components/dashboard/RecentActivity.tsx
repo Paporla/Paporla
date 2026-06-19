@@ -58,14 +58,14 @@ export default function RecentActivity({ activities = [] }: RecentActivityProps)
       icon: Clock,
       color: 'text-primary',
       bg: 'bg-primary/10',
-      activities: activities.filter((a) => ['pending', 'confirmed', 'ready_pickup'].includes(a.status || '')),
+      activities: activities.filter((a) => ['pending', 'confirmed', 'ready_pickup'].includes(a.status ?? '')),
     },
     {
       title: 'Completadas',
       icon: CheckCircle,
       color: 'text-green-400',
       bg: 'bg-green-500/10',
-      activities: activities.filter((a) => ['picked_up', 'completed'].includes(a.status || '')),
+      activities: activities.filter((a) => ['picked_up', 'completed'].includes(a.status ?? '')),
     },
     {
       title: 'Canceladas',
@@ -147,7 +147,7 @@ export default function RecentActivity({ activities = [] }: RecentActivityProps)
                   >
                     <div className="divide-y dark:divide-dark-border/50 divide-gray-200 border-t dark:border-dark-border/50 border-gray-200">
                       {group.activities.slice(0, 5).map((activity, idx) => {
-                        const status = statusConfig[activity.status || ''] || {
+                        const status = statusConfig[activity.status ?? ''] || {
                           label: activity.status,
                           icon: ShoppingBag,
                           color: 'text-gray-400',
@@ -178,7 +178,7 @@ export default function RecentActivity({ activities = [] }: RecentActivityProps)
                               <p className="text-xs dark:text-gray-500 text-gray-400 mt-0.5">{activity.description}</p>
                               {activity.price && (
                                 <p className="text-[10px] text-primary font-medium mt-0.5">
-                                  {formatPrice(activity.price)} • {activity.quantity || 1}x
+                                  {formatPrice(activity.price)} • {activity.quantity ?? 1}x
                                 </p>
                               )}
                               <p className="text-[10px] dark:text-gray-600 text-gray-500 mt-1">

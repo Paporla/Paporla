@@ -69,7 +69,7 @@ export function useFavorites() {
       console.error('Error loading favorites:', error)
     } else {
       const typedData = data as unknown as FavoriteShop[]
-      setFavorites(typedData || [])
+      setFavorites(typedData ?? [])
       setFavoriteShopIds(new Set(typedData?.map((f) => f.shop_id) || []))
     }
 

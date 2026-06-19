@@ -23,10 +23,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       return {
         title: shop.name,
         description:
-          shop.description || `Visita ${shop.name} en ${shop.city || 'tu ciudad'} y descubre sus packs sorpresa.`,
+          shop.description ?? `Visita ${shop.name} en ${shop.city ?? 'tu ciudad'} y descubre sus packs sorpresa.`,
         openGraph: {
           title: `${shop.name} | Paporla`,
-          description: shop.description || `Visita ${shop.name} en ${shop.city || 'tu ciudad'}`,
+          description: shop.description ?? `Visita ${shop.name} en ${shop.city ?? 'tu ciudad'}`,
           images: shop.logo_url ? [{ url: shop.logo_url }] : undefined,
         },
       }

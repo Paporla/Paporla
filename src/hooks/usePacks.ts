@@ -9,10 +9,10 @@ async function apiFetch<T>(url: string): Promise<T> {
   const response = await fetch(url)
   if (!response.ok) {
     const err = await response.json()
-    throw new Error(err.error || 'Error al obtener packs')
+    throw new Error(err.error ?? 'Error al obtener packs')
   }
   const data = await response.json()
-  if (!data.success) throw new Error(data.error || 'Error en la solicitud')
+  if (!data.success) throw new Error(data.error ?? 'Error en la solicitud')
   return data as T
 }
 

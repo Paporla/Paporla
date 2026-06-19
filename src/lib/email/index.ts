@@ -8,13 +8,13 @@ import {
 } from './templates'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
-const senderEmail = process.env.RESEND_FROM_EMAIL || 'noreply@paporla.com'
+const senderEmail = process.env.RESEND_FROM_EMAIL ?? 'noreply@paporla.com'
 
 const isDev = process.env.NODE_ENV === 'development'
 
 function logDebug(...args: unknown[]) {
   if (isDev) {
-    console.log('[Email]', ...args)
+    console.warn('[Email]', ...args)
   }
 }
 

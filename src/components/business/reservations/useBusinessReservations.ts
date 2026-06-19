@@ -46,9 +46,9 @@ export function useBusinessReservations() {
         .eq('shop_id', shop!.id)
         .order('created_at', { ascending: false })
       if (error) throw error
-      return ((data || []) as unknown as ReservationItem[]).map((r) => ({
+      return ((data ?? []) as unknown as ReservationItem[]).map((r) => ({
         ...r,
-        user: r.user || { name: 'Usuario', email: 'N/A', phone: null },
+        user: r.user ?? { name: 'Usuario', email: 'N/A', phone: null },
       }))
     },
     enabled: !!shop,
@@ -120,7 +120,7 @@ export function useBusinessReservations() {
       completed: reservations.filter((r) => r.status === 'picked_up').length,
       cancelled: reservations.filter((r) => r.status === 'cancelled').length,
       noShow: reservations.filter((r) => r.status === 'no_show').length,
-      totalRevenue: reservations.reduce((sum, r) => sum + (r.total_price_cents || 0), 0),
+      totalRevenue: reservations.reduce((sum, r) => sum + (r.total_price_cents ?? 0), 0),
     }),
     [reservations],
   )
@@ -148,7 +148,7 @@ export function useBusinessReservations() {
   }
 
   return {
-    shopId: shop?.id || null,
+    shopId: shop?.id ?? null,
     loading,
     error,
     success,

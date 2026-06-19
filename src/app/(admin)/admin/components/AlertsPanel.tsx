@@ -97,7 +97,7 @@ export default function AlertsPanel() {
             id: log.id,
             level: log.severity === 'critical' ? 'critical' : log.severity === 'warning' ? 'warning' : 'info',
             title: log.title,
-            description: log.description || '',
+            description: log.description ?? '',
             time: formatTime(log.created_at),
             action: 'Ver mas',
             actionLink: '/admin',

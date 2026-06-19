@@ -61,7 +61,7 @@ export default function ShopDetailInfo({ shop, packsCount }: ShopDetailInfoProps
             Informacion
           </h2>
 
-          {(shop.address || shop.city) && (
+          {(shop.address ?? shop.city) && (
             <div className="flex items-start gap-3 text-sm">
               <MapPin className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
               <span className="dark:text-gray-400 text-gray-600">
@@ -188,7 +188,7 @@ export default function ShopDetailInfo({ shop, packsCount }: ShopDetailInfoProps
                             isToday ? 'dark:text-white text-gray-900 font-medium' : 'dark:text-gray-500 text-gray-400'
                           }
                         >
-                          {h?.closed ? 'Cerrado' : `${h?.open || '--:--'} - ${h?.close || '--:--'}`}
+                          {h?.closed ? 'Cerrado' : `${h?.open || '--:--'} - ${h?.close ?? '--:--'}`}
                         </span>
                       </div>
                     )

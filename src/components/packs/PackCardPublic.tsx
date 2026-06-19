@@ -58,7 +58,7 @@ export default function PackCardPublic({ pack, onReserve, index, reserving }: Pr
 
         <div className="h-44 dark:bg-gradient-to-br dark:from-gray-800 dark:to-gray-900 bg-gradient-to-br from-gray-100 to-gray-200 relative overflow-hidden">
           <Image
-            src={pack.image_url || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&h=300&fit=crop'}
+            src={pack.image_url ?? 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&h=300&fit=crop'}
             alt={pack.title}
             fill
             className="object-cover transform group-hover:scale-110 transition-transform duration-500"

@@ -48,7 +48,7 @@ export function useBusinessDashboard() {
         .select('id, title, remaining_stock, is_active, price_cents')
         .eq('shop_id', shop!.id)
         .order('created_at', { ascending: false })
-      return (data || []) as PackBrief[]
+      return (data ?? []) as PackBrief[]
     },
     enabled: !!shop,
     staleTime: 30 * 1000,
@@ -65,9 +65,9 @@ export function useBusinessDashboard() {
         )
         .eq('shop_id', shop!.id)
         .order('created_at', { ascending: false })
-      return ((data || []) as unknown as ReservationBrief[]).map((r) => ({
+      return ((data ?? []) as unknown as ReservationBrief[]).map((r) => ({
         ...r,
-        user: r.user || { name: 'Usuario', email: '' },
+        user: r.user ?? { name: 'Usuario', email: '' },
       }))
     },
     enabled: !!shop,
@@ -86,7 +86,7 @@ export function useBusinessDashboard() {
   const pendingReservations = rawReservations.filter((r) => ['pending', 'confirmed'].includes(r.status)).length
   const totalRevenue = rawReservations
     .filter((r) => r.status === 'picked_up')
-    .reduce((sum, r) => sum + (r.total_price_cents || 0), 0)
+    .reduce((sum, r) => sum + (r.total_price_cents ?? 0), 0)
 
   return {
     shop,

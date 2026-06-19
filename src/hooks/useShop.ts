@@ -64,7 +64,7 @@ export function useShop(shopId: string | undefined) {
       .maybeSingle()
 
     if (shopError || !shopData) {
-      setError(shopError?.message || 'Comercio no encontrado')
+      setError(shopError?.message ?? 'Comercio no encontrado')
       setLoading(false)
       return
     }
@@ -83,7 +83,7 @@ export function useShop(shopId: string | undefined) {
     if (packsError) {
       console.error('Error loading packs:', packsError)
     } else {
-      setPacks(packsData || [])
+      setPacks(packsData ?? [])
     }
 
     setLoading(false)
