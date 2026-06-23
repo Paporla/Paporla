@@ -5,8 +5,14 @@ import { PackWithShop } from '@/types/pack'
 
 const PACKS_QUERY_KEY = 'packs'
 
+function getBaseUrl(): string {
+  if (typeof window !== 'undefined') return window.location.origin
+  return process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'
+}
+
 async function apiFetch<T>(url: string): Promise<T> {
-  const response = await fetch(url)
+  const fullUrl = url.startsWith('/') ? `${getBaseUrl()}${url}` : url
+  const response = await fetch(fullUrl)
   if (!response.ok) {
     const err = await response.json()
     throw new Error(err.error ?? 'Error al obtener packs')

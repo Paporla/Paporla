@@ -1,8 +1,9 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { renderHook, waitFor } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { usePacks } from '@/hooks/usePacks'
-import { supabaseBrowser } from '@/lib/supabase/client'
+
+const API_BASE = 'http://localhost:3000'
 
 function createWrapper() {
   const queryClient = new QueryClient({
@@ -13,40 +14,35 @@ function createWrapper() {
   }
 }
 
-const mockSelect = vi.fn()
-const mockEq = vi.fn()
-const mockGt = vi.fn()
-const mockOrder = vi.fn()
-const mockFrom = vi.fn()
-const mockMaybeSingle = vi.fn()
-
-function setupMockClient() {
-  mockSelect.mockReturnThis()
-  mockEq.mockReturnThis()
-  mockGt.mockReturnThis()
-  mockOrder.mockResolvedValue({ data: [], error: null })
-  mockMaybeSingle.mockResolvedValue({ data: null, error: null })
-  mockFrom.mockImplementation((table: string) => {
-    if (table === 'packs') {
-      return {
-        select: mockSelect,
-        eq: mockEq,
-        gt: mockGt,
-        order: mockOrder,
-        maybeSingle: mockMaybeSingle,
-      }
-    }
-    return {}
+function mockFetchSuccess(data: unknown) {
+  return Promise.resolve({
+    ok: true,
+    json: () => Promise.resolve({ success: true, packs: data }),
   })
-  ;(supabaseBrowser as any).mockReturnValue({
-    from: mockFrom,
+}
+
+function mockFetchError(message: string) {
+  return Promise.resolve({
+    ok: false,
+    json: () => Promise.resolve({ error: message }),
+  })
+}
+
+function mockFetchSingleSuccess(data: unknown) {
+  return Promise.resolve({
+    ok: true,
+    json: () => Promise.resolve({ success: true, pack: data }),
   })
 }
 
 describe('usePacks', () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    setupMockClient()
+    global.fetch = vi.fn()
+  })
+
+  afterEach(() => {
+    vi.restoreAllMocks()
   })
 
   it('starts with empty packs', () => {
@@ -56,25 +52,26 @@ describe('usePacks', () => {
 
   it('fetches packs without shopId filter', async () => {
     const mockData = [{ id: 'p-1', title: 'Pack 1', shop: { name: 'Shop 1' } }]
-    mockOrder.mockResolvedValue({ data: mockData, error: null })
+    vi.mocked(global.fetch).mockResolvedValue(mockFetchSuccess(mockData))
 
     const { result } = renderHook(() => usePacks(), { wrapper: createWrapper() })
 
     await waitFor(() => expect(result.current.loading).toBe(false))
     expect(result.current.packs).toEqual(mockData)
-    expect(mockEq).toHaveBeenCalledWith('is_active', true)
-    expect(mockGt).toHaveBeenCalledWith('remaining_stock', 0)
+    expect(global.fetch).toHaveBeenCalledWith(`${API_BASE}/api/packs`)
   })
 
   it('fetches packs with shopId filter', async () => {
+    vi.mocked(global.fetch).mockResolvedValue(mockFetchSuccess([]))
+
     const { result } = renderHook(() => usePacks('shop-1'), { wrapper: createWrapper() })
 
     await waitFor(() => expect(result.current.loading).toBe(false))
-    expect(mockEq).toHaveBeenCalledWith('shop_id', 'shop-1')
+    expect(global.fetch).toHaveBeenCalledWith(`${API_BASE}/api/packs?shopId=shop-1`)
   })
 
   it('returns error when query fails', async () => {
-    mockOrder.mockResolvedValue({ data: null, error: { message: 'DB error' } })
+    vi.mocked(global.fetch).mockRejectedValue(new Error('DB error'))
 
     const { result } = renderHook(() => usePacks(), { wrapper: createWrapper() })
 
@@ -83,12 +80,13 @@ describe('usePacks', () => {
 
   it('getPackById fetches single pack', async () => {
     const mockPack = { id: 'p-1', title: 'Pack 1', shop: { name: 'Shop 1' } }
-    mockMaybeSingle.mockResolvedValue({ data: mockPack, error: null })
+    vi.mocked(global.fetch).mockResolvedValue(mockFetchSingleSuccess(mockPack))
 
     const { result } = renderHook(() => usePacks(), { wrapper: createWrapper() })
     await waitFor(() => expect(result.current.loading).toBe(false))
 
     const pack = await result.current.getPackById('p-1')
     expect(pack).toEqual(mockPack)
+    expect(global.fetch).toHaveBeenCalledWith(`${API_BASE}/api/packs?id=p-1`)
   })
 })
