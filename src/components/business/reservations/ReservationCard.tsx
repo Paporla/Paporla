@@ -177,7 +177,7 @@ export default function ReservationCard({
                 size="sm"
                 onClick={() => onNoShow(reservation.id)}
                 disabled={updating === reservation.id}
-                className="flex items-center gap-1 dark:text-gray-400 text-gray-600 dark:hover:text-white hover:text-gray-900 border-gray-600 dark:border-gray-600 border-gray-300"
+                className="flex items-center gap-1 dark:text-gray-400 text-gray-600 dark:hover:text-white hover:text-gray-900 dark:border-gray-600 border-gray-300"
               >
                 <Ban className="w-4 h-4" /> No retiro
               </Button>
