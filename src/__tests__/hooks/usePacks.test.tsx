@@ -14,8 +14,8 @@ function createWrapper() {
   }
 }
 
-function mockFetchSuccess(data: unknown) {
-  return Promise.resolve(new Response(JSON.stringify({ success: true, packs: data }), { status: 200 }))
+function mockFetchSuccess(data: unknown): Response {
+  return new Response(JSON.stringify({ success: true, packs: data }), { status: 200 })
 }
 
 describe('usePacks', () => {
@@ -64,7 +64,8 @@ describe('usePacks', () => {
   it('getPackById fetches single pack', async () => {
     const mockPack = { id: 'p-1', title: 'Pack 1', shop: { name: 'Shop 1' } }
     // Usamos mockImplementation para que cada llamada a fetch cree un Response nuevo
-    vi.mocked(global.fetch).mockImplementation((url: string) => {
+    vi.mocked(global.fetch).mockImplementation((input) => {
+      const url = typeof input === 'string' ? input : String(input)
       if (url.includes('id=')) {
         return Promise.resolve(new Response(JSON.stringify({ success: true, pack: mockPack }), { status: 200 }))
       }
