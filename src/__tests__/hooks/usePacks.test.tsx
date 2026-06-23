@@ -21,13 +21,6 @@ function mockFetchSuccess(data: unknown) {
   })
 }
 
-function mockFetchError(message: string) {
-  return Promise.resolve({
-    ok: false,
-    json: () => Promise.resolve({ error: message }),
-  })
-}
-
 function mockFetchSingleSuccess(data: unknown) {
   return Promise.resolve({
     ok: true,
