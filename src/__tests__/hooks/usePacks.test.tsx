@@ -15,17 +15,7 @@ function createWrapper() {
 }
 
 function mockFetchSuccess(data: unknown) {
-  return Promise.resolve({
-    ok: true,
-    json: () => Promise.resolve({ success: true, packs: data }),
-  })
-}
-
-function mockFetchSingleSuccess(data: unknown) {
-  return Promise.resolve({
-    ok: true,
-    json: () => Promise.resolve({ success: true, pack: data }),
-  })
+  return Promise.resolve(new Response(JSON.stringify({ success: true, packs: data }), { status: 200 }))
 }
 
 describe('usePacks', () => {
@@ -73,7 +63,13 @@ describe('usePacks', () => {
 
   it('getPackById fetches single pack', async () => {
     const mockPack = { id: 'p-1', title: 'Pack 1', shop: { name: 'Shop 1' } }
-    vi.mocked(global.fetch).mockResolvedValue(mockFetchSingleSuccess(mockPack))
+    // Usamos mockImplementation para que cada llamada a fetch cree un Response nuevo
+    vi.mocked(global.fetch).mockImplementation((url: string) => {
+      if (url.includes('id=')) {
+        return Promise.resolve(new Response(JSON.stringify({ success: true, pack: mockPack }), { status: 200 }))
+      }
+      return Promise.resolve(new Response(JSON.stringify({ success: true, packs: [] }), { status: 200 }))
+    })
 
     const { result } = renderHook(() => usePacks(), { wrapper: createWrapper() })
     await waitFor(() => expect(result.current.loading).toBe(false))
