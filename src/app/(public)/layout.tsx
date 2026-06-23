@@ -21,7 +21,9 @@ export default function PublicLayout({ children }: { children: ReactNode }) {
           }
         >
           <main id="main-content" tabIndex={-1}>
-            <PageTransition>{children}</PageTransition>
+            <div className="container-page px-4 max-w-7xl mx-auto">
+              <PageTransition>{children}</PageTransition>
+            </div>
           </main>
         </Suspense>
         <Footer />
