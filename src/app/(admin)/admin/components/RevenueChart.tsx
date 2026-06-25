@@ -141,9 +141,9 @@ export default function RevenueChart() {
 
       <ResponsiveContainer width="100%" height={260}>
         <BarChart data={data} barGap={2}>
-          <CartesianGrid strokeDasharray="3 3" stroke="#1a1a1a" vertical={false} />
-          <XAxis dataKey="month" stroke="#333" fontSize={11} tickLine={false} axisLine={false} />
-          <YAxis stroke="#333" fontSize={11} tickLine={false} axisLine={false} tickFormatter={(v) => `$${v / 100}k`} />
+          <CartesianGrid strokeDasharray="3 3" stroke="#333" vertical={false} opacity={0.3} />
+          <XAxis dataKey="month" stroke="#888" fontSize={11} tickLine={false} axisLine={false} />
+          <YAxis stroke="#888" fontSize={11} tickLine={false} axisLine={false} tickFormatter={(v) => `$${v / 100}k`} />
           <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(255,255,255,0.03)' }} />
           <Bar dataKey="total_revenue_cents" fill="#27d3b8" radius={[4, 4, 0, 0]} name="Ingresos" />
           <Bar dataKey="total_commissions_cents" fill="#8b5cf6" radius={[4, 4, 0, 0]} name="Comisiones" />

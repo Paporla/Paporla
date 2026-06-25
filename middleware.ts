@@ -1,4 +1,4 @@
-﻿import { createServerClient } from '@supabase/ssr'
+import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 import { applyRateLimit } from '@/lib/middleware/rateLimit'
 import { ROLES, isAdmin } from '@/lib/constants/roles'
@@ -21,7 +21,6 @@ export async function middleware(request: NextRequest) {
   // ============================================
   if (process.env.NEXT_PUBLIC_MAINTENANCE_MODE === 'true') {
     const path = request.nextUrl.pathname
-    // Permitir acceso a la pagina de mantenimiento y recursos estaticos
     if (
       path !== '/mantenimiento' &&
       !path.startsWith('/_next') &&
@@ -30,7 +29,6 @@ export async function middleware(request: NextRequest) {
     ) {
       return NextResponse.redirect(new URL('/mantenimiento', request.url))
     }
-    // Si ya esta en /mantenimiento, seguir
     return response
   }
 
@@ -57,9 +55,7 @@ export async function middleware(request: NextRequest) {
   )
 
   const path = request.nextUrl.pathname
-
   const publicPaths = ['/', '/login', '/register', '/faq', '/about', '/forgot-password', '/reset-password']
-
   const isPublicPath =
     publicPaths.includes(path) ||
     path.startsWith('/auth/') ||
@@ -81,39 +77,31 @@ export async function middleware(request: NextRequest) {
   const isAdminPath = path.startsWith('/admin')
   const isAuthPage = path === '/login' || path === '/register'
 
-  // Solo verificar auth para rutas protegidas
   if (!isPublicPath || isDashboardPath || isBusinessPath || isAdminPath) {
     const {
-      data: { user },
-    } = await supabase.auth.getUser()
+      data: { session },
+    } = await supabase.auth.getSession()
 
-    if (!user && !isPublicPath) {
+    if (!session && !isPublicPath) {
       return NextResponse.redirect(new URL('/login', request.url))
     }
 
-    if (user) {
-      // Obtener rol desde metadata del JWT (evita consulta a DB en cada request)
-      const role = (user?.user_metadata?.role as string) || ROLES.USER
+    if (session) {
+      const role = (session.user.user_metadata?.role as string) || ROLES.USER
 
-      // Si ya esta logueado y entra a login/register, redirigir a su panel
       if (isAuthPage) {
         const dest = role === ROLES.COMERCIO ? '/business' : isAdmin(role) ? '/admin' : '/dashboard'
         return NextResponse.redirect(new URL(dest, request.url))
       }
 
-      // Proteccion por roles
       if (isDashboardPath && role !== ROLES.USER) {
-        const dest = role === ROLES.COMERCIO ? '/business' : '/admin'
-        return NextResponse.redirect(new URL(dest, request.url))
+        return NextResponse.redirect(new URL(role === ROLES.COMERCIO ? '/business' : '/admin', request.url))
       }
-
       if (isBusinessPath && role !== ROLES.COMERCIO && !isAdmin(role)) {
         return NextResponse.redirect(new URL('/dashboard', request.url))
       }
-
       if (isAdminPath && !isAdmin(role)) {
-        const dest = role === ROLES.COMERCIO ? '/business' : '/dashboard'
-        return NextResponse.redirect(new URL(dest, request.url))
+        return NextResponse.redirect(new URL(role === ROLES.COMERCIO ? '/business' : '/dashboard', request.url))
       }
     }
   }

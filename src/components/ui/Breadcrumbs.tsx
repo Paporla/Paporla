@@ -65,7 +65,8 @@ export default function Breadcrumbs() {
     }
   }
 
-  if (breadcrumbs.length <= 2 && breadcrumbs[1]?.href === '/') return null
+  // Ocultar si solo estamos en la raíz (Inicio sin subpáginas)
+  if (breadcrumbs.length <= 1) return null
 
   return (
     <div className="border-b dark:border-gray-700 dark:bg-transparent bg-gray-50/80">

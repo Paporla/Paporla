@@ -44,7 +44,7 @@ export default function ReservationFilters({
         </div>
         <button
           onClick={() => setShowFilters(!showFilters)}
-          className="flex items-center gap-2 px-4 py-2 rounded-xl bg-dark-muted border border-dark-border hover:border-primary/30 transition-all"
+          className="flex items-center gap-2 px-4 py-2 rounded-xl dark:bg-dark-muted bg-gray-100 border dark:border-dark-border border-gray-200 hover:border-primary/30 transition-all"
         >
           <Filter className="w-4 h-4 dark:text-gray-400 text-gray-500" />
           <span className="text-sm dark:text-gray-400 text-gray-500">Filtros</span>
@@ -60,7 +60,7 @@ export default function ReservationFilters({
             exit={{ opacity: 0, height: 0 }}
             className="overflow-hidden"
           >
-            <div className="flex flex-wrap gap-2 p-4 bg-dark-muted/50 rounded-xl border border-dark-border">
+            <div className="flex flex-wrap gap-2 p-4 dark:bg-dark-muted/50 bg-gray-50 rounded-xl border dark:border-dark-border border-gray-200">
               {statusOptions.map((option) => (
                 <button
                   key={option.value}

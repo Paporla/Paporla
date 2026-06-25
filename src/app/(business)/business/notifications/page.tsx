@@ -66,10 +66,7 @@ export default function BusinessNotificationsPage() {
         </div>
         <div className="animate-pulse space-y-4">
           {[...Array(5)].map((_, i) => (
-            <div
-              key={i}
-              className="bg-dark-card dark:bg-white dark:border-gray-200 border border-dark-border rounded-2xl p-5"
-            >
+            <div key={i} className="glass-card rounded-2xl p-5">
               <div className="flex gap-4">
                 <div className="w-12 h-12 rounded-xl dark:bg-gray-800 bg-gray-200" />
                 <div className="flex-1">

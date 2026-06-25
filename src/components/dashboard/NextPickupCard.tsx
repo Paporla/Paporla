@@ -3,18 +3,51 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { motion } from 'framer-motion'
-import { Navigation, Clock, MapPin } from 'lucide-react'
+import { Navigation, Clock, MapPin, AlertCircle } from 'lucide-react'
 import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
 import CopyButton from '@/components/ui/CopyButton'
 import CountdownTimer from '@/components/ui/CountdownTimer'
-import type { Reservation } from '@/types/reservation'
+import type { ReservationWithDetails } from '@/types/reservation'
 
 interface NextPickupCardProps {
-  reservation: Reservation
+  reservation: ReservationWithDetails
+  loading?: boolean
+  error?: string
 }
 
-export default function NextPickupCard({ reservation }: NextPickupCardProps) {
+export default function NextPickupCard({ reservation, loading, error }: NextPickupCardProps) {
+  // Estado de error
+  if (error) {
+    return (
+      <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}>
+        <Card glass className="border-red-500/30 p-5 text-center">
+          <AlertCircle className="w-8 h-8 text-red-400 mx-auto mb-2" />
+          <p className="text-red-400 text-sm font-medium">{error}</p>
+        </Card>
+      </motion.div>
+    )
+  }
+
+  // Estado de carga
+  if (loading) {
+    return (
+      <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}>
+        <Card glass className="border-primary/20 p-5 animate-pulse">
+          <div className="flex flex-col md:flex-row items-start md:items-center gap-4">
+            <div className="w-20 h-20 rounded-xl bg-gray-200 dark:bg-gray-700 flex-shrink-0" />
+            <div className="flex-1 space-y-2">
+              <div className="h-3 w-24 bg-gray-200 dark:bg-gray-700 rounded" />
+              <div className="h-5 w-48 bg-gray-200 dark:bg-gray-700 rounded" />
+              <div className="h-4 w-32 bg-gray-100 dark:bg-gray-600 rounded" />
+            </div>
+            <div className="w-28 h-16 bg-gray-200 dark:bg-gray-700 rounded-xl" />
+          </div>
+        </Card>
+      </motion.div>
+    )
+  }
+
   if (!reservation.pack || !reservation.shop) return null
 
   const googleMapsUrl = reservation.shop.address

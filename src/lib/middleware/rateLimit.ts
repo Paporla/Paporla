@@ -1,6 +1,34 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { getSupabaseAdmin } from '@/lib/supabase/admin'
 
+// ============================================
+// In-memory rate limiter (capa 1)
+// ============================================
+
+interface RateLimitEntry {
+  count: number
+  resetAt: number
+}
+
+const memoryStore = new Map<string, RateLimitEntry>()
+
+// Limpieza periódica de entries expiradas (cada 60 segundos)
+const CLEANUP_INTERVAL_MS = 60 * 1000
+const cleanupTimer = setInterval(() => {
+  const now = Date.now()
+  for (const [key, entry] of memoryStore.entries()) {
+    if (now > entry.resetAt) {
+      memoryStore.delete(key)
+    }
+  }
+}, CLEANUP_INTERVAL_MS)
+// No bloquear el cierre del proceso (importante en serverless)
+cleanupTimer.unref()
+
+// ============================================
+// Configuración de rutas
+// ============================================
+
 const routeLimits: Record<string, { limit: number; window: number }> = {
   '/api/email': { limit: 10, window: 60 * 1000 },
   '/api/notifications': { limit: 30, window: 60 * 1000 },
@@ -11,7 +39,7 @@ const routeLimits: Record<string, { limit: number; window: number }> = {
   '/api/search': { limit: 60, window: 60 * 1000 },
 }
 
-function getClientIp(request: NextRequest): string {
+export function getClientIp(request: NextRequest): string {
   const forwarded = request.headers.get('x-forwarded-for')
   const realIp = request.headers.get('x-real-ip')
 
@@ -21,7 +49,44 @@ function getClientIp(request: NextRequest): string {
   return 'unknown'
 }
 
-async function checkRateLimit(
+// ============================================
+// Capa 1: Rate limiter en memoria (rápido, sin red)
+// ============================================
+
+function checkMemoryRateLimit(
+  key: string,
+  limit: number,
+  windowMs: number,
+): { allowed: boolean; remaining: number; resetAt: number; fromMemory: boolean } {
+  const now = Date.now()
+  const entry = memoryStore.get(key)
+
+  // No hay entry en memoria → indicar que se debe usar fallback (serverless cold start)
+  if (!entry) {
+    return { allowed: false, remaining: 0, resetAt: now + windowMs, fromMemory: false }
+  }
+
+  // Entry expirada → limpiar y también usar fallback
+  if (now > entry.resetAt) {
+    memoryStore.delete(key)
+    return { allowed: false, remaining: 0, resetAt: now + windowMs, fromMemory: false }
+  }
+
+  // Límite excedido
+  if (entry.count >= limit) {
+    return { allowed: false, remaining: 0, resetAt: entry.resetAt, fromMemory: true }
+  }
+
+  // Incrementar contador
+  entry.count += 1
+  return { allowed: true, remaining: limit - entry.count, resetAt: entry.resetAt, fromMemory: true }
+}
+
+// ============================================
+// Capa 2: Rate limiter en Supabase (fallback para serverless)
+// ============================================
+
+async function checkSupabaseRateLimit(
   key: string,
   limit: number,
   windowMs: number,
@@ -73,6 +138,10 @@ async function checkRateLimit(
   }
 }
 
+// ============================================
+// Interfaz pública (sin cambios)
+// ============================================
+
 export async function applyRateLimit(request: NextRequest): Promise<NextResponse | null> {
   const path = request.nextUrl.pathname
 
@@ -89,7 +158,36 @@ export async function applyRateLimit(request: NextRequest): Promise<NextResponse
   const { limit, window } = routeLimits[matchedRoute]
   const clientIp = getClientIp(request)
   const rateLimitKey = `${matchedRoute}:${clientIp}`
-  const result = await checkRateLimit(rateLimitKey, limit, window)
+
+  // Capa 1: intentar en memoria primero
+  const memResult = checkMemoryRateLimit(rateLimitKey, limit, window)
+
+  // Si la memoria tenía la entry, usar ese resultado (rápido)
+  if (memResult.fromMemory) {
+    const response = NextResponse.next()
+    response.headers.set('X-RateLimit-Limit', limit.toString())
+    response.headers.set('X-RateLimit-Remaining', memResult.remaining.toString())
+    response.headers.set('X-RateLimit-Reset', memResult.resetAt.toString())
+
+    if (!memResult.allowed) {
+      return NextResponse.json(
+        { error: 'Demasiadas solicitudes. Intenta de nuevo en unos segundos.' },
+        { status: 429, headers: { 'Retry-After': Math.ceil((memResult.resetAt - Date.now()) / 1000).toString() } },
+      )
+    }
+
+    return response
+  }
+
+  // Capa 2: fallback a Supabase (serverless: el Map se perdió entre invocaciones)
+  const result = await checkSupabaseRateLimit(rateLimitKey, limit, window)
+
+  // Sembrar el resultado en memoria para requests siguientes dentro del mismo warm instance
+  if (result.allowed) {
+    memoryStore.set(rateLimitKey, { count: limit - result.remaining, resetAt: result.resetAt })
+  } else {
+    memoryStore.set(rateLimitKey, { count: limit, resetAt: result.resetAt })
+  }
 
   const response = NextResponse.next()
   response.headers.set('X-RateLimit-Limit', limit.toString())

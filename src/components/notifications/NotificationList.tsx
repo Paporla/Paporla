@@ -5,9 +5,10 @@ import { useNotifications } from '@/hooks/useNotifications'
 import NotificationCard from './NotificationCard'
 import Button from '@/components/ui/Button'
 import EmptyState from '@/components/ui/EmptyState'
+import Toast from '@/components/ui/Toast'
 
 export default function NotificationList() {
-  const { notifications, loading, markAsRead, markAllAsRead, deleteNotification } = useNotifications()
+  const { notifications, loading, error, markAsRead, markAllAsRead, deleteNotification } = useNotifications()
   const [filter, setFilter] = useState<'all' | 'unread'>('all')
 
   const filteredNotifications = filter === 'all' ? notifications : notifications.filter((n) => !n.is_read)
@@ -17,9 +18,17 @@ export default function NotificationList() {
       <div className="space-y-3">
         {[...Array(5)].map((_, i) => (
           <div key={i} className="animate-pulse">
-            <div className="h-20 dark:bg-gray-900 bg-white dark:border-gray-700 border-gray-200 rounded-xl" />
+            <div className="h-20 dark:bg-white/5 bg-white dark:border-white/10 border-gray-200 rounded-xl" />
           </div>
         ))}
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="rounded-2xl border border-red-500/30 bg-red-500/5 p-6 text-center">
+        <p className="text-red-400 text-sm font-medium">{error}</p>
       </div>
     )
   }
@@ -27,7 +36,7 @@ export default function NotificationList() {
   if (notifications.length === 0) {
     return (
       <EmptyState
-        type="reservations"
+        type="notifications"
         action={{
           label: 'Explorar packs',
           onClick: () => (window.location.href = '/packs'),
@@ -69,15 +78,25 @@ export default function NotificationList() {
 
       {/* Lista de notificaciones */}
       <div className="space-y-2">
-        {filteredNotifications.map((notification) => (
-          <NotificationCard
-            key={notification.id}
-            notification={notification}
-            onMarkAsRead={markAsRead}
-            onDelete={deleteNotification}
-          />
-        ))}
+        {filteredNotifications.length === 0 ? (
+          <div className="text-center py-8">
+            <p className="dark:text-gray-500 text-gray-400 text-sm">
+              No hay notificaciones {filter === 'unread' ? 'sin leer' : ''}
+            </p>
+          </div>
+        ) : (
+          filteredNotifications.map((notification) => (
+            <NotificationCard
+              key={notification.id}
+              notification={notification}
+              onMarkAsRead={markAsRead}
+              onDelete={deleteNotification}
+            />
+          ))
+        )}
       </div>
+
+      {error && <Toast message={error} type="error" onClose={() => {}} />}
     </div>
   )
 }

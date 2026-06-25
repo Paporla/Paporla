@@ -28,12 +28,15 @@ export interface Notification {
 
 export function useNotifications() {
   const { user } = useAuth()
-  const supabase = supabaseBrowser()
+  const supabaseRef = useRef(supabaseBrowser())
+  const channelRef = useRef<ReturnType<ReturnType<typeof supabaseBrowser>['channel']> | null>(null)
   const [notifications, setNotifications] = useState<Notification[]>([])
   const [unreadCount, setUnreadCount] = useState(0)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const isFirstLoad = useRef(true)
+
+  const supabase = supabaseRef.current
 
   const loadNotifications = useCallback(async () => {
     if (!user) {
@@ -49,14 +52,14 @@ export function useNotifications() {
 
     setError(null)
 
-    const { data, error } = await supabase
+    const { data, error: queryError } = await supabase
       .from('notifications')
       .select('*')
       .eq('user_id', user.id)
       .order('created_at', { ascending: false })
 
-    if (error) {
-      setError(error.message)
+    if (queryError) {
+      setError(queryError.message)
     } else {
       setNotifications(data ?? [])
       setUnreadCount(data?.filter((n) => !n.is_read).length ?? 0)
@@ -66,18 +69,37 @@ export function useNotifications() {
     isFirstLoad.current = false
   }, [user, supabase])
 
+  // Carga inicial
   useEffect(() => {
     loadNotifications()
   }, [loadNotifications])
 
+  // Suscripción a cambios en tiempo real
+  // Solo se suscribe UNA VEZ por ID de usuario. Usa refs para evitar doble suscripción.
+  const subscribedUserIdRef = useRef<string | null>(null)
+
   useEffect(() => {
-    if (!user) return
+    const userId = user?.id ?? null
+
+    // Sin usuario → no hacer nada
+    if (!userId) return
+
+    // Si ya estamos suscritos para este usuario → no re-suscribir
+    if (subscribedUserIdRef.current === userId) return
+
+    // Limpiar canal anterior si existe (cambio de usuario)
+    if (channelRef.current) {
+      supabase.removeChannel(channelRef.current).catch(() => {})
+      channelRef.current = null
+    }
+
+    subscribedUserIdRef.current = userId
 
     const channel = supabase
-      .channel('notifications-changes')
+      .channel(`notifications-${userId}`)
       .on(
         'postgres_changes',
-        { event: 'INSERT', schema: 'public', table: 'notifications', filter: `user_id=eq.${user.id}` },
+        { event: 'INSERT', schema: 'public', table: 'notifications', filter: `user_id=eq.${userId}` },
         (payload) => {
           const newNotification = payload.new as Notification
           setNotifications((prev) => [newNotification, ...prev])
@@ -86,7 +108,7 @@ export function useNotifications() {
       )
       .on(
         'postgres_changes',
-        { event: 'UPDATE', schema: 'public', table: 'notifications', filter: `user_id=eq.${user.id}` },
+        { event: 'UPDATE', schema: 'public', table: 'notifications', filter: `user_id=eq.${userId}` },
         (payload) => {
           const updated = payload.new as Notification
           setNotifications((prev) => {
@@ -98,7 +120,7 @@ export function useNotifications() {
       )
       .on(
         'postgres_changes',
-        { event: 'DELETE', schema: 'public', table: 'notifications', filter: `user_id=eq.${user.id}` },
+        { event: 'DELETE', schema: 'public', table: 'notifications', filter: `user_id=eq.${userId}` },
         (payload) => {
           const deletedId = payload.old.id as string
           setNotifications((prev) => {
@@ -108,18 +130,41 @@ export function useNotifications() {
           })
         },
       )
-      .subscribe()
+      .subscribe((status) => {
+        if (status === 'CLOSED' || status === 'CHANNEL_ERROR') {
+          subscribedUserIdRef.current = null
+          channelRef.current = null
+        }
+      })
+
+    channelRef.current = channel
 
     return () => {
-      supabase.removeChannel(channel)
+      // Solo limpiar en unmount real (cuando el componente se desmonta)
+      // No limpiar en re-renders porque usamos el guard subscribedUserIdRef
     }
-  }, [user, supabase])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id])
+
+  // Limpiar canal al desmontar el componente
+  useEffect(() => {
+    return () => {
+      if (channelRef.current) {
+        supabase.removeChannel(channelRef.current).catch(() => {})
+        channelRef.current = null
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const markAsRead = useCallback(
     async (notificationId: string) => {
-      const { error } = await supabase.from('notifications').update({ is_read: true }).eq('id', notificationId)
+      const { error: updateError } = await supabase
+        .from('notifications')
+        .update({ is_read: true })
+        .eq('id', notificationId)
 
-      if (!error) {
+      if (!updateError) {
         setNotifications((prev) => prev.map((n) => (n.id === notificationId ? { ...n, is_read: true } : n)))
         setUnreadCount((prev) => Math.max(0, prev - 1))
       }
@@ -131,9 +176,9 @@ export function useNotifications() {
     const unreadIds = notifications.filter((n) => !n.is_read).map((n) => n.id)
     if (unreadIds.length === 0) return
 
-    const { error } = await supabase.from('notifications').update({ is_read: true }).in('id', unreadIds)
+    const { error: updateError } = await supabase.from('notifications').update({ is_read: true }).in('id', unreadIds)
 
-    if (!error) {
+    if (!updateError) {
       setNotifications((prev) => prev.map((n) => ({ ...n, is_read: true })))
       setUnreadCount(0)
     }
@@ -141,9 +186,9 @@ export function useNotifications() {
 
   const deleteNotification = useCallback(
     async (notificationId: string) => {
-      const { error } = await supabase.from('notifications').delete().eq('id', notificationId)
+      const { error: deleteError } = await supabase.from('notifications').delete().eq('id', notificationId)
 
-      if (!error) {
+      if (!deleteError) {
         const deleted = notifications.find((n) => n.id === notificationId)
         setNotifications((prev) => prev.filter((n) => n.id !== notificationId))
         if (deleted && !deleted.is_read) {

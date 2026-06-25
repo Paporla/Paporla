@@ -29,7 +29,7 @@ const statusConfig: Record<string, { icon: React.ComponentType<{ className?: str
 export default function BusinessRecentActivity({ activities = [] }: BusinessRecentActivityProps) {
   if (activities.length === 0) {
     return (
-      <div className="bg-dark-card dark:bg-white dark:border-gray-200 border border-dark-border rounded-2xl p-6 text-center">
+      <div className="glass-card rounded-2xl p-6 text-center">
         <ShoppingBag className="w-12 h-12 dark:text-gray-600 text-gray-400 mx-auto mb-3" />
         <p className="dark:text-gray-400 text-gray-600">No hay actividad reciente</p>
         <p className="text-xs dark:text-gray-500 text-gray-400 mt-1">Las nuevas reservas apareceran aqui</p>
@@ -38,7 +38,7 @@ export default function BusinessRecentActivity({ activities = [] }: BusinessRece
   }
 
   return (
-    <div className="bg-dark-card dark:bg-white dark:border-gray-200 border border-dark-border rounded-2xl overflow-hidden">
+    <div className="glass-card rounded-2xl overflow-hidden">
       <div className="flex items-center justify-between p-5 pb-3 border-b border-dark-border dark:border-gray-200">
         <div>
           <h3 className="text-lg font-semibold dark:text-white text-gray-900">Actividad reciente</h3>

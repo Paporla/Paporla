@@ -327,23 +327,21 @@ BEGIN
 END;
 $$;
 
--- 10.2 Generación de código de recogida
+-- 10.2 Generación de código de recogida (criptográficamente seguro)
 DROP FUNCTION IF EXISTS public.generate_pickup_code() CASCADE;
 CREATE OR REPLACE FUNCTION public.generate_pickup_code()
 RETURNS TEXT
 LANGUAGE plpgsql
 AS $$
 DECLARE
-  chars TEXT := 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-  part1 TEXT := '';
-  part2 TEXT := '';
-  i INTEGER;
+  raw_uuid TEXT;
+  code_part TEXT;
 BEGIN
-  FOR i IN 1..3 LOOP
-    part1 := part1 || substr(chars, floor(random() * length(chars) + 1)::integer, 1);
-    part2 := part2 || substr(chars, floor(random() * length(chars) + 1)::integer, 1);
-  END LOOP;
-  RETURN 'P4P-' || part1 || '-' || part2;
+  -- Usar gen_random_uuid() que es criptográficamente seguro
+  raw_uuid := replace(gen_random_uuid()::text, '-', '');
+  -- Tomar 8 caracteres y formatear como P4P-XXXX-XXXX
+  code_part := upper(substr(raw_uuid, 1, 8));
+  RETURN 'P4P-' || substr(code_part, 1, 4) || '-' || substr(code_part, 5, 4);
 END;
 $$;
 

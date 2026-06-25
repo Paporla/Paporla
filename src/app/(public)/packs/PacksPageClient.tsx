@@ -1,7 +1,7 @@
 'use client'
 
-import { useState, useMemo } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState, useMemo, useEffect } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { useAuth } from '@/hooks/useAuth'
 import { usePublicPacks } from '@/hooks/usePublicPacks'
 import PackFiltersAdvanced from '@/components/packs/PackFiltersAdvanced'
@@ -16,10 +16,12 @@ const ITEMS_PER_PAGE = 9
 
 export default function PacksPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const { user } = useAuth()
-  const { packs, loading, error, setError, setFilters } = usePublicPacks()
+  const { packs, loading, error: hookError, setError, setFilters } = usePublicPacks()
   const [currentPage, setCurrentPage] = useState(1)
   const [reserving, setReserving] = useState<string | null>(null)
+  const [reservedFromRedirect, setReservedFromRedirect] = useState(false)
 
   const totalPages = Math.ceil(packs.length / ITEMS_PER_PAGE)
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE
@@ -32,7 +34,8 @@ export default function PacksPage() {
 
   const handleReserve = async (packId: string) => {
     if (!user) {
-      router.push('/login')
+      // Guardar el pack en la URL para redirigir de vuelta tras login/registro
+      router.push(`/login?redirect=/packs&reserve=${packId}`)
       return
     }
 
@@ -66,6 +69,24 @@ export default function PacksPage() {
     }
   }
 
+  // Auto-reservar cuando el usuario vuelve tras login/registro con ?reserve=PACK_ID
+  useEffect(() => {
+    const reservePackId = searchParams.get('reserve')
+    if (!reservePackId || !user || reservedFromRedirect || loading) return
+
+    // Verificar que el pack existe en la lista cargada
+    const pack = packs.find((p) => p.id === reservePackId)
+    if (!pack) return
+
+    setReservedFromRedirect(true)
+    handleReserve(reservePackId)
+    // Limpiar el param de la URL sin recargar
+    const url = new URL(window.location.href)
+    url.searchParams.delete('reserve')
+    window.history.replaceState({}, '', url.toString())
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user, packs, loading])
+
   if (loading) return <PacksLoadingGrid />
 
   return (
@@ -98,7 +119,7 @@ export default function PacksPage() {
         )}
       </div>
 
-      {error && <Toast message={error} type="error" onClose={() => setError('')} />}
+      {hookError && <Toast message={hookError} type="error" onClose={() => setError('')} />}
     </div>
   )
 }

@@ -2,12 +2,14 @@
 
 import Link from 'next/link'
 import { motion } from 'framer-motion'
-import { Users, Store, TrendingUp, Bell, ChevronRight } from 'lucide-react'
+import { Users, Store, TrendingUp, Bell, ChevronRight, AlertCircle } from 'lucide-react'
 import Card from '@/components/ui/Card'
 import type { AdminDashboardStats } from './useAdminDashboard'
 
 interface Props {
   stats: AdminDashboardStats
+  loading?: boolean
+  error?: string
 }
 
 interface NavCard {
@@ -61,10 +63,29 @@ const navCards: NavCard[] = [
 
 function getValue(stats: AdminDashboardStats, key: keyof AdminDashboardStats | null): string {
   if (!key) return 'Ver mas'
-  return (stats[key] ?? 0).toLocaleString()
+  return (stats?.[key] ?? 0).toLocaleString()
 }
 
-export default function AdminNavCards({ stats }: Props) {
+export default function AdminNavCards({ stats, loading, error }: Props) {
+  if (error) {
+    return (
+      <div className="rounded-2xl border border-red-500/30 bg-red-500/5 p-6 text-center">
+        <AlertCircle className="w-8 h-8 text-red-400 mx-auto mb-2" />
+        <p className="text-red-400 text-sm font-medium">{error}</p>
+      </div>
+    )
+  }
+
+  if (loading) {
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 animate-pulse">
+        {[0, 1, 2].map((i) => (
+          <div key={i} className="h-32 bg-gray-200 dark:bg-gray-800 rounded-2xl" />
+        ))}
+      </div>
+    )
+  }
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
       {navCards.map((item, index) => (

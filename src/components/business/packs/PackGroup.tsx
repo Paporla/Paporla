@@ -19,7 +19,7 @@ export default function PackGroup({ title, packs, deleting, onDeleteClick, empty
 
   if (packs.length === 0 && emptyMessage) {
     return (
-      <div className="bg-dark-card/30 dark:bg-white/50 rounded-2xl border border-dark-border dark:border-gray-200 overflow-hidden">
+      <div className="dark:bg-dark-card/30 bg-gray-50 rounded-2xl border dark:border-dark-border border-gray-200 overflow-hidden">
         <div className="p-4 text-center">
           <p className="text-sm dark:text-gray-500 text-gray-400">{emptyMessage}</p>
         </div>
@@ -30,7 +30,7 @@ export default function PackGroup({ title, packs, deleting, onDeleteClick, empty
   if (packs.length === 0) return null
 
   return (
-    <div className="bg-dark-card/30 dark:bg-white/50 rounded-2xl border border-dark-border dark:border-gray-200 overflow-hidden">
+    <div className="dark:bg-dark-card/30 bg-gray-50 rounded-2xl border dark:border-dark-border border-gray-200 overflow-hidden">
       {/* Header del grupo */}
       <button
         onClick={() => setIsExpanded(!isExpanded)}

@@ -28,6 +28,7 @@ export interface DashboardStats {
   totalReservations: number
   pendingReservations: number
   totalRevenue: number
+  weekGrowth: number
 }
 export interface ShopInfo {
   id: string
@@ -88,11 +89,35 @@ export function useBusinessDashboard() {
     .filter((r) => r.status === 'picked_up')
     .reduce((sum, r) => sum + (r.total_price_cents ?? 0), 0)
 
+  // Calcular crecimiento semanal real
+  const now = new Date()
+  const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
+  const twoWeeksAgo = new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000)
+
+  const thisWeekReservations = rawReservations.filter((r) => {
+    const d = new Date(r.created_at)
+    return d >= oneWeekAgo && d <= now
+  }).length
+  const lastWeekReservations = rawReservations.filter((r) => {
+    const d = new Date(r.created_at)
+    return d >= twoWeeksAgo && d < oneWeekAgo
+  }).length
+
+  const weekGrowth =
+    lastWeekReservations > 0
+      ? Math.round(((thisWeekReservations - lastWeekReservations) / lastWeekReservations) * 100)
+      : thisWeekReservations > 0
+        ? 100
+        : 0
+
+  const error = packsResult.error?.message || reservationsResult.error?.message || null
+
   return {
     shop,
     packs,
     recentReservations: rawReservations.slice(0, 5),
     loading,
+    error,
     stats: {
       totalPacks: packs.length,
       activePacks,
@@ -100,6 +125,7 @@ export function useBusinessDashboard() {
       totalReservations,
       pendingReservations,
       totalRevenue,
+      weekGrowth,
     },
   }
 }

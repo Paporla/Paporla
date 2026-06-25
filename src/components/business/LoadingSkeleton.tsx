@@ -1,11 +1,17 @@
 export default function LoadingSkeleton() {
   return (
-    <div className="flex items-center justify-center min-h-[80vh]">
-      <div className="text-center">
-        <div className="w-14 h-14 rounded-full border-4 border-primary/30 border-t-primary animate-spin mx-auto mb-4" />
-        <p className="dark:text-gray-400 text-gray-600 text-lg font-medium">Cargando panel...</p>
-        <p className="dark:text-gray-600 text-gray-400 text-sm mt-1">Preparando tu comercio</p>
+    <div className="space-y-8 animate-pulse">
+      <div className="h-28 bg-gray-200 dark:bg-gray-800 rounded-2xl" />
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        {[0, 1, 2, 3].map((i) => (
+          <div key={i} className="h-24 bg-gray-200 dark:bg-gray-800 rounded-2xl" />
+        ))}
       </div>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="h-48 bg-gray-200 dark:bg-gray-800 rounded-2xl" />
+        <div className="h-48 bg-gray-200 dark:bg-gray-800 rounded-2xl" />
+      </div>
+      <div className="h-64 bg-gray-200 dark:bg-gray-800 rounded-2xl" />
     </div>
   )
 }

@@ -10,7 +10,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   await requireAuth(['admin', 'super_admin'])
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#0a0a1a] via-[#0f0f1a] to-[#020205]">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 dark:from-[#0a0a1a] dark:via-[#0f0f1a] dark:to-[#020205]">
       <div className="flex">
         <AdminSidebar />
         <div className="flex-1 lg:ml-72">

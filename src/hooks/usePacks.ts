@@ -1,36 +1,42 @@
 'use client'
 
 import { useQuery } from '@tanstack/react-query'
+import { supabaseBrowser } from '@/lib/supabase/client'
 import { PackWithShop } from '@/types/pack'
 
 const PACKS_QUERY_KEY = 'packs'
+const supabase = supabaseBrowser()
 
-function getBaseUrl(): string {
-  if (typeof window !== 'undefined') return window.location.origin
-  return process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'
-}
-
-async function apiFetch<T>(url: string): Promise<T> {
-  const fullUrl = url.startsWith('/') ? `${getBaseUrl()}${url}` : url
-  const response = await fetch(fullUrl)
-  if (!response.ok) {
-    const err = await response.json()
-    throw new Error(err.error ?? 'Error al obtener packs')
-  }
-  const data = await response.json()
-  if (!data.success) throw new Error(data.error ?? 'Error en la solicitud')
-  return data as T
-}
+const PACK_SELECT = `*,shop:shops(id,name,address,city,phone,verified,description,logo_url,latitude,longitude)`
 
 async function fetchPacks(shopId?: string) {
-  const url = shopId ? `/api/packs?shopId=${shopId}` : '/api/packs'
-  const data = await apiFetch<{ success: boolean; packs: PackWithShop[] }>(url)
-  return data.packs
+  let query = supabase.from('packs').select(PACK_SELECT).order('created_at', { ascending: false })
+
+  if (shopId) {
+    query = query.eq('shop_id', shopId)
+  }
+
+  const { data, error } = await query
+
+  if (error) {
+    throw new Error(error.message ?? 'Error al obtener packs')
+  }
+
+  return (data ?? []) as PackWithShop[]
 }
 
 async function fetchPackById(id: string) {
-  const data = await apiFetch<{ success: boolean; pack: PackWithShop }>(`/api/packs?id=${id}`)
-  return data.pack
+  const { data, error } = await supabase.from('packs').select(PACK_SELECT).eq('id', id).maybeSingle()
+
+  if (error) {
+    throw new Error(error.message ?? 'Error al obtener el pack')
+  }
+
+  if (!data) {
+    throw new Error('Pack no encontrado')
+  }
+
+  return data as PackWithShop
 }
 
 export function usePacks(shopId?: string) {

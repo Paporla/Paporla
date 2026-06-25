@@ -60,7 +60,7 @@ export default function StatsSection() {
               viewport={{ once: true }}
               transition={{ delay: idx * 0.1 }}
               whileHover={{ y: -5 }}
-              className="group relative text-center p-6 rounded-2xl bg-gradient-to-br from-primary/[0.18] to-primary/[0.05] border border-white/10 hover:border-primary/30 transition-all duration-300"
+              className="group relative text-center p-6 rounded-2xl bg-gradient-to-br from-primary/[0.18] to-primary/[0.05] border dark:border-white/10 border-gray-200 hover:border-primary/30 transition-all duration-300"
             >
               <div className="absolute inset-0 rounded-2xl bg-gradient-to-t from-transparent via-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 

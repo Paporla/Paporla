@@ -59,8 +59,8 @@ export default function BusinessSidebar() {
           />
         </div>
         <div>
-          <h1 className="font-bold dark:text-white text-gray-900 text-lg">Paporla</h1>
-          <p className="text-[10px] dark:text-gray-500 text-gray-500">Panel de Comercio</p>
+          <h1 className="font-bold text-white text-lg">Paporla</h1>
+          <p className="text-[10px] text-gray-500">Panel de Comercio</p>
         </div>
       </div>
 
@@ -68,13 +68,11 @@ export default function BusinessSidebar() {
       <div className="mx-4 mt-6 p-3 rounded-xl bg-primary/5 border border-primary/20">
         <div className="flex items-center gap-2">
           <Store className="w-4 h-4 text-primary" />
-          <span className="text-sm font-medium dark:text-white text-gray-900 truncate">
-            {user?.name ?? 'Mi Comercio'}
-          </span>
+          <span className="text-sm font-medium text-white truncate">{user?.name ?? 'Mi Comercio'}</span>
         </div>
         <div className="flex items-center gap-1 mt-1">
           <span className="w-1.5 h-1.5 rounded-full bg-green-400" />
-          <span className="text-[10px] dark:text-gray-500 text-gray-500">Activo</span>
+          <span className="text-[10px] text-gray-500">Activo</span>
         </div>
       </div>
     </AppSidebar>

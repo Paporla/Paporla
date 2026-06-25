@@ -1,12 +1,6 @@
-export type ReservationStatus =
-  | 'pending'
-  | 'confirmed'
-  | 'ready_pickup'
-  | 'completed'
-  | 'picked_up'
-  | 'cancelled'
-  | 'no_show'
-  | 'expired'
+import type { ReservationStatus } from '@/lib/supabase/types'
+
+export type { ReservationStatus }
 
 export interface StatusConfig {
   label: string

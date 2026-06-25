@@ -36,7 +36,7 @@ export default function UserSidebar() {
   return (
     <AppSidebar items={navItems} exploreItems={exploreItems} bottomItems={bottomItems} onLogout={handleLogout}>
       {/* Logo */}
-      <div className="flex items-center gap-3 px-6 py-5 border-b dark:border-dark-border border-gray-200">
+      <div className="flex items-center gap-3 px-6 py-5 border-b border-dark-border">
         <div className="w-9 h-9 rounded-xl bg-primary/20 flex items-center justify-center">
           <Image
             src="/images/logo-transparent.png"
@@ -47,8 +47,8 @@ export default function UserSidebar() {
           />
         </div>
         <div>
-          <h1 className="font-bold dark:text-white text-gray-900 text-lg">Paporla</h1>
-          <p className="text-[10px] dark:text-gray-500 text-gray-500">Panel de Usuario</p>
+          <h1 className="font-bold text-white text-lg">Paporla</h1>
+          <p className="text-[10px] text-gray-500">Panel de Usuario</p>
         </div>
       </div>
 
@@ -59,8 +59,8 @@ export default function UserSidebar() {
             <span className="text-primary text-sm font-bold">{user?.name?.charAt(0) || 'U'}</span>
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium dark:text-white text-gray-900 truncate">{user?.name ?? 'Usuario'}</p>
-            <p className="text-[10px] dark:text-gray-500 text-gray-500">{user?.email}</p>
+            <p className="text-sm font-medium text-white truncate">{user?.name ?? 'Usuario'}</p>
+            <p className="text-[10px] text-gray-500">{user?.email}</p>
           </div>
         </div>
       </div>

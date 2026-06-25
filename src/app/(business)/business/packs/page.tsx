@@ -120,7 +120,7 @@ export default function BusinessPacksPage() {
 
       {/* Sin packs */}
       {filteredActive.length === 0 && filteredInactive.length === 0 && packs.length === 0 && (
-        <div className="bg-dark-card dark:bg-white dark:border-gray-200 border dark:border-white/10 rounded-2xl p-12 text-center">
+        <div className="glass-card rounded-2xl p-12 text-center">
           <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-primary/10 flex items-center justify-center">
             <Package className="w-10 h-10 text-primary" />
           </div>

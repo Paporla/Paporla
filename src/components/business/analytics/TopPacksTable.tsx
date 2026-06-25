@@ -19,7 +19,7 @@ interface TopPacksTableProps {
 export default function TopPacksTable({ packs }: TopPacksTableProps) {
   if (packs.length === 0) {
     return (
-      <div className="bg-dark-card dark:bg-white dark:border-gray-200 border border-dark-border rounded-2xl p-6">
+      <div className="glass-card rounded-2xl p-6">
         <div className="flex items-center gap-2 mb-4">
           <Package className="w-5 h-5 text-primary" />
           <h3 className="font-bold dark:text-white text-gray-900">Top packs vendidos</h3>
@@ -37,11 +37,7 @@ export default function TopPacksTable({ packs }: TopPacksTableProps) {
   const maxSold = packs[0]?.totalSold ?? 1
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="bg-dark-card dark:bg-white dark:border-gray-200 border border-dark-border rounded-2xl p-6"
-    >
+    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="glass-card rounded-2xl p-6">
       <div className="flex items-center gap-2 mb-5">
         <Package className="w-5 h-5 text-primary" />
         <h3 className="font-bold dark:text-white text-gray-900">Top packs vendidos</h3>

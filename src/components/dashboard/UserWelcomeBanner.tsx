@@ -1,8 +1,7 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import Link from 'next/link'
-import { Sparkles, Package, ShoppingBag, Store, Award } from 'lucide-react'
+import { Package, Award } from 'lucide-react'
 
 interface UserWelcomeBannerProps {
   userName: string
@@ -28,35 +27,15 @@ export default function UserWelcomeBanner({
 
       <div className="relative flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div className="flex-1">
-          <div className="flex items-center gap-2 mb-2">
-            <Sparkles className="w-5 h-5 text-primary" />
+          <div className="mb-2">
             <span className="text-xs font-medium text-primary uppercase tracking-wider">Panel de Control</span>
           </div>
           <h1 className="text-2xl lg:text-3xl font-bold dark:text-white text-gray-900">
             Hola, <span className="text-primary">{userName}</span>!
           </h1>
           <p className="dark:text-gray-400 text-gray-600 text-sm mt-1">
-            Has rescatado <span className="text-primary font-bold">{packsRescued}</span> packs. Sigue salvando comida!
+            Has rescatado <span className="text-primary font-bold">{packsRescued}</span> packs. ¡Sigue salvando comida!
           </p>
-
-          {/* Enlaces rapidos a explorar */}
-          <div className="flex gap-3 mt-4">
-            <Link
-              href="/packs"
-              className="flex items-center gap-1.5 text-xs text-primary/80 hover:text-primary transition-colors"
-            >
-              <ShoppingBag className="w-3.5 h-3.5" />
-              Explorar packs
-            </Link>
-            <span className="text-gray-600">•</span>
-            <Link
-              href="/shops"
-              className="flex items-center gap-1.5 text-xs text-primary/80 hover:text-primary transition-colors"
-            >
-              <Store className="w-3.5 h-3.5" />
-              Ver comercios
-            </Link>
-          </div>
         </div>
 
         <div className="flex items-center gap-3">

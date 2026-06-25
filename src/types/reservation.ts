@@ -1,73 +1,11 @@
 // ============================================
-// TIPOS DE RESERVAS - TOO GOOD TO GO CLONE
+// UI TYPES — Reservas (composición para vistas)
 // ============================================
+// Los tipos base vienen de @/lib/supabase/types (canonical)
+import type { Reservation, ReservationStatus, PaymentMethod, PaymentStatus } from '@/lib/supabase/types'
 
-// Estados de reserva (coinciden con la DB)
-export type ReservationStatus =
-  | 'pending'
-  | 'confirmed'
-  | 'ready_pickup'
-  | 'picked_up'
-  | 'cancelled'
-  | 'expired'
-  | 'no_show'
-
-// Métodos de pago
-export type PaymentMethod = 'card' | 'cash' | 'demo' | 'stripe'
-
-// Estados de pago
-export type PaymentStatus = 'pending' | 'paid' | 'failed' | 'refunded'
-
-// ============================================
-// INTERFAZ PRINCIPAL DE RESERVA
-// ============================================
-
-export interface Reservation {
-  id: string
-  user_id: string
-  shop_id: string
-  pack_id: string
-  quantity: number
-  total_price_cents: number
-  status: ReservationStatus
-  pickup_code: string
-  payment_method: PaymentMethod | null
-  payment_status: PaymentStatus
-  payment_id: string | null
-  pickup_date: string | null
-  pickup_start_time: string | null
-  pickup_end_time: string | null
-  reserved_at: string
-  picked_up_at: string | null
-  cancelled_at: string | null
-  cancelled_by: string | null
-  cancel_reason: string | null
-  created_at: string
-  updated_at: string
-  // Datos anidados (se llenan con joins)
-  pack?: {
-    id: string
-    title: string
-    description: string | null
-    image_url: string | null
-    price_cents: number
-  }
-  shop?: {
-    id: string
-    name: string
-    address: string | null
-    phone: string | null
-    latitude: number | null
-    longitude: number | null
-    city: string | null
-  }
-  user?: {
-    id: string
-    name: string | null
-    email: string | null
-    phone: string | null
-  }
-}
+// Re-exportar para consumers existentes
+export type { Reservation, ReservationStatus, PaymentMethod, PaymentStatus }
 
 // ============================================
 // RESERVA CON DETALLES COMPLETOS (para vistas)

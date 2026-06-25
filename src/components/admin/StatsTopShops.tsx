@@ -27,12 +27,12 @@ export default function StatsTopShops({ data }: Props) {
       {data.length > 0 ? (
         <ResponsiveContainer width="100%" height={300}>
           <BarChart data={data} layout="vertical" margin={{ left: 20 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#1a1a1a" horizontal={false} />
-            <XAxis type="number" stroke="#333" fontSize={11} tickLine={false} axisLine={false} allowDecimals={false} />
+            <CartesianGrid strokeDasharray="3 3" stroke="#333" horizontal={false} opacity={0.3} />
+            <XAxis type="number" stroke="#888" fontSize={11} tickLine={false} axisLine={false} allowDecimals={false} />
             <YAxis
               dataKey="name"
               type="category"
-              stroke="#333"
+              stroke="#888"
               fontSize={11}
               tickLine={false}
               axisLine={false}

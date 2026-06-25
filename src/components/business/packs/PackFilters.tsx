@@ -35,7 +35,7 @@ export default function PackFilters({ searchTerm, onSearchChange, filterStatus, 
         </div>
         <button
           onClick={() => setShowFilters(!showFilters)}
-          className="flex items-center gap-2 px-4 py-2 rounded-xl bg-dark-muted border border-dark-border hover:border-primary/30 transition-all"
+          className="flex items-center gap-2 px-4 py-2 rounded-xl dark:bg-dark-muted bg-gray-100 border dark:border-dark-border border-gray-200 hover:border-primary/30 transition-all"
         >
           <Filter className="w-4 h-4 text-gray-400" />
           <span className="text-sm text-gray-400">Filtros</span>
@@ -50,7 +50,7 @@ export default function PackFilters({ searchTerm, onSearchChange, filterStatus, 
             exit={{ opacity: 0, height: 0 }}
             className="overflow-hidden"
           >
-            <div className="flex flex-wrap gap-2 p-4 bg-dark-muted/50 rounded-xl border border-dark-border">
+            <div className="flex flex-wrap gap-2 p-4 dark:bg-dark-muted/50 bg-gray-50 rounded-xl border dark:border-dark-border border-gray-200">
               {filters.map((filter) => (
                 <button
                   key={filter.id}

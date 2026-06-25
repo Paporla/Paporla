@@ -1,17 +1,17 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
-import { supabaseBrowser } from '@/lib/supabase/client' // ← CAMBIADO
+import { supabaseBrowser } from '@/lib/supabase/client'
 import Link from 'next/link'
-import { motion } from 'framer-motion'
-import { Lock, ArrowLeft, CheckCircle, Eye, EyeOff } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { Lock, ArrowLeft, CheckCircle, Eye, EyeOff, Check, X } from 'lucide-react'
 import Button from '@/components/ui/Button'
 import Input from '@/components/ui/Input'
 import Toast from '@/components/ui/Toast'
 
 export default function ResetPasswordPage() {
-  const supabase = supabaseBrowser() // ← AGREGADO
+  const supabase = supabaseBrowser()
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
@@ -19,6 +19,19 @@ export default function ResetPasswordPage() {
   const [success, setSuccess] = useState(false)
   const [error, setError] = useState('')
   const router = useRouter()
+
+  // Requisitos de contraseña en tiempo real
+  const passwordChecks = useMemo(() => {
+    const pwd = password
+    return [
+      { label: 'Al menos 8 caracteres', passed: pwd.length >= 8 },
+      { label: 'Una letra mayuscula', passed: /[A-Z]/.test(pwd) },
+      { label: 'Un numero', passed: /[0-9]/.test(pwd) },
+    ]
+  }, [password])
+
+  const allPasswordChecksPassed = passwordChecks.every((c) => c.passed)
+  const showPasswordHints = password.length > 0 && !allPasswordChecksPassed
 
   useEffect(() => {
     const hash = window.location.hash
@@ -75,8 +88,8 @@ export default function ResetPasswordPage() {
 
   return (
     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-      <form onSubmit={handleSubmit} className="space-y-6">
-        <p className="dark:text-gray-400 text-gray-600 text-sm text-center">Ingresa tu nueva contraseña.</p>
+      <form onSubmit={handleSubmit} className="space-y-5">
+        <p className="dark:text-gray-400 text-gray-600 text-sm text-center">Ingresa tu nueva contraseña segura.</p>
 
         <div className="relative">
           <Input
@@ -91,11 +104,43 @@ export default function ResetPasswordPage() {
           <button
             type="button"
             onClick={() => setShowPassword(!showPassword)}
-            className="absolute right-3 top-9 dark:text-gray-400 text-gray-500 hover:text-primary"
+            className="absolute right-3 top-9 dark:text-gray-400 text-gray-500 hover:text-primary transition-colors"
           >
             {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
           </button>
         </div>
+
+        {/* Requisitos de contraseña en tiempo real */}
+        <AnimatePresence>
+          {showPasswordHints && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              className="overflow-hidden"
+            >
+              <div className="bg-gray-50 dark:bg-white/[0.03] rounded-xl p-3 border border-gray-100 dark:border-white/5 space-y-1.5">
+                <p className="text-xs text-gray-500 dark:text-gray-500 mb-1">La contraseña debe tener:</p>
+                {passwordChecks.map((check) => (
+                  <div key={check.label} className="flex items-center gap-2 text-xs">
+                    {check.passed ? (
+                      <Check className="w-3.5 h-3.5 text-green-500 flex-shrink-0" />
+                    ) : (
+                      <X className="w-3.5 h-3.5 text-gray-400 flex-shrink-0" />
+                    )}
+                    <span
+                      className={
+                        check.passed ? 'text-green-600 dark:text-green-400' : 'text-gray-500 dark:text-gray-400'
+                      }
+                    >
+                      {check.label}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         <Input
           label="Confirmar nueva contraseña"
@@ -107,15 +152,8 @@ export default function ResetPasswordPage() {
           required
         />
 
-        <div className="text-sm dark:text-gray-400 text-gray-600 space-y-1">
-          <p>La contraseña debe tener:</p>
-          <ul className="list-disc list-inside ml-2">
-            <li>Al menos 8 caracteres</li>
-          </ul>
-        </div>
-
         <Button type="submit" className="w-full" disabled={loading}>
-          {loading ? 'Cargando...' : 'Actualizar contraseña'}
+          {loading ? 'Actualizando...' : 'Actualizar contraseña'}
         </Button>
 
         <div className="text-center">

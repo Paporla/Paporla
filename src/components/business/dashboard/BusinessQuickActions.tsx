@@ -62,11 +62,12 @@ export default function BusinessQuickActions() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 + idx * 0.05 }}
+            className="h-full"
           >
-            <Link href={action.href}>
-              <div className="group dark:bg-dark-card bg-white dark:bg-white dark:border-gray-200 border dark:border-dark-border border-gray-200 hover:border-primary/30 rounded-2xl p-4 text-center cursor-pointer transition-all duration-300 hover:-translate-y-1">
+            <Link href={action.href} className="block h-full">
+              <div className="group h-full flex flex-col items-center justify-center dark:bg-[#0f0f1a] bg-white border dark:border-white/10 border-gray-200 hover:border-primary/30 rounded-2xl p-4 text-center cursor-pointer transition-all duration-300 hover:-translate-y-1">
                 <div
-                  className={`w-12 h-12 mx-auto mb-3 rounded-xl bg-gradient-to-br ${action.color} flex items-center justify-center group-hover:scale-110 transition-transform`}
+                  className={`w-12 h-12 mx-auto mb-3 rounded-xl bg-gradient-to-br ${action.color} flex items-center justify-center group-hover:scale-110 transition-transform flex-shrink-0`}
                 >
                   <action.icon className="w-6 h-6 text-white" />
                 </div>

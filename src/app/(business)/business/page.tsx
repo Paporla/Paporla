@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { Store } from 'lucide-react'
+import { useAuth } from '@/hooks/useAuth'
 import { useBusinessDashboard } from '@/components/business/dashboard/useBusinessDashboard'
 import LoadingSkeleton from '@/components/business/LoadingSkeleton'
 import Button from '@/components/ui/Button'
@@ -13,14 +14,33 @@ import BusinessRecentActivity from '@/components/business/dashboard/BusinessRece
 import TodayPickups from '@/components/business/TodayPickups'
 
 export default function BusinessDashboard() {
-  const { shop, stats, recentReservations, loading } = useBusinessDashboard()
+  const { loading: authLoading } = useAuth()
+  const { shop, stats, recentReservations, loading, error: dashError } = useBusinessDashboard()
 
-  if (loading) return <LoadingSkeleton />
+  // Evitar flash: mientras se resuelve la autenticación, mostrar skeleton
+  if (authLoading || loading) return <LoadingSkeleton />
+
+  if (dashError) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
+        <div className="glass-card rounded-2xl p-8 max-w-md">
+          <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-red-500/10 flex items-center justify-center">
+            <Store className="w-8 h-8 text-red-400" />
+          </div>
+          <h2 className="text-xl font-bold dark:text-white text-gray-900 mb-2">Error al cargar</h2>
+          <p className="dark:text-gray-400 text-gray-600 text-sm mb-6">{dashError}</p>
+          <Button onClick={() => window.location.reload()} variant="outline">
+            Reintentar
+          </Button>
+        </div>
+      </div>
+    )
+  }
 
   if (!shop) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
-        <div className="bg-black/40 dark:bg-white/60 backdrop-blur-sm rounded-2xl p-8 max-w-md border dark:border-white/10 border-gray-200">
+        <div className="glass-card rounded-2xl p-8 max-w-md">
           <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-primary/10 flex items-center justify-center">
             <Store className="w-8 h-8 text-primary" />
           </div>
@@ -49,7 +69,11 @@ export default function BusinessDashboard() {
 
   return (
     <div className="space-y-8 pb-8">
-      <BusinessWelcomeBanner shopName={shop.name} todayReservations={stats.todayReservations} weekGrowth={12} />
+      <BusinessWelcomeBanner
+        shopName={shop.name}
+        todayReservations={stats.todayReservations}
+        weekGrowth={stats.weekGrowth}
+      />
 
       <BusinessStatsGrid
         stats={{

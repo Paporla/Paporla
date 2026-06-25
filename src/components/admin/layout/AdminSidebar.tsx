@@ -2,7 +2,7 @@
 
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
-import { LayoutDashboard, Users, Store, BarChart3, Bell, HelpCircle } from 'lucide-react'
+import { LayoutDashboard, Users, Store, BarChart3, Bell } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
 import { useNotifications } from '@/hooks/useNotifications'
 import AppSidebar from '@/components/layout/AppSidebar'
@@ -19,10 +19,7 @@ export default function AdminSidebar() {
     { href: '/admin/stats', label: 'Estadisticas', icon: BarChart3 },
   ]
 
-  const bottomItems = [
-    { href: '/admin/notifications', label: 'Notificaciones', icon: Bell, badge: unreadCount },
-    { href: '/faq', label: 'FAQ', icon: HelpCircle },
-  ]
+  const bottomItems = [{ href: '/admin/notifications', label: 'Notificaciones', icon: Bell, badge: unreadCount }]
 
   const handleLogout = async () => {
     await signOut()

@@ -2,7 +2,7 @@
 
 import { motion } from 'framer-motion'
 import Link from 'next/link'
-import { Calendar, Package, Leaf, DollarSign } from 'lucide-react'
+import { Calendar, Package, Leaf, DollarSign, AlertCircle } from 'lucide-react'
 
 interface UserStats {
   activeReservations: number
@@ -15,6 +15,8 @@ interface UserStats {
 
 interface UserStatsGridProps {
   stats: UserStats
+  loading?: boolean
+  error?: string
 }
 
 const statItems = [
@@ -57,9 +59,37 @@ const statItems = [
   },
 ]
 
-export default function UserStatsGrid({ stats }: UserStatsGridProps) {
+export default function UserStatsGrid({ stats, loading, error }: UserStatsGridProps) {
+  // Estado de error
+  if (error) {
+    return (
+      <div className="rounded-2xl border border-red-500/30 bg-red-500/5 p-6 text-center">
+        <AlertCircle className="w-8 h-8 text-red-400 mx-auto mb-2" />
+        <p className="text-red-400 text-sm font-medium">{error}</p>
+      </div>
+    )
+  }
+
+  // Estado de carga — skeleton cards
+  if (loading) {
+    return (
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        {[0, 1, 2, 3].map((i) => (
+          <div
+            key={i}
+            className="dark:bg-dark-card bg-white border dark:border-dark-border border-gray-200 rounded-2xl p-4 animate-pulse"
+          >
+            <div className="w-8 h-8 rounded-xl bg-gray-200 dark:bg-gray-700 mb-3" />
+            <div className="h-6 w-16 bg-gray-200 dark:bg-gray-700 rounded mb-2" />
+            <div className="h-3 w-24 bg-gray-100 dark:bg-gray-600 rounded" />
+          </div>
+        ))}
+      </div>
+    )
+  }
+
   const getValue = (key: string, isPrice?: boolean, suffix?: string) => {
-    const value = stats[key as keyof UserStats]
+    const value = stats ? stats[key as keyof UserStats] : 0
     if (isPrice && typeof value === 'number') {
       return `$${value.toLocaleString()}`
     }

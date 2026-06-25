@@ -1,9 +1,9 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Mail, Lock, User, Phone, Store, Eye, EyeOff } from 'lucide-react'
+import { Mail, Lock, User, Phone, Store, Eye, EyeOff, Check, X } from 'lucide-react'
 import Input from '@/components/ui/Input'
 import RegisterRoleSelector from './RegisterRoleSelector'
 
@@ -39,6 +39,19 @@ export default function RegisterFormFields({
   onFieldBlur,
 }: Props) {
   const [showPassword, setShowPassword] = useState(false)
+
+  // Requisitos de contraseña en tiempo real
+  const passwordChecks = useMemo(() => {
+    const pwd = formData.password
+    return [
+      { label: 'Al menos 8 caracteres', passed: pwd.length >= 8 },
+      { label: 'Una letra mayuscula', passed: /[A-Z]/.test(pwd) },
+      { label: 'Un numero', passed: /[0-9]/.test(pwd) },
+    ]
+  }, [formData.password])
+
+  const allPasswordChecksPassed = passwordChecks.every((c) => c.passed)
+  const showPasswordHints = formData.password.length > 0 && !allPasswordChecksPassed
 
   const update = (partial: Partial<FormData>) => {
     const key = Object.keys(partial)[0]
@@ -91,6 +104,38 @@ export default function RegisterFormFields({
             {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
           </button>
         </div>
+
+        {/* Requisitos de contraseña en tiempo real */}
+        <AnimatePresence>
+          {showPasswordHints && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              className="overflow-hidden"
+            >
+              <div className="bg-gray-50 dark:bg-white/[0.03] rounded-xl p-3 border border-gray-100 dark:border-white/5 space-y-1.5">
+                <p className="text-xs text-gray-500 dark:text-gray-500 mb-1">La contraseña debe tener:</p>
+                {passwordChecks.map((check) => (
+                  <div key={check.label} className="flex items-center gap-2 text-xs">
+                    {check.passed ? (
+                      <Check className="w-3.5 h-3.5 text-green-500 flex-shrink-0" />
+                    ) : (
+                      <X className="w-3.5 h-3.5 text-gray-400 flex-shrink-0" />
+                    )}
+                    <span
+                      className={
+                        check.passed ? 'text-green-600 dark:text-green-400' : 'text-gray-500 dark:text-gray-400'
+                      }
+                    >
+                      {check.label}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         <Input
           label="Confirmar contraseña"

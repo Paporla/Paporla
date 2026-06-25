@@ -41,7 +41,7 @@ export default function RevenueChart({ data, title = 'Ingresos', trend = 0 }: Re
 
   if (data.length === 0) {
     return (
-      <div className="bg-dark-card dark:bg-white dark:border-gray-200 border border-dark-border rounded-2xl p-6">
+      <div className="glass-card rounded-2xl p-6">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
             <DollarSign className="w-5 h-5 text-green-400" />
@@ -56,11 +56,7 @@ export default function RevenueChart({ data, title = 'Ingresos', trend = 0 }: Re
   }
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="bg-dark-card dark:bg-white dark:border-gray-200 border border-dark-border rounded-2xl p-6"
-    >
+    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="glass-card rounded-2xl p-6">
       <div className="flex items-center justify-between mb-6">
         <div>
           <div className="flex items-center gap-2 mb-1">

@@ -93,7 +93,7 @@ export default function BusinessStatsGrid({ stats }: BusinessStatsGridProps) {
           transition={{ delay: idx * 0.05 }}
         >
           <Link href={item.link}>
-            <div className="group bg-dark-card dark:bg-white dark:border-gray-200 border border-dark-border hover:border-primary/30 rounded-2xl p-4 transition-all duration-300 hover:-translate-y-1 cursor-pointer">
+            <div className="group glass-card hover:border-primary/30 rounded-2xl p-4 transition-all duration-300 hover:-translate-y-1 cursor-pointer">
               <div className="flex items-center justify-between mb-3">
                 <div className={`p-2 rounded-xl ${item.bg} group-hover:scale-110 transition-transform`}>
                   <item.icon className={`w-4 h-4 ${item.color}`} />

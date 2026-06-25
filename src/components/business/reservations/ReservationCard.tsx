@@ -63,7 +63,7 @@ export default function ReservationCard({
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: index * 0.03 }}
-        className={`bg-dark-card dark:bg-white border ${config.borderColor} border-l-4 rounded-xl p-3 dark:hover:bg-gray-50 hover:bg-gray-50 transition-colors`}
+        className={`dark:bg-dark-card bg-white border ${config.borderColor} border-l-4 rounded-xl p-3 dark:hover:bg-white/5 hover:bg-gray-50 transition-colors`}
       >
         <div className="flex items-center justify-between gap-3">
           <div className="flex-1 min-w-0">

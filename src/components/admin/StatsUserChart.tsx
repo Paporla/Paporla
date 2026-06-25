@@ -13,17 +13,16 @@ interface Props {
 
 export default function StatsUserChart({ data }: Props) {
   const [range, setRange] = useState<TimeRange>('30d')
-  const days = range === '7d' ? 7 : range === '30d' ? 30 : 30
-  const filtered = range === 'all' ? data : data.slice(-days)
+  const days = range === '7d' ? 7 : range === '30d' ? 30 : data.length
+  const displayLabel = range === '7d' ? '7' : range === '30d' ? '30' : data.length
+  const filtered = data.slice(-days)
 
   return (
     <Card glass className="p-6">
       <div className="flex items-center justify-between mb-6">
         <div>
           <h3 className="text-lg font-semibold dark:text-white text-gray-900">Registros de Usuarios</h3>
-          <p className="text-xs dark:text-gray-500 text-gray-400 mt-0.5">
-            Ultimos {range === 'all' ? '30' : days} dias
-          </p>
+          <p className="text-xs dark:text-gray-500 text-gray-400 mt-0.5">Ultimos {displayLabel} dias</p>
         </div>
         <div className="flex gap-1 dark:bg-white/5 bg-gray-100 rounded-lg p-0.5">
           {(['7d', '30d', 'all'] as TimeRange[]).map((r) => (
@@ -45,9 +44,9 @@ export default function StatsUserChart({ data }: Props) {
               <stop offset="95%" stopColor="#27d3b8" stopOpacity={0} />
             </linearGradient>
           </defs>
-          <CartesianGrid strokeDasharray="3 3" stroke="#1a1a1a" vertical={false} />
-          <XAxis dataKey="day" stroke="#333" fontSize={10} tickLine={false} axisLine={false} />
-          <YAxis stroke="#333" fontSize={10} tickLine={false} axisLine={false} allowDecimals={false} />
+          <CartesianGrid strokeDasharray="3 3" stroke="#333" vertical={false} opacity={0.3} />
+          <XAxis dataKey="day" stroke="#888" fontSize={10} tickLine={false} axisLine={false} />
+          <YAxis stroke="#888" fontSize={10} tickLine={false} axisLine={false} allowDecimals={false} />
           <Tooltip content={<ChartTooltip />} cursor={{ stroke: '#27d3b8', strokeWidth: 1, strokeDasharray: '4 4' }} />
           <Area
             type="monotone"

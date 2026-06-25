@@ -12,6 +12,7 @@ export function useAuth() {
 
   const [user, setUser] = useState<UserProfile | null>(null)
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   const redirectByRole = (role?: string | null) => {
     let target = '/dashboard'
@@ -85,17 +86,24 @@ export function useAuth() {
   )
 
   useEffect(() => {
-    getUser(false)
+    getUser(false).catch((err) => {
+      const message = err?.message ?? 'Error al cargar la sesión del usuario'
+      setError(message)
+    })
 
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((event) => {
       if (event === 'SIGNED_IN' || event === 'USER_UPDATED') {
-        getUser(true)
+        getUser(true).catch((err) => {
+          const message = err?.message ?? 'Error al cargar el perfil del usuario'
+          setError(message)
+        })
       }
 
       if (event === 'SIGNED_OUT') {
         setUser(null)
+        setError(null)
         setLoading(false)
       }
     })
@@ -124,6 +132,24 @@ export function useAuth() {
     }
 
     setUser(profile)
+    setError(null)
+
+    // Verificar si hay un redirect pendiente (ej: /login?redirect=/packs&reserve=pack-123)
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search)
+      const redirect = params.get('redirect')
+      if (redirect) {
+        // Conservar parametros adicionales (reserve, etc.)
+        const extraParams = new URLSearchParams()
+        params.forEach((value, key) => {
+          if (key !== 'redirect') extraParams.set(key, value)
+        })
+        const queryString = extraParams.toString()
+        router.replace(`${redirect}${queryString ? `?${queryString}` : ''}`)
+        return
+      }
+    }
+
     redirectByRole(profile.role)
   }
 
@@ -172,7 +198,11 @@ export function useAuth() {
     sendWelcomeEmail(email, name).catch((err) => console.error('[WelcomeEmail] Error:', err))
 
     if (!data.session) {
-      router.replace('/login?registered=true')
+      // Conservar redirect pendiente si existe
+      const redirectUrl =
+        typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('redirect') : null
+      const base = '/login?registered=true'
+      router.replace(redirectUrl ? `${base}&redirect=${encodeURIComponent(redirectUrl)}` : base)
       return
     }
 
@@ -184,6 +214,23 @@ export function useAuth() {
     }
 
     setUser(profile)
+    setError(null)
+
+    // Verificar si hay un redirect pendiente
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search)
+      const redirect = params.get('redirect')
+      if (redirect) {
+        const extraParams = new URLSearchParams()
+        params.forEach((value, key) => {
+          if (key !== 'redirect') extraParams.set(key, value)
+        })
+        const queryString = extraParams.toString()
+        router.replace(`${redirect}${queryString ? `?${queryString}` : ''}`)
+        return
+      }
+    }
+
     redirectByRole(profile.role)
   }
 
@@ -217,6 +264,7 @@ export function useAuth() {
   return {
     user,
     loading,
+    error,
     signIn,
     signUp,
     signOut,

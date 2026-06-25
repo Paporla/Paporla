@@ -22,10 +22,10 @@ export default function BenefitsSection() {
           viewport={{ once: true }}
           className="text-center mb-12"
         >
-          <h2 className="text-3xl md:text-4xl font-bold text-white mb-3">
+          <h2 className="text-3xl md:text-4xl font-bold dark:text-white text-gray-900 mb-3">
             ¿Por qué elegir <span className="text-primary">Paporla</span>?
           </h2>
-          <p className="text-gray-400 max-w-2xl mx-auto">
+          <p className="dark:text-gray-400 text-gray-600 max-w-2xl mx-auto">
             Beneficios para todos los que forman parte de nuestra comunidad
           </p>
         </motion.div>
@@ -39,18 +39,18 @@ export default function BenefitsSection() {
               viewport={{ once: true }}
               transition={{ delay: idx * 0.05 }}
               whileHover={{ y: -5 }}
-              className="group relative text-center p-6 rounded-2xl bg-gradient-to-br from-primary/[0.18] to-primary/[0.05] border border-white/10 hover:border-primary/30 transition-all duration-300"
+              className="group relative text-center p-6 rounded-2xl bg-gradient-to-br from-primary/[0.18] to-primary/[0.05] border dark:border-white/10 border-gray-200 hover:border-primary/30 transition-all duration-300"
             >
               {/* Efecto glossy (como el CTA) */}
               <div className="absolute inset-0 rounded-2xl bg-gradient-to-t from-transparent via-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
-              <div className="relative w-14 h-14 mx-auto mb-4 rounded-full bg-white/5 flex items-center justify-center group-hover:scale-110 group-hover:bg-primary/10 transition-all duration-300">
+              <div className="relative w-14 h-14 mx-auto mb-4 rounded-full dark:bg-white/5 bg-gray-100 flex items-center justify-center group-hover:scale-110 group-hover:bg-primary/10 transition-all duration-300">
                 <benefit.icon className="w-7 h-7 text-primary" />
               </div>
-              <h3 className="text-lg font-semibold text-white mb-2 group-hover:text-primary transition-colors duration-300">
+              <h3 className="text-lg font-semibold dark:text-white text-gray-900 mb-2 group-hover:text-primary transition-colors duration-300">
                 {benefit.title}
               </h3>
-              <p className="text-sm text-gray-400 group-hover:text-gray-300 transition-colors duration-300">
+              <p className="text-sm dark:text-gray-400 text-gray-600 dark:group-hover:text-gray-300 group-hover:text-gray-800 transition-colors duration-300">
                 {benefit.description}
               </p>
             </motion.div>

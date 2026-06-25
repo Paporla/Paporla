@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { Package, AlertCircle, CheckCircle } from 'lucide-react'
 import Button from '@/components/ui/Button'
@@ -44,7 +44,8 @@ interface Props {
 
 export default function PackFormSimplified({ shopId, pack, isDuplicate = false, onSuccess }: Props) {
   const router = useRouter()
-  const supabase = supabaseBrowser()
+  const supabaseRef = useRef(supabaseBrowser())
+  const supabase = supabaseRef.current
   const isEditing = !!pack && !isDuplicate
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
