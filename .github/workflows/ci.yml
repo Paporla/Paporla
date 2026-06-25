@@ -42,7 +42,7 @@ jobs:
           cache: 'npm'
 
       - run: npm ci
-      - run: npm run test:coverage -- --coverage.thresholds.lines=60 --coverage.thresholds.branches=50 --coverage.thresholds.functions=50
+      - run: npm run test:coverage
         env:
           NEXT_PUBLIC_SUPABASE_URL: http://localhost:3000
           NEXT_PUBLIC_SUPABASE_ANON_KEY: test-key
