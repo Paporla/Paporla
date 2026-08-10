@@ -57,10 +57,7 @@ export default function Header() {
               height={32}
               className="w-8 h-8 object-contain group-hover:scale-105 transition-transform duration-300"
             />
-            <span
-              className="font-bold text-xl text-white"
-              style={{ fontFamily: "'Space Grotesk', sans-serif" }}
-            >
+            <span className="font-bold text-xl text-white" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
               Paporla
             </span>
           </Link>
@@ -102,11 +99,7 @@ export default function Header() {
               className="md:hidden p-2 rounded-lg bg-white/5"
               aria-label="Menu"
             >
-              {isMenuOpen ? (
-                <X className="w-5 h-5 text-white" />
-              ) : (
-                <Menu className="w-5 h-5 text-white" />
-              )}
+              {isMenuOpen ? <X className="w-5 h-5 text-white" /> : <Menu className="w-5 h-5 text-white" />}
             </button>
           </div>
         </div>

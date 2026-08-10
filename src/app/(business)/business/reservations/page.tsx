@@ -108,15 +108,15 @@ export default function BusinessReservationsPage() {
         {reservations.length > 0 && (
           <ExportCSVButton
             data={reservations.map((r) => ({
-              'Fecha': r.created_at ? new Date(r.created_at).toLocaleDateString('es-CL') : '-',
-              'Pack': r.pack?.title ?? '-',
-              'Cliente': r.user?.name ?? '-',
-              'Email': r.user?.email ?? '-',
-              'Cantidad': r.quantity,
+              Fecha: r.created_at ? new Date(r.created_at).toLocaleDateString('es-CL') : '-',
+              Pack: r.pack?.title ?? '-',
+              Cliente: r.user?.name ?? '-',
+              Email: r.user?.email ?? '-',
+              Cantidad: r.quantity,
               'Precio (CLP)': r.total_price_cents,
-              'Estado': r.status,
-              'Código': r.pickup_code ?? '-',
-              'Recogida': r.pickup_date ? new Date(r.pickup_date).toLocaleDateString('es-CL') : '-',
+              Estado: r.status,
+              Código: r.pickup_code ?? '-',
+              Recogida: r.pickup_date ? new Date(r.pickup_date).toLocaleDateString('es-CL') : '-',
             }))}
             filename="reservas_paporla"
             label="Exportar CSV"

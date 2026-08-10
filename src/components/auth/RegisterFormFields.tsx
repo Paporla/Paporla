@@ -118,13 +118,7 @@ export default function RegisterFormFields({
                     ) : (
                       <X className="w-3.5 h-3.5 text-gray-400 flex-shrink-0" />
                     )}
-                    <span
-                      className={
-                        check.passed ? 'text-green-400' : 'text-gray-400'
-                      }
-                    >
-                      {check.label}
-                    </span>
+                    <span className={check.passed ? 'text-green-400' : 'text-gray-400'}>{check.label}</span>
                   </div>
                 ))}
               </div>
@@ -186,9 +180,7 @@ export default function RegisterFormFields({
               required
               error={touched.shopName ? errors.shopName : undefined}
             />
-            <p className="text-xs text-gray-500 mt-1 ml-10">
-              Puedes completar el resto despues en tu panel
-            </p>
+            <p className="text-xs text-gray-500 mt-1 ml-10">Puedes completar el resto despues en tu panel</p>
           </motion.div>
         )}
       </AnimatePresence>

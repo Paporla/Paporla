@@ -46,6 +46,10 @@ test-results/
 # Vercel
 .vercel
 
+# IA / Asistentes (pueden contener secretos)
+.codewhale/
+.deepseek/
+
 # Otros
 lib.txt
 # Sentry Config File

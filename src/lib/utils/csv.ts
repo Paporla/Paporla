@@ -64,11 +64,7 @@ export function downloadCSV(content: string, filename: string): void {
  * @param filename Nombre del archivo
  * @param columns Columnas opcionales (key → label)
  */
-export function exportToCSV(
-  rows: CSVRow[],
-  filename: string,
-  columns?: { key: string; label: string }[],
-): void {
+export function exportToCSV(rows: CSVRow[], filename: string, columns?: { key: string; label: string }[]): void {
   const content = toCSV(rows, columns)
   downloadCSV(content, filename)
 }

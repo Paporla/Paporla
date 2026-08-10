@@ -64,8 +64,8 @@ export default function OnboardingSteps() {
                     <h4 className="font-semibold dark:text-white text-gray-900 text-sm">Explora</h4>
                   </div>
                   <p className="text-xs dark:text-gray-400 text-gray-600">
-                    Descubre packs sorpresa con descuento de comercios cerca de ti. Cada pack es
-                    excedente del día que merece una segunda oportunidad.
+                    Descubre packs sorpresa con descuento de comercios cerca de ti. Cada pack es excedente del día que
+                    merece una segunda oportunidad.
                   </p>
                 </div>
               </div>
@@ -81,8 +81,8 @@ export default function OnboardingSteps() {
                     <h4 className="font-semibold dark:text-white text-gray-900 text-sm">Reserva</h4>
                   </div>
                   <p className="text-xs dark:text-gray-400 text-gray-600">
-                    Elige tu pack y resérvalo en segundos. Recibirás un código que presentarás al
-                    recoger tu pedido. Sin vueltas, sin sorpresas.
+                    Elige tu pack y resérvalo en segundos. Recibirás un código que presentarás al recoger tu pedido. Sin
+                    vueltas, sin sorpresas.
                   </p>
                 </div>
               </div>
@@ -98,8 +98,8 @@ export default function OnboardingSteps() {
                     <h4 className="font-semibold dark:text-white text-gray-900 text-sm">Recoge</h4>
                   </div>
                   <p className="text-xs dark:text-gray-400 text-gray-600">
-                    Ve al comercio en la hora indicada, muestra tu código y llévate tu pack.
-                    ¡Comida de calidad a mitad de precio!
+                    Ve al comercio en la hora indicada, muestra tu código y llévate tu pack. ¡Comida de calidad a mitad
+                    de precio!
                   </p>
                 </div>
               </div>

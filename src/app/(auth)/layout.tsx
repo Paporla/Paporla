@@ -12,7 +12,10 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
   const titles: Record<string, { title: string; subtitle: string }> = {
     '/login': { title: 'Bienvenido de vuelta', subtitle: 'Inicia sesión para continuar rescatando comida' },
     '/register': { title: 'Crea tu cuenta', subtitle: 'Únete a la comunidad que rescata comida' },
-    '/forgot-password': { title: 'Recupera tu acceso', subtitle: 'Te enviamos un enlace para restablecer tu contraseña' },
+    '/forgot-password': {
+      title: 'Recupera tu acceso',
+      subtitle: 'Te enviamos un enlace para restablecer tu contraseña',
+    },
     '/reset-password': { title: 'Nueva contraseña', subtitle: 'Elige una contraseña segura para tu cuenta' },
   }
 

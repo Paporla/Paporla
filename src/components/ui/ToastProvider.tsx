@@ -64,8 +64,7 @@ export function useToast(): ToastContextValue {
 const toastConfig: Record<ToastType, { icon: typeof AlertCircle; color: string; iconColor: string }> = {
   error: {
     icon: AlertCircle,
-    color:
-      'dark:bg-red-500/20 bg-red-50 dark:border-red-500/40 border-red-300 dark:text-red-400 text-red-700',
+    color: 'dark:bg-red-500/20 bg-red-50 dark:border-red-500/40 border-red-300 dark:text-red-400 text-red-700',
     iconColor: 'dark:text-red-400 text-red-600',
   },
   success: {
@@ -76,21 +75,14 @@ const toastConfig: Record<ToastType, { icon: typeof AlertCircle; color: string; 
   },
   info: {
     icon: Info,
-    color:
-      'dark:bg-primary/20 bg-green-50 dark:border-primary/40 border-green-300 dark:text-primary text-green-700',
+    color: 'dark:bg-primary/20 bg-green-50 dark:border-primary/40 border-green-300 dark:text-primary text-green-700',
     iconColor: 'dark:text-primary text-green-600',
   },
 }
 
 // ─── Contenedor de toasts ───────────────────────────────
 
-function ToastContainer({
-  toasts,
-  removeToast,
-}: {
-  toasts: ToastMessage[]
-  removeToast: (id: string) => void
-}) {
+function ToastContainer({ toasts, removeToast }: { toasts: ToastMessage[]; removeToast: (id: string) => void }) {
   return (
     <div className="fixed top-24 right-4 z-[9999] flex flex-col gap-2 pointer-events-none">
       <AnimatePresence>

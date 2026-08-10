@@ -144,9 +144,7 @@ export const createNotificationSchema = z.object({
 })
 
 export const batchNotificationSchema = z.object({
-  notifications: z
-    .array(createNotificationSchema)
-    .min(1, 'Se requiere al menos una notificación'),
+  notifications: z.array(createNotificationSchema).min(1, 'Se requiere al menos una notificación'),
 })
 
 // ============================================

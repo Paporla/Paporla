@@ -98,11 +98,7 @@ export function useBusinessDashboard() {
           .select('id', { count: 'exact', head: true })
           .eq('shop_id', shop!.id)
           .in('status', ['pending', 'confirmed']),
-        supabase
-          .from('reservations')
-          .select('total_price_cents')
-          .eq('shop_id', shop!.id)
-          .eq('status', 'picked_up'),
+        supabase.from('reservations').select('total_price_cents').eq('shop_id', shop!.id).eq('status', 'picked_up'),
       ])
       return {
         totalReservations: totalRes.count ?? 0,

@@ -170,9 +170,7 @@ describe('cancel_reservation', () => {
   })
 
   it('debe rechazar si faltan menos de 2 horas para la recogida (usuario normal)', () => {
-    const result = mockCancelError(
-      'Solo puedes cancelar tu reserva hasta 2 horas antes de la recogida.',
-    )
+    const result = mockCancelError('Solo puedes cancelar tu reserva hasta 2 horas antes de la recogida.')
     expect(result.success).toBe(false)
     expect(result.error).toContain('2 horas')
   })
@@ -210,33 +208,25 @@ describe('validate_pickup', () => {
   })
 
   it('debe rechazar si el usuario no es dueño del comercio ni admin', () => {
-    const result = mockPickupError(
-      'No estás autorizado para validar recogidas en este comercio.',
-    )
+    const result = mockPickupError('No estás autorizado para validar recogidas en este comercio.')
     expect(result.success).toBe(false)
     expect(result.error).toContain('No estás autorizado')
   })
 
   it('debe rechazar si la reserva no está en estado "confirmed"', () => {
-    const result = mockPickupError(
-      'La reserva no se puede recoger. Estado actual: cancelled',
-    )
+    const result = mockPickupError('La reserva no se puede recoger. Estado actual: cancelled')
     expect(result.success).toBe(false)
     expect(result.error).toContain('no se puede recoger')
   })
 
   it('debe rechazar si la recogida es antes de la ventana permitida (15 min antes)', () => {
-    const result = mockPickupError(
-      'Todavía no ha comenzado la hora de recogida.',
-    )
+    const result = mockPickupError('Todavía no ha comenzado la hora de recogida.')
     expect(result.success).toBe(false)
     expect(result.error).toContain('no ha comenzado')
   })
 
   it('debe rechazar si la recogida es después de la ventana permitida (30 min después)', () => {
-    const result = mockPickupError(
-      'La hora de recogida ya ha finalizado.',
-    )
+    const result = mockPickupError('La hora de recogida ya ha finalizado.')
     expect(result.success).toBe(false)
     expect(result.error).toContain('finalizado')
   })
