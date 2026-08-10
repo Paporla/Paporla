@@ -23,7 +23,12 @@ const cleanupTimer = setInterval(() => {
   }
 }, CLEANUP_INTERVAL_MS)
 // No bloquear el cierre del proceso (importante en serverless)
-cleanupTimer.unref()
+// En Edge Runtime setInterval devuelve number y no tiene unref()
+try {
+  cleanupTimer.unref()
+} catch {
+  // Edge Runtime: ignorar, no hay unref()
+}
 
 // ============================================
 // Configuración de rutas
