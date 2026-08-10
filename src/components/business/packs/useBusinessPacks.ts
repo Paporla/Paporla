@@ -76,32 +76,6 @@ export function useBusinessPacks() {
     [packs],
   )
 
-  const confirmDelete = async (packId: string) => {
-    setDeleting(packId)
-    setError('')
-
-    const supabase = supabaseBrowser()
-    const { count: activeCount, error: countError } = await supabase
-      .from('reservations')
-      .select('id', { count: 'exact', head: true })
-      .eq('pack_id', packId)
-      .in('status', ['confirmed', 'pending'])
-
-    setDeleting(null)
-
-    if (countError) {
-      setError(countError.message)
-      return null
-    }
-
-    if (activeCount && activeCount > 0) {
-      setError(`No se puede eliminar: ${activeCount} reserva(s) activa(s). Cancela las reservas primero.`)
-      return null
-    }
-
-    return packId
-  }
-
   const confirmDeactivate = async (packId: string): Promise<string | null> => {
     return packId
   }
