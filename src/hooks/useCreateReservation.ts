@@ -6,7 +6,6 @@ import { supabaseBrowser } from '@/lib/supabase/client'
 import { useAuth } from './useAuth'
 import { formatPrice } from '@/lib/utils/formatPrice'
 import { trackPurchase } from '@/lib/analytics/events'
-import { apiFetch } from '@/lib/utils/api-client'
 
 const RESERVATIONS_QUERY_KEY = 'reservations'
 
