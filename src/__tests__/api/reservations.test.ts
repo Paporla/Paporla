@@ -20,10 +20,16 @@ const mockUpdateReservation = vi.mocked(updateReservation)
 
 const mockAuthUser = { id: 'user-1' }
 const mockAuthenticatedClient = {
-  auth: { getUser: () => Promise.resolve({ data: { user: mockAuthUser }, error: null }) },
+  auth: {
+    getSession: () => Promise.resolve({ data: { session: { user: mockAuthUser } }, error: null }),
+    getUser: () => Promise.resolve({ data: { user: mockAuthUser }, error: null }),
+  },
 }
 const mockUnauthenticatedClient = {
-  auth: { getUser: () => Promise.resolve({ data: { user: null }, error: null }) },
+  auth: {
+    getSession: () => Promise.resolve({ data: { session: null }, error: null }),
+    getUser: () => Promise.resolve({ data: { user: null }, error: null }),
+  },
 }
 
 describe('GET /api/reservations', () => {
@@ -83,7 +89,11 @@ describe('POST /api/reservations', () => {
     const { POST } = await import('@/app/api/reservations/route')
     const request = new Request('http://localhost/api/reservations', {
       method: 'POST',
-      body: JSON.stringify({ pack_id: 'pack-1', shop_id: 'shop-1', quantity: 1 }),
+      body: JSON.stringify({
+        pack_id: '00000000-0000-0000-0000-000000000001',
+        shop_id: '00000000-0000-0000-0000-000000000002',
+        quantity: 1,
+      }),
     })
     const response = await POST(request)
     const body = await response.json()
@@ -118,7 +128,7 @@ describe('PUT /api/reservations', () => {
     const { PUT } = await import('@/app/api/reservations/route')
     const request = new Request('http://localhost/api/reservations', {
       method: 'PUT',
-      body: JSON.stringify({ id: '1', status: 'picked_up' }),
+      body: JSON.stringify({ id: '00000000-0000-0000-0000-000000000003', status: 'confirmed' }),
     })
     const response = await PUT(request)
     const body = await response.json()
