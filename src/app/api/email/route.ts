@@ -113,7 +113,9 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: false, error: error.message }, { status: 500 })
     }
 
-    console.warn(`[Email API Sent] ${type} to:`, email)
+    if (process.env.NODE_ENV === 'development') {
+      console.warn(`[Email API Sent] ${type}`)
+    }
     return NextResponse.json({ success: true, data: res })
   } catch (err: unknown) {
     console.error('[Email API Exception]:', err)

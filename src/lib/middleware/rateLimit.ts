@@ -132,7 +132,8 @@ async function checkSupabaseRateLimit(
 
     if (error) {
       console.error('[RateLimit] Error updating:', error)
-      return { allowed: false, remaining: 0, resetAt }
+      // Fail-open: si Supabase falla, permitir la request
+      return { allowed: true, remaining: limit - entry.count, resetAt }
     }
 
     if (!updated) {
@@ -142,7 +143,8 @@ async function checkSupabaseRateLimit(
     return { allowed: true, remaining: limit - updated.count, resetAt: new Date(updated.reset_at).getTime() }
   } catch (err) {
     console.error('[RateLimit] Unexpected error:', err)
-    return { allowed: false, remaining: 0, resetAt: now + windowMs }
+    // Fail-open: si Supabase está caído, no denegar tráfico legítimo
+    return { allowed: true, remaining: limit, resetAt: now + windowMs }
   }
 }
 
