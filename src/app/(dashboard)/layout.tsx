@@ -1,0 +1,28 @@
+﻿import UserSidebar from '@/components/dashboard/layout/UserSidebar'
+import UserMobileNav from '@/components/dashboard/layout/UserMobileNav'
+import Breadcrumbs from '@/components/ui/Breadcrumbs'
+import PageTransition from '@/components/ui/PageTransition'
+import { requireAuth } from '@/lib/auth/requireAuth'
+
+export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
+  await requireAuth(['user'])
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 dark:from-[#0a0a1a] dark:via-[#0f0f1a] dark:to-[#020205]">
+      <div className="flex">
+        <UserSidebar />
+        <div className="flex-1 lg:ml-72">
+          <div className="pt-4 pb-20 lg:pb-12">
+            <Breadcrumbs />
+            <main id="main-content" tabIndex={-1} className="pb-12">
+              <div className="container-page px-4 max-w-7xl mx-auto">
+                <PageTransition>{children}</PageTransition>
+              </div>
+            </main>
+          </div>
+        </div>
+      </div>
+      <UserMobileNav />
+    </div>
+  )
+}

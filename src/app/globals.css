@@ -1,0 +1,333 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ============================================
+   DISEÑO SISTEMA - CSS Variables (dark-only)
+   ============================================ */
+:root {
+  --color-bg: #0a0a1a;
+  --color-bg-card: #0f0f1a;
+  --color-bg-muted: #1a1a2e;
+  --color-border: rgba(255, 255, 255, 0.08);
+  --color-hover: rgba(255, 255, 255, 0.12);
+  --color-text: #ffffff;
+  --color-text-secondary: #cccccc;
+  --color-text-muted: #999999;
+  --color-primary: #00ff88;
+  --color-primary-light: #33ffa3;
+  --color-primary-dark: #00cc6e;
+  --color-secondary: #ff8a3c;
+  --color-danger: #ef4444;
+  --glass-bg: rgba(15, 15, 26, 0.7);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --glass-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+}
+
+/* ============================================
+   DARK MODE OVERRIDES — Tailwind utility classes
+   ============================================ */
+.text-gray-900,
+.text-gray-800 {
+  color: #ffffff !important;
+}
+
+.text-gray-700 {
+  color: #cccccc !important;
+}
+
+.text-gray-600 {
+  color: #999999 !important;
+}
+
+.bg-white {
+  background-color: #0f0f1a !important;
+}
+
+.bg-gray-50 {
+  background-color: #0a0a1a !important;
+}
+
+.bg-gray-100 {
+  background-color: #1a1a2e !important;
+}
+
+.border-gray-200 {
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+.border-gray-300 {
+  border-color: rgba(255, 255, 255, 0.12) !important;
+}
+
+/* ============================================
+   ESTILOS BASE
+   ============================================ */
+body {
+  background: radial-gradient(circle at center, #1a2c21 0%, #0d1117 100%);
+  background-attachment: fixed;
+  color: var(--color-text);
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease;
+}
+
+/* Fondo de ruido */
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0.3;
+}
+
+/* ============================================
+   COMPONENTES REUTILIZABLES
+   ============================================ */
+@layer components {
+  /* --- CARD BASE --- */
+  .card-base {
+    @apply rounded-xl p-5;
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--glass-shadow);
+    backdrop-filter: blur(12px);
+    transition: all 0.3s ease;
+  }
+
+  .card-hover {
+    @apply card-base;
+  }
+
+  .card-hover:hover {
+    border-color: var(--color-primary);
+    box-shadow:
+      0 8px 32px rgba(0, 0, 0, 0.15),
+      0 0 0 1px var(--color-primary);
+  }
+
+  /* --- SECTION HEADER (Hero) --- */
+  .section-header {
+    @apply relative overflow-hidden;
+    background: linear-gradient(135deg, rgba(0, 255, 136, 0.05) 0%, transparent 50%, rgba(255, 138, 60, 0.05) 100%);
+  }
+
+  /* --- GLOW EFFECTS --- */
+  .glow-primary {
+    box-shadow: 0 0 20px rgba(0, 255, 136, 0.15);
+  }
+
+  .glow-primary-lg {
+    box-shadow: 0 0 40px rgba(0, 255, 136, 0.2);
+  }
+
+  /* --- STATUS BADGE --- */
+  .badge {
+    @apply text-xs px-2 py-0.5 rounded-full font-medium inline-flex items-center gap-1;
+  }
+
+  /* --- GRADIENT TEXT --- */
+  .text-gradient {
+    background: linear-gradient(135deg, #00ff88 0%, #00cc6e 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .text-gradient-hero {
+    background: linear-gradient(135deg, #00ff88 0%, #33ffa3 50%, #00cc6e 100%);
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: shine 3s linear infinite;
+  }
+
+  @keyframes shine {
+    to {
+      background-position: 200% center;
+    }
+  }
+
+  /* --- GLASS CARD --- */
+  .glass-card {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--glass-shadow);
+    backdrop-filter: blur(12px);
+  }
+
+  /* --- BACKDROP OVERLAY --- */
+  .overlay {
+    @apply fixed inset-0 z-50;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(8px);
+  }
+
+  /* --- SECTION SPACING --- */
+  .section-padding {
+    @apply px-4 py-8 md:py-12;
+  }
+
+  .container-page {
+    @apply max-w-6xl mx-auto px-4;
+  }
+}
+
+/* ============================================
+   ANIMACIONES PERSONALIZADAS
+   ============================================ */
+@keyframes float-slow {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  33% {
+    transform: translate(30px, -30px) scale(1.05);
+  }
+  66% {
+    transform: translate(-20px, 20px) scale(0.95);
+  }
+}
+
+@keyframes float-medium {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(-40px, 20px) scale(1.08);
+  }
+}
+
+@keyframes float-fast {
+  0%,
+  100% {
+    transform: translate(0, 0);
+  }
+  50% {
+    transform: translate(20px, -40px);
+  }
+}
+
+@keyframes breathe {
+  0%,
+  100% {
+    opacity: 0.4;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.1);
+  }
+}
+
+.animate-float-slow {
+  animation: float-slow 12s ease-in-out infinite;
+}
+
+.animate-float-medium {
+  animation: float-medium 8s ease-in-out infinite;
+}
+
+.animate-float-fast {
+  animation: float-fast 6s ease-in-out infinite;
+}
+
+.animate-breathe {
+  animation: breathe 4s ease-in-out infinite;
+}
+
+/* ============================================
+   TRANSICIONES GLOBALES
+   ============================================ */
+* {
+  transition-property: background-color, border-color, color;
+  transition-duration: 150ms;
+  transition-timing-function: ease;
+}
+
+/* ============================================
+   SCROLL PERSONALIZADO
+   ============================================ */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(128, 128, 128, 0.3);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(128, 128, 128, 0.5);
+}
+
+/* ============================================
+   LUNA BANNER — Marco animado con fase lunar
+   ============================================ */
+.moon-banner {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background-color: #f6f1d5;
+  box-shadow:
+    0 0 20px #f6f1d5,
+    0 0 40px rgba(246, 241, 213, 0.4);
+  position: relative;
+  overflow: hidden;
+  animation: moonPulse 4s ease-in-out infinite alternate;
+}
+
+/* Sombra de fase lunar — se desliza sobre la imagen */
+.moon-banner::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background-color: #0a0a1a;
+  z-index: 5;
+  pointer-events: none;
+  animation: moonPhase 8s ease-in-out infinite;
+}
+
+@keyframes moonPulse {
+  0% {
+    box-shadow:
+      0 0 20px #f6f1d5,
+      0 0 40px rgba(246, 241, 213, 0.4);
+  }
+  100% {
+    box-shadow:
+      0 0 35px #f6f1d5,
+      0 0 60px rgba(246, 241, 213, 0.7);
+  }
+}
+
+@keyframes moonPhase {
+  0% {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  50% {
+    transform: translateX(0%);
+    opacity: 0.92;
+  }
+  100% {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
