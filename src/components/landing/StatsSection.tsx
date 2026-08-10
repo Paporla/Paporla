@@ -12,7 +12,14 @@ import type { CommunityStats } from '@/app/api/stats/route'
 
 // Fallback: datos de la FAO si la API no responde
 const fallbackStats = [
-  { value: 1300, suffix: 'M', label: 'toneladas de comida desperdiciadas al año', source: 'FAO', icon: Package, isMoney: false },
+  {
+    value: 1300,
+    suffix: 'M',
+    label: 'toneladas de comida desperdiciadas al año',
+    source: 'FAO',
+    icon: Package,
+    isMoney: false,
+  },
   {
     value: 1,
     prefix: '$',

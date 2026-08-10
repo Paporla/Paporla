@@ -21,7 +21,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     return { title: 'Comercio no encontrado', description: 'Este comercio no está disponible.' }
   }
 
-  const description = shop.description?.slice(0, 160) || `Descubre los packs de ${shop.name} en ${shop.city || 'Paporla'}.`
+  const description =
+    shop.description?.slice(0, 160) || `Descubre los packs de ${shop.name} en ${shop.city || 'Paporla'}.`
 
   return {
     title: `${shop.name} | Paporla`,
@@ -43,11 +44,7 @@ export default async function ShopDetailPage({ params }: Props) {
   const { id } = await params
   const supabase = await createClient()
 
-  const { data: shop } = await supabase
-    .from('shops')
-    .select('*')
-    .eq('id', id)
-    .maybeSingle()
+  const { data: shop } = await supabase.from('shops').select('*').eq('id', id).maybeSingle()
 
   if (!shop) notFound()
 

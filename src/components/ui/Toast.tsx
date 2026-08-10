@@ -31,7 +31,8 @@ export default function Toast({ message, type = 'info', onClose, duration = 4000
     },
     info: {
       icon: Info,
-      color: 'dark:bg-secondary/20 bg-orange-50 dark:border-secondary/40 border-orange-300 dark:text-secondary text-orange-700',
+      color:
+        'dark:bg-secondary/20 bg-orange-50 dark:border-secondary/40 border-orange-300 dark:text-secondary text-orange-700',
       iconColor: 'dark:text-secondary text-secondary-dark',
     },
   }

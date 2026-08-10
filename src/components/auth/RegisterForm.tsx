@@ -125,13 +125,13 @@ export default function RegisterForm() {
           <span className="text-gradient">Registro exitoso!</span>
         </h2>
         <p className="text-gray-400">
-          Te enviamos un correo a <strong className="text-primary">{formData.email}</strong> para que confirmes tu cuenta.
+          Te enviamos un correo a <strong className="text-primary">{formData.email}</strong> para que confirmes tu
+          cuenta.
         </p>
-        <p className="text-xs text-gray-500">Revisa tu bandeja de entrada (y spam). Una vez confirmada, podrás iniciar sesión.</p>
-        <Link
-          href="/login"
-          className="inline-flex items-center gap-1 text-primary hover:underline font-medium mt-4"
-        >
+        <p className="text-xs text-gray-500">
+          Revisa tu bandeja de entrada (y spam). Una vez confirmada, podrás iniciar sesión.
+        </p>
+        <Link href="/login" className="inline-flex items-center gap-1 text-primary hover:underline font-medium mt-4">
           <ArrowRight className="w-4 h-4" />
           Ir al inicio de sesión
         </Link>

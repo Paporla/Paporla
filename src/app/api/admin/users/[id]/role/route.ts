@@ -13,10 +13,7 @@ import { updateUserRoleSchema } from '@/lib/utils/validations'
  * - Solo super_admin puede asignar/quitar rol super_admin
  * - Solo super_admin puede modificar el rol de otro admin
  */
-export async function PATCH(
-  request: Request,
-  { params }: { params: Promise<{ id: string }> },
-) {
+export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id: targetUserId } = await params
   const supabase = await createClient()
 
@@ -31,11 +28,7 @@ export async function PATCH(
   }
 
   // 2. Verificar que el caller es admin o super_admin
-  const { data: callerProfile } = await supabase
-    .from('user_profiles')
-    .select('role')
-    .eq('id', caller.id)
-    .maybeSingle()
+  const { data: callerProfile } = await supabase.from('user_profiles').select('role').eq('id', caller.id).maybeSingle()
 
   if (!callerProfile || !isAdmin(callerProfile.role)) {
     return NextResponse.json({ success: false, error: 'Permisos insuficientes' }, { status: 403 })
@@ -81,20 +74,23 @@ export async function PATCH(
   // 6. Solo super_admin puede asignar/quitar super_admin
   if (newRole === ROLES.SUPER_ADMIN || targetCurrentRole === ROLES.SUPER_ADMIN) {
     if (callerRole !== ROLES.SUPER_ADMIN) {
-      return NextResponse.json({ success: false, error: 'Solo super_admin puede gestionar roles super_admin' }, { status: 403 })
+      return NextResponse.json(
+        { success: false, error: 'Solo super_admin puede gestionar roles super_admin' },
+        { status: 403 },
+      )
     }
   }
 
   // 7. Solo super_admin puede modificar el rol de otro admin
   if (targetCurrentRole === ROLES.ADMIN && callerRole !== ROLES.SUPER_ADMIN) {
-    return NextResponse.json({ success: false, error: 'Solo super_admin puede modificar roles de administradores' }, { status: 403 })
+    return NextResponse.json(
+      { success: false, error: 'Solo super_admin puede modificar roles de administradores' },
+      { status: 403 },
+    )
   }
 
   // 8. Ejecutar cambio
-  const { error: updateError } = await supabase
-    .from('user_profiles')
-    .update({ role: newRole })
-    .eq('id', targetUserId)
+  const { error: updateError } = await supabase.from('user_profiles').update({ role: newRole }).eq('id', targetUserId)
 
   if (updateError) {
     console.error('[AdminRoleChange] Error:', updateError)

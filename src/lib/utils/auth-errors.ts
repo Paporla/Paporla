@@ -5,9 +5,7 @@
 export function translateAuthError(error: unknown): string {
   if (!error) return 'Error desconocido'
 
-  const message = typeof error === 'string' ? error
-    : error instanceof Error ? error.message
-    : String(error)
+  const message = typeof error === 'string' ? error : error instanceof Error ? error.message : String(error)
 
   const lower = message.toLowerCase()
 

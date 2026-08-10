@@ -51,7 +51,11 @@ export default function PickupCodeValidator() {
         .eq('id', data.reservation_id)
         .maybeSingle()
 
-      const r = reservation as { quantity: number; user: { name: string } | null; pack: { title: string } | null } | null
+      const r = reservation as {
+        quantity: number
+        user: { name: string } | null
+        pack: { title: string } | null
+      } | null
 
       setResult({
         state: 'success',

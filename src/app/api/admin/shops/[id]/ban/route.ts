@@ -7,10 +7,7 @@ import { banShopSchema } from '@/lib/utils/validations'
  * PATCH /api/admin/shops/[id]/ban
  * Banea o desbanea un comercio. Solo admin/super_admin.
  */
-export async function PATCH(
-  request: Request,
-  { params }: { params: Promise<{ id: string }> },
-) {
+export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id: shopId } = await params
   const supabase = await createClient()
 
@@ -24,11 +21,7 @@ export async function PATCH(
     return NextResponse.json({ success: false, error: 'No autorizado' }, { status: 401 })
   }
 
-  const { data: callerProfile } = await supabase
-    .from('user_profiles')
-    .select('role')
-    .eq('id', caller.id)
-    .maybeSingle()
+  const { data: callerProfile } = await supabase.from('user_profiles').select('role').eq('id', caller.id).maybeSingle()
 
   if (!callerProfile || !isAdmin(callerProfile.role)) {
     return NextResponse.json({ success: false, error: 'Permisos insuficientes' }, { status: 403 })
@@ -52,21 +45,14 @@ export async function PATCH(
   const { banned } = parsed.data
 
   // 3. Verificar que el comercio existe
-  const { data: shop } = await supabase
-    .from('shops')
-    .select('name')
-    .eq('id', shopId)
-    .maybeSingle()
+  const { data: shop } = await supabase.from('shops').select('name').eq('id', shopId).maybeSingle()
 
   if (!shop) {
     return NextResponse.json({ success: false, error: 'Comercio no encontrado' }, { status: 404 })
   }
 
   // 4. Actualizar
-  const { error: updateError } = await supabase
-    .from('shops')
-    .update({ banned })
-    .eq('id', shopId)
+  const { error: updateError } = await supabase.from('shops').update({ banned }).eq('id', shopId)
 
   if (updateError) {
     console.error('[AdminShopBan] Error:', updateError)

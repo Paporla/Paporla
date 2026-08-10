@@ -10,9 +10,15 @@ const supabase = supabaseBrowser()
 
 /** Subconjunto de campos de Shop retornados por el join en favorites */
 interface FavoriteShopFields {
-  id: string; name: string; address: string | null; city: string | null
-  phone: string | null; verified: boolean; rating: number | null
-  logo_url: string | null; cover_url: string | null
+  id: string
+  name: string
+  address: string | null
+  city: string | null
+  phone: string | null
+  verified: boolean
+  rating: number | null
+  logo_url: string | null
+  cover_url: string | null
 }
 
 interface FavoriteShop {
@@ -24,9 +30,7 @@ interface FavoriteShop {
 async function fetchFavorites(userId: string): Promise<FavoriteShop[]> {
   const { data, error } = await supabase
     .from('favorites')
-    .select(
-      `id, shop_id, shop:shops (id, name, address, city, phone, verified, rating, logo_url, cover_url)`,
-    )
+    .select(`id, shop_id, shop:shops (id, name, address, city, phone, verified, rating, logo_url, cover_url)`)
     .eq('user_id', userId)
     .order('created_at', { ascending: false })
 

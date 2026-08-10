@@ -70,7 +70,9 @@ export default function ImageUpload({
         try {
           const oldPath = existingImage.split('/').slice(-2).join('/')
           if (oldPath) await supabase.storage.from(bucket).remove([oldPath])
-        } catch { /* best-effort */ }
+        } catch {
+          /* best-effort */
+        }
       }
 
       setPreview(publicUrl)

@@ -79,30 +79,31 @@ export function useAuth() {
 
         const profile = await fetchProfile(authUser.id)
 
-      if (!profile) {
-        if (process.env.NODE_ENV === 'development') console.warn('Usuario autenticado sin perfil — reintentando:', authUser.id)
-        // El trigger SQL puede tardar en crear el perfil. Reintentar 2 veces.
-        for (let attempt = 0; attempt < 2; attempt++) {
-          await new Promise((r) => setTimeout(r, 600))
-          const retry = await fetchProfile(authUser.id)
-          if (retry) {
-            setUser(retry)
-            return retry
+        if (!profile) {
+          if (process.env.NODE_ENV === 'development')
+            console.warn('Usuario autenticado sin perfil — reintentando:', authUser.id)
+          // El trigger SQL puede tardar en crear el perfil. Reintentar 2 veces.
+          for (let attempt = 0; attempt < 2; attempt++) {
+            await new Promise((r) => setTimeout(r, 600))
+            const retry = await fetchProfile(authUser.id)
+            if (retry) {
+              setUser(retry)
+              return retry
+            }
           }
+          // Si después de reintentos sigue sin perfil, crear uno mínimo
+          const { data: fallback } = await supabase
+            .from('user_profiles')
+            .upsert({ id: authUser.id, email: authUser.email, role: 'user' })
+            .select(PROFILE_FIELDS)
+            .maybeSingle()
+          if (fallback) {
+            setUser(fallback as UserProfile)
+            return fallback as UserProfile
+          }
+          setUser(null)
+          return null
         }
-        // Si después de reintentos sigue sin perfil, crear uno mínimo
-        const { data: fallback } = await supabase
-          .from('user_profiles')
-          .upsert({ id: authUser.id, email: authUser.email, role: 'user' })
-          .select(PROFILE_FIELDS)
-          .maybeSingle()
-        if (fallback) {
-          setUser(fallback as UserProfile)
-          return fallback as UserProfile
-        }
-        setUser(null)
-        return null
-      }
 
         setUser(profile)
         return profile

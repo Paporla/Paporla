@@ -11,10 +11,7 @@ import { isAdmin } from '@/lib/constants/roles'
  * - Nadie puede eliminarse a sí mismo
  * - Solo super_admin puede eliminar a otro admin
  */
-export async function DELETE(
-  request: Request,
-  { params }: { params: Promise<{ id: string }> },
-) {
+export async function DELETE(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id: targetUserId } = await params
   const supabase = await createClient()
 
@@ -29,11 +26,7 @@ export async function DELETE(
   }
 
   // 2. Verificar que el caller es admin/super_admin
-  const { data: callerProfile } = await supabase
-    .from('user_profiles')
-    .select('role')
-    .eq('id', caller.id)
-    .maybeSingle()
+  const { data: callerProfile } = await supabase.from('user_profiles').select('role').eq('id', caller.id).maybeSingle()
 
   if (!callerProfile || !isAdmin(callerProfile.role)) {
     return NextResponse.json({ success: false, error: 'Permisos insuficientes' }, { status: 403 })
@@ -71,10 +64,7 @@ export async function DELETE(
   // Favoritos
   await supabase.from('favorites').delete().eq('user_id', targetUserId)
   // Reservas (si es usuario normal)
-  const { data: reservations } = await supabase
-    .from('reservations')
-    .select('id')
-    .eq('user_id', targetUserId)
+  const { data: reservations } = await supabase.from('reservations').select('id').eq('user_id', targetUserId)
   for (const r of reservations ?? []) {
     await supabase.from('reservations').delete().eq('id', r.id)
   }
@@ -85,10 +75,7 @@ export async function DELETE(
     await supabase.from('shops').delete().eq('id', s.id)
   }
   // Finalmente, el perfil
-  const { error: deleteError } = await supabase
-    .from('user_profiles')
-    .delete()
-    .eq('id', targetUserId)
+  const { error: deleteError } = await supabase.from('user_profiles').delete().eq('id', targetUserId)
 
   if (deleteError) {
     console.error('[AdminUserDelete] Error:', deleteError)

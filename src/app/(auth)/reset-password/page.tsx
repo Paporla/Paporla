@@ -122,13 +122,7 @@ export default function ResetPasswordPage() {
                     ) : (
                       <X className="w-3.5 h-3.5 text-gray-400 flex-shrink-0" />
                     )}
-                    <span
-                      className={
-                        check.passed ? 'text-green-400' : 'text-gray-400'
-                      }
-                    >
-                      {check.label}
-                    </span>
+                    <span className={check.passed ? 'text-green-400' : 'text-gray-400'}>{check.label}</span>
                   </div>
                 ))}
               </div>
@@ -151,10 +145,7 @@ export default function ResetPasswordPage() {
         </Button>
 
         <div className="text-center">
-          <Link
-            href="/login"
-            className="text-sm text-gray-400 hover:text-primary inline-flex items-center gap-1"
-          >
+          <Link href="/login" className="text-sm text-gray-400 hover:text-primary inline-flex items-center gap-1">
             <ArrowLeft className="w-4 h-4" />
             Volver al inicio de sesión
           </Link>

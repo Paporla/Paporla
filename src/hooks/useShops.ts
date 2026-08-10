@@ -21,7 +21,12 @@ async function fetchShops(): Promise<Shop[]> {
 }
 
 export function useShops() {
-  const { data = [], isLoading, error, refetch } = useQuery({
+  const {
+    data = [],
+    isLoading,
+    error,
+    refetch,
+  } = useQuery({
     queryKey: [SHOPS_QUERY_KEY],
     queryFn: fetchShops,
     staleTime: 60 * 1000, // 1 minuto — los comercios no cambian a cada rato

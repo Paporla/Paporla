@@ -32,13 +32,10 @@ export function usePublicPacks() {
 
   /**
    * Carga packs usando React Query. Soporta dos modos:
-   * - RPC search_packs_nearby (geolocalización) 
+   * - RPC search_packs_nearby (geolocalización)
    * - Vista available_packs (modo normal)
    */
-  const {
-    data: allPacks = [],
-    isLoading: loading,
-  } = useQuery({
+  const { data: allPacks = [], isLoading: loading } = useQuery({
     queryKey: ['public-packs', filters.location?.lat, filters.location?.lng, filters.radiusKm],
     queryFn: async () => {
       setError('')
@@ -84,11 +81,7 @@ export function usePublicPacks() {
 
     if (filters.search) {
       const q = filters.search.toLowerCase()
-      result = result.filter(
-        (p) =>
-          p.title?.toLowerCase().includes(q) ||
-          p.description?.toLowerCase().includes(q),
-      )
+      result = result.filter((p) => p.title?.toLowerCase().includes(q) || p.description?.toLowerCase().includes(q))
     }
 
     if (filters.minPrice > 0) {
