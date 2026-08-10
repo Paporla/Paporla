@@ -59,7 +59,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Páginas dinámicas: packs activos y comercios
   // ANON key es suficiente — las tablas packs y shops tienen RLS pública de lectura
   try {
-    const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!)
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+    if (!supabaseUrl || !supabaseAnonKey) {
+      console.error('Sitemap: NEXT_PUBLIC_SUPABASE_URL o NEXT_PUBLIC_SUPABASE_ANON_KEY no configurados')
+      return staticPages
+    }
+    const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
     const { data: packs } = await supabase.from('packs').select('id, updated_at').eq('is_active', true).limit(100)
 
