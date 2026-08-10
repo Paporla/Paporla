@@ -112,7 +112,7 @@ describe('useBusinessPacks', () => {
     await waitFor(() => expect(result.current.loading).toBe(false))
 
     await act(async () => {
-      await result.current.handleDelete('pack-1')
+      await result.current.handleDeactivate('pack-1')
     })
 
     expect(packChain.update).toHaveBeenCalledWith({ is_active: false, deleted_at: expect.any(String) })

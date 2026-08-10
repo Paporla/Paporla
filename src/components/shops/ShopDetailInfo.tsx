@@ -15,7 +15,7 @@ interface ShopInfo {
   latitude: number | null
   longitude: number | null
   rating: number
-  hours: Record<string, { open: string; close: string; closed: boolean }> | string | null
+  hours: Record<string, { open: string; close: string; closed: boolean }> | Record<string, unknown> | string | null
   created_at: string
 }
 

@@ -29,7 +29,8 @@ export async function GET() {
     let moneySavedCents = 0
     if (savings) {
       for (const r of savings) {
-        const pack = r.pack as { price_cents: number; original_price_cents: number | null } | null
+        const packArray = r.pack as { price_cents: number; original_price_cents: number | null }[] | null
+        const pack = (Array.isArray(packArray) ? packArray[0] : packArray) ?? null
         if (pack?.original_price_cents && pack.original_price_cents > pack.price_cents) {
           moneySavedCents +=
             (pack.original_price_cents - pack.price_cents) * ((r as { quantity?: number }).quantity ?? 1)

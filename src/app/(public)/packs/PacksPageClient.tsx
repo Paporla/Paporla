@@ -182,14 +182,14 @@ export default function PacksPage() {
         {!loading && packs.length === 0 ? (
           <EmptyState
             type={filters.city || filters.search ? 'search' : 'packs'}
-            customTitle={
+            title={
               filters.city
                 ? `No hay packs en ${filters.city}`
                 : filters.search
                   ? `No encontramos "${filters.search}"`
                   : undefined
             }
-            customDescription={
+            description={
               filters.city
                 ? 'Prueba buscando en otra ciudad o explorando todos los packs disponibles.'
                 : filters.minPrice > 0 || filters.maxPrice < 100000
@@ -199,7 +199,15 @@ export default function PacksPage() {
             action={{
               label: 'Limpiar filtros',
               onClick: () =>
-                handleFilterChange({ search: '', minPrice: 0, maxPrice: 100000, showAvailableOnly: false, city: '' }),
+                handleFilterChange({
+                  search: '',
+                  minPrice: 0,
+                  maxPrice: 100000,
+                  showAvailableOnly: false,
+                  city: '',
+                  location: null,
+                  radiusKm: 10,
+                }),
             }}
           />
         ) : (
