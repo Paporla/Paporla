@@ -19,8 +19,7 @@
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx,json,css,md}": [
-      "prettier --write",
-      "cross-env ESLINT_USE_FLAT_CONFIG=false eslint --fix"
+      "prettier --write"
     ]
   },
   "dependencies": {
