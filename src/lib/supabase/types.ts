@@ -76,14 +76,7 @@ export interface Pack {
 // ============================================
 
 export type ReservationStatus =
-  | 'pending'
-  | 'confirmed'
-  | 'ready_pickup'
-  | 'picked_up'
-  | 'completed'
-  | 'cancelled'
-  | 'no_show'
-  | 'expired'
+  'pending' | 'confirmed' | 'ready_pickup' | 'picked_up' | 'completed' | 'cancelled' | 'no_show' | 'expired'
 
 export type PaymentMethod = 'card' | 'cash' | 'mercado_pago' | 'demo'
 

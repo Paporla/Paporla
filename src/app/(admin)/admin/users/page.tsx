@@ -51,7 +51,7 @@ export default function AdminUsersPage() {
 
   const updateRoleMutation = useMutation({
     mutationFn: async ({ userId, newRole }: { userId: string; newRole: string }) => {
-      await adminApi(`/api/admin/users/${userId}/role`, { body: { role: newRole } })
+      return await adminApi<{ role: string }>(`/api/admin/users/${userId}/role`, { body: { role: newRole } })
     },
     onSuccess: (res: { success: boolean; data?: { role: string } }) => {
       setSuccess(`Rol actualizado a "${res.data?.role}" correctamente`)

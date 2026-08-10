@@ -9,11 +9,12 @@ interface ProfileFormData {
 }
 
 interface ImagesTabProps {
+  shopId: string
   formData: ProfileFormData
   updateForm: (field: string, value: string) => void
 }
 
-export default function ImagesTab({ formData, updateForm }: ImagesTabProps) {
+export default function ImagesTab({ shopId, formData, updateForm }: ImagesTabProps) {
   return (
     <div className="dark:bg-black/40 bg-white backdrop-blur-sm dark:border-white/10 border-gray-200 rounded-2xl p-6 lg:p-8 space-y-8">
       <h2 className="text-lg font-bold dark:text-white text-gray-900 flex items-center gap-2">

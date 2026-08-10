@@ -15,7 +15,9 @@ interface ToastMessage {
 }
 
 interface ToastContextValue {
+  toasts: ToastMessage[]
   addToast: (message: string, type?: ToastType) => void
+  removeToast: (id: string) => void
 }
 
 // ─── Context ────────────────────────────────────────────
@@ -41,7 +43,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   }, [])
 
   return (
-    <ToastContext.Provider value={{ addToast }}>
+    <ToastContext.Provider value={{ toasts, addToast, removeToast }}>
       {children}
       <ToastContainer toasts={toasts} removeToast={removeToast} />
     </ToastContext.Provider>
@@ -54,7 +56,7 @@ export function useToast(): ToastContextValue {
   const ctx = useContext(ToastContext)
   if (!ctx) {
     // Fallback silencioso: si no hay provider, addToast no hace nada
-    return { addToast: () => {} }
+    return { toasts: [], addToast: () => {}, removeToast: () => {} }
   }
   return ctx
 }

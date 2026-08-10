@@ -47,7 +47,7 @@ export function useBusinessReservations() {
         .order('created_at', { ascending: false })
         .limit(200)
       if (error) throw error
-      return ((data ?? []) as ReservationItem[]).map((r) => ({
+      return ((data ?? []) as unknown as ReservationItem[]).map((r) => ({
         ...r,
         user: r.user ?? { name: 'Usuario', email: 'N/A', phone: null },
       }))

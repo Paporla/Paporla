@@ -55,7 +55,7 @@ export interface PickupReminderData {
 async function sendEmail(params: { to: string; subject: string; html: string; text: string }) {
   const { to, subject, html, text } = params
   try {
-    const { data, error } = await resend.emails.send({
+    const { data, error } = await getResendClient().emails.send({
       from: `Paporla <${senderEmail}>`,
       to,
       subject,

@@ -71,7 +71,7 @@ export function useBusinessDashboard() {
         .gte('created_at', twoWeeksAgo.toISOString())
         .order('created_at', { ascending: false })
         .limit(100)
-      return ((data ?? []) as ReservationBrief[]).map((r) => ({
+      return ((data ?? []) as unknown as ReservationBrief[]).map((r) => ({
         ...r,
         user: r.user ?? { name: 'Usuario', email: '' },
       }))
