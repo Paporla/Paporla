@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { pageVariants } from '@/lib/utils/motion'
-import { Calendar, ShoppingBag, Download } from 'lucide-react'
+import { Calendar, ShoppingBag } from 'lucide-react'
 import Card from '@/components/ui/Card'
 import Toast from '@/components/ui/Toast'
 import ConfirmModal from '@/components/ui/ConfirmModal'

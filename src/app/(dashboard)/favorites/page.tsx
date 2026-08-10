@@ -14,7 +14,7 @@ import { useState } from 'react'
 
 export default function FavoritesPage() {
   const router = useRouter()
-  const { user } = useAuth()
+  useAuth()
   const { favorites, loading, removeFavorite } = useFavorites()
   const [removing, setRemoving] = useState<string | null>(null)
   const [error, setError] = useState('')
