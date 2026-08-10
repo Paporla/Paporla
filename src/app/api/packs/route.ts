@@ -1,6 +1,6 @@
 ﻿import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
-import { getPacks, createPack, updatePack, deactivatePack, ALLOWED_PACK_FIELDS } from '@/lib/services/packService'
+import { getPacks, createPack, updatePack, deletePack, ALLOWED_PACK_FIELDS } from '@/lib/services/packService'
 import { packSchema } from '@/lib/utils/validations'
 
 const cacheHeaders = {
@@ -89,7 +89,7 @@ export async function DELETE(request: Request) {
   const id = searchParams.get('id')
   if (!id) return NextResponse.json({ success: false, error: 'ID del pack requerido' }, { status: 400 })
 
-  const deleteResult = (await deactivatePack(user.id, id)) as PackResult & { data?: { success: boolean } }
+  const deleteResult = (await deletePack(user.id, id)) as PackResult & { data?: { success: boolean } }
   if (deleteResult.error)
     return NextResponse.json({ success: false, error: deleteResult.error }, { status: deleteResult.status ?? 500 })
   return NextResponse.json({ success: true, message: 'Pack eliminado' })
