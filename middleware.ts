@@ -17,6 +17,8 @@ function buildCspHeader(nonce: string): string {
   return [
     "default-src 'self'",
     `script-src 'self' 'nonce-${nonce}' https://*.supabase.co https://www.googletagmanager.com https://www.google-analytics.com`,
+    // 'unsafe-inline' requerido por Framer Motion (inyecta <style> sin nonce).
+    // TODO: migrar a MotionConfig con nonce para eliminarlo.
     `style-src 'self' 'nonce-${nonce}' 'unsafe-inline'`,
     "img-src 'self' data: https:",
     `connect-src 'self' https://*.supabase.co https://*.sentry.io https://www.google-analytics.com`,
