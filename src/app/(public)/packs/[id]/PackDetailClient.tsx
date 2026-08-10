@@ -22,7 +22,7 @@ import {
 } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
 import { useCreateReservation } from '@/hooks/useCreateReservation'
-import { trackViewPackDetail, trackClickReserve, trackBeginCheckout } from '@/lib/analytics/events'
+import '@/lib/analytics/events'
 import { supabaseBrowser } from '@/lib/supabase/client'
 import { motion } from 'framer-motion'
 import Button from '@/components/ui/Button'
@@ -76,7 +76,6 @@ export default function PackDetailClient({ initialPack, packId }: Props) {
     loading: reserving,
     error,
     clearError,
-    clearLastReservation,
   } = useCreateReservation()
   const [quantity, setQuantity] = useState(1)
   const [showConfirmation, setShowConfirmation] = useState(false)
