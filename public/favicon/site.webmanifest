@@ -1,0 +1,23 @@
+{
+  "name": "Paporla - Rescate Alimentario",
+  "short_name": "Paporla",
+  "description": "Rescata comida, ayuda al planeta y ahorra. Conectamos comercios con excedentes de comida.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0a0a1a",
+  "theme_color": "#00ff88",
+  "icons": [
+    {
+      "src": "/favicon/web-app-manifest-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/favicon/web-app-manifest-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

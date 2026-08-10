@@ -1,0 +1,89 @@
+{
+  "schema_version": 1,
+  "snapshot_sequence": 124,
+  "agents": [],
+  "coordination": {
+    "schema_version": 1,
+    "sequence": 8,
+    "decisions": [],
+    "write_claims": [
+      {
+        "claim": {
+          "owner": "agent_db1f321a",
+          "roots": [
+            "src/lib/utils/validations.ts",
+            "src/app/api"
+          ],
+          "exact_files": [],
+          "contracts": []
+        },
+        "sequence": 5,
+        "isolated_worktree": false
+      },
+      {
+        "claim": {
+          "owner": "agent_8459eeef",
+          "roots": [
+            "src"
+          ],
+          "exact_files": [],
+          "contracts": []
+        },
+        "sequence": 7,
+        "isolated_worktree": false
+      }
+    ],
+    "reconciliations": [],
+    "projections": [
+      {
+        "child_id": "agent_5a9ec178",
+        "decision_ids": [],
+        "projected_bytes": 0,
+        "deduplicated": 0,
+        "omitted": 0,
+        "sequence": 1
+      },
+      {
+        "child_id": "agent_9898df27",
+        "decision_ids": [],
+        "projected_bytes": 0,
+        "deduplicated": 0,
+        "omitted": 0,
+        "sequence": 2
+      },
+      {
+        "child_id": "agent_c4c029c2",
+        "decision_ids": [],
+        "projected_bytes": 0,
+        "deduplicated": 0,
+        "omitted": 0,
+        "sequence": 3
+      },
+      {
+        "child_id": "agent_3bb34e30",
+        "decision_ids": [],
+        "projected_bytes": 0,
+        "deduplicated": 0,
+        "omitted": 0,
+        "sequence": 4
+      },
+      {
+        "child_id": "agent_db1f321a",
+        "decision_ids": [],
+        "projected_bytes": 0,
+        "deduplicated": 0,
+        "omitted": 0,
+        "sequence": 6
+      },
+      {
+        "child_id": "agent_8459eeef",
+        "decision_ids": [],
+        "projected_bytes": 0,
+        "deduplicated": 0,
+        "omitted": 0,
+        "sequence": 8
+      }
+    ],
+    "contentions": []
+  }
+}
