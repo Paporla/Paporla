@@ -1,6 +1,13 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { renderHook, act } from '@testing-library/react'
 import { useToast } from '@/hooks/useToast'
+import { ToastProvider } from '@/components/ui/ToastProvider'
+
+function createWrapper() {
+  return function Wrapper({ children }: { children: React.ReactNode }) {
+    return <ToastProvider>{children}</ToastProvider>
+  }
+}
 
 describe('useToast', () => {
   beforeEach(() => {
@@ -12,12 +19,12 @@ describe('useToast', () => {
   })
 
   it('starts with empty toasts', () => {
-    const { result } = renderHook(() => useToast())
+    const { result } = renderHook(() => useToast(), { wrapper: createWrapper() })
     expect(result.current.toasts).toEqual([])
   })
 
   it('adds a toast with default type', () => {
-    const { result } = renderHook(() => useToast())
+    const { result } = renderHook(() => useToast(), { wrapper: createWrapper() })
     act(() => {
       result.current.addToast('Hello')
     })
@@ -27,7 +34,7 @@ describe('useToast', () => {
   })
 
   it('adds a toast with success type', () => {
-    const { result } = renderHook(() => useToast())
+    const { result } = renderHook(() => useToast(), { wrapper: createWrapper() })
     act(() => {
       result.current.addToast('Success!', 'success')
     })
@@ -35,7 +42,7 @@ describe('useToast', () => {
   })
 
   it('adds a toast with error type', () => {
-    const { result } = renderHook(() => useToast())
+    const { result } = renderHook(() => useToast(), { wrapper: createWrapper() })
     act(() => {
       result.current.addToast('Error!', 'error')
     })
@@ -43,7 +50,7 @@ describe('useToast', () => {
   })
 
   it('generates unique IDs', () => {
-    const { result } = renderHook(() => useToast())
+    const { result } = renderHook(() => useToast(), { wrapper: createWrapper() })
     act(() => {
       result.current.addToast('First')
       result.current.addToast('Second')
@@ -52,7 +59,7 @@ describe('useToast', () => {
   })
 
   it('removes a toast by ID', () => {
-    const { result } = renderHook(() => useToast())
+    const { result } = renderHook(() => useToast(), { wrapper: createWrapper() })
     act(() => {
       result.current.addToast('First')
       result.current.addToast('Second')
@@ -65,20 +72,20 @@ describe('useToast', () => {
     expect(result.current.toasts[0].message).toBe('Second')
   })
 
-  it('auto-removes toast after 3 seconds', () => {
-    const { result } = renderHook(() => useToast())
+  it('auto-removes toast after 4 seconds', () => {
+    const { result } = renderHook(() => useToast(), { wrapper: createWrapper() })
     act(() => {
       result.current.addToast('Auto remove')
     })
     expect(result.current.toasts).toHaveLength(1)
     act(() => {
-      vi.advanceTimersByTime(3000)
+      vi.advanceTimersByTime(4000)
     })
     expect(result.current.toasts).toHaveLength(0)
   })
 
   it('handles multiple toasts', () => {
-    const { result } = renderHook(() => useToast())
+    const { result } = renderHook(() => useToast(), { wrapper: createWrapper() })
     act(() => {
       result.current.addToast('One')
       result.current.addToast('Two')
