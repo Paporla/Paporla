@@ -3,7 +3,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabaseBrowser } from '@/lib/supabase/client'
 import { useAuth } from './useAuth'
-import type { Shop } from '@/lib/supabase/types'
 
 const FAVORITES_QUERY_KEY = 'favorites'
 const supabase = supabaseBrowser()
