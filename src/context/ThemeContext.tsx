@@ -13,6 +13,10 @@ interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined)
 
 function getInitialTheme(): Theme {
+  if (typeof window === 'undefined') return 'dark'
+  const stored = localStorage.getItem('paporla-theme')
+  if (stored === 'light' || stored === 'dark') return stored
+  if (window.matchMedia?.('(prefers-color-scheme: light)').matches) return 'light'
   return 'dark'
 }
 
