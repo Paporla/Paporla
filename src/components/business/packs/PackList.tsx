@@ -41,4 +41,3 @@ export default function PackList({ packs, deleting, onDeleteClick }: PackListPro
     </div>
   )
 }
-

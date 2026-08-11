@@ -144,10 +144,7 @@ export default function NotificationsPage() {
       </div>
 
       {filteredNotifications.length === 0 ? (
-        <EmptyState
-          type="notifications"
-          action={{ label: 'Explorar packs', onClick: () => router.push('/packs') }}
-        />
+        <EmptyState type="notifications" action={{ label: 'Explorar packs', onClick: () => router.push('/packs') }} />
       ) : (
         <div className="space-y-3">
           {filteredNotifications.map((notification, idx) => {
