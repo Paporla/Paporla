@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { motion } from 'framer-motion'
-import { Users, Store, TrendingUp, Bell, ChevronRight, AlertCircle } from 'lucide-react'
+import { Users, Store, TrendingUp, Bell, ChevronRight, AlertCircle, Package, CalendarCheck } from 'lucide-react'
 import Card from '@/components/ui/Card'
 import type { AdminDashboardStats } from './useAdminDashboard'
 
@@ -59,6 +59,24 @@ const navCards: NavCard[] = [
     bg: 'bg-amber-500/10',
     description: 'Actividad en tiempo real',
   },
+  {
+    icon: Package,
+    label: 'Packs',
+    key: 'totalPacks',
+    href: '/admin/packs',
+    color: 'text-primary',
+    bg: 'bg-primary/10',
+    description: 'Gestionar packs',
+  },
+  {
+    icon: CalendarCheck,
+    label: 'Reservas',
+    key: 'totalReservations',
+    href: '/admin/reservations',
+    color: 'text-secondary',
+    bg: 'bg-secondary/10',
+    description: 'Todas las reservas',
+  },
 ]
 
 function getValue(stats: AdminDashboardStats, key: keyof AdminDashboardStats | null): string {
@@ -79,7 +97,7 @@ export default function AdminNavCards({ stats, loading, error }: Props) {
   if (loading) {
     return (
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 animate-pulse">
-        {[0, 1, 2].map((i) => (
+        {[0, 1, 2, 3, 4, 5].map((i) => (
           <div key={i} className="h-32 bg-gray-200 dark:bg-gray-800 rounded-2xl" />
         ))}
       </div>
@@ -87,7 +105,7 @@ export default function AdminNavCards({ stats, loading, error }: Props) {
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       {navCards.map((item, index) => (
         <motion.div
           key={item.label}

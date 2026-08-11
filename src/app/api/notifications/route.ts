@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 import { createNotificationSchema, batchNotificationSchema } from '@/lib/utils/validations'
+import { logger } from '@/lib/logger'
 
 export async function POST(request: Request) {
   try {
@@ -73,13 +74,13 @@ export async function POST(request: Request) {
       .single()
 
     if (error) {
-      console.error('[Notifications] Error creating:', error)
+      logger.error('Notifications Create', error)
       return NextResponse.json({ success: false, error: error.message }, { status: 500 })
     }
 
     return NextResponse.json({ success: true, data })
   } catch (err: unknown) {
-    console.error('[Notifications] Error:', err)
+    logger.error('Notifications POST', err)
     const message = err instanceof Error ? err.message : 'Error interno'
     return NextResponse.json({ success: false, error: message }, { status: 500 })
   }
@@ -146,13 +147,13 @@ export async function PUT(request: Request) {
     const { data, error } = await supabase.from('notifications').insert(validatedNotifs).select()
 
     if (error) {
-      console.error('[Notifications] Batch error:', error)
+      logger.error('Notifications Batch Insert', error)
       return NextResponse.json({ success: false, error: error.message }, { status: 500 })
     }
 
     return NextResponse.json({ success: true, data })
   } catch (err: unknown) {
-    console.error('[Notifications] Batch error:', err)
+    logger.error('Notifications PUT', err)
     const message = err instanceof Error ? err.message : 'Error interno'
     return NextResponse.json({ success: false, error: message }, { status: 500 })
   }

@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { motion } from 'framer-motion'
 import { useAuth } from '@/hooks/useAuth'
 import Button from '@/components/ui/Button'
-import Toast from '@/components/ui/Toast'
+import { useToast } from '@/components/ui/ToastProvider'
 import RegisterFormFields from './RegisterFormFields'
 import { ArrowRight } from 'lucide-react'
 import { registerSchema } from '@/lib/utils/validations'
@@ -21,7 +21,6 @@ export default function RegisterForm() {
     shopName: '',
   })
   const [loading, setLoading] = useState(false)
-  const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
   const [fieldErrors, setFieldErrors] = useState<Record<string, string | undefined>>({})
   const [touched, setTouched] = useState<Record<string, boolean>>({})
@@ -49,6 +48,7 @@ export default function RegisterForm() {
   }
   const [agreedToTerms, setAgreedToTerms] = useState(false)
   const { signUp } = useAuth()
+  const { addToast } = useToast()
 
   const validateForm = () => {
     const errors: Record<string, string> = {}
@@ -81,10 +81,9 @@ export default function RegisterForm() {
     e.preventDefault()
     setTouched({ email: true, password: true, name: true, confirmPassword: true })
     setLoading(true)
-    setError('')
 
     if (!agreedToTerms) {
-      setError('Debes aceptar los términos y condiciones')
+      addToast('Debes aceptar los términos y condiciones', 'error')
       setLoading(false)
       return
     }
@@ -107,7 +106,7 @@ export default function RegisterForm() {
       )
       setSuccess(true)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error al registrarse')
+      addToast(err instanceof Error ? err.message : 'Error al registrarse', 'error')
     } finally {
       setLoading(false)
     }
@@ -182,8 +181,6 @@ export default function RegisterForm() {
           Inicia sesión aquí <ArrowRight className="w-3 h-3" />
         </Link>
       </div>
-
-      {error && <Toast message={error} type="error" onClose={() => setError('')} />}
     </form>
   )
 }

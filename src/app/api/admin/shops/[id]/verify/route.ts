@@ -1,7 +1,9 @@
 import { createClient } from '@/lib/supabase/server'
+import { getSupabaseAdmin } from '@/lib/supabase/admin'
 import { NextResponse } from 'next/server'
 import { isAdmin } from '@/lib/constants/roles'
 import { verifyShopSchema } from '@/lib/utils/validations'
+import { logger } from '@/lib/logger'
 
 /**
  * PATCH /api/admin/shops/[id]/verify
@@ -45,7 +47,11 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
   const { verified } = parsed.data
 
   // 3. Verificar que el comercio existe
-  const { data: shop } = await supabase.from('shops').select('name').eq('id', shopId).maybeSingle()
+  const { data: shop } = await supabase
+    .from('shops')
+    .select('name, owner_id')
+    .eq('id', shopId)
+    .maybeSingle()
 
   if (!shop) {
     return NextResponse.json({ success: false, error: 'Comercio no encontrado' }, { status: 404 })
@@ -55,11 +61,23 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
   const { error: updateError } = await supabase.from('shops').update({ verified }).eq('id', shopId)
 
   if (updateError) {
-    console.error('[AdminShopVerify] Error:', updateError)
+    logger.error('AdminShopVerify', updateError)
     return NextResponse.json({ success: false, error: 'Error al actualizar comercio' }, { status: 500 })
   }
 
-  // 5. Registrar
+  // 5. Notificar al dueño del comercio (tiempo real vía service_role)
+  if (verified && shop.owner_id) {
+    const admin = getSupabaseAdmin()
+    await admin.from('notifications').insert({
+      user_id: shop.owner_id,
+      type: 'shop_verified',
+      message: `Tu comercio "${shop.name}" ha sido verificado. Ya puedes comenzar a publicar packs.`,
+      is_read: false,
+      sent_at: new Date().toISOString(),
+    }).catch(() => {})
+  }
+
+  // 6. Registrar
   await supabase.from('activity_logs').insert({
     type: 'shop_verified',
     severity: 'info',

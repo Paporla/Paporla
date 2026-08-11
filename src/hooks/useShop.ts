@@ -3,6 +3,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { supabaseBrowser } from '@/lib/supabase/client'
 import type { Shop, Pack } from '@/lib/supabase/types'
+import { logger } from '@/lib/logger'
 
 const supabase = supabaseBrowser()
 
@@ -35,7 +36,7 @@ async function fetchShop(shopId: string): Promise<ShopWithPacks> {
     .order('created_at', { ascending: false })
 
   if (packsError) {
-    console.error('Error loading packs:', packsError)
+    logger.error('useShop loadPacks', packsError)
   }
 
   return {

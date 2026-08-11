@@ -433,7 +433,11 @@ BEGIN
     NEW.id,
     NEW.email,
     COALESCE(NEW.raw_user_meta_data->>'name', NEW.raw_user_meta_data->>'full_name', split_part(NEW.email, '@', 1)),
-    'user', -- SIEMPRE 'user' por seguridad; el cambio de rol solo via admin
+    -- Solo permitir 'user' o 'comercio' desde el metadata. Nunca admin/super_admin.
+    CASE 
+      WHEN NEW.raw_user_meta_data->>'role' IN ('user', 'comercio') THEN NEW.raw_user_meta_data->>'role'
+      ELSE 'user'
+    END,
     NEW.raw_user_meta_data->>'avatar_url'
   )
   ON CONFLICT (id) DO NOTHING;

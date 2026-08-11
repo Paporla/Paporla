@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { getSupabaseAdmin, validateCronRequest } from '@/lib/supabase/admin'
+import { logger } from '@/lib/logger'
 
 export async function GET(request: Request) {
   if (!validateCronRequest(request)) {
@@ -11,7 +12,7 @@ export async function GET(request: Request) {
     const { error } = await supabase.rpc('cleanup_rate_limits')
 
     if (error) {
-      console.error('[CRON:cleanup-rate-limits] Error:', error)
+      logger.error('CRON cleanup-rate-limits RPC', error)
       throw error
     }
 

@@ -5,6 +5,7 @@ import { motion } from 'framer-motion'
 import { pageVariants } from '@/lib/utils/motion'
 import { Bell, CheckCheck, Trash2, Clock, Package, CheckCircle, XCircle, AlertCircle, Store, Heart } from 'lucide-react'
 import { useNotifications } from '@/hooks/useNotifications'
+import { useAuth } from '@/hooks/useAuth'
 import { formatRelativeTime } from '@/lib/utils/formatTime'
 import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
@@ -26,22 +27,48 @@ const iconMap: Record<string, { icon: React.ComponentType<{ className?: string }
 const defaultIcon = { icon: Bell, color: 'text-gray-400', bg: 'bg-gray-500/10' }
 
 export default function NotificationsPage() {
-  const { notifications, unreadCount, loading, markAsRead, markAllAsRead, deleteNotification } = useNotifications()
+  const { notifications, unreadCount, loading: notifLoading, markAsRead, markAllAsRead, deleteNotification } = useNotifications()
+  const { loading: authLoading } = useAuth()
   const [filter, setFilter] = useState<'all' | 'unread'>('all')
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null)
 
   const filteredNotifications = filter === 'all' ? notifications : notifications.filter((n) => !n.is_read)
 
-  // SPINNER
-  if (loading) {
+  const isLoading = authLoading || notifLoading
+
+  // SKELETON — mantener hasta que auth y notificaciones esten listos
+  if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="text-center">
-          <div className="w-14 h-14 rounded-full border-4 border-primary/30 border-t-primary animate-spin mx-auto mb-4" />
-          <p className="dark:text-gray-400 text-gray-600 text-lg font-medium">Cargando notificaciones...</p>
-          <p className="dark:text-gray-600 text-gray-400 text-sm mt-1">Por favor espera</p>
+      <motion.div variants={pageVariants} initial="initial" animate="animate" className="space-y-8 pb-8">
+        <div className="relative overflow-hidden bg-gradient-to-br from-primary/5 via-transparent to-secondary/5 -mt-8 -mx-4 px-4 py-8 rounded-b-3xl">
+          <div className="flex items-center gap-3 mb-2">
+            <div className="w-10 h-10 rounded-xl bg-primary/10 animate-pulse" />
+            <div>
+              <div className="h-8 w-48 bg-white/5 rounded-lg animate-pulse mb-2" />
+              <div className="h-4 w-64 bg-white/5 rounded animate-pulse" />
+            </div>
+          </div>
         </div>
-      </div>
+
+        <div className="flex gap-2">
+          <div className="h-10 w-24 bg-white/5 rounded-lg animate-pulse" />
+          <div className="h-10 w-32 bg-white/5 rounded-lg animate-pulse" />
+        </div>
+
+        <div className="space-y-3">
+          {[0, 1, 2, 3, 4].map((i) => (
+            <div key={i} className="glass-card rounded-2xl p-5 animate-pulse">
+              <div className="flex gap-4">
+                <div className="w-10 h-10 rounded-xl bg-white/5" />
+                <div className="flex-1 space-y-3">
+                  <div className="h-4 bg-white/5 rounded w-3/4" />
+                  <div className="h-3 bg-white/5 rounded w-1/4" />
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </motion.div>
     )
   }
 

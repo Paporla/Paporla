@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { supabaseBrowser } from '@/lib/supabase/client'
+import { logger } from '@/lib/logger'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 
 interface RevenueData {
@@ -48,34 +49,58 @@ export default function RevenueChart() {
     const loadRevenueData = async () => {
       setLoading(true)
 
-      const { data, error } = await supabase.from('revenue_metrics').select('*').order('month', { ascending: true })
+      // Consultar reservas completadas (picked_up) en vez de la tabla revenue_metrics que no existe
+      const { data: reservations, error } = await supabase
+        .from('reservations')
+        .select('id, total_price_cents, created_at')
+        .eq('status', 'picked_up')
+        .order('created_at', { ascending: true })
 
       if (error) {
-        console.error('Error loading revenue data:', error)
-      } else if (data && data.length > 0) {
-        // Formatear meses
-        const formattedData = data.map((item: RevenueData) => ({
-          ...item,
-          month: new Date(item.month).toLocaleDateString('es', { month: 'short' }),
-          total_revenue_cents: item.total_revenue_cents ?? 0,
-          total_commissions_cents: item.total_commissions_cents ?? 0,
-        }))
-        setData(formattedData)
-
-        // Calcular total de ingresos
-        const total = formattedData.reduce((sum, item) => sum + item.total_revenue_cents, 0)
-        setTotalRevenue(total)
-
-        // Calcular crecimiento (comparar últimos 2 meses)
-        if (formattedData.length >= 2) {
-          const lastMonth = formattedData[formattedData.length - 1].total_revenue_cents
-          const prevMonth = formattedData[formattedData.length - 2].total_revenue_cents
-          if (prevMonth > 0) {
-            const growthPercent = ((lastMonth - prevMonth) / prevMonth) * 100
-            setGrowth(Math.round(growthPercent))
-          }
-        }
+        logger.error('Admin RevenueChart', error)
+        setLoading(false)
+        return
       }
+
+      if (!reservations || reservations.length === 0) {
+        setLoading(false)
+        return
+      }
+
+      // Agrupar por mes en JS
+      const monthlyMap = new Map<string, { revenue: number; commissions: number; count: number }>()
+
+      for (const r of reservations) {
+        const date = new Date(r.created_at)
+        const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
+        const existing = monthlyMap.get(monthKey) ?? { revenue: 0, commissions: 0, count: 0 }
+        const revenue = r.total_price_cents ?? 0
+        existing.revenue += revenue
+        existing.commissions += Math.round(revenue * 0.1) // 10% comision
+        existing.count += 1
+        monthlyMap.set(monthKey, existing)
+      }
+
+      const formattedData: RevenueData[] = Array.from(monthlyMap.entries())
+        .sort(([a], [b]) => a.localeCompare(b))
+        .map(([monthKey, values]) => ({
+          month: new Date(monthKey + '-01').toLocaleDateString('es', { month: 'short' }),
+          total_revenue_cents: values.revenue,
+          total_commissions_cents: values.commissions,
+          total_reservations: values.count,
+        }))
+
+      setData(formattedData)
+
+      const total = formattedData.reduce((sum, item) => sum + item.total_revenue_cents, 0)
+      setTotalRevenue(total)
+
+      if (formattedData.length >= 2) {
+        const last = formattedData[formattedData.length - 1].total_revenue_cents
+        const prev = formattedData[formattedData.length - 2].total_revenue_cents
+        if (prev > 0) setGrowth(Math.round(((last - prev) / prev) * 100))
+      }
+
       setLoading(false)
     }
 

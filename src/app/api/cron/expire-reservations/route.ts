@@ -1,5 +1,6 @@
 ﻿import { NextResponse } from 'next/server'
 import { getSupabaseAdmin, validateCronRequest } from '@/lib/supabase/admin'
+import { logger } from '@/lib/logger'
 
 export async function GET(request: Request) {
   if (!validateCronRequest(request)) {
@@ -12,7 +13,7 @@ export async function GET(request: Request) {
     const { data: expireResult, error: expireError } = await supabase.rpc('expire_reservations')
 
     if (expireError) {
-      console.error('[CRON] RPC Error:', expireError)
+      logger.error('CRON expire-reservations RPC', expireError)
       throw expireError
     }
 
@@ -26,7 +27,7 @@ export async function GET(request: Request) {
       timestamp: new Date().toISOString(),
     })
   } catch (error) {
-    console.error('[CRON] Error:', error)
+    logger.error('CRON expire-reservations', error)
     return NextResponse.json(
       { success: false, error: error instanceof Error ? error.message : 'Error desconocido' },
       { status: 500 },

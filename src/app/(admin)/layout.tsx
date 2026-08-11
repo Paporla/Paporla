@@ -8,8 +8,13 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   await requireAuth(['admin', 'super_admin'])
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 dark:from-[#0a0a1a] dark:via-[#0f0f1a] dark:to-[#020205]">
-      <div className="flex">
+    <div className="min-h-screen relative" style={{ background: 'linear-gradient(180deg, #0d1f14 0%, #0a0a1a 45%, #0a0a1a 55%, #0d1f14 100%)' }}>
+      {/* Blobs decorativos al estilo landing */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-0 left-1/4 w-[600px] h-[600px] bg-primary/[0.04] rounded-full blur-3xl" />
+        <div className="absolute bottom-0 right-1/4 w-[500px] h-[500px] bg-primary/[0.03] rounded-full blur-3xl" />
+      </div>
+      <div className="flex relative z-10">
         <AdminSidebar />
         <div className="flex-1 lg:ml-72">
           <div className="pt-4 pb-20 lg:pb-12">

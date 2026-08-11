@@ -1,4 +1,5 @@
 import { getSupabaseAdmin } from '@/lib/supabase/admin'
+import { logger } from '@/lib/logger'
 
 interface SendNotificationParams {
   userId: string
@@ -19,12 +20,12 @@ export async function sendNotification({ userId, type, message, reservationId }:
       sent_at: new Date().toISOString(),
     })
     if (error) {
-      console.error('[sendNotification] Error:', error.message)
+      logger.error('sendNotification', error)
       return false
     }
     return true
   } catch (err) {
-    console.error('[sendNotification] Error:', err)
+    logger.error('sendNotification', err)
     return false
   }
 }
@@ -42,12 +43,12 @@ export async function sendBatchNotifications(notifications: SendNotificationPara
     }))
     const { error } = await supabase.from('notifications').insert(records)
     if (error) {
-      console.error('[sendBatchNotifications] Error:', error.message)
+      logger.error('sendBatchNotifications', error)
       return false
     }
     return true
   } catch (err) {
-    console.error('[sendBatchNotifications] Error:', err)
+    logger.error('sendBatchNotifications', err)
     return false
   }
 }

@@ -35,14 +35,12 @@ export function useNotifications() {
   const [error, setError] = useState<string | null>(null)
 
   const loadNotifications = useCallback(async () => {
-    if (!user) {
-      setNotifications([])
-      setUnreadCount(0)
-      setLoading(false)
-      return
-    }
+    // No hacer nada hasta que tengamos el usuario. Si user es null porque
+    // auth aun esta cargando, mantenemos loading=true (el estado inicial).
+    // El dashboard layout requireAuth redirige a /login si no hay sesion.
+    if (!user) return
 
-    setLoading(true)
+    // loading ya es true del estado inicial, no forzamos otro render
     setError(null)
 
     const { data, error: queryError } = await supabase

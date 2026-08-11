@@ -159,7 +159,8 @@ export default function BusinessProfilePage() {
         setShop(newShop)
       }
 
-      setToast({ message: toastMessage ?? 'Perfil actualizado correctamente', type: 'success' })
+      const msg = typeof toastMessage === 'string' ? toastMessage : 'Perfil actualizado correctamente'
+      setToast({ message: msg, type: 'success' })
       setIsDirty(false)
     } catch (err: unknown) {
       setToast({ message: err instanceof Error ? err.message : 'Error al guardar los cambios', type: 'error' })
@@ -213,7 +214,10 @@ export default function BusinessProfilePage() {
     return <ProfilePreview formData={formData} hours={hours} onBack={() => setPreviewMode(false)} />
   }
 
-  const completionPercentage = Object.values(formData).filter((v) => v).length * 10
+  // Porcentaje basado en campos esenciales del perfil (excluye opcionales y admin)
+  const completionFields = ['name', 'description', 'category', 'address', 'city', 'phone', 'logoUrl', 'coverUrl']
+  const filled = completionFields.filter((f) => formData[f as keyof typeof formData]).length
+  const completionPercentage = Math.round((filled / completionFields.length) * 100)
 
   return (
     <div className="space-y-6">

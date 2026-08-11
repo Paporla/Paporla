@@ -69,7 +69,7 @@ export default function Breadcrumbs() {
   if (breadcrumbs.length <= 1) return null
 
   return (
-    <div className="border-b dark:border-gray-700 dark:bg-transparent bg-gray-50/80">
+    <div className="border-b border-white/5 bg-transparent">
       <div className="container mx-auto px-4">
         <div className="py-2.5">
           <nav className="flex items-center gap-1 text-xs md:text-sm overflow-x-auto whitespace-nowrap scrollbar-hide">

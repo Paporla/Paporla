@@ -3,6 +3,7 @@
 import Image from 'next/image'
 import { useState, useRef } from 'react'
 import { supabaseBrowser } from '@/lib/supabase/client'
+import { logger } from '@/lib/logger'
 import { ImageIcon, Upload, X, Loader2 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 
@@ -78,7 +79,7 @@ export default function ImageUpload({
       setPreview(publicUrl)
       onUploadComplete(publicUrl)
     } catch (error: unknown) {
-      console.error('Error uploading image:', error)
+      logger.error('ImageUpload', error)
       onError?.((error instanceof Error ? error.message : 'Error') || 'Error al subir la imagen')
     } finally {
       setUploading(false)

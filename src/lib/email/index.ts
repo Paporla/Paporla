@@ -1,5 +1,6 @@
 import { Resend } from 'resend'
 import * as Sentry from '@sentry/nextjs'
+import { logger } from '@/lib/logger'
 import {
   welcomeTemplate,
   reservationConfirmationTemplate,
@@ -14,19 +15,11 @@ function getResendClient(): Resend {
 }
 const senderEmail = process.env.RESEND_FROM_EMAIL ?? 'noreply@paporla.com'
 
-const isDev = process.env.NODE_ENV === 'development'
-
-function logDebug(...args: unknown[]) {
-  if (isDev) {
-    console.warn('[Email]', ...args)
-  }
-}
-
-function logError(context: string, error: unknown) {
-  if (isDev) {
-    console.error(`[Email Error] ${context}:`, error)
-  }
-  if (!isDev) {
+function logEmailError(context: string, error: unknown) {
+  logger.error(`Email: ${context}`, error)
+  // En produccion, Sentry captura automaticamente via instrumentation.
+  // Pero enviamos explicitamente para tener el tag email_context.
+  if (process.env.NODE_ENV !== 'development' && process.env.NODE_ENV !== 'test') {
     Sentry.captureException(error, { tags: { email_context: context } })
   }
 }
@@ -63,13 +56,13 @@ async function sendEmail(params: { to: string; subject: string; html: string; te
       text,
     })
     if (error) {
-      logError(subject, error)
+      logEmailError(subject, error)
       return { success: false, error }
     }
-    logDebug('Sent:', subject, 'to:', to)
+    logger.info('Email Sent', `${subject} -> ${to}`)
     return { success: true, data }
   } catch (err) {
-    logError(subject, err)
+    logEmailError(subject, err)
     return { success: false, error: err }
   }
 }

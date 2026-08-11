@@ -123,7 +123,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         >
           Saltar al contenido principal
         </a>
-        <Providers>
+        <Providers nonce={nonce}>
           <RouteLoader />
           <PWAProvider />
           {children}

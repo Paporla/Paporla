@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 import { ROLES, isAdmin } from '@/lib/constants/roles'
 import { updateUserRoleSchema } from '@/lib/utils/validations'
+import { logger } from '@/lib/logger'
 
 /**
  * PATCH /api/admin/users/[id]/role
@@ -93,7 +94,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
   const { error: updateError } = await supabase.from('user_profiles').update({ role: newRole }).eq('id', targetUserId)
 
   if (updateError) {
-    console.error('[AdminRoleChange] Error:', updateError)
+    logger.error('AdminRoleChange', updateError)
     return NextResponse.json({ success: false, error: 'Error al actualizar rol' }, { status: 500 })
   }
 

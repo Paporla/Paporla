@@ -6,7 +6,7 @@ import { useSearchParams } from 'next/navigation'
 import { useAuth } from '@/hooks/useAuth'
 import Button from '@/components/ui/Button'
 import Input from '@/components/ui/Input'
-import Toast from '@/components/ui/Toast'
+import { useToast } from '@/components/ui/ToastProvider'
 import { Mail, Lock, Eye, EyeOff } from 'lucide-react'
 import { loginSchema } from '@/lib/utils/validations'
 
@@ -16,8 +16,6 @@ export default function LoginForm() {
   const [showPassword, setShowPassword] = useState(false)
   const [rememberMe, setRememberMe] = useState(false)
   const [loading, setLoading] = useState(false)
-  const [error, setError] = useState('')
-  const [success, setSuccess] = useState('')
   const [fieldErrors, setFieldErrors] = useState<{ email?: string; password?: string }>({})
   const [touched, setTouched] = useState<Record<string, boolean>>({})
 
@@ -37,6 +35,7 @@ export default function LoginForm() {
     if (field === 'password') validateField('password', password)
   }
   const { signIn } = useAuth()
+  const { addToast } = useToast()
   const searchParams = useSearchParams()
 
   useEffect(() => {
@@ -47,7 +46,7 @@ export default function LoginForm() {
     }
 
     if (searchParams.get('registered') === 'true') {
-      setSuccess('Registro exitoso! Revisa tu email para confirmar tu cuenta.')
+      addToast('Registro exitoso! Revisa tu email para confirmar tu cuenta.', 'success')
     }
   }, [searchParams])
 
@@ -70,8 +69,6 @@ export default function LoginForm() {
     e.preventDefault()
     setTouched({ email: true, password: true })
     setLoading(true)
-    setError('')
-    setSuccess('')
 
     if (!validateForm()) {
       setLoading(false)
@@ -87,7 +84,7 @@ export default function LoginForm() {
         sessionStorage.removeItem('remembered_email')
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error al iniciar sesión')
+      addToast(err instanceof Error ? err.message : 'Error al iniciar sesión', 'error')
     } finally {
       setLoading(false)
     }
@@ -165,9 +162,6 @@ export default function LoginForm() {
           Regístrate aquí
         </Link>
       </div>
-
-      {success && <Toast message={success} type="success" onClose={() => setSuccess('')} />}
-      {error && <Toast message={error} type="error" onClose={() => setError('')} />}
     </form>
   )
 }

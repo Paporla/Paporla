@@ -32,7 +32,7 @@ export default function UnsavedChangesBar({ isDirty, onSave, onDiscard, saving }
               Descartar
             </button>
             <button
-              onClick={onSave}
+              onClick={() => onSave()}
               disabled={saving}
               className="flex items-center gap-2 bg-primary hover:bg-primary/80 text-black text-sm font-bold px-5 py-2 rounded-xl transition-all disabled:opacity-50"
             >

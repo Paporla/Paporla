@@ -1,7 +1,8 @@
 ﻿'use client'
 
 import Link from 'next/link'
-import { Store } from 'lucide-react'
+import { useSearchParams } from 'next/navigation'
+import { Store, ShieldAlert, CheckCircle } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
 import { useBusinessDashboard } from '@/components/business/dashboard/useBusinessDashboard'
 import LoadingSkeleton from '@/components/business/LoadingSkeleton'
@@ -16,6 +17,8 @@ import TodayPickups from '@/components/business/TodayPickups'
 export default function BusinessDashboard() {
   const { loading: authLoading } = useAuth()
   const { shop, stats, recentReservations, loading, error: dashError } = useBusinessDashboard()
+  const searchParams = useSearchParams()
+  const isNewShop = searchParams.get('new') === 'true'
 
   // Evitar flash: mientras se resuelve la autenticación, mostrar skeleton
   if (authLoading || loading) return <LoadingSkeleton />
@@ -55,6 +58,42 @@ export default function BusinessDashboard() {
       </div>
     )
   }
+
+  // Mostrar aviso si el comercio no esta verificado
+  if (!shop.verified) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
+        <div className="glass-card rounded-2xl p-8 max-w-md">
+          <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-amber-500/10 flex items-center justify-center">
+            <ShieldAlert className="w-8 h-8 text-amber-400" />
+          </div>
+          <h2 className="text-xl font-bold dark:text-white text-gray-900 mb-2">Comercio en revision</h2>
+          <p className="dark:text-gray-400 text-gray-600 text-sm mb-6">
+            Tu comercio <strong className="text-primary">{shop.name}</strong> esta pendiente de verificacion por nuestro
+            equipo. Te notificaremos cuando este aprobado.
+          </p>
+          <p className="text-xs dark:text-gray-600 text-gray-500 mb-6">
+            Mientras tanto, asegurate de completar todos los datos de tu perfil para acelerar el proceso.
+          </p>
+          <Link href="/business/profile" className="block w-full">
+            <Button className="w-full" variant="outline">
+              Completar perfil
+            </Button>
+          </Link>
+        </div>
+      </div>
+    )
+  }
+
+  // Banner de bienvenida para comercio nuevo recien verificado
+  {isNewShop && (
+    <div className="mb-4 p-4 rounded-xl bg-primary/10 border border-primary/20 flex items-center gap-3">
+      <CheckCircle className="w-5 h-5 text-primary flex-shrink-0" />
+      <p className="text-sm dark:text-gray-300 text-gray-700">
+        Perfil completado! Ya puedes empezar a publicar packs.
+      </p>
+    </div>
+  )}
 
   // Convertir reservas recientes a formato de actividad
   const activities = (recentReservations ?? []).map((r) => ({

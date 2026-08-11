@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 import { isAdmin } from '@/lib/constants/roles'
+import { logger } from '@/lib/logger'
 
 /**
  * DELETE /api/admin/users/[id]
@@ -78,7 +79,7 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ i
   const { error: deleteError } = await supabase.from('user_profiles').delete().eq('id', targetUserId)
 
   if (deleteError) {
-    console.error('[AdminUserDelete] Error:', deleteError)
+    logger.error('AdminUserDelete', deleteError)
     return NextResponse.json({ success: false, error: 'Error al eliminar usuario' }, { status: 500 })
   }
 

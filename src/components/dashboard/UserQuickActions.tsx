@@ -60,14 +60,16 @@ export default function UserQuickActions() {
             transition={{ delay: 0.2 + idx * 0.05 }}
           >
             <Link href={action.href}>
-              <div className="group glass-card hover:border-primary/30 rounded-2xl p-4 text-center cursor-pointer transition-all duration-300 hover:-translate-y-1">
+              <div className="group glass-card hover:border-primary/30 rounded-2xl p-3 text-center cursor-pointer transition-all duration-300 hover:-translate-y-1 h-full flex flex-col items-center justify-center min-h-[90px]">
                 <div
-                  className={`w-10 h-10 mx-auto mb-2.5 rounded-xl bg-gradient-to-br ${action.color} flex items-center justify-center group-hover:scale-110 transition-transform`}
+                  className={`w-8 h-8 mx-auto mb-2 rounded-xl bg-gradient-to-br ${action.color} flex items-center justify-center group-hover:scale-110 transition-transform`}
                 >
-                  <action.icon className="w-5 h-5 text-white" />
+                  <action.icon className="w-4 h-4 text-white" />
                 </div>
-                <p className="dark:text-white text-gray-900 font-medium text-xs">{action.label}</p>
-                <p className="text-[10px] dark:text-gray-500 text-gray-400 mt-0.5 leading-tight">
+                <p className="dark:text-white text-gray-900 font-medium text-[11px] leading-tight truncate w-full">
+                  {action.label}
+                </p>
+                <p className="text-[10px] dark:text-gray-500 text-gray-400 mt-0.5 leading-tight truncate w-full">
                   {action.description}
                 </p>
               </div>
