@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { Bell, CheckCheck, Trash2, Clock, Package, CheckCircle, XCircle, AlertCircle, Store } from 'lucide-react'
 import { formatRelativeTime } from '@/lib/utils/formatTime'
@@ -25,6 +26,7 @@ const iconMap: Record<string, { icon: React.ComponentType<{ className?: string }
 const defaultIcon = { icon: Bell, color: 'text-gray-400', bg: 'bg-gray-500/10' }
 
 export default function BusinessNotificationsPage() {
+  const router = useRouter()
   const { notifications, unreadCount, markAsRead, markAllAsRead, deleteNotification, loading } = useNotifications()
   const [filter, setFilter] = useState<'all' | 'unread'>('all')
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null)
