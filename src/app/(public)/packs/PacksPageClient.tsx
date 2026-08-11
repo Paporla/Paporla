@@ -207,6 +207,7 @@ export default function PacksPage() {
                   city: '',
                   location: null,
                   radiusKm: 10,
+                  sortBy: 'newest' as const,
                 }),
             }}
           />
