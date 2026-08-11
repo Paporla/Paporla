@@ -1,8 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { requireAuth } from '@/lib/auth/requireAuth'
 import Link from 'next/link'
-import { Package, Eye, Trash2, ArrowLeft } from 'lucide-react'
-import Button from '@/components/ui/Button'
+import { Package, Eye } from 'lucide-react'
 import { formatPrice } from '@/lib/utils/formatPrice'
 
 export default async function AdminPacksPage() {
