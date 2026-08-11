@@ -15,6 +15,7 @@ interface Filters {
   city: string
   location: { lat: number; lng: number } | null
   radiusKm: number
+  sortBy: 'newest' | 'price_asc' | 'price_desc' | 'distance'
 }
 
 interface Props {
@@ -30,7 +31,7 @@ const defaultFilters: Filters = {
   showAvailableOnly: false,
   city: '',
   location: null,
-  radiusKm: 10,
+  sortBy: 'newest' as const,
 }
 
 export default function PackFiltersAdvanced({
@@ -134,6 +135,19 @@ export default function PackFiltersAdvanced({
                     update('maxPrice', max)
                   }}
                 />
+                <div>
+                  <label className="block text-sm font-medium dark:text-gray-300 text-gray-700 mb-2">Ordenar por</label>
+                  <select
+                    value={filters.sortBy || 'newest'}
+                  onChange={(e) => update('sortBy', e.target.value as Filters['sortBy'])}
+                  className="w-full px-4 py-2 rounded-lg dark:bg-white/5 bg-white dark:border-gray-600 border-gray-200 dark:text-white text-gray-900 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
+                >
+                  {filters.location && <option value="distance">Más cercanos</option>}
+                  <option value="newest">Más recientes</option>
+                  <option value="price_asc">Precio: menor a mayor</option>
+                  <option value="price_desc">Precio: mayor a menor</option>
+                </select>
+                </div>
                 <div>
                   <label className="block text-sm font-medium dark:text-gray-300 text-gray-700 mb-2">Ciudad</label>
                   <select
