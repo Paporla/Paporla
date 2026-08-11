@@ -4,6 +4,7 @@
 -- ========================================================
 
 -- Habilitar RLS en cualquier tabla pública que aún no lo tenga
+-- Excluye tablas de sistema (PostGIS, etc.)
 DO $$
 DECLARE
   t record;
@@ -12,6 +13,7 @@ BEGIN
     SELECT tablename
     FROM pg_tables
     WHERE schemaname = 'public'
+      AND tablename NOT IN ('spatial_ref_sys', 'geography_columns', 'geometry_columns')
       AND tablename NOT IN (
         SELECT tablename
         FROM pg_tables
