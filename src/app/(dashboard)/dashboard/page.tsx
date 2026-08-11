@@ -8,6 +8,7 @@ import { pageVariants } from '@/lib/utils/motion'
 import { useAuth } from '@/hooks/useAuth'
 import { useReservations } from '@/hooks/useReservations'
 import UserWelcomeBanner from '@/components/dashboard/UserWelcomeBanner'
+import OnboardingBanner from '@/components/onboarding/OnboardingBanner'
 import UserStatsGrid from '@/components/dashboard/UserStatsGrid'
 import UserQuickActions from '@/components/dashboard/UserQuickActions'
 import NextPickupCard from '@/components/dashboard/NextPickupCard'
@@ -97,6 +98,8 @@ export default function UserDashboardPage() {
           duration={6000}
         />
       )}
+
+      <OnboardingBanner type="user" />
 
       <ErrorBoundary fallback={<div className="p-4 text-sm text-gray-500">Error al cargar banner</div>}>
         <UserWelcomeBanner
