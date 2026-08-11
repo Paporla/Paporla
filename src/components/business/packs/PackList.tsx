@@ -1,5 +1,6 @@
 'use client'
 
+import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import PackCard from './PackCard'
 import { BusinessPack } from './useBusinessPacks'
@@ -39,3 +40,5 @@ export default function PackList({ packs, deleting, onDeleteClick }: PackListPro
     </div>
   )
 }
+
+const router = useRouter()

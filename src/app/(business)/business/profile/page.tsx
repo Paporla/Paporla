@@ -1,6 +1,7 @@
 ﻿'use client'
 
 import { useState, useEffect, useRef } from 'react'
+import { useRouter } from 'next/navigation'
 import { useAuth } from '@/hooks/useAuth'
 import { supabaseBrowser } from '@/lib/supabase/client'
 import Toast from '@/components/ui/Toast'
@@ -41,6 +42,7 @@ interface ShopData {
 }
 
 export default function BusinessProfilePage() {
+  const router = useRouter()
   const { user } = useAuth()
   const supabase = supabaseBrowser()
   const [loading, setLoading] = useState(true)

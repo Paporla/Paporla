@@ -1,6 +1,7 @@
 ﻿'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Calendar, Clock, CheckCircle, XCircle, Ban, ChevronDown, ChevronUp, MapPin, AlertCircle } from 'lucide-react'
@@ -29,6 +30,7 @@ const statusIcons: Record<string, React.ComponentType<{ className?: string }>> =
 }
 
 export default function UserReservationsPage() {
+  const router = useRouter()
   const { reservations, loading, error: hookError, cancelReservation } = useReservations()
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
