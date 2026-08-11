@@ -12,16 +12,16 @@ export default function Providers({ children, nonce }: { children: React.ReactNo
   return (
     <ErrorBoundary>
       <AuthProvider>
-      <QueryProvider>
-        {process.env.NODE_ENV === 'development' && <ReactQueryDevtools initialIsOpen={false} />}
-        <ThemeProvider>
-          <ToastProvider>
-            <MotionConfig reducedMotion="user" nonce={nonce}>
-              {children}
-            </MotionConfig>
-          </ToastProvider>
-        </ThemeProvider>
-      </QueryProvider>
+        <QueryProvider>
+          {process.env.NODE_ENV === 'development' && <ReactQueryDevtools initialIsOpen={false} />}
+          <ThemeProvider>
+            <ToastProvider>
+              <MotionConfig reducedMotion="user" nonce={nonce}>
+                {children}
+              </MotionConfig>
+            </ToastProvider>
+          </ThemeProvider>
+        </QueryProvider>
       </AuthProvider>
     </ErrorBoundary>
   )

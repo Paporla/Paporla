@@ -86,14 +86,16 @@ export default function BusinessDashboard() {
   }
 
   // Banner de bienvenida para comercio nuevo recien verificado
-  {isNewShop && (
-    <div className="mb-4 p-4 rounded-xl bg-primary/10 border border-primary/20 flex items-center gap-3">
-      <CheckCircle className="w-5 h-5 text-primary flex-shrink-0" />
-      <p className="text-sm dark:text-gray-300 text-gray-700">
-        Perfil completado! Ya puedes empezar a publicar packs.
-      </p>
-    </div>
-  )}
+  {
+    isNewShop && (
+      <div className="mb-4 p-4 rounded-xl bg-primary/10 border border-primary/20 flex items-center gap-3">
+        <CheckCircle className="w-5 h-5 text-primary flex-shrink-0" />
+        <p className="text-sm dark:text-gray-300 text-gray-700">
+          Perfil completado! Ya puedes empezar a publicar packs.
+        </p>
+      </div>
+    )
+  }
 
   // Convertir reservas recientes a formato de actividad
   const activities = (recentReservations ?? []).map((r) => ({

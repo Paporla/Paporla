@@ -16,7 +16,14 @@ interface AuthContextValue {
   loading: boolean
   error: string | null
   signIn: (email: string, password: string) => Promise<void>
-  signUp: (email: string, password: string, name: string, role: SignUpRole, phone?: string, shopData?: ShopData) => Promise<void>
+  signUp: (
+    email: string,
+    password: string,
+    name: string,
+    role: SignUpRole,
+    phone?: string,
+    shopData?: ShopData,
+  ) => Promise<void>
   signOut: () => Promise<void>
   getUser: (skipLoading?: boolean) => Promise<UserProfile | null>
 }
@@ -65,14 +72,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       try {
         if (!skipLoading) setLoading(true)
 
-        const { data: { session } } = await supabase.auth.getSession()
+        const {
+          data: { session },
+        } = await supabase.auth.getSession()
 
         if (!session) {
           setUser(null)
           return null
         }
 
-        const { data: { user: authUser }, error: authError } = await supabase.auth.getUser()
+        const {
+          data: { user: authUser },
+          error: authError,
+        } = await supabase.auth.getUser()
 
         if (authError || !authUser) {
           if (authError) {
@@ -128,13 +140,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     getUser(false)
-      .then(() => { initialLoadDone.current = true })
+      .then(() => {
+        initialLoadDone.current = true
+      })
       .catch((err) => {
         Sentry.captureException(err, { tags: { context: 'auth_init' } })
         setError(err?.message ?? 'Error al cargar la sesion del usuario')
       })
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event) => {
       if (event === 'SIGNED_IN' || event === 'USER_UPDATED') {
         if (!initialLoadDone.current) return
         getUser(true).catch((err) => {
@@ -149,7 +165,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     })
 
-    return () => { subscription.unsubscribe() }
+    return () => {
+      subscription.unsubscribe()
+    }
   }, [getUser, supabase])
 
   const signIn = async (email: string, password: string) => {
@@ -174,7 +192,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const redirect = params.get('redirect')
       if (redirect) {
         const extraParams = new URLSearchParams()
-        params.forEach((value, key) => { if (key !== 'redirect') extraParams.set(key, value) })
+        params.forEach((value, key) => {
+          if (key !== 'redirect') extraParams.set(key, value)
+        })
         router.replace(`${redirect}${extraParams.toString() ? `?${extraParams}` : ''}`)
         return
       }
@@ -184,22 +204,31 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   const signUp = async (
-    email: string, password: string, name: string,
-    role: SignUpRole, phone?: string, shopData?: ShopData,
+    email: string,
+    password: string,
+    name: string,
+    role: SignUpRole,
+    phone?: string,
+    shopData?: ShopData,
   ) => {
     const { data, error: authError } = await supabase.auth.signUp({
-      email, password,
+      email,
+      password,
       options: {
         data: {
-          name, role, phone: phone ?? null,
+          name,
+          role,
+          phone: phone ?? null,
           // Datos del comercio (el callback los usa para crear la shop via service_role)
-          ...(role === 'comercio' && shopData?.name ? {
-            shop_name: shopData.name,
-            shop_description: shopData.description ?? null,
-            shop_address: shopData.address ?? null,
-            shop_city: shopData.city ?? null,
-            shop_phone: shopData.phone ?? null,
-          } : {}),
+          ...(role === 'comercio' && shopData?.name
+            ? {
+                shop_name: shopData.name,
+                shop_description: shopData.description ?? null,
+                shop_address: shopData.address ?? null,
+                shop_city: shopData.city ?? null,
+                shop_phone: shopData.phone ?? null,
+              }
+            : {}),
         },
         emailRedirectTo: `${window.location.origin}/callback`,
       },
@@ -212,24 +241,37 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Los datos ya viajan en user_metadata -> no se necesita updateUser aqui.
 
     // Notificar admins (best-effort, fire-and-forget)
-    void supabase.from('user_profiles').select('id').in('role', [ROLES.ADMIN, ROLES.SUPER_ADMIN]).then(({ data: admins }) => {
-      if (!admins?.length) return
-      void import('@/lib/notifications/sendNotification').then(({ sendBatchNotifications }) => {
-        void sendBatchNotifications(admins.map((admin) => ({
-          userId: admin.id, type: 'new_user' as const,
-          message: `${name ?? 'Usuario'} se registro como ${role === ROLES.COMERCIO ? 'comercio' : 'usuario'}${role === ROLES.COMERCIO && shopData?.name ? ` - ${shopData.name}` : ''}`,
-        })))
+    void supabase
+      .from('user_profiles')
+      .select('id')
+      .in('role', [ROLES.ADMIN, ROLES.SUPER_ADMIN])
+      .then(({ data: admins }) => {
+        if (!admins?.length) return
+        void import('@/lib/notifications/sendNotification').then(({ sendBatchNotifications }) => {
+          void sendBatchNotifications(
+            admins.map((admin) => ({
+              userId: admin.id,
+              type: 'new_user' as const,
+              message: `${name ?? 'Usuario'} se registro como ${role === ROLES.COMERCIO ? 'comercio' : 'usuario'}${role === ROLES.COMERCIO && shopData?.name ? ` - ${shopData.name}` : ''}`,
+            })),
+          )
+        })
       })
-    })
 
     if (!data.session) {
-      const redirectUrl = typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('redirect') : null
-      router.replace(redirectUrl ? `/login?registered=true&redirect=${encodeURIComponent(redirectUrl)}` : '/login?registered=true')
+      const redirectUrl =
+        typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('redirect') : null
+      router.replace(
+        redirectUrl ? `/login?registered=true&redirect=${encodeURIComponent(redirectUrl)}` : '/login?registered=true',
+      )
       return
     }
 
     const profile = await fetchProfile(data.user.id)
-    if (!profile) { router.replace('/login?registered=true'); return }
+    if (!profile) {
+      router.replace('/login?registered=true')
+      return
+    }
 
     setUser(profile)
     setError(null)
@@ -239,7 +281,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const redirect = params.get('redirect')
       if (redirect) {
         const extraParams = new URLSearchParams()
-        params.forEach((value, key) => { if (key !== 'redirect') extraParams.set(key, value) })
+        params.forEach((value, key) => {
+          if (key !== 'redirect') extraParams.set(key, value)
+        })
         router.replace(`${redirect}${extraParams.toString() ? `?${extraParams}` : ''}`)
         return
       }

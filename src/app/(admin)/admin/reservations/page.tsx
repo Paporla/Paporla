@@ -31,10 +31,7 @@ export default async function AdminReservationsPage() {
   const userMap = new Map<string, { name: string; email: string }>()
   if (reservations && reservations.length > 0) {
     const userIds = [...new Set(reservations.map((r) => r.user_id as string))]
-    const { data: profiles } = await supabase
-      .from('user_profiles')
-      .select('id, name, email')
-      .in('id', userIds)
+    const { data: profiles } = await supabase.from('user_profiles').select('id, name, email').in('id', userIds)
     if (profiles) {
       for (const p of profiles) {
         userMap.set(p.id, { name: p.name ?? '', email: p.email ?? '' })
@@ -95,9 +92,7 @@ export default async function AdminReservationsPage() {
                         <div className="flex items-center gap-2">
                           <User className="w-4 h-4 text-gray-500 flex-shrink-0" />
                           <div>
-                            <p className="font-medium dark:text-white text-gray-900 text-xs">
-                              {user?.name ?? '—'}
-                            </p>
+                            <p className="font-medium dark:text-white text-gray-900 text-xs">{user?.name ?? '—'}</p>
                             <p className="text-[10px] dark:text-gray-500 text-gray-400">{user?.email}</p>
                           </div>
                         </div>

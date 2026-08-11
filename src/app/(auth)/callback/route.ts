@@ -90,4 +90,3 @@ async function createShopIfNeeded(user: { id: string; user_metadata?: Record<str
 
   return true // recien creado
 }
-
