@@ -204,7 +204,7 @@ export default function BusinessProfilePage() {
     if (error) {
       setToast({ message: error.message, type: 'error' })
     } else {
-      window.location.href = '/business'
+      router.push('/business')
     }
   }
 

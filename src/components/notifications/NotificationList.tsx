@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { useNotifications } from '@/hooks/useNotifications'
 import NotificationCard from './NotificationCard'
 import Button from '@/components/ui/Button'
@@ -8,6 +9,7 @@ import EmptyState from '@/components/ui/EmptyState'
 import Toast from '@/components/ui/Toast'
 
 export default function NotificationList() {
+  const router = useRouter()
   const { notifications, loading, error, markAsRead, markAllAsRead, deleteNotification } = useNotifications()
   const [filter, setFilter] = useState<'all' | 'unread'>('all')
 
@@ -39,7 +41,7 @@ export default function NotificationList() {
         type="notifications"
         action={{
           label: 'Explorar packs',
-          onClick: () => (window.location.href = '/packs'),
+          onClick: () => router.push('/packs'),
         }}
       />
     )

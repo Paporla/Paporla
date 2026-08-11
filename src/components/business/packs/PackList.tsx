@@ -18,7 +18,7 @@ export default function PackList({ packs, deleting, onDeleteClick }: PackListPro
         type="packs"
         action={{
           label: 'Crear mi primer pack',
-          onClick: () => (window.location.href = '/business/packs/new'),
+          onClick: () => router.push('/business/packs/new'),
         }}
       />
     )

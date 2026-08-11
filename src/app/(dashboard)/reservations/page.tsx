@@ -101,7 +101,7 @@ export default function UserReservationsPage() {
         type="reservations"
         action={{
           label: 'Explorar packs',
-          onClick: () => (window.location.href = '/packs'),
+          onClick: () => router.push('/packs'),
         }}
       />
     )

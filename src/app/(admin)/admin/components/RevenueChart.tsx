@@ -84,7 +84,7 @@ export default function RevenueChart() {
       const formattedData: RevenueData[] = Array.from(monthlyMap.entries())
         .sort(([a], [b]) => a.localeCompare(b))
         .map(([monthKey, values]) => ({
-          month: new Date(monthKey + '-01').toLocaleDateString('es', { month: 'short' }),
+          month: new Date(`${monthKey}-01`).toLocaleDateString('es', { month: 'short' }),
           total_revenue_cents: values.revenue,
           total_commissions_cents: values.commissions,
           total_reservations: values.count,
