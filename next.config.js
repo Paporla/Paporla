@@ -70,9 +70,13 @@ const sentryOptions = {
 }
 
 // Solo activar monitoreo en producción cuando Sentry está configurado.
-// En CI de PRs no se inyectan SENTRY_ORG ni SENTRY_PROJECT — sin ellos,
-// el plugin de sourcemaps fallaría y bloquearía el build.
-const hasSentryConfig = Boolean(process.env.SENTRY_ORG && process.env.SENTRY_PROJECT)
+// En CI de PRs y Vercel deploy sin Sentry, se omite para no bloquear el build.
+const hasSentryConfig = Boolean(
+  process.env.SENTRY_ORG &&
+  process.env.SENTRY_PROJECT &&
+  process.env.SENTRY_ORG !== 'paporla' && // placeholder, no configurado real
+  process.env.SENTRY_PROJECT !== 'paporla'
+)
 
 if (process.env.NODE_ENV === 'production' && hasSentryConfig) {
   module.exports = withSentryConfig(nextConfig, sentryOptions)
