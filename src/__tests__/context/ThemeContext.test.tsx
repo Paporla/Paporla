@@ -23,12 +23,14 @@ function TestConsumer() {
 
 // Component that calls useTheme outside ThemeProvider to test error
 function OrphanConsumer() {
+  let error: string | null = null
   try {
     useTheme()
-    return <div data-testid="no-error">OK</div>
   } catch (e: unknown) {
-    return <div data-testid="error">{(e as Error).message}</div>
+    error = (e as Error).message
   }
+  if (error) return <div data-testid="error">{error}</div>
+  return <div data-testid="no-error">OK</div>
 }
 
 describe('ThemeProvider', () => {

@@ -52,6 +52,7 @@ export default function CountdownTimer({ targetDate, targetEndTime, onExpired }:
     return () => clearInterval(timer)
   }, [targetDate, targetEndTime, onExpired])
 
+  // eslint-disable-next-line
   if (expiredRef.current) {
     return (
       <motion.span

@@ -9,6 +9,8 @@ export default [
       'no-var': 'error',
       'prefer-template': 'warn',
       'react-hooks/exhaustive-deps': 'warn',
+      'react-hooks/set-state-in-effect': 'warn',
+      'react/no-unstable-nested-components': 'warn',
     },
   },
   {
