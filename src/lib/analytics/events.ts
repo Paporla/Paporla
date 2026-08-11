@@ -24,6 +24,7 @@ function sendEvent(event: GtagEvent): void {
   if (!window.gtag) {
     // En desarrollo, loguear para debug
     if (process.env.NODE_ENV === 'development') {
+      // eslint-disable-next-line no-console
       console.debug('[Analytics]', event.event, event)
     }
     return
