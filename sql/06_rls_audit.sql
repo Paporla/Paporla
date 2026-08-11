@@ -45,8 +45,9 @@ BEGIN
 
     IF policy_count = 0 THEN
       -- Tabla sin políticas: crear política restrictiva (solo service_role)
+      EXECUTE format('DROP POLICY IF EXISTS "Restrict access" ON public.%I', t.tablename);
       EXECUTE format(
-        'CREATE POLICY IF NOT EXISTS "Restrict access" ON public.%I AS RESTRICTIVE FOR ALL TO public USING (false)',
+        'CREATE POLICY "Restrict access" ON public.%I AS RESTRICTIVE FOR ALL TO public USING (false)',
         t.tablename
       );
       RAISE NOTICE 'Política restrictiva creada en: public.%', t.tablename;
