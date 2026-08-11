@@ -128,7 +128,7 @@ export default function BusinessNotificationsPage() {
           type="notifications"
           action={{
             label: 'Explorar packs',
-            onClick: () => (window.location.href = '/business/packs'),
+            onClick: () => router.push('/business/packs'),
           }}
         />
       ) : (
