@@ -16,12 +16,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: 'npm'
-
       - run: npm ci
       - run: npm run lint
         env:
@@ -35,12 +33,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: 'npm'
-
       - run: npm ci
       - run: npm run test:coverage
         env:
@@ -73,22 +69,20 @@ jobs:
     needs: [lint-and-typecheck, test]
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: 'npm'
-
       - run: npm ci
       - run: npx playwright install --with-deps chromium
       - run: npm run test:e2e
         env:
-          NEXT_PUBLIC_SUPABASE_URL: http://localhost:3000
-          NEXT_PUBLIC_SUPABASE_ANON_KEY: test-key
-          SUPABASE_SERVICE_ROLE_KEY: test-key
-          CRON_SECRET: test-secret
-          RESEND_API_KEY: test-key
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
           NEXT_PUBLIC_SITE_URL: http://localhost:3000
+          E2E_TEST_EMAIL: ${{ secrets.E2E_TEST_EMAIL || '' }}
+          E2E_TEST_PASSWORD: ${{ secrets.E2E_TEST_PASSWORD || '' }}
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -102,18 +96,16 @@ jobs:
     needs: [lint-and-typecheck, test, security-audit]
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: 'npm'
-
       - run: npm ci
       - run: npm run build
         env:
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL || 'http://localhost:3000' }}
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'test-key' }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY || 'test-key' }}
-          RESEND_API_KEY: test-key
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY || 'test-key' }}
           NEXT_PUBLIC_SITE_URL: http://localhost:3000
           NEXT_PUBLIC_MAINTENANCE_MODE: false
