@@ -31,6 +31,7 @@ const defaultFilters: Filters = {
   showAvailableOnly: false,
   city: '',
   location: null,
+  radiusKm: 10,
   sortBy: 'newest' as const,
 }
 

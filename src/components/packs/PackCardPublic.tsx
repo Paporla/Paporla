@@ -22,6 +22,7 @@ export interface PublicPack {
   shop_latitude?: number | null
   shop_longitude?: number | null
   distance_meters?: number | null
+  created_at: string
 }
 
 /** Formatea metros a texto legible: "< 100 m", "1.2 km", "5.8 km" */
