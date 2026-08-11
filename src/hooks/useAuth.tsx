@@ -206,16 +206,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // La creacion del comercio se hace en el servidor (callback/route.ts)
     // Los datos ya viajan en user_metadata -> no se necesita updateUser aqui.
 
-    // Notificar admins (best-effort)
-    supabase.from('user_profiles').select('id').in('role', [ROLES.ADMIN, ROLES.SUPER_ADMIN]).then(({ data: admins }) => {
+    // Notificar admins (best-effort, fire-and-forget)
+    void supabase.from('user_profiles').select('id').in('role', [ROLES.ADMIN, ROLES.SUPER_ADMIN]).then(({ data: admins }) => {
       if (!admins?.length) return
-      import('@/lib/notifications/sendNotification').then(({ sendBatchNotifications }) => {
-        sendBatchNotifications(admins.map((admin) => ({
+      void import('@/lib/notifications/sendNotification').then(({ sendBatchNotifications }) => {
+        void sendBatchNotifications(admins.map((admin) => ({
           userId: admin.id, type: 'new_user' as const,
           message: `${name ?? 'Usuario'} se registro como ${role === ROLES.COMERCIO ? 'comercio' : 'usuario'}${role === ROLES.COMERCIO && shopData?.name ? ` - ${shopData.name}` : ''}`,
-        }))).catch(() => {})
+        })))
       })
-    }).catch(() => {})
+    })
 
     if (!data.session) {
       const redirectUrl = typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('redirect') : null

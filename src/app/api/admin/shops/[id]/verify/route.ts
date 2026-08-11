@@ -68,13 +68,13 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
   // 5. Notificar al dueño del comercio (tiempo real vía service_role)
   if (verified && shop.owner_id) {
     const admin = getSupabaseAdmin()
-    await admin.from('notifications').insert({
+    void admin.from('notifications').insert({
       user_id: shop.owner_id,
       type: 'shop_verified',
       message: `Tu comercio "${shop.name}" ha sido verificado. Ya puedes comenzar a publicar packs.`,
       is_read: false,
       sent_at: new Date().toISOString(),
-    }).catch(() => {})
+    }).then(() => {}).catch(() => {})
   }
 
   // 6. Registrar
