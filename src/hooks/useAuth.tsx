@@ -161,6 +161,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const profile = await fetchProfile(data.user.id)
     if (!profile) throw new Error('No existe perfil para este usuario')
 
+    // Sincronizar el rol en el JWT con user_profiles para que el middleware no haga redirects incorrectos
+    if (profile.role && data.user.user_metadata?.role !== profile.role) {
+      await supabase.auth.updateUser({ data: { role: profile.role } }).catch(() => {})
+    }
+
     setUser(profile)
     setError(null)
 
