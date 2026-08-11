@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import { Store, ShieldAlert, CheckCircle } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
+import OnboardingBanner from '@/components/onboarding/OnboardingBanner'
 import { useBusinessDashboard } from '@/components/business/dashboard/useBusinessDashboard'
 import LoadingSkeleton from '@/components/business/LoadingSkeleton'
 import Button from '@/components/ui/Button'
@@ -110,6 +111,7 @@ export default function BusinessDashboard() {
 
   return (
     <div className="space-y-8 pb-8">
+      <OnboardingBanner type="commerce" />
       <BusinessWelcomeBanner
         shopName={shop.name}
         todayReservations={stats.todayReservations}
