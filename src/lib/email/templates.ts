@@ -11,6 +11,7 @@ import {
   EMAIL_CONFIG,
 } from './components'
 
+const baseUrl = EMAIL_CONFIG.baseUrl
 const primary = '#00ff88'
 
 // ============================================
@@ -34,7 +35,7 @@ ${stepRow(3, 'Recoge y disfruta', 'Ve al comercio, muestra tu codigo y recoge')}
 </table>
 `)}
 
-${ctaButton('${EMAIL_CONFIG.baseUrl}/packs', 'Explorar packs disponibles')}
+${ctaButton('${baseUrl}/packs', 'Explorar packs disponibles')}
 
 ${separator()}
 
@@ -79,7 +80,7 @@ ${detailItem('Total pagado', data.price, true)}
 
 <p style="color:#888888;font-size:12px;line-height:1.6;text-align:center;margin:16px 0 20px;">Recuerda pasar dentro del horario indicado.<br>Si no puedes asistir, cancela desde tu panel.</p>
 
-${ctaButton('${EMAIL_CONFIG.baseUrl}/dashboard', 'Ver mis reservas')}`,
+${ctaButton('${baseUrl}/dashboard', 'Ver mis reservas')}`,
     'Reserva confirmada',
   )
 }
@@ -145,7 +146,7 @@ ${data.pickupTime ? detailItem('Horario', data.pickupTime) : ''}
 
 <p style="color:#888888;font-size:12px;line-height:1.6;text-align:center;margin:16px 0 20px;">Si no puedes asistir, cancela desde tu panel<br>para que otro usuario pueda disfrutarlo.</p>
 
-${ctaButton('${EMAIL_CONFIG.baseUrl}/dashboard', 'Ver detalles')}`,
+${ctaButton('${baseUrl}/dashboard', 'Ver detalles')}`,
     'Recoge tu pack hoy',
   )
 }
