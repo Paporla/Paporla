@@ -28,6 +28,7 @@ const iconMap: Record<string, { icon: React.ComponentType<{ className?: string }
 const defaultIcon = { icon: Bell, color: 'text-gray-400', bg: 'bg-gray-500/10' }
 
 export default function NotificationsPage() {
+  const router = useRouter()
   const {
     notifications,
     unreadCount,

@@ -13,6 +13,7 @@ interface PackListProps {
 }
 
 export default function PackList({ packs, deleting, onDeleteClick }: PackListProps) {
+  const router = useRouter()
   if (packs.length === 0) {
     return (
       <EmptyState
@@ -41,4 +42,3 @@ export default function PackList({ packs, deleting, onDeleteClick }: PackListPro
   )
 }
 
-const router = useRouter()
