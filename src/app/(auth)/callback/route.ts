@@ -91,37 +91,3 @@ async function createShopIfNeeded(user: { id: string; user_metadata?: Record<str
   return true // recien creado
 }
 
-/**
- * Notifica a los admins sobre un nuevo registro y crea activity_log.
- * Solo se ejecuta server-side, tiene acceso a SERVICE_ROLE_KEY.
- */
-async function notifyAdminsAndLog(userId: string, email: string, name: string, role: string) {
-  try {
-    const admin = getSupabaseAdmin()
-
-    // 1. Insertar activity_log
-    await admin.from('activity_logs').insert({
-      user_id: userId,
-      type: role === 'comercio' ? 'shop_created' : 'user_registered',
-      severity: role === 'comercio' ? 'warning' : 'info',
-      title: role === 'comercio' ? 'Nuevo comercio pendiente de verificacion' : 'Nuevo usuario registrado',
-      description: `${name} (${email}) se registro como ${role === 'comercio' ? 'comercio' : 'usuario'}`,
-    })
-
-    // 2. Notificar a todos los admins
-    const { data: admins } = await admin.from('user_profiles').select('id').in('role', ['admin', 'super_admin'])
-    if (!admins?.length) return
-
-    const notifications = admins.map((a) => ({
-      user_id: a.id,
-      type: role === 'comercio' ? 'new_shop' : 'new_user',
-      message: `${name} (${email}) se registro como ${role === 'comercio' ? 'comercio' : 'usuario'}`,
-      is_read: false,
-      sent_at: new Date().toISOString(),
-    }))
-
-    await admin.from('notifications').insert(notifications)
-  } catch (err) {
-    logger.error('notifyAdminsAndLog', err)
-  }
-}
