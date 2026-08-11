@@ -38,6 +38,7 @@ export default function PackFormPickupTime({ data, onChange }: Props) {
 
       <div className="flex flex-wrap gap-2 mb-4">
         {todayPresets.map((opt) => {
+          // eslint-disable-next-line
           const d = new Date(Date.now() + opt.days * 86400000)
           const dateStr = d.toISOString().split('T')[0]
           return (
