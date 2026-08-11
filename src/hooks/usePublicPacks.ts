@@ -13,6 +13,7 @@ interface Filters {
   city: string
   location: { lat: number; lng: number } | null
   radiusKm: number
+  sortBy: 'newest' | 'price_asc' | 'price_desc' | 'distance'
 }
 
 const DEFAULT_FILTERS: Filters = {
@@ -23,6 +24,7 @@ const DEFAULT_FILTERS: Filters = {
   city: '',
   location: null,
   radiusKm: 10,
+  sortBy: 'newest',
 }
 
 export function usePublicPacks() {
@@ -98,6 +100,20 @@ export function usePublicPacks() {
     if (filters.city && !filters.location) {
       result = result.filter((p) => p.shop_city === filters.city)
     }
+
+    // Ordenamiento
+    if (filters.sortBy === 'price_asc') {
+      result.sort((a, b) => a.price_cents - b.price_cents)
+    } else if (filters.sortBy === 'price_desc') {
+      result.sort((a, b) => b.price_cents - a.price_cents)
+    } else if (filters.sortBy === 'newest' && filters.location) {
+      // Si hay geolocalización activa pero el usuario quiere más recientes
+      result.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+    } else if (filters.sortBy === 'distance' || (filters.location && filters.sortBy !== 'newest')) {
+      // Por defecto con geolocalización: ordenar por distancia
+      result.sort((a, b) => (a.distance_meters ?? 99999) - (b.distance_meters ?? 99999))
+    }
+    // 'newest' sin geolocalización ya viene ordenado de la query (created_at DESC)
 
     return result
   }, [allPacks, filters])
