@@ -70,13 +70,7 @@ interface Props {
 export default function PackDetailClient({ initialPack, packId }: Props) {
   const router = useRouter()
   const { user } = useAuth()
-  const {
-    createReservation,
-    lastReservation,
-    loading: reserving,
-    error,
-    clearError,
-  } = useCreateReservation()
+  const { createReservation, lastReservation, loading: reserving, error, clearError } = useCreateReservation()
   const [quantity, setQuantity] = useState(1)
   const [showConfirmation, setShowConfirmation] = useState(false)
   const [showSummary, setShowSummary] = useState(false)

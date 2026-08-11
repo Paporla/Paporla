@@ -9,7 +9,7 @@
 export const formatPrice = (
   price: number | null | undefined,
   locale: string = 'es-AR',
-  currency: string = 'ARS'
+  currency: string = 'ARS',
 ): string => {
   if (price === null || price === undefined) return formatCents(0, locale, currency)
   return formatCents(price, locale, currency)

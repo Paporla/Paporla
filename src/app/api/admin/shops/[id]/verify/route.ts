@@ -47,11 +47,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
   const { verified } = parsed.data
 
   // 3. Verificar que el comercio existe
-  const { data: shop } = await supabase
-    .from('shops')
-    .select('name, owner_id')
-    .eq('id', shopId)
-    .maybeSingle()
+  const { data: shop } = await supabase.from('shops').select('name, owner_id').eq('id', shopId).maybeSingle()
 
   if (!shop) {
     return NextResponse.json({ success: false, error: 'Comercio no encontrado' }, { status: 404 })

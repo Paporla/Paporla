@@ -75,7 +75,7 @@ const hasSentryConfig = Boolean(
   process.env.SENTRY_ORG &&
   process.env.SENTRY_PROJECT &&
   process.env.SENTRY_ORG !== 'paporla' && // placeholder, no configurado real
-  process.env.SENTRY_PROJECT !== 'paporla'
+  process.env.SENTRY_PROJECT !== 'paporla',
 )
 
 if (process.env.NODE_ENV === 'production' && hasSentryConfig) {

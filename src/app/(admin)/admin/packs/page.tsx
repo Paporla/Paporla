@@ -51,7 +51,9 @@ export default async function AdminPacksPage() {
                   <th className="text-left px-4 py-3 text-xs font-medium dark:text-gray-400 text-gray-600">Precio</th>
                   <th className="text-left px-4 py-3 text-xs font-medium dark:text-gray-400 text-gray-600">Stock</th>
                   <th className="text-left px-4 py-3 text-xs font-medium dark:text-gray-400 text-gray-600">Estado</th>
-                  <th className="text-right px-4 py-3 text-xs font-medium dark:text-gray-400 text-gray-600">Acciones</th>
+                  <th className="text-right px-4 py-3 text-xs font-medium dark:text-gray-400 text-gray-600">
+                    Acciones
+                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y dark:divide-white/5 divide-gray-200">
@@ -64,9 +66,7 @@ export default async function AdminPacksPage() {
                           {pack.title as string}
                         </p>
                       </td>
-                      <td className="px-4 py-3 dark:text-gray-400 text-gray-600">
-                        {shop?.name ?? '—'}
-                      </td>
+                      <td className="px-4 py-3 dark:text-gray-400 text-gray-600">{shop?.name ?? '—'}</td>
                       <td className="px-4 py-3 dark:text-gray-400 text-gray-600">
                         {formatPrice((pack.price_cents as number) ?? 0)}
                       </td>
