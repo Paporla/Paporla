@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { logger } from '@/lib/logger'
 
 export interface CommunityStats {
   packsRescued: number
@@ -66,7 +67,7 @@ export async function GET() {
       } satisfies CommunityStats,
     })
   } catch (error) {
-    console.error('[Stats API] Error:', error)
+    logger.error('Stats API', error)
     return NextResponse.json({ success: false, error: 'Error obteniendo estadísticas' }, { status: 500 })
   }
 }

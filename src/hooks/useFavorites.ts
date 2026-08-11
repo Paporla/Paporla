@@ -3,6 +3,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabaseBrowser } from '@/lib/supabase/client'
 import { useAuth } from './useAuth'
+import { logger } from '@/lib/logger'
 
 const FAVORITES_QUERY_KEY = 'favorites'
 const supabase = supabaseBrowser()
@@ -92,7 +93,7 @@ export function useFavorites() {
       }
       return true
     } catch (err) {
-      console.error('Error toggling favorite:', err)
+      logger.error('useFavorites toggle', err)
       return false
     }
   }

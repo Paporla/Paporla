@@ -2,7 +2,7 @@
 
 import React from 'react'
 import { motion } from 'framer-motion'
-import { Package, Calendar, CheckCircle, XCircle, AlertCircle } from 'lucide-react'
+import { Package, Calendar, CheckCircle, XCircle, AlertCircle, Clock } from 'lucide-react'
 import Card from '@/components/ui/Card'
 import type { AdminDashboardStats } from './useAdminDashboard'
 
@@ -23,6 +23,7 @@ const items: Array<{
   { icon: Calendar, label: 'Reservas', key: 'totalReservations', color: 'text-blue-400', bg: 'bg-blue-500/10' },
   { icon: CheckCircle, label: 'Verificados', key: 'verifiedShops', color: 'text-green-400', bg: 'bg-green-500/10' },
   { icon: XCircle, label: 'Baneados', key: 'bannedShops', color: 'text-red-400', bg: 'bg-red-500/10' },
+  { icon: Clock, label: 'Pendientes', key: 'pendingShops', color: 'text-amber-400', bg: 'bg-amber-500/10' },
 ]
 
 export default function AdminStatCards({ stats, loading, error }: Props) {
@@ -37,8 +38,8 @@ export default function AdminStatCards({ stats, loading, error }: Props) {
 
   if (loading) {
     return (
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 animate-pulse">
-        {[0, 1, 2, 3].map((i) => (
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 animate-pulse">
+        {[0, 1, 2, 3, 4].map((i) => (
           <div key={i} className="h-24 bg-gray-200 dark:bg-gray-800 rounded-2xl" />
         ))}
       </div>
@@ -50,27 +51,36 @@ export default function AdminStatCards({ stats, loading, error }: Props) {
   }
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-      {items.map((item, index) => (
-        <motion.div
-          key={item.key}
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.3 + index * 0.05 }}
-        >
-          <Card glass className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <div className={`text-2xl font-bold ${item.color}`}>{getValue(item.key).toLocaleString()}</div>
-                <div className="text-xs dark:text-gray-400 text-gray-700 mt-1">{item.label}</div>
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+      {items.map((item, index) => {
+        const value = getValue(item.key)
+        const isPending = item.key === 'pendingShops' && value > 0
+        return (
+          <motion.div
+            key={item.key}
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.3 + index * 0.05 }}
+          >
+            <Card glass className={`p-4 ${isPending ? 'border-amber-500/50 ring-1 ring-amber-500/20' : ''}`}>
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className={`text-2xl font-bold ${item.color}`}>{value.toLocaleString()}</div>
+                  <div className="text-xs dark:text-gray-400 text-gray-700 mt-1">
+                    {item.label}
+                    {isPending && (
+                      <span className="ml-1.5 inline-block w-2 h-2 bg-amber-400 rounded-full animate-pulse align-middle" />
+                    )}
+                  </div>
+                </div>
+                <div className={`p-2 rounded-lg ${item.bg}`}>
+                  <item.icon className={`w-5 h-5 ${item.color}`} />
+                </div>
               </div>
-              <div className={`p-2 rounded-lg ${item.bg}`}>
-                <item.icon className={`w-5 h-5 ${item.color}`} />
-              </div>
-            </div>
-          </Card>
-        </motion.div>
-      ))}
+            </Card>
+          </motion.div>
+        )
+      })}
     </div>
   )
 }

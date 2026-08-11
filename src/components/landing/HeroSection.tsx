@@ -63,7 +63,7 @@ export default function HeroSection() {
                 <div className="absolute inset-0 bg-white/20 translate-x-full group-hover:translate-x-0 transition-transform duration-300" />
               </Link>
               <Link
-                href="/shops"
+                href="/register"
                 className="inline-flex items-center justify-center px-8 py-3 rounded-full border border-primary/40 text-white font-semibold hover:bg-primary/10 transition text-center"
               >
                 Registra tu comercio

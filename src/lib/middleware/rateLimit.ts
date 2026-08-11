@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { getSupabaseAdmin } from '@/lib/supabase/admin'
+import { logger } from '@/lib/logger'
 
 // ============================================
 // In-memory rate limiter (capa 1)
@@ -112,7 +113,7 @@ async function checkSupabaseRateLimit(
         .upsert({ id: key, count: 1, reset_at: new Date(resetAt).toISOString() }, { onConflict: 'id' })
 
       if (error) {
-        console.error('[RateLimit] Error upserting:', error)
+        logger.error('RateLimit Upsert', error)
         return { allowed: false, remaining: 0, resetAt }
       }
       return { allowed: true, remaining: limit - 1, resetAt }
@@ -131,7 +132,7 @@ async function checkSupabaseRateLimit(
       .maybeSingle()
 
     if (error) {
-      console.error('[RateLimit] Error updating:', error)
+      logger.error('RateLimit Update', error)
       // Fail-open: si Supabase falla, permitir la request
       return { allowed: true, remaining: limit - entry.count, resetAt }
     }
@@ -142,7 +143,7 @@ async function checkSupabaseRateLimit(
 
     return { allowed: true, remaining: limit - updated.count, resetAt: new Date(updated.reset_at).getTime() }
   } catch (err) {
-    console.error('[RateLimit] Unexpected error:', err)
+    logger.error('RateLimit Unexpected', err)
     // Fail-open: si Supabase está caído, no denegar tráfico legítimo
     return { allowed: true, remaining: limit, resetAt: now + windowMs }
   }

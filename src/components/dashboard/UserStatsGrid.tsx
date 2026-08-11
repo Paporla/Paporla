@@ -89,11 +89,9 @@ export default function UserStatsGrid({ stats, loading, error }: UserStatsGridPr
             </div>
             <p className={`text-xl font-bold ${item.color}`}>{item.value}</p>
             <p className="text-xs text-gray-500 mt-1">{item.label}</p>
-            {'link' in item && (
-              <div className="mt-2 text-[10px] text-primary/50 opacity-0 group-hover:opacity-100 transition-opacity">
-                Ver detalles →
-              </div>
-            )}
+            <div className="mt-2 text-[10px] text-primary/50 opacity-0 group-hover:opacity-100 transition-opacity h-[15px]">
+              {'link' in item ? 'Ver detalles →' : ''}
+            </div>
           </div>
         )
 

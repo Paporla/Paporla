@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { MapPin, Navigation, AlertCircle, CheckCircle } from 'lucide-react'
+import { logger } from '@/lib/logger'
 
 interface Coordinates {
   lat: number
@@ -49,7 +50,7 @@ export default function GeolocationFilter({ onLocationChange, defaultRadius = 10
           const city = data.address?.city ?? data.address?.town ?? data.address?.state ?? 'tu ubicación'
           setLocationName(city)
         } catch (err) {
-          console.error('Error en reverse geocoding:', err)
+          logger.error('GeolocationFilter reverseGeocoding', err)
           setLocationName('tu ubicación')
         }
 

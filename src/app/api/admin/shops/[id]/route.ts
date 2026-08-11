@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 import { isAdmin } from '@/lib/constants/roles'
+import { logger } from '@/lib/logger'
 
 /**
  * DELETE /api/admin/shops/[id]
@@ -37,7 +38,7 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ i
   const { error: packsError } = await supabase.from('packs').delete().eq('shop_id', shopId)
 
   if (packsError) {
-    console.error('[AdminShopDelete] Error eliminando packs:', packsError)
+    logger.error('AdminShopDelete packs', packsError)
   }
 
   // 4. Eliminar reservas asociadas a los packs de este comercio
@@ -53,7 +54,7 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ i
   const { error: deleteError } = await supabase.from('shops').delete().eq('id', shopId)
 
   if (deleteError) {
-    console.error('[AdminShopDelete] Error:', deleteError)
+    logger.error('AdminShopDelete', deleteError)
     return NextResponse.json({ success: false, error: 'Error al eliminar comercio' }, { status: 500 })
   }
 

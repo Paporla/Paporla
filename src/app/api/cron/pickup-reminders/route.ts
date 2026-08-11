@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { getSupabaseAdmin, validateCronRequest } from '@/lib/supabase/admin'
 import { sendPickupReminderEmail } from '@/lib/email'
+import { logger } from '@/lib/logger'
 
 export async function GET(request: Request) {
   if (!validateCronRequest(request)) {
@@ -131,7 +132,7 @@ export async function GET(request: Request) {
       message: `${notificationCount} recordatorios y ${emailCount} emails enviados`,
     })
   } catch (err) {
-    console.error('[PickupReminders] Error:', err)
+    logger.error('CRON pickup-reminders', err)
     return NextResponse.json({ success: false, error: 'Error interno' }, { status: 500 })
   }
 }

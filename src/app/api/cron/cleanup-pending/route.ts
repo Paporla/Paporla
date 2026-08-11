@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { getSupabaseAdmin, validateCronRequest } from '@/lib/supabase/admin'
+import { logger } from '@/lib/logger'
 
 export async function GET(request: Request) {
   if (!validateCronRequest(request)) {
@@ -14,7 +15,7 @@ export async function GET(request: Request) {
     })
 
     if (error) {
-      console.error('[CRON:cleanup-pending] RPC Error:', error)
+      logger.error('CRON cleanup-pending RPC', error)
       throw error
     }
 
@@ -28,7 +29,7 @@ export async function GET(request: Request) {
       timestamp: new Date().toISOString(),
     })
   } catch (error) {
-    console.error('[CRON:cleanup-pending] Error:', error)
+    logger.error('CRON cleanup-pending', error)
     return NextResponse.json(
       { success: false, error: error instanceof Error ? error.message : 'Error desconocido' },
       { status: 500 },

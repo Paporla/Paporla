@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 import { isAdmin } from '@/lib/constants/roles'
 import { banShopSchema } from '@/lib/utils/validations'
+import { logger } from '@/lib/logger'
 
 /**
  * PATCH /api/admin/shops/[id]/ban
@@ -55,7 +56,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
   const { error: updateError } = await supabase.from('shops').update({ banned }).eq('id', shopId)
 
   if (updateError) {
-    console.error('[AdminShopBan] Error:', updateError)
+    logger.error('AdminShopBan', updateError)
     return NextResponse.json({ success: false, error: 'Error al actualizar comercio' }, { status: 500 })
   }
 

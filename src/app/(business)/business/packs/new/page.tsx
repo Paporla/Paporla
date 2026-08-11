@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { ArrowLeft, PackagePlus, ShieldAlert } from 'lucide-react'
 import Button from '@/components/ui/Button'
 import PackFormSimplified from '@/components/business/PackFormSimplified'
+import { logger } from '@/lib/logger'
 
 export default async function NewPackPage() {
   const supabase = await createClient()
@@ -23,7 +24,7 @@ export default async function NewPackPage() {
     .maybeSingle()
 
   if (profileError) {
-    console.error('Error obteniendo perfil:', profileError)
+    logger.error('NewPackPage getProfile', profileError)
     redirect('/login')
   }
 
@@ -46,7 +47,7 @@ export default async function NewPackPage() {
     .maybeSingle()
 
   if (shopError) {
-    console.error('Error obteniendo comercio:', shopError)
+    logger.error('NewPackPage getShop', shopError)
     redirect('/business/profile')
   }
 

@@ -5,6 +5,7 @@ import { motion } from 'framer-motion'
 import { UserPlus, ShoppingBag, Store, Package, AlertTriangle, CheckCircle, XCircle, Clock } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { supabaseBrowser } from '@/lib/supabase/client'
+import { logger } from '@/lib/logger'
 
 interface Activity {
   id: string
@@ -46,7 +47,7 @@ export default function RecentActivity() {
         .limit(showAll ? 50 : 10)
 
       if (error) {
-        console.error('Error loading activities:', error)
+        logger.error('Admin RecentActivity', error)
       } else {
         setActivities(data ?? [])
       }

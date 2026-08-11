@@ -36,7 +36,7 @@ export default function CTASection() {
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition" />
               </Link>
               <Link
-                href="/shops"
+                href="/register"
                 className="inline-flex items-center justify-center px-8 py-3 rounded-full border border-primary/40 text-white font-semibold hover:bg-primary/10 transition text-center"
               >
                 Registra tu comercio

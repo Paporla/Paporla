@@ -6,6 +6,7 @@ import { supabaseBrowser } from '@/lib/supabase/client'
 import { useAuth } from './useAuth'
 import { formatPrice } from '@/lib/utils/formatPrice'
 import { trackPurchase } from '@/lib/analytics/events'
+import { logger } from '@/lib/logger'
 
 const RESERVATIONS_QUERY_KEY = 'reservations'
 
@@ -124,7 +125,7 @@ export function useCreateReservation() {
                   price: formatPrice(packDetails.price_cents * params.quantity!),
                 },
               }),
-            }).catch((emailErr) => console.error('Error enviando email de confirmación:', emailErr))
+            }).catch((emailErr) => logger.error('useCreateReservation sendConfirmationEmail', emailErr))
           } catch {
             // Email es best-effort; no afecta el flujo principal
           }

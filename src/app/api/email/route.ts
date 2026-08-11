@@ -8,6 +8,7 @@ import {
   pickupReminderTemplate,
 } from '@/lib/email/templates'
 import { sendEmailSchema } from '@/lib/utils/validations'
+import { logger } from '@/lib/logger'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 const senderEmail = process.env.RESEND_FROM_EMAIL ?? 'noreply@paporla.com'
@@ -109,16 +110,14 @@ export async function POST(request: Request) {
     })
 
     if (error) {
-      console.error(`[Email API Error] ${type}:`, error)
+      logger.error('Email API', error, { type })
       return NextResponse.json({ success: false, error: error.message }, { status: 500 })
     }
 
-    if (process.env.NODE_ENV === 'development') {
-      console.warn(`[Email API Sent] ${type}`)
-    }
+    logger.info('Email API Sent', type)
     return NextResponse.json({ success: true, data: res })
   } catch (err: unknown) {
-    console.error('[Email API Exception]:', err)
+    logger.error('Email API Exception', err)
     const message = err instanceof Error ? err.message : 'Error interno del servidor'
     return NextResponse.json({ success: false, error: message }, { status: 500 })
   }

@@ -3,6 +3,7 @@
 import { useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { Package, AlertCircle, CheckCircle } from 'lucide-react'
+import { logger } from '@/lib/logger'
 import Button from '@/components/ui/Button'
 import Toast from '@/components/ui/Toast'
 import { supabaseBrowser } from '@/lib/supabase/client'
@@ -106,7 +107,7 @@ export default function PackFormSimplified({ shopId, pack, isDuplicate = false, 
         onSuccess?.()
       }, 1500)
     } catch (err: unknown) {
-      console.error('Error al guardar pack:', err)
+      logger.error('PackFormSimplified savePack', err)
       setError(err instanceof Error ? err.message : 'Error al guardar el pack')
       setLoading(false)
     }

@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
+import { logger } from '@/lib/logger'
 
 const DEFAULT_PAGE_SIZE = 20
 const MAX_PAGE_SIZE = 50
@@ -117,7 +118,7 @@ export async function GET(request: Request) {
       { headers: cacheHeaders },
     )
   } catch (error) {
-    console.error('[Search] Error:', error)
+    logger.error('Search API', error)
     return NextResponse.json(
       { success: false, error: error instanceof Error ? error.message : 'Error en la búsqueda' },
       { status: 500 },

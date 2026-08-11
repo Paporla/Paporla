@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { Copy, Check } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { logger } from '@/lib/logger'
 
 interface CopyButtonProps {
   text: string
@@ -18,7 +19,7 @@ export default function CopyButton({ text, label = 'Copiar' }: CopyButtonProps) 
       setCopied(true)
       setTimeout(() => setCopied(false), 2000)
     } catch (err) {
-      console.error('Error copying:', err)
+      logger.error('CopyButton', err)
     }
   }
 

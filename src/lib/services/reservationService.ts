@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { getSupabaseAdmin } from '@/lib/supabase/admin'
 import { sendReservationConfirmationEmail } from '@/lib/email'
 import { isAdmin } from '@/lib/constants/roles'
+import { logger } from '@/lib/logger'
 
 const VALID_STATUS_TRANSITIONS: Record<string, string[]> = {
   pending: ['confirmed', 'cancelled'],
@@ -69,7 +70,7 @@ export async function createReservation(userId: string, body: { pack_id: string;
 
   if (reservation) {
     notifyReservationCreated(userId, reservation).catch((err) =>
-      console.error('[ReservationService] Error sending notifications:', err),
+      logger.error('ReservationService notifyReservationCreated', err),
     )
   }
 
@@ -97,7 +98,7 @@ async function notifyReservationCreated(userId: string, reservation: Record<stri
       pickupDate: (reservation.pickup_date as string) || null,
       pickupTime: (reservation.pickup_start_time as string) || null,
       price: `$${(((reservation.total_price_cents as number) || 0) / 100).toFixed(2)}`,
-    }).catch((err) => console.error('[ReservationService] Email error:', err))
+    }).catch((err) => logger.error('ReservationService sendConfirmationEmail', err))
   }
 
   if (shop?.owner_id) {
@@ -153,7 +154,7 @@ export async function updateReservation(userId: string, body: { id: string; stat
 
   if (status === 'cancelled' && updated) {
     notifyCancellation(userId, updated, body.cancel_reason).catch((err) =>
-      console.error('[ReservationService] Error sending cancellation notifications:', err),
+      logger.error('ReservationService notifyCancellation', err),
     )
   }
 

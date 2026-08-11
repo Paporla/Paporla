@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { ArrowLeft, Copy, Package, ShieldAlert, AlertTriangle } from 'lucide-react'
 import Button from '@/components/ui/Button'
 import PackFormSimplified from '@/components/business/PackFormSimplified'
+import { logger } from '@/lib/logger'
 
 interface EditPackPageProps {
   params: {
@@ -31,7 +32,7 @@ export default async function EditPackPage({ params }: EditPackPageProps) {
     .maybeSingle()
 
   if (profileError) {
-    console.error('Error obteniendo perfil:', profileError)
+    logger.error('EditPackPage getProfile', profileError)
     redirect('/login')
   }
 
@@ -54,7 +55,7 @@ export default async function EditPackPage({ params }: EditPackPageProps) {
     .maybeSingle()
 
   if (shopError) {
-    console.error('Error obteniendo comercio:', shopError)
+    logger.error('EditPackPage getShop', shopError)
     redirect('/business/profile')
   }
 
@@ -109,7 +110,7 @@ export default async function EditPackPage({ params }: EditPackPageProps) {
     .maybeSingle()
 
   if (packError) {
-    console.error('Error obteniendo pack:', packError)
+    logger.error('EditPackPage getPack', packError)
     notFound()
   }
 
