@@ -1,6 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
 import { requireAuth } from '@/lib/auth/requireAuth'
-import Link from 'next/link'
 import { CalendarCheck, User, Store, Package } from 'lucide-react'
 import { formatPrice } from '@/lib/utils/formatPrice'
 import { formatRelativeTime } from '@/lib/utils/formatTime'
@@ -29,7 +28,7 @@ export default async function AdminReservationsPage() {
     .limit(200)
 
   // Obtener nombres de usuarios por separado (user_id referencia auth.users, no user_profiles)
-  let userMap = new Map<string, { name: string; email: string }>()
+  const userMap = new Map<string, { name: string; email: string }>()
   if (reservations && reservations.length > 0) {
     const userIds = [...new Set(reservations.map((r) => r.user_id as string))]
     const { data: profiles } = await supabase
