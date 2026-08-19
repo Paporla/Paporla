@@ -1,95 +1,134 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { NextRequest, NextResponse } from 'next/server'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { NextRequest } from 'next/server'
 
-// Mock getSupabaseAdmin before importing the module under test
-vi.mock('@/lib/supabase/admin', () => ({
-  getSupabaseAdmin: vi.fn(),
+const { mockRpc, mockLoggerError } = vi.hoisted(() => ({
+  mockRpc: vi.fn(),
+  mockLoggerError: vi.fn(),
 }))
 
-// Import after mocks are set up
-await import('@/lib/supabase/admin')
+vi.mock('@/lib/supabase/admin', () => ({
+  getSupabaseAdmin: () => ({ rpc: mockRpc }),
+}))
 
-// Helper to create a minimal NextRequest-like object
-function createMockRequest(headers: Record<string, string>, pathname = '/api/email'): NextRequest {
-  const url = new URL(`http://localhost${pathname}`)
+vi.mock('@/lib/logger', () => ({
+  logger: { error: mockLoggerError },
+}))
+
+import { applyRateLimit, getClientIp } from '@/lib/middleware/rateLimit'
+
+function createRequest(pathname: string, headers: Record<string, string> = {}): NextRequest {
+  return new NextRequest(`https://preview.paporla.test${pathname}`, { headers })
+}
+
+function allowResponse(remaining = 4) {
   return {
-    headers: new Map(Object.entries(headers)) as unknown as Headers,
-    nextUrl: url,
-  } as unknown as NextRequest
+    data: {
+      allowed: true,
+      limit: 5,
+      remaining,
+      reset_at: new Date(Date.now() + 60_000).toISOString(),
+      blocked_until: null,
+    },
+    error: null,
+  }
 }
 
 describe('getClientIp', () => {
-  let getClientIp: (request: NextRequest) => string
-
-  beforeAll(async () => {
-    // Dynamic import to avoid hoisting issues with vi.mock
-    const mod = await import('@/lib/middleware/rateLimit')
-    getClientIp = mod.getClientIp
-  })
-
-  it('returns real-ip when x-real-ip header is present', () => {
-    const req = createMockRequest({ 'x-real-ip': '192.168.1.1' })
-    expect(getClientIp(req)).toBe('192.168.1.1')
-  })
-
-  it('returns the first IP from x-forwarded-for when x-real-ip is absent', () => {
-    const req = createMockRequest({ 'x-forwarded-for': '203.0.113.5, 198.51.100.2, 10.0.0.1' })
-    expect(getClientIp(req)).toBe('203.0.113.5')
-  })
-
-  it('prefers x-real-ip over x-forwarded-for', () => {
-    const req = createMockRequest({
-      'x-real-ip': '10.0.0.42',
+  it('returns x-real-ip when present', () => {
+    const request = createRequest('/api/auth', {
+      'x-real-ip': '192.168.1.1',
       'x-forwarded-for': '203.0.113.5, 198.51.100.2',
     })
-    expect(getClientIp(req)).toBe('10.0.0.42')
+
+    expect(getClientIp(request)).toBe('192.168.1.1')
   })
 
-  it('trims whitespace from forwarded IPs', () => {
-    const req = createMockRequest({ 'x-forwarded-for': '  203.0.113.5 , 198.51.100.2' })
-    expect(getClientIp(req)).toBe('203.0.113.5')
+  it('returns the first forwarded IP and trims whitespace', () => {
+    const request = createRequest('/api/auth', {
+      'x-forwarded-for': ' 203.0.113.5, 198.51.100.2',
+    })
+
+    expect(getClientIp(request)).toBe('203.0.113.5')
   })
 
-  it('returns "unknown" when no IP headers are present', () => {
-    const req = createMockRequest({})
-    expect(getClientIp(req)).toBe('unknown')
+  it('returns unknown when proxy headers are absent', () => {
+    expect(getClientIp(createRequest('/api/auth'))).toBe('unknown')
   })
 })
 
 describe('applyRateLimit', () => {
-  let applyRateLimit: (request: NextRequest) => Promise<NextResponse | null>
-
-  beforeAll(async () => {
-    const mod = await import('@/lib/middleware/rateLimit')
-    applyRateLimit = mod.applyRateLimit
-  })
-
   beforeEach(() => {
     vi.clearAllMocks()
+    mockRpc.mockResolvedValue(allowResponse())
   })
 
-  it('returns null for routes not in the rate-limit map', async () => {
-    const req = createMockRequest({ 'x-real-ip': '1.2.3.4' }, '/api/unknown')
-    const result = await applyRateLimit(req)
-    expect(result).toBeNull()
+  it('ignores routes outside the configured API map', async () => {
+    const response = await applyRateLimit(createRequest('/api/unknown'))
+
+    expect(response).toBeNull()
+    expect(mockRpc).not.toHaveBeenCalled()
   })
 
-  it('returns null for non-api routes', async () => {
-    const req = createMockRequest({}, '/')
-    const result = await applyRateLimit(req)
-    expect(result).toBeNull()
+  it('uses the atomic canonical service RPC with privacy-preserving hashes', async () => {
+    const response = await applyRateLimit(createRequest('/api/auth', { 'x-real-ip': '203.0.113.9' }))
+
+    expect(response?.status).toBe(200)
+    expect(response?.headers.get('X-RateLimit-Limit')).toBe('5')
+    expect(response?.headers.get('X-RateLimit-Remaining')).toBe('4')
+    expect(mockRpc).toHaveBeenCalledWith(
+      'service_check_rate_limit',
+      expect.objectContaining({
+        p_scope: 'ip',
+        p_action: '/api/auth',
+        p_limit: 5,
+        p_window_seconds: 60,
+        p_block_seconds: 0,
+      }),
+    )
+
+    const args = mockRpc.mock.calls[0][1] as { p_key_hash: string; p_identifier_hash: string }
+    expect(args.p_key_hash).toMatch(/^\\x[0-9a-f]{64}$/)
+    expect(args.p_identifier_hash).toMatch(/^\\x[0-9a-f]{64}$/)
+    expect(JSON.stringify(args)).not.toContain('203.0.113.9')
   })
 
-  it('returns null for static assets', async () => {
-    const req = createMockRequest({}, '/_next/static/chunk.js')
-    const result = await applyRateLimit(req)
-    expect(result).toBeNull()
+  it('matches configured route prefixes', async () => {
+    await applyRateLimit(createRequest('/api/auth/session', { 'x-real-ip': '203.0.113.10' }))
+
+    expect(mockRpc).toHaveBeenCalledWith('service_check_rate_limit', expect.objectContaining({ p_action: '/api/auth' }))
   })
 
-  it('matches prefix routes (e.g. /api/email/send matches /api/email)', async () => {
-    const req = createMockRequest({ 'x-real-ip': '1.2.3.4' }, '/api/email/send')
-    const result = await applyRateLimit(req)
-    // Should not be null because /api/email is a configured route prefix
-    expect(result).not.toBeNull()
+  it('returns 429 with rate-limit headers when the RPC denies the request', async () => {
+    const resetAt = new Date(Date.now() + 30_000).toISOString()
+    mockRpc.mockResolvedValue({
+      data: { allowed: false, limit: 5, remaining: 0, reset_at: resetAt, blocked_until: resetAt },
+      error: null,
+    })
+
+    const response = await applyRateLimit(createRequest('/api/auth', { 'x-real-ip': '203.0.113.11' }))
+    const body = await response?.json()
+
+    expect(response?.status).toBe(429)
+    expect(response?.headers.get('X-RateLimit-Remaining')).toBe('0')
+    expect(Number(response?.headers.get('Retry-After'))).toBeGreaterThan(0)
+    expect(body.error).toMatch(/Demasiadas solicitudes/)
+  })
+
+  it('fails open and logs when the service RPC is unavailable', async () => {
+    mockRpc.mockResolvedValue({ data: null, error: new Error('RPC unavailable') })
+
+    const response = await applyRateLimit(createRequest('/api/auth', { 'x-real-ip': '203.0.113.12' }))
+
+    expect(response).toBeNull()
+    expect(mockLoggerError).toHaveBeenCalledWith('RateLimit service_check_rate_limit', expect.any(Error))
+  })
+
+  it('fails open and logs an invalid RPC response', async () => {
+    mockRpc.mockResolvedValue({ data: { allowed: true }, error: null })
+
+    const response = await applyRateLimit(createRequest('/api/auth', { 'x-real-ip': '203.0.113.13' }))
+
+    expect(response).toBeNull()
+    expect(mockLoggerError).toHaveBeenCalled()
   })
 })
