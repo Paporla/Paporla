@@ -56,10 +56,10 @@ export default function UserSidebar() {
       <div className="mx-4 mt-6 p-3 rounded-xl bg-primary/5 border border-primary/20">
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">
-            <span className="text-primary text-sm font-bold">{user?.name?.charAt(0) || 'U'}</span>
+            <span className="text-primary text-sm font-bold">{user?.displayName?.charAt(0) || 'U'}</span>
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-white truncate">{user?.name ?? 'Usuario'}</p>
+            <p className="text-sm font-medium text-white truncate">{user?.displayName ?? 'Usuario'}</p>
             <p className="text-[10px] text-gray-500">{user?.email}</p>
           </div>
         </div>

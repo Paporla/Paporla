@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabaseBrowser } from '@/lib/supabase/client'
 import Link from 'next/link'
@@ -27,13 +27,6 @@ export default function ResetPasswordPage() {
   const allPasswordChecksPassed = passwordChecks.every((c) => c.passed)
   const showPasswordHints = password.length > 0 && !allPasswordChecksPassed
 
-  useEffect(() => {
-    const hash = window.location.hash
-    if (!hash.includes('access_token')) {
-      setError('Enlace invalido o expirado. Por favor, solicita un nuevo enlace de recuperacion.')
-    }
-  }, [])
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
@@ -45,8 +38,8 @@ export default function ResetPasswordPage() {
       return
     }
 
-    if (password.length < 8) {
-      setError('La contraseña debe tener al menos 8 caracteres')
+    if (!allPasswordChecksPassed) {
+      setError('La contraseña no cumple todos los requisitos de seguridad')
       setLoading(false)
       return
     }
@@ -54,10 +47,11 @@ export default function ResetPasswordPage() {
     const { error: updateError } = await supabase.auth.updateUser({ password })
 
     if (updateError) {
-      setError(updateError.message)
+      setError('El enlace no es válido o ha expirado. Solicita uno nuevo.')
     } else {
+      await supabase.auth.signOut()
       setSuccess(true)
-      setTimeout(() => router.push('/login'), 3000)
+      setTimeout(() => router.replace('/login?password_updated=true'), 3000)
     }
     setLoading(false)
   }

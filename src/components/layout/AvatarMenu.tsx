@@ -24,8 +24,8 @@ export default function AvatarMenu() {
   }, [])
 
   const getInitials = () => {
-    if (!user?.name) return 'U'
-    return user.name.charAt(0).toUpperCase()
+    if (!user?.displayName) return 'U'
+    return user.displayName.charAt(0).toUpperCase()
   }
 
   const getPanelRoute = () => {
@@ -73,10 +73,10 @@ export default function AvatarMenu() {
       {/* Avatar con menu desplegable */}
       <div className="relative" ref={menuRef}>
         <button onClick={() => setIsOpen(!isOpen)} className="flex items-center gap-2 focus:outline-none">
-          {user?.avatar_url ? (
+          {user?.avatarPublicUrl ? (
             <Image
-              src={user.avatar_url}
-              alt={user.name ?? 'Avatar'}
+              src={user.avatarPublicUrl}
+              alt={user.displayName ?? 'Avatar'}
               width={36}
               height={36}
               className="w-9 h-9 rounded-full object-cover border-2 border-primary"
@@ -100,7 +100,7 @@ export default function AvatarMenu() {
               <div className="p-2">
                 {/* Informacion del usuario */}
                 <div className="px-3 py-3 dark:border-gray-800 border-gray-200 mb-2">
-                  <p className="text-sm font-semibold dark:text-white text-gray-900 truncate">{user?.name}</p>
+                  <p className="text-sm font-semibold dark:text-white text-gray-900 truncate">{user?.displayName}</p>
                   <p className="text-xs dark:text-gray-400 text-gray-600 truncate mt-0.5">{user?.email}</p>
                   <div className="mt-2">
                     <span className="text-xs bg-primary/20 text-primary px-2 py-0.5 rounded-full">{getRoleName()}</span>

@@ -152,9 +152,9 @@ export default function RegisterFormFields({
         />
 
         <Input
-          label="Telefono (opcional)"
+          label="Teléfono (opcional)"
           name="phone"
-          placeholder="+56 9 5555 1234"
+          placeholder="+56955551234"
           value={formData.phone}
           onChange={(e) => update({ phone: e.target.value })}
           onBlur={() => onFieldBlur?.('phone')}

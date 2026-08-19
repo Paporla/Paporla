@@ -1,35 +1,45 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { renderHook, act, waitFor } from '@testing-library/react'
-import { useProfile } from '@/hooks/useProfile'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { act, renderHook, waitFor } from '@testing-library/react'
+import { buildAvatarPath, useProfile } from '@/hooks/useProfile'
 import { supabaseBrowser } from '@/lib/supabase/client'
+import type { UserProfile } from '@/types/user'
 
-const mockFrom = vi.fn()
-const mockUpdate = vi.fn()
-const mockEq = vi.fn()
+const mockRpc = vi.fn()
 const mockUpload = vi.fn()
+const mockRemove = vi.fn()
 const mockGetPublicUrl = vi.fn()
 
+const profile: UserProfile = {
+  id: '11111111-1111-4111-8111-111111111111',
+  role: 'user',
+  accountStatus: 'active',
+  email: 'user@example.com',
+  displayName: 'Usuario Uno',
+  phoneE164: '+56955551234',
+  avatarPath: null,
+  avatarPublicUrl: null,
+  marketId: '10000000-0000-4000-8000-000000000001',
+  localityId: null,
+  locale: 'es-CL',
+  onboardingCompletedAt: null,
+  emailConfirmedAt: null,
+  lastLoginAt: null,
+  createdAt: '2026-08-20T00:00:00Z',
+  updatedAt: '2026-08-20T00:00:00Z',
+}
+
 function setupMockClient() {
-  mockEq.mockReturnThis()
-  mockUpdate.mockReturnThis()
+  mockRpc.mockResolvedValue({ data: { success: true }, error: null })
   mockUpload.mockResolvedValue({ error: null })
+  mockRemove.mockResolvedValue({ data: [], error: null })
   mockGetPublicUrl.mockReturnValue({ data: { publicUrl: 'https://example.com/avatar.jpg' } })
 
-  mockFrom.mockImplementation((table: string) => {
-    if (table === 'user_profiles') {
-      return { update: mockUpdate, eq: mockEq }
-    }
-    return {}
-  })
-  ;(supabaseBrowser as any).mockReturnValue({
-    from: mockFrom,
+  vi.mocked(supabaseBrowser).mockReturnValue({
+    rpc: mockRpc,
     storage: {
-      from: () => ({
-        upload: mockUpload,
-        getPublicUrl: mockGetPublicUrl,
-      }),
+      from: () => ({ upload: mockUpload, remove: mockRemove, getPublicUrl: mockGetPublicUrl }),
     },
-  })
+  } as never)
 }
 
 const fakeFile = new File(['test'], 'avatar.png', { type: 'image/png' })
@@ -38,63 +48,102 @@ describe('useProfile', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     setupMockClient()
+    vi.spyOn(crypto, 'randomUUID').mockReturnValue('22222222-2222-4222-8222-222222222222')
   })
 
-  it('updateProfile calls supabase update', async () => {
+  it('updates only through update_own_profile', async () => {
     const { result } = renderHook(() => useProfile())
 
     await act(async () => {
-      await result.current.updateProfile('user-1', { name: 'New Name' })
+      await result.current.updateProfile({
+        displayName: 'Nombre Nuevo',
+        phoneE164: '+56911112222',
+        avatarPath: null,
+        marketId: profile.marketId,
+        localityId: null,
+        locale: 'es-CL',
+      })
     })
 
-    expect(mockUpdate).toHaveBeenCalledWith({ name: 'New Name' })
-    expect(mockEq).toHaveBeenCalledWith('id', 'user-1')
+    expect(mockRpc).toHaveBeenCalledWith('update_own_profile', {
+      p_display_name: 'Nombre Nuevo',
+      p_phone_e164: '+56911112222',
+      p_avatar_path: '',
+      p_market_id: profile.marketId,
+      p_locality_id: null,
+      p_locale: 'es-CL',
+    })
   })
 
-  it('uploadAvatar uploads file and updates profile', async () => {
+  it('uploads an avatar under avatars/<userId>/<uuid> and stores only its path', async () => {
     const { result } = renderHook(() => useProfile())
 
-    let url: string
+    let url = ''
     await act(async () => {
-      url = await result.current.uploadAvatar('user-1', fakeFile)
+      url = await result.current.uploadAvatar(profile, fakeFile)
     })
 
-    expect(mockUpload).toHaveBeenCalled()
-    expect(mockUpdate).toHaveBeenCalled()
-    expect(url!).toBe('https://example.com/avatar.jpg')
+    const expectedPath = `${profile.id}/22222222-2222-4222-8222-222222222222.png`
+    expect(mockUpload).toHaveBeenCalledWith(expectedPath, fakeFile, { contentType: 'image/png', upsert: false })
+    expect(mockRpc).toHaveBeenCalledWith('update_own_profile', expect.objectContaining({ p_avatar_path: expectedPath }))
+    expect(url).toBe('https://example.com/avatar.jpg')
   })
 
-  it('uploadAvatar rejects invalid file type', async () => {
-    const invalidFile = new File(['test'], 'test.exe', { type: 'application/x-msdownload' })
+  it('removes the previous avatar only after the profile update succeeds', async () => {
+    const { result } = renderHook(() => useProfile())
+
+    await act(async () => {
+      await result.current.uploadAvatar({ ...profile, avatarPath: `${profile.id}/old.webp` }, fakeFile)
+    })
+
+    expect(mockRemove).toHaveBeenCalledWith([`${profile.id}/old.webp`])
+  })
+
+  it('removes a newly uploaded orphan when the profile RPC fails', async () => {
+    mockRpc.mockResolvedValue({ data: null, error: new Error('RPC failed') })
     const { result } = renderHook(() => useProfile())
 
     await expect(
       act(async () => {
-        await result.current.uploadAvatar('user-1', invalidFile)
+        await result.current.uploadAvatar(profile, fakeFile)
       }),
-    ).rejects.toThrow(/Tipo de archivo no permitido/)
+    ).rejects.toThrow('RPC failed')
+
+    expect(mockRemove).toHaveBeenCalledWith([`${profile.id}/22222222-2222-4222-8222-222222222222.png`])
   })
 
-  it('uploadAvatar rejects oversized file', async () => {
-    const hugeFile = new File(['x'.repeat(6 * 1024 * 1024)], 'huge.jpg', { type: 'image/jpeg' })
+  it('rejects MIME types not allowed by the bucket', async () => {
+    const invalidFile = new File(['test'], 'avatar.gif', { type: 'image/gif' })
+    const { result } = renderHook(() => useProfile())
+
+    await expect(result.current.uploadAvatar(profile, invalidFile)).rejects.toThrow(/Tipo de archivo no permitido/)
+    expect(mockUpload).not.toHaveBeenCalled()
+  })
+
+  it('rejects files larger than the bucket limit', async () => {
+    const hugeFile = new File([new Uint8Array(2 * 1024 * 1024 + 1)], 'huge.jpg', { type: 'image/jpeg' })
+    const { result } = renderHook(() => useProfile())
+
+    await expect(result.current.uploadAvatar(profile, hugeFile)).rejects.toThrow(/2MB/)
+    expect(mockUpload).not.toHaveBeenCalled()
+  })
+
+  it('always resets uploading after an upload error', async () => {
+    mockUpload.mockResolvedValue({ error: new Error('Upload failed') })
     const { result } = renderHook(() => useProfile())
 
     await expect(
       act(async () => {
-        await result.current.uploadAvatar('user-1', hugeFile)
+        await result.current.uploadAvatar(profile, fakeFile)
       }),
-    ).rejects.toThrow(/excede el tamaño máximo/)
-  })
+    ).rejects.toThrow('Upload failed')
 
-  it('sets uploading state during upload', async () => {
-    mockUpload.mockImplementation(() => new Promise((resolve) => setTimeout(() => resolve({ error: null }), 100)))
-    const { result } = renderHook(() => useProfile())
-
-    act(() => {
-      result.current.uploadAvatar('user-1', fakeFile)
-    })
-
-    await waitFor(() => expect(result.current.uploading).toBe(true))
     await waitFor(() => expect(result.current.uploading).toBe(false))
+  })
+})
+
+describe('buildAvatarPath', () => {
+  it('does not duplicate the bucket name in the object path', () => {
+    expect(buildAvatarPath('user-id', 'image/webp', 'object-id')).toBe('user-id/object-id.webp')
   })
 })

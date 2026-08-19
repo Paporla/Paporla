@@ -94,6 +94,16 @@ describe('registerSchema', () => {
     expect(result.success).toBe(false)
   })
 
+  it('rejects a name made only of whitespace', () => {
+    const result = registerSchema.safeParse({
+      email: 'test@example.com',
+      password: 'Password123',
+      name: '   ',
+      role: 'user',
+    })
+    expect(result.success).toBe(false)
+  })
+
   it('rejects invalid role', () => {
     const result = registerSchema.safeParse({
       email: 'test@example.com',
@@ -104,7 +114,7 @@ describe('registerSchema', () => {
     expect(result.success).toBe(false)
   })
 
-  it('allows optional phone', () => {
+  it('allows an optional E.164 phone with visual separators', () => {
     const result = registerSchema.safeParse({
       email: 'test@example.com',
       password: 'Password123',
@@ -113,6 +123,17 @@ describe('registerSchema', () => {
       phone: '+56 9 12345678',
     })
     expect(result.success).toBe(true)
+  })
+
+  it('rejects a phone without international country code', () => {
+    const result = registerSchema.safeParse({
+      email: 'test@example.com',
+      password: 'Password123',
+      name: 'Test User',
+      role: 'user',
+      phone: '912345678',
+    })
+    expect(result.success).toBe(false)
   })
 })
 

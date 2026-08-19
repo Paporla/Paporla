@@ -49,10 +49,10 @@ export default function AdminSidebar() {
       <div className="mx-4 mt-6 p-3 rounded-xl bg-primary/5 border border-primary/20">
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">
-            <span className="text-primary text-sm font-bold">{user?.name?.charAt(0) || 'A'}</span>
+            <span className="text-primary text-sm font-bold">{user?.displayName?.charAt(0) || 'A'}</span>
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium dark:text-white text-gray-900 truncate">{user?.name ?? 'Admin'}</p>
+            <p className="text-sm font-medium dark:text-white text-gray-900 truncate">{user?.displayName ?? 'Admin'}</p>
             <p className="text-[10px] dark:text-gray-500 text-gray-500">{user?.email}</p>
           </div>
         </div>

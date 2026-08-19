@@ -3,6 +3,7 @@ import { NextResponse, type NextRequest } from 'next/server'
 import { applyRateLimit } from '@/lib/middleware/rateLimit'
 import { setCsrfCookie, validateCsrf } from '@/lib/middleware/csrf'
 import { ROLES, isAdmin } from '@/lib/constants/roles'
+import { getActiveUserRole } from '@/lib/auth/profile'
 
 // ============================================
 // CSP — Nonce-based (replaces static 'unsafe-inline')
@@ -110,17 +111,6 @@ export async function middleware(request: NextRequest) {
   )
 
   const path = request.nextUrl.pathname
-  const publicPaths = ['/', '/login', '/register', '/faq', '/about', '/forgot-password', '/reset-password']
-  const isPublicPath =
-    publicPaths.includes(path) ||
-    path.startsWith('/auth/') ||
-    path.startsWith('/legal/') ||
-    path.startsWith('/packs') ||
-    path.startsWith('/shops') ||
-    path.startsWith('/contacto') ||
-    path.startsWith('/callback') ||
-    path.startsWith('/api') ||
-    path.startsWith('/mantenimiento')
 
   const isDashboardPath =
     path.startsWith('/dashboard') ||
@@ -132,32 +122,48 @@ export async function middleware(request: NextRequest) {
   const isAdminPath = path.startsWith('/admin')
   const isAuthPage = path === '/login' || path === '/register'
 
-  if (!isPublicPath || isDashboardPath || isBusinessPath || isAdminPath) {
-    const {
-      data: { session },
-    } = await supabase.auth.getSession()
+  const requiresAuth = isDashboardPath || isBusinessPath || isAdminPath
 
-    if (!session && !isPublicPath) {
-      return NextResponse.redirect(new URL('/login', request.url))
+  if (requiresAuth || isAuthPage) {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
+
+    if (!user) {
+      if (requiresAuth) return NextResponse.redirect(new URL('/login', request.url))
+      return response
     }
 
-    if (session) {
-      const role = (session.user.user_metadata?.role as string) || ROLES.USER
+    // Los roles de user_metadata son editables por el propio usuario y nunca son
+    // una fuente de autorización. El rol y estado canónicos viven en el perfil.
+    const { data: profile } = await supabase
+      .from('user_profiles')
+      .select('role, account_status')
+      .eq('id', user.id)
+      .maybeSingle()
 
-      if (isAuthPage) {
-        const dest = role === ROLES.COMERCIO ? '/business' : isAdmin(role) ? '/admin' : '/dashboard'
-        return NextResponse.redirect(new URL(dest, request.url))
-      }
+    const role = getActiveUserRole(profile)
 
-      if (isDashboardPath && role !== ROLES.USER) {
-        return NextResponse.redirect(new URL(role === ROLES.COMERCIO ? '/business' : '/admin', request.url))
+    if (!role) {
+      if (requiresAuth) {
+        return NextResponse.redirect(new URL('/login?error=account_unavailable', request.url))
       }
-      if (isBusinessPath && role !== ROLES.COMERCIO && !isAdmin(role)) {
-        return NextResponse.redirect(new URL('/dashboard', request.url))
-      }
-      if (isAdminPath && !isAdmin(role)) {
-        return NextResponse.redirect(new URL(role === ROLES.COMERCIO ? '/business' : '/dashboard', request.url))
-      }
+      return response
+    }
+
+    if (isAuthPage) {
+      const dest = role === ROLES.COMERCIO ? '/business' : isAdmin(role) ? '/admin' : '/dashboard'
+      return NextResponse.redirect(new URL(dest, request.url))
+    }
+
+    if (isDashboardPath && role !== ROLES.USER) {
+      return NextResponse.redirect(new URL(role === ROLES.COMERCIO ? '/business' : '/admin', request.url))
+    }
+    if (isBusinessPath && role !== ROLES.COMERCIO && !isAdmin(role)) {
+      return NextResponse.redirect(new URL('/dashboard', request.url))
+    }
+    if (isAdminPath && !isAdmin(role)) {
+      return NextResponse.redirect(new URL(role === ROLES.COMERCIO ? '/business' : '/dashboard', request.url))
     }
   }
 

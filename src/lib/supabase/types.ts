@@ -2,9 +2,26 @@
 // CANONICAL TYPES — Fuente única de verdad
 // Derivados del esquema de base de datos
 // ============================================
-import type { UserRole, UserProfile } from '@/types/user'
+import type { UserRole } from '@/types/user'
 
-export type { UserRole, UserProfile }
+export type { UserRole }
+
+// Compatibilidad temporal exclusiva del módulo admin antiguo. Auth y perfil de
+// usuario usan el modelo canónico de src/types/user.ts. El admin se migrará en
+// un commit posterior y eliminará esta interfaz.
+export interface UserProfile {
+  id: string
+  email: string | null
+  name: string | null
+  phone: string | null
+  role: UserRole
+  avatar_url: string | null
+  email_confirmed: boolean | null
+  created_at: string | null
+  last_login?: string | null
+  country?: string | null
+  city?: string | null
+}
 
 // ============================================
 // SHOP
