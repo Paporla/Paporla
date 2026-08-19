@@ -118,7 +118,7 @@ export function useCreateReservation() {
                 type: 'reservation',
                 email: user.email,
                 data: {
-                  userName: user.name ?? 'Usuario',
+                  userName: user.displayName ?? 'Usuario',
                   packTitle: packDetails.title,
                   shopName: packDetails.shop.name,
                   pickupCode: result.pickup_code,

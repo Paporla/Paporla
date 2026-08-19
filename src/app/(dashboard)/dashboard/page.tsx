@@ -103,7 +103,7 @@ export default function UserDashboardPage() {
 
       <ErrorBoundary fallback={<div className="p-4 text-sm text-gray-500">Error al cargar banner</div>}>
         <UserWelcomeBanner
-          userName={user?.name ?? 'Usuario'}
+          userName={user?.displayName ?? 'Usuario'}
           packsRescued={stats.totalPacksRescued}
           level={stats.level}
           points={stats.points}

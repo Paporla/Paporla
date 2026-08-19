@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { isValidOptionalPhone } from '@/lib/auth/profile'
 
 export const loginSchema = z.object({
   email: z.string().email('Email inválido'),
@@ -7,16 +8,20 @@ export const loginSchema = z.object({
 
 export const registerSchema = z
   .object({
-    email: z.string().email('Email inválido'),
+    email: z.string().trim().email('Email inválido'),
     password: z
       .string()
       .min(8, 'La contraseña debe tener al menos 8 caracteres')
       .regex(/[A-Z]/, 'Debe contener al menos una letra mayúscula')
       .regex(/[0-9]/, 'Debe contener al menos un número'),
-    name: z.string().min(2, 'El nombre debe tener al menos 2 caracteres'),
-    phone: z.string().optional(),
+    name: z.string().trim().min(2, 'El nombre debe tener al menos 2 caracteres').max(120),
+    phone: z
+      .string()
+      .trim()
+      .refine(isValidOptionalPhone, 'Usa formato internacional, por ejemplo +56955551234')
+      .optional(),
     role: z.enum(['user', 'comercio']),
-    shopName: z.string().optional(),
+    shopName: z.string().trim().min(2, 'El nombre del comercio debe tener al menos 2 caracteres').max(160).optional(),
   })
   .refine(
     (data) => {

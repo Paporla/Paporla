@@ -46,9 +46,12 @@ export default function LoginForm() {
     }
 
     if (searchParams.get('registered') === 'true') {
-      addToast('Registro exitoso! Revisa tu email para confirmar tu cuenta.', 'success')
+      addToast('¡Registro exitoso! Revisa tu email para confirmar tu cuenta.', 'success')
     }
-  }, [searchParams])
+    if (searchParams.get('password_updated') === 'true') {
+      addToast('Contraseña actualizada. Ya puedes iniciar sesión.', 'success')
+    }
+  }, [addToast, searchParams])
 
   const validateForm = () => {
     const result = loginSchema.safeParse({ email, password })

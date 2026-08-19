@@ -7,6 +7,14 @@ import * as Sentry from '@sentry/nextjs'
 import { translateAuthError } from '@/lib/utils/auth-errors'
 import { ROLES, isAdmin } from '@/lib/constants/roles'
 import { logger } from '@/lib/logger'
+import { DEFAULT_MARKET } from '@/lib/constants/markets'
+import {
+  USER_PROFILE_FIELDS,
+  getSafeInternalRedirect,
+  mapUserProfile,
+  normalizePhoneE164,
+  type UserProfileRow,
+} from '@/lib/auth/profile'
 import type { UserProfile, SignUpRole, ShopData } from '@/types/user'
 
 // ─── Tipos ──────────────────────────────────────────────
@@ -47,13 +55,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     router.replace(target)
   }
 
-  const PROFILE_FIELDS = 'id, email, name, phone, role, avatar_url, email_confirmed, created_at'
-
   const fetchProfile = useCallback(
     async (userId: string) => {
       const { data: profile, error: fetchError } = await supabase
         .from('user_profiles')
-        .select(PROFILE_FIELDS)
+        .select(USER_PROFILE_FIELDS)
         .eq('id', userId)
         .maybeSingle()
 
@@ -61,8 +67,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         logger.error('useAuth fetchProfile', fetchError)
         throw fetchError
       }
+      if (!profile) return null
 
-      return profile as UserProfile | null
+      const row = profile as UserProfileRow
+      const avatarPublicUrl = row.avatar_path
+        ? supabase.storage.from('avatars').getPublicUrl(row.avatar_path).data.publicUrl
+        : null
+
+      return mapUserProfile(row, avatarPublicUrl)
     },
     [supabase],
   )
@@ -103,24 +115,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (!profile) {
           logger.warn('useAuth getUser', `Usuario autenticado sin perfil — reintentando: ${authUser.id}`)
           for (let attempt = 0; attempt < 2; attempt++) {
-            await new Promise((r) => setTimeout(r, 600))
+            await new Promise((resolve) => setTimeout(resolve, 600))
             const retry = await fetchProfile(authUser.id)
             if (retry) {
+              if (retry.accountStatus !== 'active') {
+                await supabase.auth.signOut().catch(() => {})
+                throw new Error('La cuenta no está disponible')
+              }
               setUser(retry)
               return retry
             }
           }
-          const { data: fallback } = await supabase
-            .from('user_profiles')
-            .upsert({ id: authUser.id, email: authUser.email, role: 'user' })
-            .select(PROFILE_FIELDS)
-            .maybeSingle()
-          if (fallback) {
-            setUser(fallback as UserProfile)
-            return fallback as UserProfile
-          }
-          setUser(null)
-          return null
+
+          // El trigger de Auth es el único responsable de crear perfiles.
+          // Nunca intentamos un INSERT/UPSERT desde el cliente.
+          await supabase.auth.signOut().catch(() => {})
+          throw new Error('No se pudo cargar el perfil de la cuenta')
+        }
+
+        if (profile.accountStatus !== 'active') {
+          await supabase.auth.signOut().catch(() => {})
+          throw new Error('La cuenta no está disponible')
         }
 
         setUser(profile)
@@ -177,11 +192,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (!data.user) throw new Error('No se pudo obtener el usuario autenticado')
 
     const profile = await fetchProfile(data.user.id)
-    if (!profile) throw new Error('No existe perfil para este usuario')
+    if (!profile) {
+      await supabase.auth.signOut().catch(() => {})
+      throw new Error('No existe perfil para este usuario')
+    }
 
-    // Sincronizar el rol en el JWT con user_profiles para que el middleware no haga redirects incorrectos
-    if (profile.role && data.user.user_metadata?.role !== profile.role) {
-      await supabase.auth.updateUser({ data: { role: profile.role } }).catch(() => {})
+    if (profile.accountStatus !== 'active') {
+      await supabase.auth.signOut().catch(() => {})
+      throw new Error('La cuenta no está disponible')
     }
 
     setUser(profile)
@@ -189,7 +207,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     if (typeof window !== 'undefined') {
       const params = new URLSearchParams(window.location.search)
-      const redirect = params.get('redirect')
+      const redirect = getSafeInternalRedirect(params.get('redirect'))
       if (redirect) {
         const extraParams = new URLSearchParams()
         params.forEach((value, key) => {
@@ -211,22 +229,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     phone?: string,
     shopData?: ShopData,
   ) => {
+    const normalizedPhone = normalizePhoneE164(phone)
+
     const { data, error: authError } = await supabase.auth.signUp({
       email,
       password,
       options: {
         data: {
-          name,
+          name: name.trim(),
           role,
-          phone: phone ?? null,
-          // Datos del comercio (el callback los usa para crear la shop via service_role)
+          phone: normalizedPhone,
+          locale: DEFAULT_MARKET.locale,
+          // Pre-onboarding únicamente. create_own_shop validará de nuevo estos datos.
           ...(role === 'comercio' && shopData?.name
             ? {
-                shop_name: shopData.name,
+                shop_name: shopData.name.trim(),
                 shop_description: shopData.description ?? null,
                 shop_address: shopData.address ?? null,
                 shop_city: shopData.city ?? null,
-                shop_phone: shopData.phone ?? null,
+                shop_phone: normalizedPhone,
               }
             : {}),
         },
@@ -237,30 +258,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (authError) throw authError
     if (!data.user) throw new Error('Error al crear usuario')
 
-    // La creacion del comercio se hace en el servidor (callback/route.ts)
-    // Los datos ya viajan en user_metadata -> no se necesita updateUser aqui.
-
-    // Notificar admins (best-effort, fire-and-forget)
-    void supabase
-      .from('user_profiles')
-      .select('id')
-      .in('role', [ROLES.ADMIN, ROLES.SUPER_ADMIN])
-      .then(({ data: admins }) => {
-        if (!admins?.length) return
-        void import('@/lib/notifications/sendNotification').then(({ sendBatchNotifications }) => {
-          void sendBatchNotifications(
-            admins.map((admin) => ({
-              userId: admin.id,
-              type: 'new_user' as const,
-              message: `${name ?? 'Usuario'} se registro como ${role === ROLES.COMERCIO ? 'comercio' : 'usuario'}${role === ROLES.COMERCIO && shopData?.name ? ` - ${shopData.name}` : ''}`,
-            })),
-          )
-        })
-      })
+    // El trigger de Auth crea el perfil. El comercio se crea posteriormente
+    // mediante create_own_shop, después de elegir una localidad válida.
 
     if (!data.session) {
       const redirectUrl =
-        typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('redirect') : null
+        typeof window !== 'undefined'
+          ? getSafeInternalRedirect(new URLSearchParams(window.location.search).get('redirect'))
+          : null
       router.replace(
         redirectUrl ? `/login?registered=true&redirect=${encodeURIComponent(redirectUrl)}` : '/login?registered=true',
       )
@@ -269,8 +274,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     const profile = await fetchProfile(data.user.id)
     if (!profile) {
-      router.replace('/login?registered=true')
-      return
+      await supabase.auth.signOut().catch(() => {})
+      throw new Error('La cuenta se creó, pero el perfil todavía no está disponible')
     }
 
     setUser(profile)
@@ -278,7 +283,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     if (typeof window !== 'undefined') {
       const params = new URLSearchParams(window.location.search)
-      const redirect = params.get('redirect')
+      const redirect = getSafeInternalRedirect(params.get('redirect'))
       if (redirect) {
         const extraParams = new URLSearchParams()
         params.forEach((value, key) => {
@@ -295,7 +300,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signOut = async () => {
     await supabase.auth.signOut()
     setUser(null)
-    window.location.href = '/'
+    router.replace('/')
+    router.refresh()
   }
 
   return (

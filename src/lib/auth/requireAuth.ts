@@ -1,20 +1,11 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
+import { getActiveUserRole } from '@/lib/auth/profile'
 import type { UserRole } from '@/types/user'
 
 export async function requireAuth(allowedRoles?: UserRole[]) {
   const supabase = await createClient()
 
-  // Verificar sesión primero (getSession no lanza error cuando no hay sesión)
-  const {
-    data: { session },
-  } = await supabase.auth.getSession()
-
-  if (!session) {
-    redirect('/login')
-  }
-
-  // getUser() usa el JWT local sin roundtrip a Supabase (más rápido que getSession())
   const {
     data: { user },
     error: authError,
@@ -24,11 +15,18 @@ export async function requireAuth(allowedRoles?: UserRole[]) {
     redirect('/login')
   }
 
-  const { data: profile } = await supabase.from('user_profiles').select('role').eq('id', user.id).maybeSingle()
+  const { data: profile, error: profileError } = await supabase
+    .from('user_profiles')
+    .select('role, account_status')
+    .eq('id', user.id)
+    .maybeSingle()
 
-  const role = profile?.role as UserRole | undefined
+  const role = profileError ? null : getActiveUserRole(profile)
+  if (!role) {
+    redirect('/login?error=account_unavailable')
+  }
 
-  if (allowedRoles && role && !allowedRoles.includes(role)) {
+  if (allowedRoles && !allowedRoles.includes(role)) {
     if (role === 'comercio') redirect('/business')
     if (role === 'admin' || role === 'super_admin') redirect('/admin')
     redirect('/dashboard')

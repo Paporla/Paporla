@@ -68,7 +68,7 @@ export default function BusinessSidebar() {
       <div className="mx-4 mt-6 p-3 rounded-xl bg-primary/5 border border-primary/20">
         <div className="flex items-center gap-2">
           <Store className="w-4 h-4 text-primary" />
-          <span className="text-sm font-medium text-white truncate">{user?.name ?? 'Mi Comercio'}</span>
+          <span className="text-sm font-medium text-white truncate">{user?.displayName ?? 'Mi Comercio'}</span>
         </div>
         <div className="flex items-center gap-1 mt-1">
           <span className="w-1.5 h-1.5 rounded-full bg-green-400" />
