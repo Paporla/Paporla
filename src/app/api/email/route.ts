@@ -10,8 +10,12 @@ import {
 import { sendEmailSchema } from '@/lib/utils/validations'
 import { logger } from '@/lib/logger'
 
-const resend = new Resend(process.env.RESEND_API_KEY)
 const senderEmail = process.env.RESEND_FROM_EMAIL ?? 'noreply@paporla.com'
+
+function getResendClient(): Resend | null {
+  const apiKey = process.env.RESEND_API_KEY
+  return apiKey ? new Resend(apiKey) : null
+}
 
 export async function POST(request: Request) {
   try {
@@ -97,6 +101,15 @@ export async function POST(request: Request) {
         break
     }
 
+    const resend = getResendClient()
+    if (!resend) {
+      logger.warn('Email API', 'Servicio de email no configurado', { type })
+      return NextResponse.json(
+        { success: false, error: 'Servicio de email no disponible en este entorno' },
+        { status: 503 },
+      )
+    }
+
     const { data: res, error } = await resend.emails.send({
       from: `Paporla <${senderEmail}>`,
       to: email,
@@ -111,14 +124,13 @@ export async function POST(request: Request) {
 
     if (error) {
       logger.error('Email API', error, { type })
-      return NextResponse.json({ success: false, error: error.message }, { status: 500 })
+      return NextResponse.json({ success: false, error: 'No se pudo enviar el email' }, { status: 500 })
     }
 
     logger.info('Email API Sent', type)
     return NextResponse.json({ success: true, data: res })
   } catch (err: unknown) {
     logger.error('Email API Exception', err)
-    const message = err instanceof Error ? err.message : 'Error interno del servidor'
-    return NextResponse.json({ success: false, error: message }, { status: 500 })
+    return NextResponse.json({ success: false, error: 'Error interno del servidor' }, { status: 500 })
   }
 }
