@@ -15,6 +15,25 @@ export const formatPrice = (
   return formatCents(price, locale, currency)
 }
 
+/**
+ * Formatea importes canónicos guardados en la unidad menor de su moneda.
+ * No todas las monedas usan dos decimales: CLP usa 0; ARS/COP usan 2.
+ */
+export function formatMinorPrice(
+  amountMinor: number | null | undefined,
+  currency: string,
+  locale: string = 'es-419',
+): string {
+  const value = amountMinor ?? 0
+  try {
+    const formatter = new Intl.NumberFormat(locale, { style: 'currency', currency })
+    const fractionDigits = formatter.resolvedOptions().maximumFractionDigits ?? 2
+    return formatter.format(value / 10 ** fractionDigits)
+  } catch {
+    return `${currency} ${value}`
+  }
+}
+
 function formatCents(cents: number, locale: string, currency: string): string {
   const amount = cents / 100
   try {

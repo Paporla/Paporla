@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { formatPrice } from '@/lib/utils/formatPrice'
+import { formatMinorPrice, formatPrice } from '@/lib/utils/formatPrice'
 
 describe('formatPrice', () => {
   describe('con locale y currency explicitos (USD)', () => {
@@ -42,6 +42,24 @@ describe('formatPrice', () => {
       const result = formatPrice(null)
       expect(result).toContain('0')
       expect(result).toContain('$')
+    })
+  })
+
+  describe('importes canónicos por moneda', () => {
+    it('formatea CLP sin dividir por 100', () => {
+      const result = formatMinorPrice(4990, 'CLP', 'es-CL')
+      expect(result).toContain('4.990')
+      expect(result).not.toContain(',00')
+    })
+
+    it('formatea monedas con dos decimales desde unidades menores', () => {
+      const result = formatMinorPrice(12345, 'USD', 'en-US')
+      expect(result).toBe('$123.45')
+    })
+
+    it('acepta null y undefined', () => {
+      expect(formatMinorPrice(null, 'CLP', 'es-CL')).toContain('0')
+      expect(formatMinorPrice(undefined, 'CLP', 'es-CL')).toContain('0')
     })
   })
 

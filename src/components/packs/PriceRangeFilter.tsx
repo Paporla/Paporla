@@ -1,8 +1,8 @@
 'use client'
 
-import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { DollarSign } from 'lucide-react'
+import { formatMinorPrice } from '@/lib/utils/formatPrice'
 
 interface PriceRangeFilterProps {
   minPrice: number
@@ -10,6 +10,8 @@ interface PriceRangeFilterProps {
   onPriceChange: (min: number, max: number) => void
   minLimit?: number
   maxLimit?: number
+  currencyCode?: string
+  locale?: string
 }
 
 export default function PriceRangeFilter({
@@ -18,30 +20,18 @@ export default function PriceRangeFilter({
   onPriceChange,
   minLimit = 0,
   maxLimit = 100000,
+  currencyCode = 'CLP',
+  locale = 'es-CL',
 }: PriceRangeFilterProps) {
-  const [localMin, setLocalMin] = useState(minPrice)
-  const [localMax, setLocalMax] = useState(maxPrice)
-
-  useEffect(() => {
-    setLocalMin(minPrice)
-    setLocalMax(maxPrice)
-  }, [minPrice, maxPrice])
-
   const handleMinChange = (value: number) => {
-    const newMin = Math.min(value, localMax - 100)
-    setLocalMin(newMin)
-    onPriceChange(newMin, localMax)
+    onPriceChange(Math.max(minLimit, Math.min(value, maxPrice - 500)), maxPrice)
   }
 
   const handleMaxChange = (value: number) => {
-    const newMax = Math.max(value, localMin + 100)
-    setLocalMax(newMax)
-    onPriceChange(localMin, newMax)
+    onPriceChange(minPrice, Math.min(maxLimit, Math.max(value, minPrice + 500)))
   }
 
-  const formatPrice = (price: number) => {
-    return `$${(price / 100).toFixed(2)}`
-  }
+  const format = (value: number) => formatMinorPrice(value, currencyCode, locale)
 
   return (
     <div className="space-y-4">
@@ -51,7 +41,7 @@ export default function PriceRangeFilter({
           Rango de precio
         </label>
         <span className="text-xs text-gray-500 dark:text-gray-400">
-          {formatPrice(localMin)} - {formatPrice(localMax)}
+          {format(minPrice)} - {format(maxPrice)}
         </span>
       </div>
 
@@ -60,8 +50,8 @@ export default function PriceRangeFilter({
           <div
             className="absolute h-2 bg-gradient-to-r from-primary to-primary/60 rounded-full"
             style={{
-              left: `${(localMin / maxLimit) * 100}%`,
-              right: `${100 - (localMax / maxLimit) * 100}%`,
+              left: `${(minPrice / maxLimit) * 100}%`,
+              right: `${100 - (maxPrice / maxLimit) * 100}%`,
             }}
           />
         </div>
@@ -70,37 +60,27 @@ export default function PriceRangeFilter({
           type="range"
           min={minLimit}
           max={maxLimit}
-          step={100}
-          value={localMin}
-          onChange={(e) => handleMinChange(Number(e.target.value))}
+          step={500}
+          value={minPrice}
+          onChange={(event) => handleMinChange(Number(event.target.value))}
           className="absolute top-0 left-0 w-full h-2 opacity-0 cursor-pointer"
+          aria-label="Precio mínimo"
         />
 
         <input
           type="range"
           min={minLimit}
           max={maxLimit}
-          step={100}
-          value={localMax}
-          onChange={(e) => handleMaxChange(Number(e.target.value))}
+          step={500}
+          value={maxPrice}
+          onChange={(event) => handleMaxChange(Number(event.target.value))}
           className="absolute top-0 left-0 w-full h-2 opacity-0 cursor-pointer"
+          aria-label="Precio máximo"
         />
 
         <div className="relative flex justify-between mt-2">
-          <motion.div
-            className="text-xs text-gray-600 dark:text-gray-400"
-            animate={{ x: `${(localMin / maxLimit) * 100}%` }}
-            transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-          >
-            {formatPrice(localMin)}
-          </motion.div>
-          <motion.div
-            className="text-xs text-gray-600 dark:text-gray-400"
-            animate={{ x: `${(localMax / maxLimit) * 100 - 100}%` }}
-            transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-          >
-            {formatPrice(localMax)}
-          </motion.div>
+          <motion.div className="text-xs text-gray-600 dark:text-gray-400">{format(minPrice)}</motion.div>
+          <motion.div className="text-xs text-gray-600 dark:text-gray-400">{format(maxPrice)}</motion.div>
         </div>
       </div>
 
@@ -108,8 +88,11 @@ export default function PriceRangeFilter({
         <div className="flex-1">
           <input
             type="number"
-            value={localMin / 100}
-            onChange={(e) => handleMinChange(Number(e.target.value) * 100)}
+            min={minLimit}
+            max={maxLimit}
+            step={500}
+            value={minPrice}
+            onChange={(event) => handleMinChange(Number(event.target.value))}
             className="w-full px-3 py-2 rounded-lg dark:bg-white/10 bg-white dark:border-gray-600 border-gray-200 dark:text-white text-gray-900 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
             placeholder="Mínimo"
           />
@@ -117,8 +100,11 @@ export default function PriceRangeFilter({
         <div className="flex-1">
           <input
             type="number"
-            value={localMax / 100}
-            onChange={(e) => handleMaxChange(Number(e.target.value) * 100)}
+            min={minLimit}
+            max={maxLimit}
+            step={500}
+            value={maxPrice}
+            onChange={(event) => handleMaxChange(Number(event.target.value))}
             className="w-full px-3 py-2 rounded-lg dark:bg-white/10 bg-white dark:border-gray-600 border-gray-200 dark:text-white text-gray-900 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
             placeholder="Máximo"
           />
