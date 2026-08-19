@@ -11,6 +11,9 @@ node_modules/
 /build
 
 # Archivos de entorno (SECRETOS - NO SUBIR)
+.env
+.env.*
+!.env.example
 .env*.local
 .env.production
 .env.development
