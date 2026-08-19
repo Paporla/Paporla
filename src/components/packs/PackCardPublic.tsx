@@ -2,30 +2,37 @@
 
 import Image from 'next/image'
 import { motion } from 'framer-motion'
-import { Package, TrendingUp, Leaf, MapPin, Clock, Navigation } from 'lucide-react'
-import { formatPrice } from '@/lib/utils/formatPrice'
+import { Package, Leaf, MapPin, Clock, Navigation } from 'lucide-react'
+import { formatMinorPrice } from '@/lib/utils/formatPrice'
 
 export interface PublicPack {
   id: string
   shop_id: string
+  locality_id: string
   title: string
-  description: string
-  price_cents: number
-  original_price_cents: number | null
+  description: string | null
+  category: string
+  tags: string[]
+  allergen_notice: string | null
+  price_minor: number
+  original_price_minor: number | null
+  currency_code: string
   remaining_stock: number
-  total_stock: number
-  shop_name: string
-  shop_city: string
-  shop_verified: boolean
-  shop_rating: number
+  pickup_start_at: string
+  pickup_end_at: string
+  timezone: string
   image_url: string | null
-  shop_latitude?: number | null
-  shop_longitude?: number | null
-  distance_meters?: number | null
-  created_at: string
+  shop_name: string
+  shop_category: string | null
+  locality_name: string
+  shop_address: string | null
+  shop_latitude: number | null
+  shop_longitude: number | null
+  shop_rating: number | null
+  shop_rating_count: number
+  distance_meters: number | null
 }
 
-/** Formatea metros a texto legible: "< 100 m", "1.2 km", "5.8 km" */
 function formatDistance(meters: number | null | undefined): string | null {
   if (meters == null) return null
   if (meters < 100) return '< 100 m'
@@ -33,18 +40,33 @@ function formatDistance(meters: number | null | undefined): string | null {
   return `${(meters / 1000).toFixed(1)} km`
 }
 
+function formatPickupTime(value: string, timezone: string): string {
+  try {
+    return new Intl.DateTimeFormat('es-CL', {
+      weekday: 'short',
+      hour: '2-digit',
+      minute: '2-digit',
+      timeZone: timezone,
+    }).format(new Date(value))
+  } catch {
+    return 'Horario por confirmar'
+  }
+}
+
 interface Props {
   pack: PublicPack
   onReserve: (id: string) => void
   index: number
   reserving: string | null
+  reservationsEnabled?: boolean
 }
 
-export default function PackCardPublic({ pack, onReserve, index, reserving }: Props) {
+export default function PackCardPublic({ pack, onReserve, index, reserving, reservationsEnabled = false }: Props) {
   const isAvailable = pack.remaining_stock > 0
+  const canReserve = isAvailable && reservationsEnabled
   const discount =
-    pack.original_price_cents && pack.original_price_cents > pack.price_cents
-      ? Math.round((1 - pack.price_cents / pack.original_price_cents) * 100)
+    pack.original_price_minor && pack.original_price_minor > pack.price_minor
+      ? Math.round((1 - pack.price_minor / pack.original_price_minor) * 100)
       : null
 
   return (
@@ -64,7 +86,7 @@ export default function PackCardPublic({ pack, onReserve, index, reserving }: Pr
         </div>
         <div className="absolute top-3 left-3 z-10">
           <div className="px-2 py-1 bg-primary/20 backdrop-blur-sm text-primary text-xs font-medium rounded-lg flex items-center gap-1">
-            <Leaf className="w-3 h-3" /> Rescatado
+            <Leaf className="w-3 h-3" /> Disponible
           </div>
         </div>
 
@@ -80,14 +102,18 @@ export default function PackCardPublic({ pack, onReserve, index, reserving }: Pr
         </div>
 
         <div className="p-5">
-          <div className="flex items-start justify-between mb-2">
+          <div className="flex items-start justify-between mb-2 gap-3">
             <h3 className="dark:text-white text-gray-900 font-bold text-lg line-clamp-1 group-hover:text-primary transition-colors">
               {pack.title}
             </h3>
-            <div className="text-right">
-              <span className="text-primary font-bold text-xl">{formatPrice(pack.price_cents)}</span>
-              {pack.original_price_cents && (
-                <p className="text-xs text-gray-500 line-through">{formatPrice(pack.original_price_cents)}</p>
+            <div className="text-right flex-shrink-0">
+              <span className="text-primary font-bold text-xl">
+                {formatMinorPrice(pack.price_minor, pack.currency_code, 'es-CL')}
+              </span>
+              {pack.original_price_minor && (
+                <p className="text-xs text-gray-500 line-through">
+                  {formatMinorPrice(pack.original_price_minor, pack.currency_code, 'es-CL')}
+                </p>
               )}
             </div>
           </div>
@@ -95,12 +121,14 @@ export default function PackCardPublic({ pack, onReserve, index, reserving }: Pr
           <div className="flex items-center gap-1 text-xs dark:text-gray-500 text-gray-400 mb-2">
             <MapPin className="w-3 h-3" />
             <span>{pack.shop_name}</span>
-            {pack.shop_verified && <span className="text-primary text-xs ml-1">Verificado</span>}
+            <span className="text-primary text-xs ml-1">Verificado</span>
           </div>
 
-          <p className="dark:text-gray-400 text-gray-600 text-sm mb-3 line-clamp-2">{pack.description}</p>
+          <p className="dark:text-gray-400 text-gray-600 text-sm mb-3 line-clamp-2">
+            {pack.description || 'Pack sorpresa preparado por el comercio.'}
+          </p>
 
-          <div className="flex items-center justify-between text-xs dark:text-gray-500 text-gray-400 mb-4">
+          <div className="flex items-center justify-between gap-2 text-xs dark:text-gray-500 text-gray-400 mb-4">
             <div className="flex items-center gap-1">
               <Package className="w-3 h-3" />
               <span>{pack.remaining_stock} disponibles</span>
@@ -112,31 +140,33 @@ export default function PackCardPublic({ pack, onReserve, index, reserving }: Pr
               </div>
             ) : (
               <div className="flex items-center gap-1">
-                <Clock className="w-3 h-3" />
-                <span>Recogida local</span>
+                <MapPin className="w-3 h-3" />
+                <span>{pack.locality_name}</span>
               </div>
             )}
             <div className="flex items-center gap-1">
-              <TrendingUp className="w-3 h-3 text-primary" />
-              <span className="text-primary">+2 comidas</span>
+              <Clock className="w-3 h-3 text-primary" />
+              <span>{formatPickupTime(pack.pickup_start_at, pack.timezone)}</span>
             </div>
           </div>
 
           <button
-            onClick={() => onReserve(pack.id)}
-            disabled={!isAvailable || reserving === pack.id}
+            onClick={() => canReserve && onReserve(pack.id)}
+            disabled={!canReserve || reserving === pack.id}
             className={`w-full py-2.5 rounded-xl font-semibold transition-all flex items-center justify-center gap-2 ${
-              isAvailable
+              canReserve
                 ? 'bg-primary text-black hover:bg-primary/90'
                 : 'dark:bg-gray-700 bg-gray-200 dark:text-gray-400 text-gray-500 cursor-not-allowed'
             }`}
           >
             {reserving === pack.id ? (
               <div className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin" />
-            ) : isAvailable ? (
+            ) : !isAvailable ? (
+              'Agotado'
+            ) : reservationsEnabled ? (
               'Reservar ahora'
             ) : (
-              'Agotado'
+              'Reservas próximamente'
             )}
           </button>
         </div>

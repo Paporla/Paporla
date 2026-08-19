@@ -1,9 +1,13 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { supabaseBrowser } from '@/lib/supabase/client'
+import { DEFAULT_MARKET } from '@/lib/constants/markets'
+import type { Database } from '@/types/database.generated'
 import type { PublicPack } from '@/components/packs/PackCardPublic'
+
+type SearchPackRow = Database['public']['Functions']['search_available_packs']['Returns'][number]
 
 interface Filters {
   search: string
@@ -30,90 +34,95 @@ const DEFAULT_FILTERS: Filters = {
 export function usePublicPacks() {
   const supabase = supabaseBrowser()
   const [filters, setFilters] = useState<Filters>(DEFAULT_FILTERS)
-  const [error, setError] = useState('')
+  const [localError, setError] = useState('')
 
-  /**
-   * Carga packs usando React Query. Soporta dos modos:
-   * - RPC search_packs_nearby (geolocalización)
-   * - Vista available_packs (modo normal)
-   */
-  const { data: allPacks = [], isLoading: loading } = useQuery({
-    queryKey: ['public-packs', filters.location?.lat, filters.location?.lng, filters.radiusKm],
-    queryFn: async () => {
-      setError('')
+  const query = useQuery({
+    queryKey: [
+      'public-packs',
+      DEFAULT_MARKET.id,
+      filters.search,
+      filters.location?.lat,
+      filters.location?.lng,
+      filters.radiusKm,
+    ],
+    queryFn: async (): Promise<PublicPack[]> => {
+      const { data, error } = await supabase.rpc('search_available_packs', {
+        p_market_id: DEFAULT_MARKET.id,
+        p_locality_id: undefined,
+        p_latitude: filters.location?.lat,
+        p_longitude: filters.location?.lng,
+        p_radius_meters: Math.round(filters.radiusKm * 1000),
+        p_query: filters.search.trim() || undefined,
+        p_limit: 50,
+      })
 
-      if (filters.location) {
-        // MODO GEOLOCALIZACIÓN: usar RPC search_packs_nearby
-        const radiusMeters = filters.radiusKm * 1000
-        const { data, error: rpcError } = await supabase.rpc('search_packs_nearby', {
-          p_lat: filters.location.lat,
-          p_lng: filters.location.lng,
-          p_radius_meters: radiusMeters,
-          p_limit: 100,
-        })
+      if (error) throw new Error(error.message || 'No se pudieron cargar los packs')
 
-        if (rpcError) {
-          setError(rpcError.message)
-          return []
+      return ((data ?? []) as SearchPackRow[]).map((row) => {
+        const imageUrl = row.image_path
+          ? supabase.storage.from('pack-images').getPublicUrl(row.image_path).data.publicUrl
+          : null
+
+        return {
+          id: row.pack_id,
+          shop_id: row.shop_id,
+          locality_id: row.locality_id,
+          title: row.title,
+          description: row.description,
+          category: row.category,
+          tags: row.tags,
+          allergen_notice: row.allergen_notice,
+          price_minor: row.price_minor,
+          original_price_minor: row.original_price_minor,
+          currency_code: row.currency_code,
+          remaining_stock: row.remaining_stock,
+          pickup_start_at: row.pickup_start_at,
+          pickup_end_at: row.pickup_end_at,
+          timezone: row.timezone,
+          image_url: imageUrl,
+          shop_name: row.shop_name,
+          shop_category: row.shop_category,
+          locality_name: row.locality_name,
+          shop_address: row.shop_address,
+          shop_latitude: row.shop_latitude,
+          shop_longitude: row.shop_longitude,
+          shop_rating: row.shop_rating,
+          shop_rating_count: row.shop_rating_count,
+          distance_meters: row.distance_meters,
         }
-        return (data as PublicPack[]) || []
-      }
-
-      // MODO VISTA: usar available_packs con límite
-      const { data, error: viewError } = await supabase
-        .from('available_packs')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .limit(200)
-
-      if (viewError) {
-        setError(viewError.message)
-        return []
-      }
-      return (data as PublicPack[]) || []
+      })
     },
     staleTime: 30 * 1000,
   })
 
-  /**
-   * Filtrado cliente: búsqueda por texto, precio, ciudad, stock.
-   */
+  const allPacks = useMemo(() => query.data ?? [], [query.data])
   const packs = useMemo(() => {
     let result = [...allPacks]
 
-    if (filters.search) {
-      const q = filters.search.toLowerCase()
-      result = result.filter((p) => p.title?.toLowerCase().includes(q) || p.description?.toLowerCase().includes(q))
-    }
-
     if (filters.minPrice > 0) {
-      result = result.filter((p) => p.price_cents >= filters.minPrice)
+      result = result.filter((pack) => pack.price_minor >= filters.minPrice)
     }
-    if (filters.maxPrice < 100000) {
-      result = result.filter((p) => p.price_cents <= filters.maxPrice)
+    if (filters.maxPrice < DEFAULT_FILTERS.maxPrice) {
+      result = result.filter((pack) => pack.price_minor <= filters.maxPrice)
     }
-
     if (filters.showAvailableOnly) {
-      result = result.filter((p) => p.remaining_stock > 0)
+      result = result.filter((pack) => pack.remaining_stock > 0)
     }
-
     if (filters.city && !filters.location) {
-      result = result.filter((p) => p.shop_city === filters.city)
+      result = result.filter((pack) => pack.locality_name === filters.city)
     }
 
-    // Ordenamiento
     if (filters.sortBy === 'price_asc') {
-      result.sort((a, b) => a.price_cents - b.price_cents)
+      result.sort((a, b) => a.price_minor - b.price_minor)
     } else if (filters.sortBy === 'price_desc') {
-      result.sort((a, b) => b.price_cents - a.price_cents)
-    } else if (filters.sortBy === 'newest' && filters.location) {
-      // Si hay geolocalización activa pero el usuario quiere más recientes
-      result.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
-    } else if (filters.sortBy === 'distance' || (filters.location && filters.sortBy !== 'newest')) {
-      // Por defecto con geolocalización: ordenar por distancia
-      result.sort((a, b) => (a.distance_meters ?? 99999) - (b.distance_meters ?? 99999))
+      result.sort((a, b) => b.price_minor - a.price_minor)
+    } else if (filters.sortBy === 'distance') {
+      result.sort(
+        (a, b) => (a.distance_meters ?? Number.MAX_SAFE_INTEGER) - (b.distance_meters ?? Number.MAX_SAFE_INTEGER),
+      )
+    } else {
+      result.sort((a, b) => new Date(a.pickup_start_at).getTime() - new Date(b.pickup_start_at).getTime())
     }
-    // 'newest' sin geolocalización ya viene ordenado de la query (created_at DESC)
 
     return result
   }, [allPacks, filters])
@@ -122,8 +131,8 @@ export function usePublicPacks() {
     allPacks,
     packs,
     filters,
-    loading,
-    error,
+    loading: query.isLoading,
+    error: localError || query.error?.message || '',
     setError,
     setFilters,
   }

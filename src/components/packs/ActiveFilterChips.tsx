@@ -1,5 +1,7 @@
 'use client'
 
+import { formatMinorPrice } from '@/lib/utils/formatPrice'
+
 interface Filters {
   minPrice: number
   maxPrice: number
@@ -16,14 +18,22 @@ interface Props {
 
 export default function ActiveFilterChips({ filters, onRemove }: Props) {
   const chips: Array<{ show: boolean; label: string; key: string }> = [
-    { show: filters.minPrice > 0, label: `Desde $${(filters.minPrice / 100).toFixed(2)}`, key: 'minPrice' },
-    { show: filters.maxPrice < 100000, label: `Hasta $${(filters.maxPrice / 100).toFixed(2)}`, key: 'maxPrice' },
+    {
+      show: filters.minPrice > 0,
+      label: `Desde ${formatMinorPrice(filters.minPrice, 'CLP', 'es-CL')}`,
+      key: 'minPrice',
+    },
+    {
+      show: filters.maxPrice < 100000,
+      label: `Hasta ${formatMinorPrice(filters.maxPrice, 'CLP', 'es-CL')}`,
+      key: 'maxPrice',
+    },
     { show: !!filters.city, label: filters.city, key: 'city' },
-    { show: !!filters.location, label: `Cerca de mi (${filters.radiusKm} km)`, key: 'location' },
+    { show: !!filters.location, label: `Cerca de mí (${filters.radiusKm} km)`, key: 'location' },
     { show: filters.showAvailableOnly, label: 'Solo disponibles', key: 'showAvailableOnly' },
   ]
 
-  const visible = chips.filter((c) => c.show)
+  const visible = chips.filter((chip) => chip.show)
   if (visible.length === 0) return null
 
   return (
@@ -34,7 +44,7 @@ export default function ActiveFilterChips({ filters, onRemove }: Props) {
           className="px-3 py-1 rounded-full bg-primary/10 text-primary text-sm flex items-center gap-1"
         >
           {chip.label}
-          <button onClick={() => onRemove(chip.key)} className="hover:text-red-500">
+          <button onClick={() => onRemove(chip.key)} className="hover:text-red-500" aria-label={`Quitar ${chip.label}`}>
             &times;
           </button>
         </span>
