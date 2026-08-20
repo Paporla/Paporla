@@ -10,13 +10,7 @@ import { supabaseBrowser } from '@/lib/supabase/client'
 import PackCategoryTemplates from './packs/PackCategoryTemplates'
 import PackFormBasicInfo from './packs/PackFormBasicInfo'
 import PackFormPickupTime from './packs/PackFormPickupTime'
-import {
-  PackFormData,
-  validatePackForm,
-  getDefaultPackData,
-  packToFormData,
-  buildPackInsertData,
-} from '@/lib/utils/packForm'
+import { PackFormData, validatePackForm, getDefaultPackData, packToFormData } from '@/lib/utils/packForm'
 
 interface Pack {
   id: string
@@ -41,6 +35,10 @@ interface Props {
   pack?: Pack
   isDuplicate?: boolean
   onSuccess?: () => void
+}
+
+function chileDateTime(date: string, time: string) {
+  return `${date}T${time}:00-04:00`
 }
 
 export default function PackFormSimplified({ shopId, pack, isDuplicate = false, onSuccess }: Props) {
@@ -81,6 +79,9 @@ export default function PackFormSimplified({ shopId, pack, isDuplicate = false, 
     setSuccess('')
 
     const errors = validatePackForm(formData)
+    if (!formData.pickup_date || !formData.pickup_start_time || !formData.pickup_end_time) {
+      errors.general = 'Fecha y horario de recogida son obligatorios'
+    }
     const firstError = Object.values(errors)[0]
     if (firstError) {
       setError(firstError)
@@ -88,20 +89,40 @@ export default function PackFormSimplified({ shopId, pack, isDuplicate = false, 
       return
     }
 
-    const packData = buildPackInsertData(shopId, formData, !isEditing)
+    if (isEditing && pack) {
+      setError('La edicion de packs se activara en el siguiente paso.')
+      setLoading(false)
+      return
+    }
+
+    const pickupStart = chileDateTime(formData.pickup_date, formData.pickup_start_time)
+    const pickupEnd = chileDateTime(formData.pickup_date, formData.pickup_end_time)
+    const original = formData.original_price_cents > 0 ? formData.original_price_cents : formData.price_cents
 
     try {
-      if (isEditing && pack) {
-        const { error: err } = await supabase.from('packs').update(packData).eq('id', pack.id).eq('shop_id', shopId)
+      const { data, error: err } = await supabase.rpc('create_pack_draft', {
+        p_shop_id: shopId,
+        p_title: formData.title,
+        p_description: formData.description,
+        p_category: selectedCategory ?? 'surprise',
+        p_tags: [],
+        p_allergen_notice: '',
+        p_handling_notice: '',
+        p_price_minor: formData.price_cents,
+        p_original_price_minor: original,
+        p_total_stock: formData.total_stock,
+        p_sales_start_at: new Date().toISOString(),
+        p_pickup_start_at: pickupStart,
+        p_pickup_end_at: pickupEnd,
+        p_image_path: '',
+        p_image_gallery: [],
+      })
+      if (err) throw err
 
-        if (err) throw err
-        setSuccess('Pack actualizado correctamente')
-      } else {
-        const { error: err } = await supabase.from('packs').insert(packData)
-        if (err) throw err
-        setSuccess(isDuplicate ? 'Pack duplicado correctamente' : 'Pack creado correctamente')
-      }
+      const created = data as { pack_id?: string }
+      if (!created?.pack_id) throw new Error('No se pudo crear el pack')
 
+      setSuccess('Pack guardado como borrador. Aun no esta publicado.')
       setTimeout(() => {
         router.push('/business/packs')
         onSuccess?.()
@@ -169,7 +190,13 @@ export default function PackFormSimplified({ shopId, pack, isDuplicate = false, 
         <div className="flex gap-4 pt-4">
           <Button type="submit" className="flex-1" disabled={loading} loading={loading}>
             <Package className="w-4 h-4 mr-2" />
-            {loading ? 'Guardando...' : isEditing ? 'Actualizar Pack' : isDuplicate ? 'Duplicar Pack' : 'Crear Pack'}
+            {loading
+              ? 'Guardando...'
+              : isEditing
+                ? 'Actualizar Pack'
+                : isDuplicate
+                  ? 'Duplicar Pack'
+                  : 'Crear borrador'}
           </Button>
           <Button type="button" variant="outline" onClick={() => router.back()} className="flex-1" disabled={loading}>
             Cancelar
