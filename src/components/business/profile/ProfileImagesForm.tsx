@@ -1,7 +1,8 @@
 'use client'
 
-import { Image as ImageIcon, AlertTriangle } from 'lucide-react'
+import { Image as ImageIcon } from 'lucide-react'
 import ImageUpload from '@/components/ui/ImageUpload'
+import { supabaseBrowser } from '@/lib/supabase/client'
 
 interface ProfileImagesFormProps {
   logoUrl: string
@@ -11,11 +12,12 @@ interface ProfileImagesFormProps {
   shopId: string
 }
 
-/**
- * Formulario de imágenes del perfil de comercio.
- * Envuelve dos ImageUpload: uno para el logo y otro para la portada.
- * Usa el shopId como prefijo estable para las rutas de subida en Supabase Storage.
- */
+function toPreview(bucket: 'shop-images', stored: string) {
+  if (!stored) return null
+  if (stored.startsWith('http') || stored.startsWith('blob:')) return stored
+  return supabaseBrowser().storage.from(bucket).getPublicUrl(stored).data.publicUrl
+}
+
 export default function ProfileImagesForm({
   logoUrl,
   coverUrl,
@@ -27,33 +29,30 @@ export default function ProfileImagesForm({
     <div className="dark:bg-black/40 bg-white backdrop-blur-sm dark:border-white/10 border-gray-200 rounded-2xl p-6 lg:p-8 space-y-8">
       <h2 className="text-lg font-bold dark:text-white text-gray-900 flex items-center gap-2">
         <ImageIcon className="w-5 h-5 text-primary" />
-        Imagenes del comercio
+        Imágenes del comercio
       </h2>
 
       <ImageUpload
         bucket="shop-images"
         path={`${shopId}/logo`}
-        existingImage={logoUrl || null}
+        existingImage={toPreview('shop-images', logoUrl)}
         onUploadComplete={onLogoChange}
         onError={() => {}}
-        label="Logo del comercio"
+        label="Logo del comercio (JPEG, PNG o WebP, máx. 2 MB)"
       />
 
       <ImageUpload
         bucket="shop-images"
         path={`${shopId}/cover`}
-        existingImage={coverUrl || null}
+        existingImage={toPreview('shop-images', coverUrl)}
         onUploadComplete={onCoverChange}
         onError={() => {}}
         label="Imagen de portada"
       />
 
-      <div className="dark:bg-black/40 bg-gray-50 dark:border-white/10 border-gray-200 rounded-xl p-4">
-        <p className="text-xs dark:text-gray-500 text-gray-400 flex items-center gap-2">
-          <AlertTriangle className="w-4 h-4 text-yellow-400" />
-          Las imagenes de alta calidad aumentan las reservas un 40%. Usa fotos reales de tu local.
-        </p>
-      </div>
+      <p className="text-xs dark:text-gray-500 text-gray-400">
+        Usa fotos reales del local. El logo y la portada se verán en tu ficha pública.
+      </p>
     </div>
   )
 }
