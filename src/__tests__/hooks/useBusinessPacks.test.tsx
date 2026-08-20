@@ -18,16 +18,27 @@ function createWrapper() {
   }
 }
 
-let packChain: any, shopChain: any
+let packChain: any
+let rpc: ReturnType<typeof vi.fn>
 
 function setupMockClient() {
-  shopChain = {
-    select: vi.fn(),
-    eq: vi.fn(),
-    maybeSingle: vi.fn().mockResolvedValue({ data: { id: 'shop-1', name: 'Shop 1' }, error: null }),
-  }
-  shopChain.select.mockReturnValue(shopChain)
-  shopChain.eq.mockReturnValue(shopChain)
+  rpc = vi.fn().mockResolvedValue({
+    data: {
+      shop: {
+        id: 'shop-1',
+        name: 'Shop 1',
+        status: 'verified',
+        logo_path: null,
+        description: null,
+        address_line1: null,
+        phone_e164: null,
+        latitude: null,
+        longitude: null,
+        locality_id: null,
+      },
+    },
+    error: null,
+  })
 
   packChain = {
     select: vi.fn(),
@@ -40,11 +51,10 @@ function setupMockClient() {
   packChain.update.mockReturnValue({ eq: vi.fn().mockResolvedValue({ error: null }) })
 
   const mockFrom = vi.fn((table: string) => {
-    if (table === 'shops') return shopChain
     if (table === 'packs') return packChain
     return { select: vi.fn().mockReturnThis(), eq: vi.fn().mockReturnThis(), in: vi.fn().mockReturnThis() }
   })
-  ;(supabaseBrowser as any).mockReturnValue({ from: mockFrom })
+  ;(supabaseBrowser as any).mockReturnValue({ from: mockFrom, rpc })
 }
 
 describe('useBusinessPacks', () => {
@@ -63,8 +73,7 @@ describe('useBusinessPacks', () => {
     const { result } = renderHook(() => useBusinessPacks(), { wrapper: createWrapper() })
 
     await waitFor(() => expect(result.current.shopId).toBe('shop-1'))
-    expect(shopChain.select).toHaveBeenCalled()
-    expect(shopChain.eq).toHaveBeenCalledWith('owner_id', 'user-1')
+    expect(rpc).toHaveBeenCalledWith('get_my_shop')
   })
 
   it('fetches packs for the shop when shop is loaded', async () => {
