@@ -30,7 +30,9 @@ async function fetchShop(shopId: string): Promise<ShopWithPacks> {
   }
 
   const logoPath = (row.logo_path as string | null) ?? null
+  const coverPath = (row.cover_path as string | null) ?? null
   const logoUrl = logoPath ? supabase.storage.from('shop-images').getPublicUrl(logoPath).data.publicUrl : null
+  const coverUrl = coverPath ? supabase.storage.from('shop-images').getPublicUrl(coverPath).data.publicUrl : null
 
   const shop = {
     id: String(row.id),
@@ -40,6 +42,7 @@ async function fetchShop(shopId: string): Promise<ShopWithPacks> {
     city: (row.locality_name as string | null) ?? (row.city as string | null) ?? '',
     phone: (row.phone_e164 as string | null) ?? null,
     logo_url: logoUrl,
+    cover_url: coverUrl,
     verified: true,
     rating: row.rating != null ? Number(row.rating) : null,
   } as Shop

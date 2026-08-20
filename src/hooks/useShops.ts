@@ -21,22 +21,37 @@ async function fetchShops(): Promise<Shop[]> {
 
   if (error) throw new Error(error.message)
 
-  const byId = new Map<string, Shop>()
+  const ids: string[] = []
   for (const row of (data ?? []) as Record<string, unknown>[]) {
     const id = String(row.shop_id)
-    if (byId.has(id)) continue
-    byId.set(id, {
-      id,
-      name: String(row.shop_name ?? ''),
+    if (!ids.includes(id)) ids.push(id)
+  }
+
+  const shops: Shop[] = []
+  for (const id of ids) {
+    const { data: payload } = await supabase.rpc('get_public_shop', { p_shop_id: id })
+    const raw = (payload as { shop?: Record<string, unknown> } | Record<string, unknown> | null) ?? null
+    const row =
+      raw && typeof raw === 'object' && 'shop' in raw && raw.shop
+        ? (raw.shop as Record<string, unknown>)
+        : (raw as Record<string, unknown> | null)
+    if (!row?.id) continue
+
+    const logoPath = (row.logo_path as string | null) ?? null
+    const coverPath = (row.cover_path as string | null) ?? null
+    shops.push({
+      id: String(row.id),
+      name: String(row.name ?? ''),
       description: (row.description as string | null) ?? null,
-      city: String(row.locality_name ?? ''),
-      cover_url: null,
-      rating: row.shop_rating != null ? Number(row.shop_rating) : 0,
+      city: (row.locality_name as string | null) ?? (row.city as string | null) ?? '',
+      cover_url: coverPath ? supabase.storage.from('shop-images').getPublicUrl(coverPath).data.publicUrl : null,
+      logo_url: logoPath ? supabase.storage.from('shop-images').getPublicUrl(logoPath).data.publicUrl : null,
+      rating: row.rating != null ? Number(row.rating) : 0,
       verified: true,
     } as Shop)
   }
 
-  return [...byId.values()]
+  return shops
 }
 
 export function useShops() {
