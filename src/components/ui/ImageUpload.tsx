@@ -86,13 +86,15 @@ export default function ImageUpload({
   const handleRemove = () => {
     setPreview(null)
     onUploadComplete('')
-    onFileChosen?.(undefined as unknown as File)
     if (fileInputRef.current) fileInputRef.current.value = ''
   }
+
+  const isLocalPreview = !!preview && (preview.startsWith('blob:') || preview.startsWith('data:'))
 
   return (
     <div className="space-y-2">
       <label className="block text-sm font-medium dark:text-gray-400 text-gray-600">{label}</label>
+
       <div className="relative">
         <input
           ref={fileInputRef}
@@ -102,6 +104,7 @@ export default function ImageUpload({
           className="hidden"
           disabled={uploading}
         />
+
         <AnimatePresence mode="wait">
           {preview ? (
             <motion.div
@@ -112,13 +115,18 @@ export default function ImageUpload({
               className="relative group"
             >
               <div className="relative w-full h-40 rounded-xl overflow-hidden dark:bg-gray-800 bg-gray-100">
-                <Image
-                  src={preview}
-                  alt="Preview"
-                  fill
-                  className="object-cover"
-                  sizes="(max-width: 768px) 100vw, 400px"
-                />
+                {isLocalPreview ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={preview} alt="Preview" className="absolute inset-0 h-full w-full object-cover" />
+                ) : (
+                  <Image
+                    src={preview}
+                    alt="Preview"
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 768px) 100vw, 400px"
+                  />
+                )}
                 <div className="absolute inset-0 dark:bg-black/50 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
                   <button
                     type="button"
@@ -131,12 +139,17 @@ export default function ImageUpload({
                   <button
                     type="button"
                     onClick={handleRemove}
-                    className="p-2 rounded-lg bg-red-500/20 hover:bg-red-500/30"
+                    className="p-2 rounded-lg bg-red-500/20 hover:bg-red-500/30 transition-colors"
                   >
                     <X className="w-5 h-5 text-red-400" />
                   </button>
                 </div>
               </div>
+              {uploading && (
+                <div className="absolute inset-0 dark:bg-black/70 bg-black/50 rounded-xl flex items-center justify-center">
+                  <Loader2 className="w-8 h-8 text-primary animate-spin" />
+                </div>
+              )}
             </motion.div>
           ) : (
             <motion.div
@@ -145,7 +158,7 @@ export default function ImageUpload({
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.9 }}
               onClick={() => fileInputRef.current?.click()}
-              className="w-full h-40 rounded-xl border-2 border-dashed dark:border-gray-600 border-gray-300 dark:bg-gray-800/30 bg-gray-100 hover:border-primary/50 cursor-pointer flex flex-col items-center justify-center gap-2"
+              className="w-full h-40 rounded-xl border-2 border-dashed dark:border-gray-600 border-gray-300 dark:bg-gray-800/30 bg-gray-100 hover:border-primary/50 dark:hover:bg-gray-700/40 hover:bg-gray-200 transition-all cursor-pointer flex flex-col items-center justify-center gap-2"
             >
               {uploading ? (
                 <Loader2 className="w-8 h-8 text-primary animate-spin" />
