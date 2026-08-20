@@ -1,7 +1,6 @@
 ﻿'use client'
 
-import { useState, useEffect, useRef } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState, useEffect } from 'react'
 import { useAuth } from '@/hooks/useAuth'
 import { supabaseBrowser } from '@/lib/supabase/client'
 import Toast from '@/components/ui/Toast'
@@ -20,6 +19,9 @@ interface HoursData {
 }
 
 const DAYS = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo']
+
+const CHILE_MARKET_ID = '10000000-0000-4000-8000-000000000001'
+const SANTIAGO_LOCALITY_ID = '10000000-0000-4000-8000-000000000101'
 
 interface ShopData {
   id: string
@@ -42,7 +44,6 @@ interface ShopData {
 }
 
 export default function BusinessProfilePage() {
-  const router = useRouter()
   const { user } = useAuth()
   const supabase = supabaseBrowser()
   const [loading, setLoading] = useState(true)
@@ -53,15 +54,14 @@ export default function BusinessProfilePage() {
   const [saving, setSaving] = useState(false)
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null)
   const [isSaving, setIsSaving] = useState(false)
-  const autoSaveRef = useRef<NodeJS.Timeout>()
 
   const [formData, setFormData] = useState({
     name: '',
     description: '',
     category: '',
     address: '',
-    city: '',
-    country: 'VE',
+    city: 'Santiago',
+    country: 'CL',
     latitude: '',
     longitude: '',
     phone: '',
@@ -84,49 +84,62 @@ export default function BusinessProfilePage() {
     if (!user?.id) return
 
     const loadShop = async () => {
-      const { data } = await supabase.from('shops').select('*').eq('owner_id', user.id).maybeSingle()
-      if (data) {
-        setShop(data)
-        setFormData({
-          name: data.name ?? '',
-          description: data.description ?? '',
-          category: data.category ?? '',
-          address: data.address ?? '',
-          city: data.city ?? '',
-          country: data.country ?? 'VE',
-          latitude: data.latitude ? data.latitude.toString() : '',
-          longitude: data.longitude ? data.longitude.toString() : '',
-          phone: data.phone ?? '',
-          website: data.website ?? '',
-          instagram: data.instagram ?? '',
-          logoUrl: data.logo_url ?? '',
-          coverUrl: data.cover_url ?? '',
-          verified: data.verified ?? false,
-        })
-        if (data.hours) {
-          try {
-            setHours((prev) => ({ ...prev, ...JSON.parse(data.hours ?? '{}') }))
-          } catch {}
+      const { data, error } = await supabase.rpc('get_my_shop')
+      if (error) {
+        setToast({ message: error.message, type: 'error' })
+        setLoading(false)
+        return
+      }
+
+      const row = (data as { shop?: Record<string, unknown> | null } | null)?.shop
+      if (row && typeof row.id === 'string') {
+        const mapped: ShopData = {
+          id: row.id,
+          name: String(row.name ?? ''),
+          description: (row.description as string | null) ?? null,
+          category: (row.category as string | null) ?? null,
+          address: (row.address_line1 as string | null) ?? null,
+          city: 'Santiago',
+          country: 'CL',
+          latitude: (row.latitude as number | null) ?? null,
+          longitude: (row.longitude as number | null) ?? null,
+          phone: (row.phone_e164 as string | null) ?? null,
+          website: (row.website_url as string | null) ?? null,
+          instagram: (row.instagram_handle as string | null) ?? null,
+          logo_url: null,
+          cover_url: null,
+          hours: null,
+          verified: row.status === 'verified',
+          owner_id: user.id,
         }
+        setShop(mapped)
+        setFormData({
+          name: mapped.name,
+          description: mapped.description ?? '',
+          category: mapped.category ?? '',
+          address: mapped.address ?? '',
+          city: 'Santiago',
+          country: 'CL',
+          latitude: mapped.latitude ? String(mapped.latitude) : '',
+          longitude: mapped.longitude ? String(mapped.longitude) : '',
+          phone: mapped.phone ?? '',
+          website: mapped.website ?? '',
+          instagram: mapped.instagram ?? '',
+          logoUrl: '',
+          coverUrl: '',
+          verified: mapped.verified,
+        })
       }
       setLoading(false)
     }
 
-    loadShop()
+    void loadShop()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user])
-
-  useEffect(() => {
-    return () => {
-      if (autoSaveRef.current) clearTimeout(autoSaveRef.current)
-    }
-  }, [])
 
   const updateForm = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }))
     setIsDirty(true)
-    if (autoSaveRef.current) clearTimeout(autoSaveRef.current)
-    autoSaveRef.current = setTimeout(() => handleSave('Cambios guardados'), 3000)
   }
 
   const handleSave = async (toastMessage?: string) => {
@@ -134,34 +147,56 @@ export default function BusinessProfilePage() {
     setIsSaving(true)
 
     try {
-      const shopData = {
-        owner_id: user!.id,
-        name: formData.name,
-        description: formData.description ?? null,
-        category: formData.category ?? null,
-        address: formData.address ?? null,
-        city: formData.city ?? null,
-        country: formData.country,
-        latitude: formData.latitude ? parseFloat(formData.latitude) : null,
-        longitude: formData.longitude ? parseFloat(formData.longitude) : null,
-        phone: formData.phone ?? null,
-        website: formData.website ?? null,
-        instagram: formData.instagram ?? null,
-        logo_url: formData.logoUrl ?? null,
-        cover_url: formData.coverUrl ?? null,
-        hours: JSON.stringify(hours),
-      }
-
       if (shop?.id) {
-        const { error } = await supabase.from('shops').update(shopData).eq('id', shop.id)
-        if (error) throw error
-      } else {
-        const { data: newShop, error } = await supabase.from('shops').insert(shopData).select().single()
-        if (error) throw error
-        setShop(newShop)
+        setToast({
+          message: 'La edición completa del comercio se activará en el siguiente paso.',
+          type: 'error',
+        })
+        return
       }
 
-      const msg = typeof toastMessage === 'string' ? toastMessage : 'Perfil actualizado correctamente'
+      if (!formData.name.trim()) {
+        setToast({ message: 'El nombre del comercio es obligatorio.', type: 'error' })
+        return
+      }
+
+      const { data, error } = await supabase.rpc('create_own_shop', {
+        p_market_id: CHILE_MARKET_ID,
+        p_locality_id: SANTIAGO_LOCALITY_ID,
+        p_name: formData.name,
+        p_description: formData.description,
+        p_category: formData.category,
+        p_phone_e164: formData.phone,
+        p_address_line1: formData.address,
+        p_address_line2: '',
+        p_postal_code: '',
+      })
+      if (error) throw error
+
+      const created = data as { shop_id?: string; success?: boolean }
+      if (!created?.shop_id) throw new Error('No se pudo crear el comercio')
+
+      setShop({
+        id: created.shop_id,
+        name: formData.name,
+        description: formData.description || null,
+        category: formData.category || null,
+        address: formData.address || null,
+        city: 'Santiago',
+        country: 'CL',
+        latitude: null,
+        longitude: null,
+        phone: formData.phone || null,
+        website: formData.website || null,
+        instagram: formData.instagram || null,
+        logo_url: null,
+        cover_url: null,
+        hours: null,
+        verified: false,
+        owner_id: user!.id,
+      })
+
+      const msg = typeof toastMessage === 'string' ? toastMessage : 'Comercio creado en borrador'
       setToast({ message: msg, type: 'success' })
       setIsDirty(false)
     } catch (err: unknown) {
@@ -179,8 +214,8 @@ export default function BusinessProfilePage() {
         description: shop.description ?? '',
         category: shop.category ?? '',
         address: shop.address ?? '',
-        city: shop.city ?? '',
-        country: shop.country ?? 'VE',
+        city: shop.city ?? 'Santiago',
+        country: shop.country ?? 'CL',
         latitude: shop.latitude ? shop.latitude.toString() : '',
         longitude: shop.longitude ? shop.longitude.toString() : '',
         phone: shop.phone ?? '',
@@ -190,24 +225,13 @@ export default function BusinessProfilePage() {
         coverUrl: shop.cover_url ?? '',
         verified: shop.verified ?? false,
       })
-      if (shop.hours) {
-        try {
-          setHours((prev) => ({ ...prev, ...JSON.parse(shop.hours ?? '{}') }))
-        } catch {}
-      }
     }
     setIsDirty(false)
     setToast({ message: 'Cambios descartados', type: 'success' })
   }
 
   const handleDelete = async () => {
-    if (!shop?.id) return
-    const { error } = await supabase.from('shops').delete().eq('id', shop.id)
-    if (error) {
-      setToast({ message: error.message, type: 'error' })
-    } else {
-      router.push('/business')
-    }
+    setToast({ message: 'Eliminar comercio no está disponible en esta versión.', type: 'error' })
   }
 
   if (loading) return <LoadingSkeleton />
@@ -216,7 +240,6 @@ export default function BusinessProfilePage() {
     return <ProfilePreview formData={formData} hours={hours} onBack={() => setPreviewMode(false)} />
   }
 
-  // Porcentaje basado en campos esenciales del perfil (excluye opcionales y admin)
   const completionFields = ['name', 'description', 'category', 'address', 'city', 'phone', 'logoUrl', 'coverUrl']
   const filled = completionFields.filter((f) => formData[f as keyof typeof formData]).length
   const completionPercentage = Math.round((filled / completionFields.length) * 100)
@@ -247,7 +270,7 @@ export default function BusinessProfilePage() {
             coverUrl={formData.coverUrl}
             onLogoChange={(url) => updateForm('logoUrl', url)}
             onCoverChange={(url) => updateForm('coverUrl', url)}
-            shopId={shop!.id}
+            shopId={shop?.id ?? ''}
           />
         )}
 

@@ -18,22 +18,11 @@ function createWrapper() {
   }
 }
 
-let shopChain: any
+let rpc: ReturnType<typeof vi.fn>
 
 function setupMockClient() {
-  shopChain = {
-    select: vi.fn(),
-    eq: vi.fn(),
-    maybeSingle: vi.fn().mockResolvedValue({ data: null, error: null }),
-  }
-  shopChain.select.mockReturnValue(shopChain)
-  shopChain.eq.mockReturnValue(shopChain)
-  ;(supabaseBrowser as any).mockReturnValue({
-    from: vi.fn((table: string) => {
-      if (table === 'shops') return shopChain
-      return {}
-    }),
-  })
+  rpc = vi.fn().mockResolvedValue({ data: null, error: null })
+  ;(supabaseBrowser as any).mockReturnValue({ rpc })
 }
 
 describe('useBusinessShop', () => {
@@ -43,19 +32,39 @@ describe('useBusinessShop', () => {
     mockUseAuth.mockReturnValue({ user: { id: 'user-1', name: 'Test' } })
   })
 
-  it('queries shops by owner_id when user is present', async () => {
-    const shopData = { id: 'shop-1', name: 'Mi Tienda', verified: true }
-    shopChain.maybeSingle.mockResolvedValue({ data: shopData, error: null })
+  it('loads shop via get_my_shop when user is present', async () => {
+    rpc.mockResolvedValue({
+      data: {
+        shop: {
+          id: 'shop-1',
+          name: 'Mi Tienda',
+          status: 'verified',
+          logo_path: null,
+          description: null,
+          address_line1: null,
+          phone_e164: null,
+          latitude: null,
+          longitude: null,
+          locality_id: '10000000-0000-4000-8000-000000000101',
+        },
+      },
+      error: null,
+    })
 
     const { result } = renderHook(() => useBusinessShop(), { wrapper: createWrapper() })
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
-    expect(shopChain.eq).toHaveBeenCalledWith('owner_id', 'user-1')
-    expect(result.current.data).toEqual(shopData)
+    expect(rpc).toHaveBeenCalledWith('get_my_shop')
+    expect(result.current.data).toMatchObject({
+      id: 'shop-1',
+      name: 'Mi Tienda',
+      verified: true,
+      status: 'verified',
+    })
   })
 
   it('returns null when no shop exists for user', async () => {
-    shopChain.maybeSingle.mockResolvedValue({ data: null, error: null })
+    rpc.mockResolvedValue({ data: null, error: null })
 
     const { result } = renderHook(() => useBusinessShop(), { wrapper: createWrapper() })
 
@@ -72,7 +81,7 @@ describe('useBusinessShop', () => {
   })
 
   it('throws on query error', async () => {
-    shopChain.maybeSingle.mockResolvedValue({ data: null, error: { message: 'DB error' } })
+    rpc.mockResolvedValue({ data: null, error: { message: 'DB error' } })
 
     const { result } = renderHook(() => useBusinessShop(), { wrapper: createWrapper() })
 
