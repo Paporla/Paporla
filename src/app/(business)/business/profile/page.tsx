@@ -57,6 +57,23 @@ function storagePath(value: string, fallback: string | null) {
   return fallback ?? ''
 }
 
+async function persistHours(client: ReturnType<typeof supabaseBrowser>, shopId: string, hoursMap: HoursData) {
+  for (let i = 0; i < 7; i++) {
+    const day = DAYS[i]
+    const h = hoursMap[day]
+    const closed = !!h?.closed
+    const { error } = await client.rpc('set_shop_hour', {
+      p_shop_id: shopId,
+      p_weekday: i + 1,
+      p_sequence: 1,
+      p_opens_at: closed ? '00:00' : h?.open || '09:00',
+      p_closes_at: closed ? '00:00' : h?.close || '18:00',
+      p_is_closed: closed,
+    })
+    if (error) throw error
+  }
+}
+
 export default function BusinessProfilePage() {
   const { user } = useAuth()
   const supabase = supabaseBrowser()
@@ -105,7 +122,12 @@ export default function BusinessProfilePage() {
         return
       }
 
-      const row = (data as { shop?: Record<string, unknown> | null } | null)?.shop
+      const payload = data as {
+        shop?: Record<string, unknown> | null
+        hours?: { weekday: number; opens_at: string | null; closes_at: string | null; is_closed: boolean }[] | null
+      } | null
+
+      const row = payload?.shop
       if (row && typeof row.id === 'string') {
         const mapped: ShopData = {
           id: row.id,
@@ -145,6 +167,25 @@ export default function BusinessProfilePage() {
           coverUrl: mapped.cover_path ?? '',
           verified: mapped.verified,
         })
+      }
+
+      const hoursRows = payload?.hours
+      if (hoursRows?.length) {
+        const next: HoursData = {}
+        DAYS.forEach((d) => {
+          next[d] = { open: '09:00', close: '18:00', closed: d === 'Domingo' }
+        })
+        hoursRows.forEach((h) => {
+          const idx = h.weekday === 0 ? 6 : h.weekday - 1
+          const day = DAYS[idx]
+          if (!day) return
+          next[day] = {
+            open: h.opens_at ? String(h.opens_at).slice(0, 5) : '09:00',
+            close: h.closes_at ? String(h.closes_at).slice(0, 5) : '18:00',
+            closed: !!h.is_closed,
+          }
+        })
+        setHours(next)
       }
       setLoading(false)
     }
@@ -190,6 +231,8 @@ export default function BusinessProfilePage() {
         })
         if (error) throw error
 
+        await persistHours(supabase, shop.id, hours)
+
         setShop({
           ...shop,
           name: formData.name,
@@ -205,7 +248,7 @@ export default function BusinessProfilePage() {
           cover_path: coverPath || null,
         })
 
-        const msg = typeof toastMessage === 'string' ? toastMessage : 'Perfil actualizado'
+        const msg = typeof toastMessage === 'string' ? toastMessage : 'Perfil y horarios actualizados'
         setToast({ message: msg, type: 'success' })
         setIsDirty(false)
         return
@@ -226,6 +269,8 @@ export default function BusinessProfilePage() {
 
       const created = data as { shop_id?: string; success?: boolean }
       if (!created?.shop_id) throw new Error('No se pudo crear el comercio')
+
+      await persistHours(supabase, created.shop_id, hours)
 
       setShop({
         id: created.shop_id,
