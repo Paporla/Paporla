@@ -7,46 +7,38 @@ interface Props {
   params: Promise<{ id: string }>
 }
 
+async function loadShop(id: string) {
+  const supabase = await createClient()
+  const { data, error } = await supabase.rpc('get_public_shop', { p_shop_id: id })
+  if (error || !data) return null
+  return data
+}
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params
-  const supabase = await createClient()
+  const data = await loadShop(id)
+  const row = (
+    data && typeof data === 'object' && 'shop' in (data as object)
+      ? (data as { shop: Record<string, unknown> }).shop
+      : data
+  ) as Record<string, unknown> | null
 
-  const { data: shop } = await supabase
-    .from('shops')
-    .select('name, description, logo_url, city')
-    .eq('id', id)
-    .maybeSingle()
-
-  if (!shop) {
+  if (!row) {
     return { title: 'Comercio no encontrado', description: 'Este comercio no está disponible.' }
   }
 
-  const description =
-    shop.description?.slice(0, 160) || `Descubre los packs de ${shop.name} en ${shop.city || 'Paporla'}.`
+  const name = String(row.name ?? 'Comercio')
+  const description = String(row.description ?? '').slice(0, 160) || `Descubre los packs de ${name} en Paporla.`
 
   return {
-    title: `${shop.name} | Paporla`,
+    title: `${name} | Paporla`,
     description,
-    openGraph: {
-      title: `${shop.name} | Paporla`,
-      description,
-      images: shop.logo_url ? [{ url: shop.logo_url, width: 512, height: 512, alt: shop.name }] : [],
-    },
-    twitter: {
-      title: `${shop.name} | Paporla`,
-      description,
-      images: shop.logo_url ? [shop.logo_url] : [],
-    },
   }
 }
 
 export default async function ShopDetailPage({ params }: Props) {
   const { id } = await params
-  const supabase = await createClient()
-
-  const { data: shop } = await supabase.from('shops').select('*').eq('id', id).maybeSingle()
-
-  if (!shop) notFound()
-
-  return <ShopDetailClient shopId={id} initialShop={shop} />
+  const data = await loadShop(id)
+  if (!data) notFound()
+  return <ShopDetailClient shopId={id} initialShop={data as Record<string, unknown>} />
 }
