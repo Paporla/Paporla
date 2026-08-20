@@ -5,7 +5,7 @@ import { motion } from 'framer-motion'
 import { Package, Edit, Trash2, CheckCircle, EyeOff, AlertCircle, Clock, Copy } from 'lucide-react'
 import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
-import { formatPrice } from '@/lib/utils/formatPrice'
+import { formatMinorPrice } from '@/lib/utils/formatPrice'
 import { formatDate } from '@/lib/utils/formatDate'
 import type { BusinessPack } from './useBusinessPacks'
 
@@ -56,7 +56,9 @@ export default function PackCard({ pack, index, deleting, onDeleteClick }: Props
             )}
 
             <div className="flex flex-wrap gap-4 text-sm">
-              <span className="text-primary font-semibold text-lg">{formatPrice(pack.price_cents)}</span>
+              <span className="text-primary font-semibold text-lg">
+                {formatMinorPrice(pack.price_cents, 'CLP', 'es-CL')}
+              </span>
               <span className="text-gray-500 flex items-center gap-1">
                 <Package className="w-3 h-3" /> Stock: {pack.remaining_stock}/{pack.total_stock}
               </span>

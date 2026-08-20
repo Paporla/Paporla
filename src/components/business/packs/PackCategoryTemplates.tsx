@@ -9,8 +9,8 @@ const CATEGORIES = [
     template: {
       title: 'Pack Panaderia Artesanal',
       description: 'Pan recien horneado, croissants y pasteleria',
-      price_cents: 1999,
-      original_price_cents: 5999,
+      price_cents: 3990,
+      original_price_cents: 7990,
     },
   },
   {
@@ -19,8 +19,8 @@ const CATEGORIES = [
     template: {
       title: 'Pack Sushi Sorpresa',
       description: 'Sushi variado del dia',
-      price_cents: 3999,
-      original_price_cents: 12999,
+      price_cents: 7990,
+      original_price_cents: 15990,
     },
   },
   {
@@ -29,8 +29,8 @@ const CATEGORIES = [
     template: {
       title: 'Pack Pizza Familiar',
       description: 'Pizza grande 4 quesos o pepperoni',
-      price_cents: 4999,
-      original_price_cents: 14999,
+      price_cents: 5990,
+      original_price_cents: 12990,
     },
   },
   {
@@ -39,8 +39,8 @@ const CATEGORIES = [
     template: {
       title: 'Pack Cafe de Especialidad',
       description: 'Cafe artesanal + croissant',
-      price_cents: 1499,
-      original_price_cents: 4499,
+      price_cents: 2990,
+      original_price_cents: 5990,
     },
   },
   {
@@ -49,8 +49,8 @@ const CATEGORIES = [
     template: {
       title: 'Pack Bowl Vegano',
       description: 'Ensalada fresca con quinoa y vegetales',
-      price_cents: 2499,
-      original_price_cents: 7999,
+      price_cents: 4990,
+      original_price_cents: 9990,
     },
   },
 ]
