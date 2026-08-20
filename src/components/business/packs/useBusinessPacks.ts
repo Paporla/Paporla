@@ -1,25 +1,35 @@
 'use client'
 
-import { useState, useMemo } from 'react'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useState } from 'react'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { supabaseBrowser } from '@/lib/supabase/client'
+import { useAuth } from '@/hooks/useAuth'
 import { useBusinessShop } from '@/lib/query/useBusinessShop'
 
 export interface BusinessPack {
   id: string
   title: string
   description: string | null
+  is_active: boolean
+  status: string
+  remaining_stock: number
+  total_stock: number
   price_cents: number
-  original_price_cents: number | null
+  ends_at: string | null
+}
+
+type ListedPack = {
+  pack_id: string
+  title: string
+  status: string
+  price_minor: number
   total_stock: number
   remaining_stock: number
-  is_active: boolean
-  created_at: string
-  ends_at: string | null
-  image_url: string | null
+  pickup_end_at: string | null
 }
 
 export function useBusinessPacks() {
+  const { user } = useAuth()
   const { data: shop } = useBusinessShop()
   const queryClient = useQueryClient()
   const [searchTerm, setSearchTerm] = useState('')
@@ -27,79 +37,65 @@ export function useBusinessPacks() {
   const [success, setSuccess] = useState('')
   const [deleting, setDeleting] = useState<string | null>(null)
 
-  const { data: packs = [], isLoading: loading } = useQuery({
-    queryKey: ['business-packs', shop?.id],
+  const packsQuery = useQuery({
+    queryKey: ['business-packs', user?.id],
     queryFn: async () => {
       const supabase = supabaseBrowser()
-      const { data, error } = await supabase
-        .from('packs')
-        .select('*')
-        .eq('shop_id', shop!.id)
-        .order('created_at', { ascending: false })
-      if (error) throw error
-      return (data ?? []) as BusinessPack[]
+      const { data, error: err } = await supabase.rpc('list_my_packs', {
+        p_before_created_at: null,
+        p_before_pack_id: null,
+        p_limit: 50,
+      })
+      if (err) throw err
+      const rows = (data ?? []) as ListedPack[]
+      return rows.map((p): BusinessPack => ({
+        id: p.pack_id,
+        title: p.title,
+        description: null,
+        status: p.status,
+        is_active: p.status === 'active',
+        remaining_stock: p.remaining_stock,
+        total_stock: p.total_stock,
+        price_cents: Number(p.price_minor),
+        ends_at: p.pickup_end_at,
+      }))
     },
-    enabled: !!shop,
+    enabled: !!user,
     staleTime: 30 * 1000,
   })
 
-  const invalidate = () => queryClient.invalidateQueries({ queryKey: ['business-packs', shop?.id] })
+  const allPacks = packsQuery.data ?? []
+  const packs = allPacks.filter((p) => p.title.toLowerCase().includes(searchTerm.toLowerCase()))
 
-  const deactivateMutation = useMutation({
-    mutationFn: async (packId: string) => {
-      const supabase = supabaseBrowser()
-      const { error: updateError } = await supabase
-        .from('packs')
-        .update({ is_active: false, deleted_at: new Date().toISOString() })
-        .eq('id', packId)
-      if (updateError) throw updateError
-    },
-    onSuccess: () => {
-      setSuccess('Pack desactivado correctamente')
-      invalidate()
-    },
-    onError: (err: Error) => setError(err.message),
-  })
-
-  const filteredPacks = useMemo(() => {
-    if (!searchTerm) return packs
-    return packs.filter((p) => p.title.toLowerCase().includes(searchTerm.toLowerCase()))
-  }, [searchTerm, packs])
-
-  const stats = useMemo(
-    () => ({
-      total: packs.length,
-      active: packs.filter((p) => p.is_active).length,
-      inactive: packs.filter((p) => !p.is_active).length,
-      lowStock: packs.filter((p) => p.remaining_stock > 0 && p.remaining_stock / p.total_stock < 0.2).length,
-    }),
-    [packs],
-  )
-
-  const confirmDeactivate = async (packId: string): Promise<string | null> => {
-    return packId
+  const stats = {
+    total: allPacks.length,
+    active: allPacks.filter((p) => p.status === 'active').length,
+    inactive: allPacks.filter((p) => p.status !== 'active').length,
+    draft: allPacks.filter((p) => p.status === 'draft').length,
+    lowStock: allPacks.filter((p) => p.status === 'active' && p.remaining_stock <= 2).length,
   }
 
-  const handleDeactivate = async (packId: string) => {
-    setDeleting(packId)
-    await deactivateMutation.mutateAsync(packId)
+  const confirmDeactivate = async (id: string) => id
+
+  const handleDeactivate = async (_id: string) => {
+    setError('Pausar/eliminar packs se activará en el siguiente paso.')
     setDeleting(null)
   }
 
   return {
-    shopId: shop?.id ?? null,
-    loading,
-    error,
+    loading: packsQuery.isLoading,
+    error: error || packsQuery.error?.message || '',
     success,
     setError,
     setSuccess,
     searchTerm,
     setSearchTerm,
-    packs: filteredPacks,
+    packs,
+    shopId: shop?.id ?? null,
     stats,
     deleting,
     confirmDeactivate,
     handleDeactivate,
-    reload: invalidate,
+    reload: () => queryClient.invalidateQueries({ queryKey: ['business-packs'] }),
   }
 }

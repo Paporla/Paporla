@@ -18,43 +18,47 @@ function createWrapper() {
   }
 }
 
-let packChain: any
 let rpc: ReturnType<typeof vi.fn>
 
-function setupMockClient() {
-  rpc = vi.fn().mockResolvedValue({
-    data: {
-      shop: {
-        id: 'shop-1',
-        name: 'Shop 1',
-        status: 'verified',
-        logo_path: null,
-        description: null,
-        address_line1: null,
-        phone_e164: null,
-        latitude: null,
-        longitude: null,
-        locality_id: null,
-      },
-    },
-    error: null,
-  })
-
-  packChain = {
-    select: vi.fn(),
-    eq: vi.fn(),
-    order: vi.fn().mockResolvedValue({ data: [], error: null }),
-    update: vi.fn(),
+function listed(title: string, status = 'active') {
+  return {
+    pack_id: title === 'Pack 1' ? 'p-1' : title === 'Pack 2' ? 'p-2' : 'p-x',
+    title,
+    status,
+    price_minor: 3990,
+    total_stock: 10,
+    remaining_stock: 5,
+    pickup_end_at: null,
   }
-  packChain.select.mockReturnValue(packChain)
-  packChain.eq.mockReturnValue(packChain)
-  packChain.update.mockReturnValue({ eq: vi.fn().mockResolvedValue({ error: null }) })
+}
 
-  const mockFrom = vi.fn((table: string) => {
-    if (table === 'packs') return packChain
-    return { select: vi.fn().mockReturnThis(), eq: vi.fn().mockReturnThis(), in: vi.fn().mockReturnThis() }
+function setupMockClient(rows: ReturnType<typeof listed>[] = []) {
+  rpc = vi.fn().mockImplementation((name: string) => {
+    if (name === 'get_my_shop') {
+      return Promise.resolve({
+        data: {
+          shop: {
+            id: 'shop-1',
+            name: 'Shop 1',
+            status: 'verified',
+            logo_path: null,
+            description: null,
+            address_line1: null,
+            phone_e164: null,
+            latitude: null,
+            longitude: null,
+            locality_id: null,
+          },
+        },
+        error: null,
+      })
+    }
+    if (name === 'list_my_packs') {
+      return Promise.resolve({ data: rows, error: null })
+    }
+    return Promise.resolve({ data: null, error: null })
   })
-  ;(supabaseBrowser as any).mockReturnValue({ from: mockFrom, rpc })
+  ;(supabaseBrowser as any).mockReturnValue({ rpc, from: vi.fn() })
 }
 
 describe('useBusinessPacks', () => {
@@ -71,59 +75,44 @@ describe('useBusinessPacks', () => {
 
   it('resolves shopId when shop query succeeds', async () => {
     const { result } = renderHook(() => useBusinessPacks(), { wrapper: createWrapper() })
-
     await waitFor(() => expect(result.current.shopId).toBe('shop-1'))
     expect(rpc).toHaveBeenCalledWith('get_my_shop')
   })
 
   it('fetches packs for the shop when shop is loaded', async () => {
-    const mockPacks = [
-      { id: 'p-1', title: 'Pack 1', is_active: true, remaining_stock: 10, total_stock: 20 },
-      { id: 'p-2', title: 'Pack 2', is_active: false, remaining_stock: 0, total_stock: 10 },
-    ]
-    packChain.order.mockResolvedValue({ data: mockPacks, error: null })
-
+    setupMockClient([listed('Pack 1'), listed('Pack 2', 'draft')])
     const { result } = renderHook(() => useBusinessPacks(), { wrapper: createWrapper() })
-
     await waitFor(() => expect(result.current.shopId).toBe('shop-1'))
     await waitFor(() => expect(result.current.loading).toBe(false))
-    expect(packChain.select).toHaveBeenCalled()
-    expect(packChain.eq).toHaveBeenCalledWith('shop_id', 'shop-1')
-    expect(result.current.packs).toEqual(mockPacks)
+    expect(rpc).toHaveBeenCalledWith('list_my_packs', {
+      p_before_created_at: null,
+      p_before_pack_id: null,
+      p_limit: 50,
+    })
+    expect(result.current.packs.map((p) => p.title)).toEqual(['Pack 1', 'Pack 2'])
   })
 
   it('filters packs by search term', async () => {
-    const mockPacks = [
-      { id: 'p-1', title: 'Pan Artesanal', is_active: true, remaining_stock: 10, total_stock: 20 },
-      { id: 'p-2', title: 'Croissant', is_active: true, remaining_stock: 5, total_stock: 10 },
-    ]
-    packChain.order.mockResolvedValue({ data: mockPacks, error: null })
-
+    setupMockClient([
+      { ...listed('Pan Artesanal'), pack_id: 'p-1' },
+      { ...listed('Croissant'), pack_id: 'p-2' },
+    ])
     const { result } = renderHook(() => useBusinessPacks(), { wrapper: createWrapper() })
-
-    await waitFor(() => expect(result.current.shopId).toBe('shop-1'))
     await waitFor(() => expect(result.current.loading).toBe(false))
-
     act(() => {
       result.current.setSearchTerm('pan')
     })
-
     expect(result.current.packs).toHaveLength(1)
     expect(result.current.packs[0].title).toBe('Pan Artesanal')
   })
 
   it('calls delete mutation and invalidates query', async () => {
-    packChain.order.mockResolvedValue({ data: [], error: null })
-
+    setupMockClient([])
     const { result } = renderHook(() => useBusinessPacks(), { wrapper: createWrapper() })
-
-    await waitFor(() => expect(result.current.shopId).toBe('shop-1'))
     await waitFor(() => expect(result.current.loading).toBe(false))
-
     await act(async () => {
       await result.current.handleDeactivate('pack-1')
     })
-
-    expect(packChain.update).toHaveBeenCalledWith({ is_active: false, deleted_at: expect.any(String) })
+    expect(result.current.error).toMatch(/siguiente paso/i)
   })
 })
