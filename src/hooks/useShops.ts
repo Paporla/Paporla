@@ -3,21 +3,40 @@
 import { useQuery } from '@tanstack/react-query'
 import { supabaseBrowser } from '@/lib/supabase/client'
 import type { Shop } from '@/lib/supabase/types'
+import { DEFAULT_MARKET } from '@/lib/constants/markets'
 
 const SHOPS_QUERY_KEY = 'shops'
-const supabase = supabaseBrowser()
 
 async function fetchShops(): Promise<Shop[]> {
-  const { data, error } = await supabase
-    .from('shops')
-    .select('*')
-    .eq('verified', true)
-    .eq('banned', false)
-    .is('deleted_at', null)
-    .order('rating', { ascending: false })
+  const supabase = supabaseBrowser()
+  const { data, error } = await supabase.rpc('search_available_packs', {
+    p_market_id: DEFAULT_MARKET.id,
+    p_locality_id: undefined,
+    p_latitude: undefined,
+    p_longitude: undefined,
+    p_radius_meters: 10000,
+    p_query: undefined,
+    p_limit: 50,
+  })
 
   if (error) throw new Error(error.message)
-  return (data as Shop[]) ?? []
+
+  const byId = new Map<string, Shop>()
+  for (const row of (data ?? []) as Record<string, unknown>[]) {
+    const id = String(row.shop_id)
+    if (byId.has(id)) continue
+    byId.set(id, {
+      id,
+      name: String(row.shop_name ?? ''),
+      description: (row.description as string | null) ?? null,
+      city: String(row.locality_name ?? ''),
+      cover_url: null,
+      rating: row.shop_rating != null ? Number(row.shop_rating) : 0,
+      verified: true,
+    } as Shop)
+  }
+
+  return [...byId.values()]
 }
 
 export function useShops() {
@@ -27,9 +46,9 @@ export function useShops() {
     error,
     refetch,
   } = useQuery({
-    queryKey: [SHOPS_QUERY_KEY],
+    queryKey: [SHOPS_QUERY_KEY, DEFAULT_MARKET.id],
     queryFn: fetchShops,
-    staleTime: 60 * 1000, // 1 minuto — los comercios no cambian a cada rato
+    staleTime: 60 * 1000,
   })
 
   return {
