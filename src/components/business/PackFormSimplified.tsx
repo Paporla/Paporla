@@ -50,6 +50,7 @@ export default function PackFormSimplified({ shopId, pack, isDuplicate = false, 
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
+  const [allergenNotice, setAllergenNotice] = useState('')
   const [formData, setFormData] = useState<PackFormData>(() => {
     if (pack && !isDuplicate) {
       return packToFormData({ ...pack })
@@ -106,7 +107,7 @@ export default function PackFormSimplified({ shopId, pack, isDuplicate = false, 
         p_description: formData.description,
         p_category: selectedCategory ?? 'surprise',
         p_tags: [],
-        p_allergen_notice: '',
+        p_allergen_notice: allergenNotice,
         p_handling_notice: '',
         p_price_minor: formData.price_cents,
         p_original_price_minor: original,
@@ -164,6 +165,19 @@ export default function PackFormSimplified({ shopId, pack, isDuplicate = false, 
           shopId={shopId}
           onError={setError}
         />
+
+        <div className="dark:bg-black/40 bg-white rounded-2xl p-6 border dark:border-white/10 border-gray-200">
+          <label className="block text-sm font-medium dark:text-gray-400 text-gray-600 mb-2">
+            Aviso de alérgenos (recomendado para poder publicar)
+          </label>
+          <textarea
+            value={allergenNotice}
+            onChange={(e) => setAllergenNotice(e.target.value)}
+            rows={3}
+            className="w-full px-4 py-3 rounded-xl dark:bg-white/5 bg-gray-50 border dark:border-white/10 border-gray-200 dark:text-white text-gray-900"
+            placeholder="Ej: Puede contener gluten, lácteos y trazas de frutos secos."
+          />
+        </div>
 
         <PackFormPickupTime data={pickupData} onChange={(d) => setFormData((prev) => ({ ...prev, ...d }))} />
 
