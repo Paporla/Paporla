@@ -41,6 +41,12 @@ function chileDateTime(date: string, time: string) {
   return `${date}T${time}:00-04:00`
 }
 
+function fileExt(file: File) {
+  if (file.type === 'image/png') return 'png'
+  if (file.type === 'image/webp') return 'webp'
+  return 'jpg'
+}
+
 export default function PackFormSimplified({ shopId, pack, isDuplicate = false, onSuccess }: Props) {
   const router = useRouter()
   const supabaseRef = useRef(supabaseBrowser())
@@ -51,6 +57,7 @@ export default function PackFormSimplified({ shopId, pack, isDuplicate = false, 
   const [success, setSuccess] = useState('')
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
   const [allergenNotice, setAllergenNotice] = useState('')
+  const [packFile, setPackFile] = useState<File | null>(null)
   const [formData, setFormData] = useState<PackFormData>(() => {
     if (pack && !isDuplicate) {
       return packToFormData({ ...pack })
@@ -99,13 +106,18 @@ export default function PackFormSimplified({ shopId, pack, isDuplicate = false, 
     const pickupStart = chileDateTime(formData.pickup_date, formData.pickup_start_time)
     const pickupEnd = chileDateTime(formData.pickup_date, formData.pickup_end_time)
     const original = formData.original_price_cents > 0 ? formData.original_price_cents : formData.price_cents
+    const category = selectedCategory ?? 'surprise'
 
     try {
+      const { data: shopPayload } = await supabase.rpc('get_my_shop')
+      const shopRow = (shopPayload as { shop?: { cover_path?: string | null; logo_path?: string | null } } | null)?.shop
+      const fallbackPath = shopRow?.cover_path || shopRow?.logo_path || ''
+
       const { data, error: err } = await supabase.rpc('create_pack_draft', {
         p_shop_id: shopId,
         p_title: formData.title,
         p_description: formData.description,
-        p_category: selectedCategory ?? 'surprise',
+        p_category: category,
         p_tags: [],
         p_allergen_notice: allergenNotice,
         p_handling_notice: '',
@@ -115,7 +127,7 @@ export default function PackFormSimplified({ shopId, pack, isDuplicate = false, 
         p_sales_start_at: new Date().toISOString(),
         p_pickup_start_at: pickupStart,
         p_pickup_end_at: pickupEnd,
-        p_image_path: '',
+        p_image_path: fallbackPath,
         p_image_gallery: [],
       })
       if (err) throw err
@@ -123,7 +135,40 @@ export default function PackFormSimplified({ shopId, pack, isDuplicate = false, 
       const created = data as { pack_id?: string }
       if (!created?.pack_id) throw new Error('No se pudo crear el pack')
 
-      setSuccess('Pack guardado como borrador. Aun no esta publicado.')
+      let imagePath = fallbackPath
+      if (packFile) {
+        const objectPath = `${shopId}/${created.pack_id}/${crypto.randomUUID()}.${fileExt(packFile)}`
+        const { error: upErr } = await supabase.storage.from('pack-images').upload(objectPath, packFile, {
+          cacheControl: '3600',
+          upsert: false,
+        })
+        if (upErr) throw upErr
+        imagePath = objectPath
+
+        const { error: updErr } = await supabase.rpc('update_pack_content', {
+          p_pack_id: created.pack_id,
+          p_title: formData.title,
+          p_description: formData.description,
+          p_category: category,
+          p_tags: [],
+          p_allergen_notice: allergenNotice,
+          p_handling_notice: '',
+          p_price_minor: formData.price_cents,
+          p_original_price_minor: original,
+          p_sales_start_at: new Date().toISOString(),
+          p_pickup_start_at: pickupStart,
+          p_pickup_end_at: pickupEnd,
+          p_image_path: imagePath,
+          p_image_gallery: [],
+        })
+        if (updErr) throw updErr
+      }
+
+      setSuccess(
+        imagePath
+          ? 'Pack guardado como borrador con imagen.'
+          : 'Pack guardado como borrador. Falta imagen para publicar.',
+      )
       setTimeout(() => {
         router.push('/business/packs')
         onSuccess?.()
@@ -164,6 +209,7 @@ export default function PackFormSimplified({ shopId, pack, isDuplicate = false, 
           onChange={(d) => setFormData((prev) => ({ ...prev, ...d }))}
           shopId={shopId}
           onError={setError}
+          onFileChosen={(file) => setPackFile(file)}
         />
 
         <div className="dark:bg-black/40 bg-white rounded-2xl p-6 border dark:border-white/10 border-gray-200">

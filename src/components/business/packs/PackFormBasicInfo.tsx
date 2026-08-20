@@ -18,9 +18,10 @@ interface Props {
   onChange: (data: BasicData) => void
   shopId: string
   onError: (err: string) => void
+  onFileChosen?: (file: File) => void
 }
 
-export default function PackFormBasicInfo({ data, onChange, shopId, onError }: Props) {
+export default function PackFormBasicInfo({ data, onChange, shopId, onError, onFileChosen }: Props) {
   const update = (partial: Partial<BasicData>) => onChange({ ...data, ...partial })
 
   const discount =
@@ -92,7 +93,7 @@ export default function PackFormBasicInfo({ data, onChange, shopId, onError }: P
         </div>
 
         <p className="text-xs dark:text-gray-500 text-gray-500">
-          Precio en pesos chilenos enteros, sin decimales ni símbolo $. Chile no usa céntimos.
+          Precio en pesos chilenos enteros, sin decimales. Chile no usa céntimos.
         </p>
 
         {discount && (
@@ -104,11 +105,13 @@ export default function PackFormBasicInfo({ data, onChange, shopId, onError }: P
 
         <ImageUpload
           bucket="pack-images"
-          path={`${shopId}/packs`}
+          path={`${shopId}/pending`}
+          deferUpload
+          onFileChosen={onFileChosen}
           existingImage={data.image_url || null}
           onUploadComplete={(url) => update({ image_url: url })}
           onError={onError}
-          label="Foto del pack (opcional en borrador; luego podrá usarse la del comercio)"
+          label="Foto del pack (si no subes, se usará la del comercio si existe)"
         />
       </div>
     </div>
