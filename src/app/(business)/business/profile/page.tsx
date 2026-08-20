@@ -52,6 +52,11 @@ function parseCoord(value: string): number | null {
   return Number.isFinite(n) ? n : null
 }
 
+function storagePath(value: string, fallback: string | null) {
+  if (value && !value.startsWith('http') && !value.startsWith('blob:')) return value
+  return fallback ?? ''
+}
+
 export default function BusinessProfilePage() {
   const { user } = useAuth()
   const supabase = supabaseBrowser()
@@ -136,8 +141,8 @@ export default function BusinessProfilePage() {
           phone: mapped.phone ?? '',
           website: mapped.website ?? '',
           instagram: mapped.instagram ?? '',
-          logoUrl: '',
-          coverUrl: '',
+          logoUrl: mapped.logo_path ?? '',
+          coverUrl: mapped.cover_path ?? '',
           verified: mapped.verified,
         })
       }
@@ -164,6 +169,8 @@ export default function BusinessProfilePage() {
       }
 
       if (shop?.id) {
+        const logoPath = storagePath(formData.logoUrl, shop.logo_path)
+        const coverPath = storagePath(formData.coverUrl, shop.cover_path)
         const { error } = await supabase.rpc('update_own_shop', {
           p_shop_id: shop.id,
           p_locality_id: SANTIAGO_LOCALITY_ID,
@@ -178,8 +185,8 @@ export default function BusinessProfilePage() {
           p_postal_code: '',
           p_latitude: parseCoord(formData.latitude),
           p_longitude: parseCoord(formData.longitude),
-          p_logo_path: shop.logo_path ?? '',
-          p_cover_path: shop.cover_path ?? '',
+          p_logo_path: logoPath,
+          p_cover_path: coverPath,
         })
         if (error) throw error
 
@@ -194,6 +201,8 @@ export default function BusinessProfilePage() {
           instagram: formData.instagram || null,
           latitude: parseCoord(formData.latitude),
           longitude: parseCoord(formData.longitude),
+          logo_path: logoPath || null,
+          cover_path: coverPath || null,
         })
 
         const msg = typeof toastMessage === 'string' ? toastMessage : 'Perfil actualizado'
@@ -265,8 +274,8 @@ export default function BusinessProfilePage() {
         phone: shop.phone ?? '',
         website: shop.website ?? '',
         instagram: shop.instagram ?? '',
-        logoUrl: shop.logo_url ?? '',
-        coverUrl: shop.cover_url ?? '',
+        logoUrl: shop.logo_path ?? '',
+        coverUrl: shop.cover_path ?? '',
         verified: shop.verified ?? false,
       })
     }
