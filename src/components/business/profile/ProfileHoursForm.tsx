@@ -110,6 +110,7 @@ export default function ProfileHoursForm({ hours, onHoursChange }: ProfileHoursF
             )}
 
             <button
+              type="button"
               onClick={() => updateHours(day, 'closed', !hours[day]?.closed)}
               className={`text-xs font-medium px-3 py-1.5 rounded-lg transition-all ${
                 hours[day]?.closed
@@ -127,6 +128,7 @@ export default function ProfileHoursForm({ hours, onHoursChange }: ProfileHoursF
         <span className="text-xs dark:text-gray-500 text-gray-400 mr-2 self-center">Presets:</span>
         {presets.map((preset) => (
           <button
+            type="button"
             key={preset.label}
             onClick={() => applyPreset(preset)}
             className="text-xs dark:text-gray-400 text-gray-600 dark:bg-black/40 bg-gray-50 border dark:border-white/10 border-gray-200 dark:hover:border-primary/30 hover:border-primary/30 dark:hover:text-primary hover:text-primary px-3 py-1.5 rounded-lg transition-all"

@@ -113,6 +113,6 @@ describe('useBusinessPacks', () => {
     await act(async () => {
       await result.current.handleDeactivate('pack-1')
     })
-    expect(result.current.error).toMatch(/siguiente paso/i)
+    expect(result.current.error).toMatch(/pausar|publicar/i)
   })
 })

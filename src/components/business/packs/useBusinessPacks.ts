@@ -78,9 +78,28 @@ export function useBusinessPacks() {
 
   const confirmDeactivate = async (id: string) => id
 
-  const handleDeactivate = async (_id: string) => {
-    setError('Pausar/eliminar packs se activará en el siguiente paso.')
-    setDeleting(null)
+  const handleDeactivate = async (id: string) => {
+    const pack = allPacks.find((p) => p.id === id)
+    const supabase = supabaseBrowser()
+    setDeleting(id)
+    try {
+      if (pack?.status === 'active') {
+        const { error: err } = await supabase.rpc('set_pack_paused', { p_pack_id: id, p_paused: true })
+        if (err) throw err
+        setSuccess('Pack pausado. No se muestra en el catálogo.')
+      } else if (pack?.status === 'paused' || pack?.status === 'draft') {
+        const { error: err } = await supabase.rpc('publish_pack', { p_pack_id: id })
+        if (err) throw err
+        setSuccess('Pack publicado.')
+      } else {
+        setError('Este pack no se puede pausar ni publicar ahora.')
+      }
+      await queryClient.invalidateQueries({ queryKey: ['business-packs'] })
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : 'No se pudo cambiar el estado del pack')
+    } finally {
+      setDeleting(null)
+    }
   }
 
   return {
