@@ -33,6 +33,7 @@ function toSerializedPack(row: Record<string, unknown>, imageUrl: string | null)
     id: String(row.pack_id),
     title: String(row.title ?? ''),
     description: (row.description as string | null) ?? null,
+    allergen_notice: (row.allergen_notice as string | null) ?? null,
     price_cents: Number(row.price_minor ?? 0),
     original_price_cents: row.original_price_minor != null ? Number(row.original_price_minor) : null,
     total_stock: Number(row.remaining_stock ?? 0),

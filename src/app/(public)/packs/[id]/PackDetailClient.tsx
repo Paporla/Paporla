@@ -1,17 +1,14 @@
 'use client'
 
 import Image from 'next/image'
-import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { useQuery } from '@tanstack/react-query'
 import {
   AlertCircle,
   ArrowLeft,
   Home,
   Package,
   MapPin,
-  Calendar,
   Clock,
   Store,
   CheckCircle,
@@ -20,24 +17,16 @@ import {
   Truck,
   ExternalLink,
 } from 'lucide-react'
-import { useAuth } from '@/hooks/useAuth'
-import { useCreateReservation } from '@/hooks/useCreateReservation'
-import '@/lib/analytics/events'
-import { supabaseBrowser } from '@/lib/supabase/client'
 import { motion } from 'framer-motion'
 import Button from '@/components/ui/Button'
-import Toast from '@/components/ui/Toast'
-import ReservationConfirmation from '@/components/ui/ReservationConfirmation'
-import PackPaymentSelector from '@/components/packs/PackPaymentSelector'
-import PackReservationModal from '@/components/packs/PackReservationModal'
-import { formatPrice } from '@/lib/utils/formatPrice'
-import { formatDate } from '@/lib/utils/formatDate'
+import { formatMinorPrice } from '@/lib/utils/formatPrice'
 import ShareButton from '@/components/ui/ShareButton'
 
 export interface SerializedPack {
   id: string
   title: string
   description: string | null
+  allergen_notice: string | null
   price_cents: number
   original_price_cents: number | null
   total_stock: number
@@ -67,130 +56,36 @@ interface Props {
   packId: string
 }
 
-export default function PackDetailClient({ initialPack, packId }: Props) {
+function formatPickup(endsAt: string | null) {
+  if (!endsAt) return null
+  try {
+    return new Intl.DateTimeFormat('es-CL', {
+      weekday: 'long',
+      day: 'numeric',
+      month: 'short',
+      hour: '2-digit',
+      minute: '2-digit',
+      timeZone: 'America/Santiago',
+    }).format(new Date(endsAt))
+  } catch {
+    return null
+  }
+}
+
+export default function PackDetailClient({ initialPack }: Props) {
   const router = useRouter()
-  const { user } = useAuth()
-  const { createReservation, lastReservation, loading: reserving, error, clearError } = useCreateReservation()
-  const [quantity, setQuantity] = useState(1)
-  const [showConfirmation, setShowConfirmation] = useState(false)
-  const [showSummary, setShowSummary] = useState(false)
-  const [paymentMethod, setPaymentMethod] = useState<'cash' | 'demo'>('cash')
-  const [acceptedPolicies, setAcceptedPolicies] = useState(false)
-  const [localError, setLocalError] = useState('')
+  const pack = initialPack
+  const priceLabel = (n: number) => formatMinorPrice(n, 'CLP', 'es-CL')
+  const hasDiscount = pack.original_price_cents != null && pack.original_price_cents > pack.price_cents
+  const discount = hasDiscount ? Math.round((1 - pack.price_cents / pack.original_price_cents!) * 100) : null
+  const pickupLabel = formatPickup(pack.ends_at)
 
-  // React Query con datos iniciales del servidor (SSR + revalidacion en cliente)
-  const { data: pack, isLoading: loading } = useQuery({
-    queryKey: ['pack-detail', packId],
-    queryFn: async () => {
-      const supabase = supabaseBrowser()
-      const { data, error } = await supabase
-        .from('packs')
-        .select('*, shop:shops (id, name, description, address, city, phone, logo_url, rating, verified)')
-        .eq('id', packId)
-        .eq('is_active', true)
-        .is('deleted_at', null)
-        .maybeSingle()
-
-      if (error || !data) {
-        throw new Error('Pack no encontrado')
-      }
-
-      return data as SerializedPack
-    },
-    initialData: initialPack,
-    staleTime: 30 * 1000,
-  })
-
-  const handleReserve = () => {
-    if (!user) {
-      router.push('/login')
-      return
-    }
-    if (!pack) return
-    setLocalError('')
-    clearError()
-
-    if (!acceptedPolicies) {
-      setLocalError('Debes aceptar las politicas de retiro y cancelacion')
-      return
-    }
-    if (quantity > pack.remaining_stock) {
-      setLocalError(`Solo quedan ${pack.remaining_stock} unidades disponibles`)
-      return
-    }
-    setShowSummary(true)
-  }
-
-  const handleConfirmReservation = async () => {
-    if (!pack || !user) return
-    setLocalError('')
-    clearError()
-
-    const result = await createReservation(
-      {
-        packId: pack.id,
-        quantity,
-        paymentMethod: paymentMethod === 'demo' ? 'demo' : 'cash',
-      },
-      {
-        title: pack.title,
-        image_url: pack.image_url,
-        price_cents: pack.price_cents,
-        shop: {
-          name: pack.shop.name,
-          address: pack.shop.address,
-          phone: pack.shop.phone,
-        },
-        pickup_date: pack.pickup_date,
-        pickup_start_time: pack.pickup_start_time,
-        pickup_end_time: pack.pickup_end_time,
-      },
-    )
-
-    if (result) {
-      setShowSummary(false)
-      setShowConfirmation(true)
-    }
-  }
-
-  const discount = (() => {
-    if (!pack?.original_price_cents || pack.original_price_cents <= pack.price_cents) return null
-    return Math.round((1 - pack.price_cents / pack.original_price_cents) * 100)
-  })()
-
-  const isAvailable = pack?.remaining_stock && pack.remaining_stock > 0 && pack.is_active
-
-  if (loading) {
-    return (
-      <div className="container mx-auto px-4 py-12">
-        <div className="max-w-6xl mx-auto">
-          <div className="animate-pulse">
-            <div className="h-8 w-32 dark:bg-gray-800 bg-gray-200 rounded mb-6" />
-            <div className="grid md:grid-cols-2 gap-8">
-              <div className="h-96 dark:bg-gray-800 bg-gray-200 rounded-xl" />
-              <div className="space-y-4">
-                <div className="h-8 w-48 dark:bg-gray-800 bg-gray-200 rounded" />
-                <div className="h-4 w-32 dark:bg-gray-800 bg-gray-200 rounded" />
-                <div className="h-6 w-24 dark:bg-gray-800 bg-gray-200 rounded" />
-                <div className="h-24 w-full dark:bg-gray-800 bg-gray-200 rounded" />
-                <div className="h-12 w-full dark:bg-gray-800 bg-gray-200 rounded" />
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    )
-  }
-
-  if (!pack) {
+  if (!pack?.id) {
     return (
       <div className="container mx-auto px-4 py-12 text-center">
-        <div className="glass-card rounded-2xl p-8 max-w-md mx-auto">
-          <AlertCircle className="w-16 h-16 text-red-400 mx-auto mb-4" />
-          <h1 className="text-2xl font-bold dark:text-white text-gray-900 mb-2">Pack no encontrado</h1>
-          <p className="dark:text-gray-400 text-gray-600 mb-6">El pack que buscas no existe o ya no esta disponible</p>
-          <Button onClick={() => router.push('/packs')}>Volver a packs</Button>
-        </div>
+        <AlertCircle className="w-16 h-16 text-red-400 mx-auto mb-4" />
+        <h1 className="text-2xl font-bold mb-2">Pack no encontrado</h1>
+        <Button onClick={() => router.push('/packs')}>Volver a packs</Button>
       </div>
     )
   }
@@ -201,25 +96,23 @@ export default function PackDetailClient({ initialPack, packId }: Props) {
         <div className="flex items-center justify-between mb-6">
           <button
             onClick={() => router.back()}
-            className="flex items-center gap-2 dark:text-gray-400 text-gray-600 hover:text-primary transition-colors group"
+            className="flex items-center gap-2 dark:text-gray-400 text-gray-600 hover:text-primary"
           >
-            <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-            <span className="hidden sm:inline">Volver</span>
+            <ArrowLeft className="w-4 h-4" />
+            Volver
           </button>
-          <div className="flex items-center gap-3">
+          <div className="flex gap-3">
             <Link
               href="/"
-              className="flex items-center gap-1.5 text-xs dark:text-gray-500 text-gray-400 hover:text-primary transition-colors px-3 py-1.5 rounded-lg dark:bg-white/5 bg-gray-100 hover:bg-primary/10"
+              className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg dark:bg-white/5 bg-gray-100"
             >
-              <Home className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Inicio</span>
+              <Home className="w-3.5 h-3.5" /> Inicio
             </Link>
             <Link
               href="/packs"
-              className="flex items-center gap-1.5 text-xs dark:text-gray-500 text-gray-400 hover:text-primary transition-colors px-3 py-1.5 rounded-lg dark:bg-white/5 bg-gray-100 hover:bg-primary/10"
+              className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg dark:bg-white/5 bg-gray-100"
             >
-              <Package className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Packs</span>
+              <Package className="w-3.5 h-3.5" /> Packs
             </Link>
           </div>
         </div>
@@ -228,27 +121,15 @@ export default function PackDetailClient({ initialPack, packId }: Props) {
           <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="relative">
             <div className="relative h-80 md:h-96 rounded-2xl overflow-hidden glass-card">
               {pack.image_url ? (
-                <Image
-                  src={pack.image_url}
-                  alt={pack.title}
-                  fill
-                  className="object-cover"
-                  sizes="(max-width: 768px) 100vw, 50vw"
-                  priority
-                />
+                <Image src={pack.image_url} alt={pack.title} fill className="object-cover" sizes="50vw" priority />
               ) : (
-                <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/20 to-secondary/20">
+                <div className="w-full h-full flex items-center justify-center">
                   <Package className="w-20 h-20 dark:text-gray-500 text-gray-400" />
                 </div>
               )}
               {discount && (
                 <div className="absolute top-4 right-4 bg-red-500 text-white px-3 py-1 rounded-full text-sm font-bold">
                   -{discount}%
-                </div>
-              )}
-              {!isAvailable && (
-                <div className="absolute inset-0 bg-black/60 flex items-center justify-center backdrop-blur-sm">
-                  <span className="text-2xl font-bold text-white">Agotado</span>
                 </div>
               )}
             </div>
@@ -259,195 +140,85 @@ export default function PackDetailClient({ initialPack, packId }: Props) {
               <h1 className="text-3xl md:text-4xl font-bold dark:text-white text-gray-900 mb-2">{pack.title}</h1>
               <div className="flex items-center justify-between">
                 <div className="flex items-baseline gap-2">
-                  <span className="text-3xl font-bold text-primary">{formatPrice(pack.price_cents)}</span>
-                  {pack.original_price_cents && (
-                    <span className="text-lg text-gray-500 line-through">{formatPrice(pack.original_price_cents)}</span>
+                  <span className="text-3xl font-bold text-primary">{priceLabel(pack.price_cents)}</span>
+                  {hasDiscount && (
+                    <span className="text-lg text-gray-500 line-through">{priceLabel(pack.original_price_cents!)}</span>
                   )}
                 </div>
                 <ShareButton
                   title={`${pack.title} — Paporla`}
-                  text={`¡Mira este pack! ${pack.title} por ${formatPrice(pack.price_cents)} en ${pack.shop.name}. ¡Rescata comida y ahorra! 🥗`}
+                  text={`Pack ${pack.title} por ${priceLabel(pack.price_cents)} en ${pack.shop.name}.`}
                   variant="icon"
                 />
               </div>
             </div>
 
-            <div className="flex items-center gap-2 text-sm">
-              <Package className="w-4 h-4 dark:text-gray-400 text-gray-500" />
-              <span className="dark:text-gray-400 text-gray-600">
-                Stock disponible: <span className="text-primary font-semibold">{pack.remaining_stock}</span> /{' '}
-                {pack.total_stock} unidades
-              </span>
-            </div>
+            <p className="text-sm dark:text-gray-400 text-gray-600">
+              Stock: <span className="text-primary font-semibold">{pack.remaining_stock}</span> / {pack.total_stock}
+            </p>
 
             {pack.description && (
               <div className="p-4 glass-card rounded-xl">
-                <h3 className="font-semibold dark:text-white text-gray-900 mb-2">Descripcion</h3>
-                <p className="dark:text-gray-400 text-gray-600 text-sm leading-relaxed">{pack.description}</p>
+                <h3 className="font-semibold dark:text-white text-gray-900 mb-2">Descripción</h3>
+                <p className="text-sm dark:text-gray-400 text-gray-600">{pack.description}</p>
               </div>
             )}
 
-            {(pack.pickup_date ?? pack.pickup_start_time) && (
-              <div className="p-4 glass-card rounded-xl">
-                <h3 className="font-semibold dark:text-white text-gray-900 mb-3 flex items-center gap-2">
-                  <Clock className="w-4 h-4 text-primary" />
-                  Informacion de recogida
-                </h3>
-                <div className="space-y-2 text-sm">
-                  {pack.pickup_date && (
-                    <div className="flex items-center gap-2 dark:text-gray-400 text-gray-600">
-                      <Calendar className="w-4 h-4" />
-                      <span>{formatDate(pack.pickup_date)}</span>
-                    </div>
-                  )}
-                  {(pack.pickup_start_time ?? pack.pickup_end_time) && (
-                    <div className="flex items-center gap-2 dark:text-gray-400 text-gray-600">
-                      <Clock className="w-4 h-4" />
-                      <span>
-                        {pack.pickup_start_time?.slice(0, 5)} - {pack.pickup_end_time?.slice(0, 5)}
-                      </span>
-                    </div>
-                  )}
-                </div>
+            {pack.allergen_notice && (
+              <div className="rounded-xl border border-amber-500/40 bg-amber-500/10 p-4">
+                <h3 className="font-semibold dark:text-white text-gray-900 mb-1">Alérgenos</h3>
+                <p className="text-sm dark:text-amber-100 text-amber-900">{pack.allergen_notice}</p>
               </div>
             )}
 
-            {isAvailable && (
-              <div className="space-y-5">
-                <div className="flex items-center gap-4">
-                  <span className="dark:text-gray-300 text-gray-700">Cantidad:</span>
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                      className="w-8 h-8 rounded-lg dark:bg-gray-800 bg-gray-200 dark:hover:bg-gray-700 hover:bg-gray-300 dark:text-white text-gray-900 transition-colors"
-                    >
-                      -
-                    </button>
-                    <span className="w-12 text-center dark:text-white text-gray-900 font-semibold">{quantity}</span>
-                    <button
-                      onClick={() => setQuantity(Math.min(pack.remaining_stock, quantity + 1))}
-                      className="w-8 h-8 rounded-lg dark:bg-gray-800 bg-gray-200 dark:hover:bg-gray-700 hover:bg-gray-300 dark:text-white text-gray-900 transition-colors"
-                    >
-                      +
-                    </button>
-                  </div>
-                </div>
-
-                <PackPaymentSelector paymentMethod={paymentMethod} onChange={setPaymentMethod} />
-
-                <label className="flex items-start gap-3 cursor-pointer group">
-                  <input
-                    type="checkbox"
-                    checked={acceptedPolicies}
-                    onChange={() => setAcceptedPolicies(!acceptedPolicies)}
-                    className="mt-1 w-4 h-4 accent-primary rounded"
-                  />
-                  <div className="text-xs dark:text-gray-400 text-gray-600 group-hover:text-gray-300 transition-colors">
-                    Acepto las{' '}
-                    <Link href="/legal/politicas-retiro" target="_blank" className="text-primary hover:underline">
-                      politicas de retiro y cancelacion
-                    </Link>
-                    . Confirmo que podre recoger el pedido en la fecha y hora indicadas.
-                  </div>
-                </label>
+            {pickupLabel && (
+              <div className="p-4 glass-card rounded-xl flex items-center gap-2 text-sm dark:text-gray-300 text-gray-700">
+                <Clock className="w-4 h-4 text-primary" />
+                Recogida: {pickupLabel}
               </div>
             )}
 
-            {isAvailable ? (
-              <Button onClick={handleReserve} disabled={reserving || !acceptedPolicies} className="w-full py-6 text-lg">
-                {reserving ? (
-                  <div className="flex items-center gap-2">
-                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    Reservando...
-                  </div>
-                ) : (
-                  `Reservar Ahora - ${formatPrice(pack.price_cents * quantity)}`
-                )}
-              </Button>
-            ) : (
-              <Button disabled className="w-full py-6 text-lg" variant="outline">
-                <Package className="w-5 h-5" />
-                Agotado
-              </Button>
-            )}
+            <Button disabled className="w-full py-6 text-lg">
+              Reservas próximamente
+            </Button>
 
             <Link href={`/shops/${pack.shop.id}`}>
-              <div className="p-4 glass-card rounded-xl cursor-pointer hover:border-primary/50 transition-all group">
+              <div className="p-4 glass-card rounded-xl hover:border-primary/50 transition-all">
                 <div className="flex items-center gap-3">
-                  {pack.shop.logo_url ? (
-                    <Image
-                      src={pack.shop.logo_url}
-                      alt={pack.shop.name}
-                      width={48}
-                      height={48}
-                      className="w-12 h-12 rounded-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center">
-                      <Store className="w-6 h-6 text-primary" />
-                    </div>
-                  )}
+                  <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center">
+                    <Store className="w-6 h-6 text-primary" />
+                  </div>
                   <div className="flex-1">
-                    <div className="flex items-center gap-2">
-                      <p className="font-semibold dark:text-white text-gray-900 group-hover:text-primary transition-colors">
-                        {pack.shop.name}
-                      </p>
+                    <p className="font-semibold dark:text-white text-gray-900 flex items-center gap-2">
+                      {pack.shop.name}
                       {pack.shop.verified && <CheckCircle className="w-4 h-4 text-green-400" />}
-                    </div>
-                    {pack.shop.address && (
+                    </p>
+                    {pack.shop.city && (
                       <p className="text-xs dark:text-gray-400 text-gray-600 flex items-center gap-1">
                         <MapPin className="w-3 h-3" />
-                        {pack.shop.address}
-                        {pack.shop.city && <span className="dark:text-gray-500 text-gray-400">({pack.shop.city})</span>}
+                        {pack.shop.city}
                       </p>
                     )}
                   </div>
-                  <ExternalLink className="w-4 h-4 dark:text-gray-400 text-gray-500 group-hover:text-primary transition-colors" />
+                  <ExternalLink className="w-4 h-4 dark:text-gray-400" />
                 </div>
               </div>
             </Link>
 
-            <div className="flex items-center justify-center gap-4 text-xs dark:text-gray-500 text-gray-400 pt-4">
-              <div className="flex items-center gap-1">
-                <Shield className="w-3 h-3" />
-                <span>Pago seguro</span>
-              </div>
-              <div className="flex items-center gap-1">
-                <Truck className="w-3 h-3" />
-                <span>Recogida local</span>
-              </div>
-              <div className="flex items-center gap-1">
-                <Star className="w-3 h-3" />
-                <span>Comercio verificado</span>
-              </div>
+            <div className="flex items-center justify-center gap-4 text-xs dark:text-gray-500 text-gray-400 pt-2">
+              <span className="flex items-center gap-1">
+                <Shield className="w-3 h-3" /> Pago seguro
+              </span>
+              <span className="flex items-center gap-1">
+                <Truck className="w-3 h-3" /> Recogida local
+              </span>
+              <span className="flex items-center gap-1">
+                <Star className="w-3 h-3" /> Comercio verificado
+              </span>
             </div>
           </motion.div>
         </div>
       </div>
-
-      {showSummary && pack && (
-        <PackReservationModal
-          pack={pack}
-          quantity={quantity}
-          paymentMethod={paymentMethod}
-          reserving={reserving}
-          onClose={() => setShowSummary(false)}
-          onConfirm={handleConfirmReservation}
-        />
-      )}
-
-      {showConfirmation && lastReservation && (
-        <ReservationConfirmation
-          reservation={lastReservation}
-          onClose={() => {
-            setShowConfirmation(false)
-            router.push('/dashboard')
-          }}
-        />
-      )}
-
-      {error && <Toast message={error} type="error" onClose={clearError} />}
-      {localError && <Toast message={localError} type="error" onClose={() => setLocalError('')} />}
     </div>
   )
 }
