@@ -2,7 +2,7 @@
 
 import Image from 'next/image'
 import { motion } from 'framer-motion'
-import { Package, Leaf, MapPin, Clock, Navigation } from 'lucide-react'
+import { Package, MapPin, Clock, Navigation } from 'lucide-react'
 import { formatMinorPrice } from '@/lib/utils/formatPrice'
 
 export interface PublicPack {
@@ -83,8 +83,8 @@ export default function PackCardPublic({ pack, onReserve, index, reserving, rese
           )}
         </div>
         <div className="absolute top-3 left-3 z-10">
-          <div className="px-2 py-1 bg-primary/20 backdrop-blur-sm text-primary text-xs font-medium rounded-lg flex items-center gap-1">
-            <Leaf className="w-3 h-3" /> Disponible
+          <div className="px-2.5 py-1 bg-emerald-600 text-white text-xs font-semibold rounded-lg shadow-md">
+            Disponible
           </div>
         </div>
 
