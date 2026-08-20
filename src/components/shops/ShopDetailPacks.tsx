@@ -4,7 +4,7 @@ import { motion } from 'framer-motion'
 import { Package, Clock, MapPin, ChevronRight } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { formatPrice } from '@/lib/utils/formatPrice'
+import { formatMinorPrice } from '@/lib/utils/formatPrice'
 
 interface Pack {
   id: string
@@ -59,9 +59,8 @@ export default function ShopDetailPacks({ packs, shopName: _shopName, shopAddres
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {packs.map((pack, idx) => {
-          const discount = pack.original_price_cents
-            ? Math.round((1 - pack.price_cents / pack.original_price_cents) * 100)
-            : null
+          const hasDiscount = pack.original_price_cents != null && pack.original_price_cents > pack.price_cents
+          const discount = hasDiscount ? Math.round((1 - pack.price_cents / pack.original_price_cents!) * 100) : null
 
           const pickupTime =
             pack.pickup_start_time && pack.pickup_end_time
@@ -70,6 +69,7 @@ export default function ShopDetailPacks({ packs, shopName: _shopName, shopAddres
 
           const isLowStock = pack.remaining_stock <= 3
           const hasImage = pack.image_url && pack.image_url.trim() !== ''
+          const priceLabel = (n: number) => formatMinorPrice(n, 'CLP', 'es-CL')
 
           return (
             <motion.div
@@ -80,7 +80,6 @@ export default function ShopDetailPacks({ packs, shopName: _shopName, shopAddres
             >
               <Link href={`/packs/${pack.id}`}>
                 <div className="group dark:bg-black/40 bg-white backdrop-blur-sm dark:border-white/10 border-gray-200 hover:border-primary/30 rounded-2xl overflow-hidden transition-all duration-300 h-full">
-                  {/* Imagen */}
                   <div className="relative h-36 md:h-44 overflow-hidden dark:bg-[#0a0a1a] bg-gray-100">
                     {hasImage ? (
                       <Image
@@ -95,10 +94,8 @@ export default function ShopDetailPacks({ packs, shopName: _shopName, shopAddres
                         <Package className="w-12 h-12 dark:text-gray-700 text-gray-400" />
                       </div>
                     )}
-                    {/* Overlay gradient */}
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
 
-                    {/* Badges sobre la imagen */}
                     <div className="absolute top-3 left-3 flex gap-2">
                       {discount && (
                         <span className="text-xs font-bold bg-primary text-black px-2.5 py-1 rounded-full">
@@ -106,26 +103,24 @@ export default function ShopDetailPacks({ packs, shopName: _shopName, shopAddres
                         </span>
                       )}
                       {isLowStock && (
-                        <span className="text-xs font-medium bg-red-500/90 text-white px-2.5 py-1 rounded-full animate-pulse">
-                          Quedan {pack.remaining_stock}!
+                        <span className="text-xs font-medium bg-red-500/90 text-white px-2.5 py-1 rounded-full">
+                          Quedan {pack.remaining_stock}
                         </span>
                       )}
                     </div>
 
-                    {/* Precio sobre imagen */}
                     <div className="absolute bottom-3 right-3">
                       <div className="flex items-baseline gap-1 bg-black/70 backdrop-blur-sm rounded-xl px-3 py-1.5">
-                        <span className="text-lg font-bold text-primary">{formatPrice(pack.price_cents)}</span>
-                        {pack.original_price_cents && (
+                        <span className="text-lg font-bold text-primary">{priceLabel(pack.price_cents)}</span>
+                        {hasDiscount && (
                           <span className="text-xs dark:text-gray-500 text-gray-400 line-through">
-                            {formatPrice(pack.original_price_cents)}
+                            {priceLabel(pack.original_price_cents!)}
                           </span>
                         )}
                       </div>
                     </div>
                   </div>
 
-                  {/* Info */}
                   <div className="p-4 space-y-2">
                     <h3 className="font-semibold dark:text-white text-gray-900 group-hover:text-primary transition-colors line-clamp-1">
                       {pack.title}
