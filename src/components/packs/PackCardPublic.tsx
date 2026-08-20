@@ -64,10 +64,8 @@ interface Props {
 export default function PackCardPublic({ pack, onReserve, index, reserving, reservationsEnabled = false }: Props) {
   const isAvailable = pack.remaining_stock > 0
   const canReserve = isAvailable && reservationsEnabled
-  const discount =
-    pack.original_price_minor && pack.original_price_minor > pack.price_minor
-      ? Math.round((1 - pack.price_minor / pack.original_price_minor) * 100)
-      : null
+  const hasDiscount = pack.original_price_minor != null && pack.original_price_minor > pack.price_minor
+  const discount = hasDiscount ? Math.round((1 - pack.price_minor / pack.original_price_minor!) * 100) : null
 
   return (
     <motion.div
@@ -110,9 +108,9 @@ export default function PackCardPublic({ pack, onReserve, index, reserving, rese
               <span className="text-primary font-bold text-xl">
                 {formatMinorPrice(pack.price_minor, pack.currency_code, 'es-CL')}
               </span>
-              {pack.original_price_minor && (
+              {hasDiscount && (
                 <p className="text-xs text-gray-500 line-through">
-                  {formatMinorPrice(pack.original_price_minor, pack.currency_code, 'es-CL')}
+                  {formatMinorPrice(pack.original_price_minor!, pack.currency_code, 'es-CL')}
                 </p>
               )}
             </div>
