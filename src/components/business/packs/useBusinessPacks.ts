@@ -48,7 +48,8 @@ export function useBusinessPacks() {
       })
       if (err) throw err
       const rows = (data ?? []) as ListedPack[]
-      return rows.map((p): BusinessPack => ({
+      const visible = rows.filter((p) => p.status !== 'archived')
+      return visible.map((p): BusinessPack => ({
         id: p.pack_id,
         title: p.title,
         description: null,
