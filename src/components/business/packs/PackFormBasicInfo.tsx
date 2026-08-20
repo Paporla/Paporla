@@ -1,6 +1,6 @@
 'use client'
 
-import { Package, DollarSign, Tag } from 'lucide-react'
+import { Package, Tag } from 'lucide-react'
 import Input from '@/components/ui/Input'
 import ImageUpload from '@/components/ui/ImageUpload'
 
@@ -38,7 +38,7 @@ export default function PackFormBasicInfo({ data, onChange, shopId, onError }: P
       <div className="space-y-4">
         <Input
           label="Título del pack *"
-          placeholder="Ej: Pack Sorpresa Vegano"
+          placeholder="Ej: Pack sorpresa del día"
           value={data.title}
           onChange={(e) => update({ title: e.target.value })}
           icon={<Tag className="w-4 h-4" />}
@@ -47,39 +47,37 @@ export default function PackFormBasicInfo({ data, onChange, shopId, onError }: P
 
         <div>
           <label className="block text-sm font-medium dark:text-gray-400 text-gray-600 mb-2">
-            Descripcion (opcional)
+            Descripción (opcional)
           </label>
           <textarea
             value={data.description}
             onChange={(e) => update({ description: e.target.value })}
             rows={3}
-            className="w-full px-4 py-3 rounded-xl dark:bg-white/5 bg-gray-50 border dark:border-white/10 border-gray-200 dark:text-white text-gray-900 dark:placeholder-gray-500 placeholder-gray-400 focus:border-primary focus:outline-none transition-all"
+            className="w-full px-4 py-3 rounded-xl dark:bg-white/5 bg-gray-50 border dark:border-white/10 border-gray-200 dark:text-white text-gray-900 dark:placeholder-gray-400 placeholder-gray-400 focus:border-primary focus:outline-none transition-all"
             placeholder="Describe lo que incluye el pack..."
           />
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <Input
-            label="Precio (USD) *"
+            label="Precio (CLP) *"
             type="number"
-            step="0.01"
-            placeholder="9.99"
-            value={data.price_cents / 100}
-            onChange={(e) => update({ price_cents: Math.round(parseFloat(e.target.value ?? '0') * 100) })}
-            icon={<DollarSign className="w-4 h-4" />}
+            step="1"
+            min="1"
+            placeholder="3990"
+            value={data.price_cents || ''}
+            onChange={(e) => update({ price_cents: parseInt(e.target.value, 10) || 0 })}
             required
           />
 
           <Input
-            label="Precio original (opcional)"
+            label="Precio original (CLP, opcional)"
             type="number"
-            step="0.01"
-            placeholder="24.99"
-            value={data.original_price_cents / 100 || ''}
-            onChange={(e) =>
-              update({ original_price_cents: e.target.value ? Math.round(parseFloat(e.target.value) * 100) : 0 })
-            }
-            icon={<DollarSign className="w-4 h-4" />}
+            step="1"
+            min="0"
+            placeholder="7990"
+            value={data.original_price_cents || ''}
+            onChange={(e) => update({ original_price_cents: e.target.value ? parseInt(e.target.value, 10) || 0 : 0 })}
           />
 
           <Input
@@ -87,11 +85,15 @@ export default function PackFormBasicInfo({ data, onChange, shopId, onError }: P
             type="number"
             placeholder="10"
             value={data.total_stock}
-            onChange={(e) => update({ total_stock: parseInt(e.target.value) || 0 })}
+            onChange={(e) => update({ total_stock: parseInt(e.target.value, 10) || 0 })}
             icon={<Package className="w-4 h-4" />}
             required
           />
         </div>
+
+        <p className="text-xs dark:text-gray-500 text-gray-500">
+          Precio en pesos chilenos enteros, sin decimales ni símbolo $. Chile no usa céntimos.
+        </p>
 
         {discount && (
           <div className="flex items-center gap-2 text-sm text-primary bg-primary/10 rounded-lg px-3 py-2">
@@ -106,7 +108,7 @@ export default function PackFormBasicInfo({ data, onChange, shopId, onError }: P
           existingImage={data.image_url || null}
           onUploadComplete={(url) => update({ image_url: url })}
           onError={onError}
-          label="Foto del pack"
+          label="Foto del pack (opcional en borrador; luego podrá usarse la del comercio)"
         />
       </div>
     </div>
