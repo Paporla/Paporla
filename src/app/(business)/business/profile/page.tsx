@@ -38,9 +38,18 @@ interface ShopData {
   instagram: string | null
   logo_url: string | null
   cover_url: string | null
+  logo_path: string | null
+  cover_path: string | null
   hours: string | null
   verified: boolean
   owner_id: string
+}
+
+function parseCoord(value: string): number | null {
+  const trimmed = value.trim()
+  if (!trimmed) return null
+  const n = Number(trimmed)
+  return Number.isFinite(n) ? n : null
 }
 
 export default function BusinessProfilePage() {
@@ -108,6 +117,8 @@ export default function BusinessProfilePage() {
           instagram: (row.instagram_handle as string | null) ?? null,
           logo_url: null,
           cover_url: null,
+          logo_path: (row.logo_path as string | null) ?? null,
+          cover_path: (row.cover_path as string | null) ?? null,
           hours: null,
           verified: row.status === 'verified',
           owner_id: user.id,
@@ -147,16 +158,47 @@ export default function BusinessProfilePage() {
     setIsSaving(true)
 
     try {
-      if (shop?.id) {
-        setToast({
-          message: 'La edición completa del comercio se activará en el siguiente paso.',
-          type: 'error',
-        })
+      if (!formData.name.trim()) {
+        setToast({ message: 'El nombre del comercio es obligatorio.', type: 'error' })
         return
       }
 
-      if (!formData.name.trim()) {
-        setToast({ message: 'El nombre del comercio es obligatorio.', type: 'error' })
+      if (shop?.id) {
+        const { error } = await supabase.rpc('update_own_shop', {
+          p_shop_id: shop.id,
+          p_locality_id: SANTIAGO_LOCALITY_ID,
+          p_name: formData.name,
+          p_description: formData.description,
+          p_category: formData.category,
+          p_phone_e164: formData.phone,
+          p_website_url: formData.website,
+          p_instagram_handle: formData.instagram,
+          p_address_line1: formData.address,
+          p_address_line2: '',
+          p_postal_code: '',
+          p_latitude: parseCoord(formData.latitude),
+          p_longitude: parseCoord(formData.longitude),
+          p_logo_path: shop.logo_path ?? '',
+          p_cover_path: shop.cover_path ?? '',
+        })
+        if (error) throw error
+
+        setShop({
+          ...shop,
+          name: formData.name,
+          description: formData.description || null,
+          category: formData.category || null,
+          address: formData.address || null,
+          phone: formData.phone || null,
+          website: formData.website || null,
+          instagram: formData.instagram || null,
+          latitude: parseCoord(formData.latitude),
+          longitude: parseCoord(formData.longitude),
+        })
+
+        const msg = typeof toastMessage === 'string' ? toastMessage : 'Perfil actualizado'
+        setToast({ message: msg, type: 'success' })
+        setIsDirty(false)
         return
       }
 
@@ -191,6 +233,8 @@ export default function BusinessProfilePage() {
         instagram: formData.instagram || null,
         logo_url: null,
         cover_url: null,
+        logo_path: null,
+        cover_path: null,
         hours: null,
         verified: false,
         owner_id: user!.id,
