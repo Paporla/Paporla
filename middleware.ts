@@ -19,7 +19,7 @@ function buildCspHeader(nonce: string): string {
     "default-src 'self'",
     `script-src 'self' 'nonce-${nonce}' https://*.supabase.co https://www.googletagmanager.com https://www.google-analytics.com`,
     `style-src 'self' 'nonce-${nonce}'`,
-    "img-src 'self' data: https:",
+    "img-src 'self' data: blob: https:",
     `connect-src 'self' https://*.supabase.co https://*.sentry.io https://www.google-analytics.com`,
     "frame-src 'self' https://www.googletagmanager.com",
     "frame-ancestors 'none'",
