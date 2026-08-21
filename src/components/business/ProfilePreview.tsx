@@ -1,8 +1,11 @@
 'use client'
 
+import { useEffect, useState } from 'react'
 import Image from 'next/image'
-import { ArrowLeft, MapPin, Phone, Store } from 'lucide-react'
+import { ArrowLeft, Clock, MapPin, Phone, Store } from 'lucide-react'
 import { supabaseBrowser } from '@/lib/supabase/client'
+import { DAY_LABELS, weekdayToDisplayIndex } from '@/lib/constants/hours'
+import type { HoursData } from '@/lib/utils/shopHours'
 
 interface ProfilePreviewProps {
   formData: {
@@ -15,7 +18,7 @@ interface ProfilePreviewProps {
     logoUrl: string
     coverUrl: string
   }
-  hours: Record<string, { open: string; close: string; closed: boolean }>
+  hours: HoursData
   onBack: () => void
 }
 
@@ -25,9 +28,32 @@ function publicUrl(stored: string) {
   return supabaseBrowser().storage.from('shop-images').getPublicUrl(stored).data.publicUrl
 }
 
-export default function ProfilePreview({ formData, hours: _hours, onBack }: ProfilePreviewProps) {
+/** Normaliza '09:00:00' o '09:00' a '09:00' para mostrarlo. */
+function displayTime(value: string | undefined): string {
+  if (!value) return ''
+  return value.slice(0, 5)
+}
+
+export default function ProfilePreview({ formData, hours, onBack }: ProfilePreviewProps) {
   const coverSrc = publicUrl(formData.coverUrl)
   const logoSrc = publicUrl(formData.logoUrl)
+
+  /**
+   * El día actual se calcula en el cliente, nunca durante el renderizado del
+   * servidor: si el servidor y el navegador estuvieran en husos distintos (o
+   * simplemente cruzaran la medianoche entre una cosa y otra) React avisaría de
+   * un desajuste de hidratación. Empieza en null y se rellena tras montar.
+   */
+  const [todayIndex, setTodayIndex] = useState<number | null>(null)
+
+  useEffect(() => {
+    // getDay() devuelve 0=domingo..6=sábado, la misma convención canónica que
+    // usa la base de datos. weekdayToDisplayIndex lo pasa al orden de la UI,
+    // que empieza en lunes.
+    setTodayIndex(weekdayToDisplayIndex(new Date().getDay()))
+  }, [])
+
+  const hasAnyHours = DAY_LABELS.some((day) => hours?.[day])
 
   return (
     <div className="space-y-6">
@@ -88,6 +114,53 @@ export default function ProfilePreview({ formData, hours: _hours, onBack }: Prof
               </p>
             )}
           </div>
+
+          {hasAnyHours && (
+            <div className="pt-4 border-t dark:border-white/10 border-gray-200 space-y-2">
+              <p className="text-xs font-medium dark:text-gray-300 text-gray-700 flex items-center gap-2">
+                <Clock className="w-3.5 h-3.5 text-primary" />
+                Horarios de atención
+              </p>
+
+              <ul className="space-y-1">
+                {DAY_LABELS.map((day, index) => {
+                  const entry = hours?.[day]
+                  const closed = !entry || entry.closed
+                  const isToday = todayIndex === index
+
+                  return (
+                    <li
+                      key={day}
+                      className={`flex items-center justify-between text-xs rounded-md px-2 py-1 ${
+                        isToday ? 'dark:bg-primary/10 bg-primary/5' : ''
+                      }`}
+                    >
+                      <span
+                        className={
+                          isToday
+                            ? 'font-medium text-primary'
+                            : closed
+                              ? 'dark:text-gray-600 text-gray-400'
+                              : 'dark:text-gray-400 text-gray-600'
+                        }
+                      >
+                        {day}
+                        {isToday && <span className="ml-1.5 text-[10px] uppercase tracking-wide">hoy</span>}
+                      </span>
+
+                      {closed ? (
+                        <span className="dark:text-gray-600 text-gray-400">Cerrado</span>
+                      ) : (
+                        <span className={isToday ? 'font-medium text-primary' : 'dark:text-gray-300 text-gray-700'}>
+                          {displayTime(entry.open)} – {displayTime(entry.close)}
+                        </span>
+                      )}
+                    </li>
+                  )
+                })}
+              </ul>
+            </div>
+          )}
         </div>
       </div>
     </div>
