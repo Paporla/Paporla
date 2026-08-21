@@ -13,12 +13,15 @@ import ProfileHoursForm from '@/components/business/profile/ProfileHoursForm'
 import ProfileSettingsForm from '@/components/business/profile/ProfileSettingsForm'
 import ProfilePreview from '@/components/business/ProfilePreview'
 import UnsavedChangesBar from '@/components/business/UnsavedChangesBar'
-
-interface HoursData {
-  [key: string]: { open: string; close: string; closed: boolean }
-}
-
-const DAYS = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo']
+import { DAY_LABELS } from '@/lib/constants/hours'
+import {
+  buildShopHourPayloads,
+  createDefaultHours,
+  hoursRowsToFormState,
+  validateHours,
+  type HoursData,
+  type ShopHourRow,
+} from '@/lib/utils/shopHours'
 
 const CHILE_MARKET_ID = '10000000-0000-4000-8000-000000000001'
 const SANTIAGO_LOCALITY_ID = '10000000-0000-4000-8000-000000000101'
@@ -45,6 +48,12 @@ interface ShopData {
   owner_id: string
 }
 
+/** Un día de horario que no se pudo guardar. */
+interface HourFailure {
+  day: string
+  message: string
+}
+
 function parseCoord(value: string): number | null {
   const trimmed = value.trim()
   if (!trimmed) return null
@@ -57,21 +66,34 @@ function storagePath(value: string, fallback: string | null) {
   return fallback ?? ''
 }
 
-async function persistHours(client: ReturnType<typeof supabaseBrowser>, shopId: string, hoursMap: HoursData) {
-  for (let i = 0; i < 7; i++) {
-    const day = DAYS[i]
-    const h = hoursMap[day]
-    const closed = !!h?.closed
-    const { error } = await client.rpc('set_shop_hour', {
-      p_shop_id: shopId,
-      p_weekday: i + 1,
-      p_sequence: 1,
-      p_opens_at: closed ? '00:00' : h?.open || '09:00',
-      p_closes_at: closed ? '00:00' : h?.close || '18:00',
-      p_is_closed: closed,
-    })
-    if (error) throw error
-  }
+/**
+ * Guarda los 7 días de horario.
+ *
+ * Correcciones respecto a la versión anterior:
+ *  1. `p_weekday` usa la convención canónica 0..6 (domingo = 0). Antes enviaba
+ *     `i + 1`, es decir 1..7, y el domingo (7) violaba el CHECK
+ *     `weekday >= 0 AND weekday <= 6`.
+ *  2. Un día cerrado envía NULL en las horas. Antes enviaba '00:00', que viola
+ *     el CHECK `is_closed = true AND opens_at IS NULL AND closes_at IS NULL`.
+ *  3. No lanza al primer fallo: recoge los errores por día y los devuelve, para
+ *     no dejar la semana guardada a medias en silencio.
+ */
+async function persistHours(
+  client: ReturnType<typeof supabaseBrowser>,
+  shopId: string,
+  hoursMap: HoursData,
+): Promise<HourFailure[]> {
+  const payloads = buildShopHourPayloads(shopId, hoursMap)
+
+  const results = await Promise.all(
+    payloads.map(async (payload, displayIndex) => {
+      const { error } = await client.rpc('set_shop_hour', payload)
+      if (!error) return null
+      return { day: DAY_LABELS[displayIndex], message: error.message } as HourFailure
+    }),
+  )
+
+  return results.filter((r): r is HourFailure => r !== null)
 }
 
 export default function BusinessProfilePage() {
@@ -103,13 +125,7 @@ export default function BusinessProfilePage() {
     verified: false,
   })
 
-  const [hours, setHours] = useState<HoursData>(() => {
-    const initial: HoursData = {}
-    DAYS.forEach((day) => {
-      initial[day] = { open: '09:00', close: '18:00', closed: day === 'Domingo' }
-    })
-    return initial
-  })
+  const [hours, setHours] = useState<HoursData>(createDefaultHours)
 
   useEffect(() => {
     if (!user?.id) return
@@ -124,7 +140,7 @@ export default function BusinessProfilePage() {
 
       const payload = data as {
         shop?: Record<string, unknown> | null
-        hours?: { weekday: number; opens_at: string | null; closes_at: string | null; is_closed: boolean }[] | null
+        hours?: ShopHourRow[] | null
       } | null
 
       const row = payload?.shop
@@ -171,21 +187,7 @@ export default function BusinessProfilePage() {
 
       const hoursRows = payload?.hours
       if (hoursRows?.length) {
-        const next: HoursData = {}
-        DAYS.forEach((d) => {
-          next[d] = { open: '09:00', close: '18:00', closed: d === 'Domingo' }
-        })
-        hoursRows.forEach((h) => {
-          const idx = h.weekday === 0 ? 6 : h.weekday - 1
-          const day = DAYS[idx]
-          if (!day) return
-          next[day] = {
-            open: h.opens_at ? String(h.opens_at).slice(0, 5) : '09:00',
-            close: h.closes_at ? String(h.closes_at).slice(0, 5) : '18:00',
-            closed: !!h.is_closed,
-          }
-        })
-        setHours(next)
+        setHours(hoursRowsToFormState(hoursRows))
       }
       setLoading(false)
     }
@@ -199,6 +201,16 @@ export default function BusinessProfilePage() {
     setIsDirty(true)
   }
 
+  /**
+   * Los horarios también son cambios sin guardar. Antes `setHours` se pasaba
+   * directo al formulario y nunca marcaba `isDirty`, así que la barra de
+   * "Guardar cambios" no llegaba a aparecer al editar solo horarios.
+   */
+  const updateHours = (next: HoursData) => {
+    setHours(next)
+    setIsDirty(true)
+  }
+
   const handleSave = async (toastMessage?: string) => {
     setSaving(true)
     setIsSaving(true)
@@ -206,6 +218,15 @@ export default function BusinessProfilePage() {
     try {
       if (!formData.name.trim()) {
         setToast({ message: 'El nombre del comercio es obligatorio.', type: 'error' })
+        return
+      }
+
+      // Validar los horarios ANTES de tocar la base de datos: si un día es
+      // inválido, no tiene sentido haber guardado ya el resto del perfil.
+      const hourErrors = validateHours(hours)
+      if (hourErrors.length > 0) {
+        setToast({ message: `Revisa los horarios. ${hourErrors[0]}`, type: 'error' })
+        setActiveTab('hours')
         return
       }
 
@@ -231,7 +252,7 @@ export default function BusinessProfilePage() {
         })
         if (error) throw error
 
-        await persistHours(supabase, shop.id, hours)
+        const failures = await persistHours(supabase, shop.id, hours)
 
         setShop({
           ...shop,
@@ -247,6 +268,16 @@ export default function BusinessProfilePage() {
           logo_path: logoPath || null,
           cover_path: coverPath || null,
         })
+
+        if (failures.length > 0) {
+          const detalle = failures.map((f) => f.day).join(', ')
+          setToast({
+            message: `Se guardó el perfil, pero fallaron los horarios de: ${detalle}. ${failures[0].message}`,
+            type: 'error',
+          })
+          setIsDirty(false)
+          return
+        }
 
         const msg = typeof toastMessage === 'string' ? toastMessage : 'Perfil y horarios actualizados'
         setToast({ message: msg, type: 'success' })
@@ -270,7 +301,7 @@ export default function BusinessProfilePage() {
       const created = data as { shop_id?: string; success?: boolean }
       if (!created?.shop_id) throw new Error('No se pudo crear el comercio')
 
-      await persistHours(supabase, created.shop_id, hours)
+      const failures = await persistHours(supabase, created.shop_id, hours)
 
       setShop({
         id: created.shop_id,
@@ -293,6 +324,16 @@ export default function BusinessProfilePage() {
         verified: false,
         owner_id: user!.id,
       })
+
+      if (failures.length > 0) {
+        const detalle = failures.map((f) => f.day).join(', ')
+        setToast({
+          message: `Se creó el comercio, pero fallaron los horarios de: ${detalle}. ${failures[0].message}`,
+          type: 'error',
+        })
+        setIsDirty(false)
+        return
+      }
 
       const msg = typeof toastMessage === 'string' ? toastMessage : 'Comercio creado en borrador'
       setToast({ message: msg, type: 'success' })
@@ -381,7 +422,7 @@ export default function BusinessProfilePage() {
           />
         )}
 
-        {activeTab === 'hours' && <ProfileHoursForm hours={hours} onHoursChange={setHours} />}
+        {activeTab === 'hours' && <ProfileHoursForm hours={hours} onHoursChange={updateHours} />}
 
         {activeTab === 'settings' && <ProfileSettingsForm onDelete={handleDelete} />}
       </BusinessProfileLayout>
