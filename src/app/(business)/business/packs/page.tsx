@@ -12,6 +12,8 @@ import { useBusinessPacks } from '@/components/business/packs/useBusinessPacks'
 import PacksStatsGrid from '@/components/business/packs/PacksStatsGrid'
 import PackFilters from '@/components/business/packs/PackFilters'
 import PackGroup from '@/components/business/packs/PackGroup'
+import ConfirmModal from '@/components/ui/ConfirmModal'
+import type { BusinessPack } from '@/components/business/packs/useBusinessPacks'
 
 export default function BusinessPacksPage() {
   const {
@@ -25,10 +27,30 @@ export default function BusinessPacksPage() {
     packs,
     stats,
     updatingPackId,
+    archivingPackId,
     changePackState,
+    archivePack,
   } = useBusinessPacks()
 
   const [filterStatus, setFilterStatus] = useState<'all' | 'active' | 'inactive'>('all')
+
+  /*
+   * Pack pendiente de confirmar su eliminación, o `null` si el modal está cerrado.
+   *
+   * Guardamos el pack entero y no solo su id porque el modal necesita el título:
+   * un diálogo que dice «¿Eliminar este pack?» no permite detectar que se pulsó
+   * en la tarjeta equivocada. Nombrar lo que se va a destruir es lo que convierte
+   * la confirmación en una comprobación real y no en un trámite que se acepta sin leer.
+   */
+  const [packToDelete, setPackToDelete] = useState<BusinessPack | null>(null)
+
+  const confirmDelete = async () => {
+    if (!packToDelete) return
+    const id = packToDelete.id
+    // Cerramos primero: el spinner de la tarjeta ya indica que la acción sigue en curso.
+    setPackToDelete(null)
+    await archivePack(id)
+  }
 
   // `packs` ya viene filtrado por término de búsqueda desde el hook: no repetimos
   // aquí ese filtro (antes se aplicaba dos veces, una en el hook y otra en la página).
@@ -92,6 +114,8 @@ export default function BusinessPacksPage() {
           packs={visiblePublished}
           updatingPackId={updatingPackId}
           onChangeState={changePackState}
+          archivingPackId={archivingPackId}
+          onRequestDelete={setPackToDelete}
           defaultExpanded
         />
       )}
@@ -109,6 +133,8 @@ export default function BusinessPacksPage() {
             packs={visibleHistory}
             updatingPackId={updatingPackId}
             onChangeState={changePackState}
+            archivingPackId={archivingPackId}
+            onRequestDelete={setPackToDelete}
             emptyMessage="No hay packs en el historial"
           />
         </div>
@@ -150,6 +176,25 @@ export default function BusinessPacksPage() {
           </Link>
         </div>
       )}
+
+      {/*
+        `confirmText` es obligatorio aquí: el valor por defecto de ConfirmModal es
+        «Cancelar reserva», heredado de su primer uso. Sin pasarlo, el modal de
+        eliminar un pack mostraría un botón que habla de reservas.
+      */}
+      <ConfirmModal
+        isOpen={packToDelete !== null}
+        onClose={() => setPackToDelete(null)}
+        onConfirm={confirmDelete}
+        title="Eliminar pack"
+        message={
+          packToDelete
+            ? `Se eliminará «${packToDelete.title}» de tu listado. Esta acción no se puede deshacer. Si solo quieres retirarlo del catálogo temporalmente, pausalo en su lugar.`
+            : ''
+        }
+        confirmText="Eliminar pack"
+        cancelText="Conservar"
+      />
 
       {error && <Toast message={error} type="error" onClose={() => setError('')} />}
       {success && <Toast message={success} type="success" onClose={() => setSuccess('')} />}

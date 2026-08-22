@@ -93,6 +93,45 @@ export function getPackActionDisabledReason(status: string): string | null {
   }
 }
 
+/**
+ * ¿Se puede eliminar (archivar) el pack en su estado actual?
+ *
+ * Regla de producto: un pack **publicado no se elimina directamente**. Primero
+ * se pausa. Son dos gestos deliberados en lugar de uno, y evitan que un pack
+ * que los clientes están viendo ahora mismo en el catálogo desaparezca por un
+ * clic accidental.
+ *
+ * Importa ser estricto aquí porque `archive_pack` NO tiene vuelta atrás: no
+ * existe `unarchive_pack`, y el listado del comerciante oculta los archivados.
+ * Para él, archivar y borrar son lo mismo.
+ */
+export function canArchivePack(status: string): boolean {
+  switch (status) {
+    case 'draft':
+    case 'paused':
+    case 'sold_out':
+    case 'expired':
+      return true
+    // 'active'   → hay que pausarlo antes.
+    // 'archived' → ya lo está (y el hook ni siquiera lo lista).
+    default:
+      return false
+  }
+}
+
+/** Motivo por el que no se puede eliminar, para explicárselo al comerciante. */
+export function getArchiveBlockedReason(status: string): string | null {
+  if (canArchivePack(status)) return null
+  switch (status) {
+    case 'active':
+      return 'Pausa el pack antes de eliminarlo.'
+    case 'archived':
+      return 'Este pack ya está eliminado.'
+    default:
+      return 'Este pack no se puede eliminar.'
+  }
+}
+
 /** Etiqueta legible del estado. */
 export function getPackStatusLabel(status: string): string {
   const labels: Record<string, string> = {
