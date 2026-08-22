@@ -103,4 +103,62 @@ describe('translateDbError', () => {
       expect(translateDbError(c).length).toBeGreaterThan(0)
     }
   })
+
+  describe('errores de packs (0009, 0016)', () => {
+    it('explica por qué no se puede eliminar un pack con reservas y sugiere pausarlo', () => {
+      const msg = translateDbError({ message: 'PACK_HAS_ACTIVE_RESERVATIONS', code: 'P0001' })
+      expect(msg).toContain('reservas activas')
+      expect(msg).toMatch(/pausa/i)
+    })
+
+    it('traduce PACK_NOT_AUTHORIZED', () => {
+      expect(translateDbError({ message: 'PACK_NOT_AUTHORIZED', code: '42501' })).toBe(
+        'Este pack no pertenece a tu comercio.',
+      )
+    })
+
+    it('traduce PACK_NOT_ACTIVE al intentar pausar', () => {
+      expect(translateDbError({ message: 'PACK_NOT_ACTIVE', code: 'P0001' })).toBe(
+        'Solo puedes pausar un pack que esté activo.',
+      )
+    })
+
+    it('traduce PACK_NOT_RESUMABLE al intentar reanudar', () => {
+      expect(translateDbError({ message: 'PACK_NOT_RESUMABLE', code: 'P0001' })).toMatch(/no se puede reanudar/i)
+    })
+
+    it('traduce SHOP_NOT_VERIFIED al intentar publicar', () => {
+      expect(translateDbError({ message: 'SHOP_NOT_VERIFIED', code: 'P0001' })).toMatch(/no está verificado/i)
+    })
+
+    it('no confunde PACK_NOT_OWNED con PACK_NOT_PUBLISHABLE', () => {
+      expect(translateDbError({ message: 'PACK_NOT_PUBLISHABLE', code: 'P0001' })).toBe(
+        'Este pack no se puede publicar en su estado actual.',
+      )
+    })
+
+    it('P0001 desconocido devuelve el mensaje original, nunca vacío', () => {
+      const msg = translateDbError({ message: 'ALGO_NUEVO_SIN_TRADUCIR', code: 'P0001' })
+      expect(msg).toBe('ALGO_NUEVO_SIN_TRADUCIR')
+      expect(msg.length).toBeGreaterThan(0)
+    })
+
+    it('los errores reales de packs nunca caen en el fallback genérico', () => {
+      const reales = [
+        'PACK_HAS_ACTIVE_RESERVATIONS',
+        'PACK_NOT_AUTHORIZED',
+        'PACK_NOT_PUBLISHABLE',
+        'PACK_NOT_RESUMABLE',
+        'PACK_NOT_ACTIVE',
+        'SHOP_NOT_VERIFIED',
+      ]
+      for (const message of reales) {
+        const salida = translateDbError({ message, code: 'P0001' }, 'FALLBACK')
+        expect(salida).not.toBe('FALLBACK')
+        expect(salida).not.toBe(message)
+        expect(salida).not.toBe('[object Object]')
+        expect(salida.trim().length).toBeGreaterThan(0)
+      }
+    })
+  })
 })
