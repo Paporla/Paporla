@@ -50,7 +50,7 @@ export default async function EditPackPage({ params }: EditPackPageProps) {
 
   const { data: shop, error: shopError } = await supabase
     .from('shops')
-    .select('id, name, verified, banned, deleted_at')
+    .select('id, name, status, deleted_at')
     .eq('owner_id', user.id)
     .maybeSingle()
 
@@ -67,7 +67,14 @@ export default async function EditPackPage({ params }: EditPackPageProps) {
     redirect('/business/profile')
   }
 
-  if (shop.banned) {
+  /*
+   * El estado del comercio vive en `status`, no en las columnas `verified` y
+   * `banned` del esquema anterior a la migracion: esas columnas ya no existen
+   * y pedirlas hacia fallar la consulta entera, redirigiendo al perfil sin
+   * explicacion. Los estados validos son:
+   * draft | pending_review | verified | rejected | suspended | closed
+   */
+  if (shop.status === 'suspended' || shop.status === 'closed') {
     return (
       <div className="space-y-8">
         <div className="relative overflow-hidden bg-gradient-to-br from-red-500/10 via-transparent to-red-500/5 -mt-8 -mx-4 px-4 py-8 rounded-b-3xl">
@@ -106,7 +113,7 @@ export default async function EditPackPage({ params }: EditPackPageProps) {
     .select('*')
     .eq('id', id)
     .eq('shop_id', shop.id)
-    .is('deleted_at', null)
+    .is('archived_at', null)
     .maybeSingle()
 
   if (packError) {
@@ -118,7 +125,7 @@ export default async function EditPackPage({ params }: EditPackPageProps) {
     notFound()
   }
 
-  if (!shop.verified) {
+  if (shop.status !== 'verified') {
     return (
       <div className="space-y-8">
         <div className="relative overflow-hidden bg-gradient-to-br from-yellow-500/10 via-transparent to-primary/5 -mt-8 -mx-4 px-4 py-8 rounded-b-3xl">
@@ -161,7 +168,7 @@ export default async function EditPackPage({ params }: EditPackPageProps) {
     )
   }
 
-  const isFinalStatus = pack.status === 'sold_out' || pack.status === 'expired' || pack.status === 'deleted'
+  const isFinalStatus = pack.status === 'sold_out' || pack.status === 'expired' || pack.status === 'archived'
 
   return (
     <div className="space-y-8">
