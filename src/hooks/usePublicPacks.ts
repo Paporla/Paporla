@@ -92,7 +92,20 @@ export function usePublicPacks() {
         }
       })
     },
+    /*
+     * El catálogo lo mira el cliente, y lo que ve tiene que existir de verdad.
+     *
+     * Un pack puede pausarse, agotarse o caducar en cualquier momento mientras
+     * alguien tiene la pestaña abierta. Con `refetchOnWindowFocus` desactivado
+     * (el valor por defecto del provider), al volver a la pestaña seguía viendo
+     * la lista guardada: packs que ya no están a la venta. La reserva fallaba
+     * después, en la base de datos, con un error que el cliente no entiende.
+     *
+     * Aquí sí refrescamos al recuperar el foco. 30 s de `staleTime` evitan que
+     * cada cambio de pestaña dispare una consulta.
+     */
     staleTime: 30 * 1000,
+    refetchOnWindowFocus: true,
   })
 
   const allPacks = useMemo(() => query.data ?? [], [query.data])

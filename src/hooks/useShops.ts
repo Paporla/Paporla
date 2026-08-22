@@ -63,7 +63,14 @@ export function useShops() {
   } = useQuery({
     queryKey: [SHOPS_QUERY_KEY, DEFAULT_MARKET.id],
     queryFn: fetchShops,
+    /*
+     * Mismo motivo que en el catálogo de packs: el directorio se construye a
+     * partir de los packs a la venta, así que un comercio entra y sale de la
+     * lista según pausa o reanuda. Si no refrescamos al volver a la pestaña,
+     * el cliente ve comercios que ya no tienen nada que ofrecer.
+     */
     staleTime: 60 * 1000,
+    refetchOnWindowFocus: true,
   })
 
   return {
