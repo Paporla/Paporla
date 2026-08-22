@@ -9,13 +9,22 @@ import type { BusinessPack } from './useBusinessPacks'
 interface PackGroupProps {
   title: string
   packs: BusinessPack[]
-  deleting: string | null
-  onDeleteClick: (id: string) => void
+  updatingPackId: string | null
+  onChangeState: (id: string) => void
   emptyMessage?: string
+  /** Los packs publicados interesan de un vistazo; el historial puede ir plegado. */
+  defaultExpanded?: boolean
 }
 
-export default function PackGroup({ title, packs, deleting, onDeleteClick, emptyMessage }: PackGroupProps) {
-  const [isExpanded, setIsExpanded] = useState(false)
+export default function PackGroup({
+  title,
+  packs,
+  updatingPackId,
+  onChangeState,
+  emptyMessage,
+  defaultExpanded = false,
+}: PackGroupProps) {
+  const [isExpanded, setIsExpanded] = useState(defaultExpanded)
 
   if (packs.length === 0 && emptyMessage) {
     return (
@@ -37,7 +46,7 @@ export default function PackGroup({ title, packs, deleting, onDeleteClick, empty
         className="w-full flex items-center justify-between p-4 dark:bg-dark-card/50 bg-gray-50 dark:hover:bg-dark-card hover:bg-gray-100 transition-colors"
       >
         <div className="flex items-center gap-3">
-          <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+          <div className={`w-2 h-2 rounded-full ${defaultExpanded ? 'bg-primary animate-pulse' : 'bg-gray-400'}`} />
           <h3 className="font-semibold dark:text-white text-gray-900">{title}</h3>
           <span className="text-xs bg-primary/20 text-primary px-2 py-0.5 rounded-full">{packs.length}</span>
         </div>
@@ -59,7 +68,13 @@ export default function PackGroup({ title, packs, deleting, onDeleteClick, empty
           >
             <div className="p-4 space-y-3">
               {packs.map((pack, idx) => (
-                <PackCard key={pack.id} pack={pack} index={idx} deleting={deleting} onDeleteClick={onDeleteClick} />
+                <PackCard
+                  key={pack.id}
+                  pack={pack}
+                  index={idx}
+                  updatingPackId={updatingPackId}
+                  onChangeState={onChangeState}
+                />
               ))}
             </div>
           </motion.div>

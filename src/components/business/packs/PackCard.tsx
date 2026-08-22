@@ -2,14 +2,74 @@
 
 import Link from 'next/link'
 import { motion } from 'framer-motion'
-import { Package, Edit, Trash2, CheckCircle, EyeOff, AlertCircle, Clock, Copy } from 'lucide-react'
+import {
+  Package,
+  Edit,
+  CheckCircle,
+  EyeOff,
+  AlertCircle,
+  Clock,
+  Copy,
+  Play,
+  Pause,
+  Send,
+  FileEdit,
+  XCircle,
+  CalendarX,
+} from 'lucide-react'
 import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
 import { formatMinorPrice } from '@/lib/utils/formatPrice'
 import { formatDate } from '@/lib/utils/formatDate'
+import {
+  getPackAction,
+  getPackActionDisabledReason,
+  type PackActionKind,
+  type PackStatus,
+} from '@/lib/utils/packActions'
 import type { BusinessPack } from './useBusinessPacks'
 
+type BadgeStyle = { label: string; className: string; Icon: typeof CheckCircle }
+
+/**
+ * Insignia de estado del pack.
+ *
+ * Antes solo se distinguía "Activo" / "Inactivo", de modo que un borrador, un
+ * pack pausado, uno agotado y uno caducado se veían exactamente igual: gris e
+ * "Inactivo". Son situaciones muy distintas y cada una pide una acción distinta
+ * del comerciante.
+ */
+const STATUS_BADGES: Record<PackStatus, BadgeStyle> = {
+  draft: { label: 'Borrador', className: 'bg-gray-500/20 text-gray-400', Icon: FileEdit },
+  active: { label: 'Publicado', className: 'bg-green-500/20 text-green-400', Icon: CheckCircle },
+  paused: { label: 'En pausa', className: 'bg-amber-500/20 text-amber-500', Icon: EyeOff },
+  sold_out: { label: 'Agotado', className: 'bg-blue-500/20 text-blue-400', Icon: XCircle },
+  expired: { label: 'Caducado', className: 'bg-gray-500/20 text-gray-400', Icon: CalendarX },
+  archived: { label: 'Eliminado', className: 'bg-gray-500/20 text-gray-500', Icon: XCircle },
+}
+
+const FALLBACK_BADGE: BadgeStyle = {
+  label: 'Desconocido',
+  className: 'bg-gray-500/20 text-gray-400',
+  Icon: AlertCircle,
+}
+
+/**
+ * Presentación de cada acción. La lógica de negocio (qué RPC, con qué argumentos)
+ * vive en `packActions.ts`; aquí solo decidimos cómo se ve el botón.
+ */
+const ACTION_STYLES: Record<
+  Exclude<PackActionKind, 'none'>,
+  { Icon: typeof Send; variant: 'primary' | 'outline'; pendingLabel: string }
+> = {
+  publish: { Icon: Send, variant: 'primary', pendingLabel: 'Publicando…' },
+  pause: { Icon: Pause, variant: 'outline', pendingLabel: 'Pausando…' },
+  resume: { Icon: Play, variant: 'primary', pendingLabel: 'Reanudando…' },
+}
+
 function getStockStatus(remaining: number, total: number) {
+  // Un pack sin stock total no debería existir, pero si llega uno no dividimos entre cero.
+  if (total <= 0) return { label: 'Sin stock', color: 'bg-red-500/20 text-red-400', icon: AlertCircle }
   const pct = (remaining / total) * 100
   if (pct === 0) return { label: 'Agotado', color: 'bg-red-500/20 text-red-400', icon: AlertCircle }
   if (pct < 20) return { label: 'Stock bajo', color: 'bg-yellow-500/20 text-yellow-400', icon: AlertCircle }
@@ -19,14 +79,24 @@ function getStockStatus(remaining: number, total: number) {
 interface Props {
   pack: BusinessPack
   index: number
-  deleting: string | null
-  onDeleteClick: (id: string) => void
+  /** Id del pack cuya acción de estado está en curso, o `null` si no hay ninguna. */
+  updatingPackId: string | null
+  /** Publica, pausa o reanuda el pack según su estado actual. */
+  onChangeState: (id: string) => void
 }
 
-export default function PackCard({ pack, index, deleting, onDeleteClick }: Props) {
+export default function PackCard({ pack, index, updatingPackId, onChangeState }: Props) {
   const stock = getStockStatus(pack.remaining_stock, pack.total_stock)
   const StockIcon = stock.icon
   const pct = pack.total_stock > 0 ? Math.round((pack.remaining_stock / pack.total_stock) * 100) : 0
+
+  const badge = STATUS_BADGES[pack.status as PackStatus] ?? FALLBACK_BADGE
+  const BadgeIcon = badge.Icon
+
+  const action = getPackAction(pack.status)
+  const style = action.kind === 'none' ? null : ACTION_STYLES[action.kind]
+  const disabledReason = getPackActionDisabledReason(pack.status)
+  const isUpdating = updatingPackId === pack.id
 
   return (
     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.05 }}>
@@ -37,15 +107,12 @@ export default function PackCard({ pack, index, deleting, onDeleteClick }: Props
               <h3 className="text-lg font-semibold dark:text-white text-gray-900 group-hover:text-primary transition-colors">
                 {pack.title}
               </h3>
-              {pack.is_active ? (
-                <span className="text-xs bg-green-500/20 text-green-400 px-2 py-0.5 rounded-full flex items-center gap-1">
-                  <CheckCircle className="w-3 h-3" /> Activo
-                </span>
-              ) : (
-                <span className="text-xs bg-gray-500/20 text-gray-400 px-2 py-0.5 rounded-full flex items-center gap-1">
-                  <EyeOff className="w-3 h-3" /> Inactivo
-                </span>
-              )}
+              <span
+                className={`text-xs ${badge.className} px-2 py-0.5 rounded-full flex items-center gap-1`}
+                data-testid="pack-status-badge"
+              >
+                <BadgeIcon className="w-3 h-3" /> {badge.label}
+              </span>
               <span className={`text-xs ${stock.color} px-2 py-0.5 rounded-full flex items-center gap-1`}>
                 <StockIcon className="w-3 h-3" /> {stock.label}
               </span>
@@ -57,7 +124,7 @@ export default function PackCard({ pack, index, deleting, onDeleteClick }: Props
 
             <div className="flex flex-wrap gap-4 text-sm">
               <span className="text-primary font-semibold text-lg">
-                {formatMinorPrice(pack.price_cents, 'CLP', 'es-CL')}
+                {formatMinorPrice(pack.price_minor, pack.currency_code, 'es-CL')}
               </span>
               <span className="text-gray-500 flex items-center gap-1">
                 <Package className="w-3 h-3" /> Stock: {pack.remaining_stock}/{pack.total_stock}
@@ -71,29 +138,57 @@ export default function PackCard({ pack, index, deleting, onDeleteClick }: Props
           </div>
 
           <div className="flex items-center gap-2">
-            <Link href={`/business/packs/${pack.id}/duplicate`}>
+            <Link href={`/business/packs/${pack.id}/duplicate`} aria-label={`Duplicar ${pack.title}`}>
               <Button variant="outline" size="sm" className="p-2">
                 <Copy className="w-4 h-4" />
               </Button>
             </Link>
-            <Link href={`/business/packs/${pack.id}`}>
+            <Link href={`/business/packs/${pack.id}`} aria-label={`Editar ${pack.title}`}>
               <Button variant="outline" size="sm" className="p-2">
                 <Edit className="w-4 h-4" />
               </Button>
             </Link>
-            <Button
-              variant="danger"
-              size="sm"
-              onClick={() => onDeleteClick(pack.id)}
-              disabled={deleting === pack.id}
-              className="p-2"
-            >
-              {deleting === pack.id ? (
-                <div className="w-4 h-4 border-2 border-red-400 border-t-transparent rounded-full animate-spin" />
-              ) : (
-                <Trash2 className="w-4 h-4" />
-              )}
-            </Button>
+
+            {/*
+              Botón de estado CON TEXTO, nunca un icono suelto.
+
+              Antes aquí había una papelera roja que en realidad llamaba a
+              `set_pack_paused`: el comerciante no se atrevía a pulsarla por
+              miedo a borrar su pack, y quien la pulsaba esperando borrar se
+              llevaba un susto. El rojo comunica destrucción; pausar no destruye.
+            */}
+            {style ? (
+              <Button
+                variant={style.variant}
+                size="sm"
+                onClick={() => onChangeState(pack.id)}
+                disabled={isUpdating}
+                aria-label={`${action.label}: ${pack.title}`}
+                className="flex items-center gap-1.5"
+                data-testid="pack-state-button"
+              >
+                {isUpdating ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                    <span>{style.pendingLabel}</span>
+                  </>
+                ) : (
+                  <>
+                    <style.Icon className="w-4 h-4" />
+                    <span>{action.label}</span>
+                  </>
+                )}
+              </Button>
+            ) : (
+              disabledReason && (
+                <span
+                  className="text-xs dark:text-gray-500 text-gray-400 max-w-[10rem] text-right"
+                  data-testid="pack-no-action"
+                >
+                  {disabledReason}
+                </span>
+              )
+            )}
           </div>
         </div>
 

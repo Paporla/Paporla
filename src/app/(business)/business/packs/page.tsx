@@ -7,7 +7,6 @@ import Link from 'next/link'
 import { Package, Plus } from 'lucide-react'
 import Button from '@/components/ui/Button'
 import Toast from '@/components/ui/Toast'
-import ConfirmModal from '@/components/ui/ConfirmModal'
 import LoadingSkeleton from '@/components/business/LoadingSkeleton'
 import { useBusinessPacks } from '@/components/business/packs/useBusinessPacks'
 import PacksStatsGrid from '@/components/business/packs/PacksStatsGrid'
@@ -25,39 +24,28 @@ export default function BusinessPacksPage() {
     setSearchTerm,
     packs,
     stats,
-    deleting,
-    confirmDeactivate,
-    handleDeactivate,
+    updatingPackId,
+    changePackState,
   } = useBusinessPacks()
 
   const [filterStatus, setFilterStatus] = useState<'all' | 'active' | 'inactive'>('all')
-  const [modalOpen, setModalOpen] = useState(false)
-  const [packToDelete, setPackToDelete] = useState<string | null>(null)
 
-  // Separar packs activos e inactivos
-  const activePacks = packs.filter((pack) => pack.is_active)
-  const inactivePacks = packs.filter((pack) => !pack.is_active)
+  // `packs` ya viene filtrado por término de búsqueda desde el hook: no repetimos
+  // aquí ese filtro (antes se aplicaba dos veces, una en el hook y otra en la página).
+  //
+  // "Publicados" son los que el cliente puede comprar ahora mismo. Todo lo demás
+  // —borradores, pausados, agotados, caducados— es historial: sigue existiendo y
+  // el comerciante lo ve, pero no está a la venta.
+  const publishedPacks = packs.filter((pack) => pack.status === 'active')
+  const historyPacks = packs.filter((pack) => pack.status !== 'active')
 
-  // Filtrar por búsqueda
-  const filteredActive = activePacks.filter((pack) => pack.title.toLowerCase().includes(searchTerm.toLowerCase()))
+  // El desplegable de estado no filtraba nada: se leía su valor pero nunca se usaba.
+  const showPublished = filterStatus === 'all' || filterStatus === 'active'
+  const showHistory = filterStatus === 'all' || filterStatus === 'inactive'
 
-  const filteredInactive = inactivePacks.filter((pack) => pack.title.toLowerCase().includes(searchTerm.toLowerCase()))
-
-  const onDeactivateClick = async (id: string) => {
-    const result = await confirmDeactivate(id)
-    if (result) {
-      setPackToDelete(result)
-      setModalOpen(true)
-    }
-  }
-
-  const onConfirmDeactivate = async () => {
-    if (packToDelete) {
-      await handleDeactivate(packToDelete)
-      setModalOpen(false)
-      setPackToDelete(null)
-    }
-  }
+  const visiblePublished = showPublished ? publishedPacks : []
+  const visibleHistory = showHistory ? historyPacks : []
+  const hasVisiblePacks = visiblePublished.length > 0 || visibleHistory.length > 0
 
   if (loading) return <LoadingSkeleton />
 
@@ -97,13 +85,19 @@ export default function BusinessPacksPage() {
         onStatusChange={setFilterStatus}
       />
 
-      {/* Packs Activos */}
-      {filteredActive.length > 0 && (
-        <PackGroup title="Packs Activos" packs={filteredActive} deleting={deleting} onDeleteClick={onDeactivateClick} />
+      {/* Packs publicados: visibles ahora mismo en el catálogo */}
+      {visiblePublished.length > 0 && (
+        <PackGroup
+          title="Packs publicados"
+          packs={visiblePublished}
+          updatingPackId={updatingPackId}
+          onChangeState={changePackState}
+          defaultExpanded
+        />
       )}
 
-      {/* Historial (packs inactivos) */}
-      {filteredInactive.length > 0 && (
+      {/* Historial: existen pero no están a la venta */}
+      {visibleHistory.length > 0 && (
         <div className="space-y-4">
           <div className="flex items-center gap-2 pt-4">
             <div className="w-1 h-5 dark:bg-gray-600 bg-gray-300 rounded-full" />
@@ -111,17 +105,38 @@ export default function BusinessPacksPage() {
           </div>
 
           <PackGroup
-            title="Packs Inactivos"
-            packs={filteredInactive}
-            deleting={deleting}
-            onDeleteClick={onDeactivateClick}
-            emptyMessage="No hay packs inactivos"
+            title="Borradores, pausados y finalizados"
+            packs={visibleHistory}
+            updatingPackId={updatingPackId}
+            onChangeState={changePackState}
+            emptyMessage="No hay packs en el historial"
           />
         </div>
       )}
 
-      {/* Sin packs */}
-      {filteredActive.length === 0 && filteredInactive.length === 0 && packs.length === 0 && (
+      {/* Sin resultados para la búsqueda o el filtro actuales */}
+      {!hasVisiblePacks && packs.length === 0 && searchTerm.trim() !== '' && (
+        <div className="glass-card rounded-2xl p-12 text-center">
+          <p className="dark:text-gray-400 text-gray-600">Ningún pack coincide con &laquo;{searchTerm}&raquo;</p>
+          <Button variant="outline" className="mt-4" onClick={() => setSearchTerm('')}>
+            Limpiar búsqueda
+          </Button>
+        </div>
+      )}
+
+      {!hasVisiblePacks && packs.length > 0 && (
+        <div className="glass-card rounded-2xl p-12 text-center">
+          <p className="dark:text-gray-400 text-gray-600">
+            No hay packs {filterStatus === 'active' ? 'publicados' : 'en el historial'}
+          </p>
+          <Button variant="outline" className="mt-4" onClick={() => setFilterStatus('all')}>
+            Ver todos
+          </Button>
+        </div>
+      )}
+
+      {/* Sin packs en absoluto */}
+      {packs.length === 0 && searchTerm.trim() === '' && (
         <div className="glass-card rounded-2xl p-12 text-center">
           <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-primary/10 flex items-center justify-center">
             <Package className="w-10 h-10 text-primary" />
@@ -135,16 +150,6 @@ export default function BusinessPacksPage() {
           </Link>
         </div>
       )}
-
-      <ConfirmModal
-        isOpen={modalOpen}
-        onClose={() => setModalOpen(false)}
-        onConfirm={onConfirmDeactivate}
-        title="Eliminar pack"
-        message="Si el pack tiene reservas en el historial, se desactivará (soft delete)."
-        confirmText="Sí, eliminar"
-        cancelText="Cancelar"
-      />
 
       {error && <Toast message={error} type="error" onClose={() => setError('')} />}
       {success && <Toast message={success} type="success" onClose={() => setSuccess('')} />}
