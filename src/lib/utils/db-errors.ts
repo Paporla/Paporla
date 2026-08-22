@@ -82,10 +82,19 @@ const RPC_MESSAGES: Record<string, string> = {
   ADMIN_REQUIRED: 'Esta acción requiere permisos de administrador.',
   INVALID_REVIEW_DECISION: 'La decisión de revisión no es válida. Debes indicar un motivo de al menos 3 caracteres.',
 
-  // Packs
-  PACK_NOT_OWNED: 'Este pack no pertenece a tu comercio.',
+  // Packs — publish_pack / set_pack_paused / archive_pack (migraciones 0009, 0016)
+  // Invariante verificada por test: ninguna clave de este mapa es subcadena de otra.
+  // La búsqueda es por inclusión, así que si alguna vez lo fuera, el orden decidiría
+  // el resultado y el mensaje podría ser el equivocado.
+  PACK_HAS_ACTIVE_RESERVATIONS:
+    'No puedes eliminar este pack porque tiene reservas activas. Pausa el pack para que deje de venderse; podrás eliminarlo cuando se completen o cancelen.',
+  PACK_NOT_AUTHORIZED: 'Este pack no pertenece a tu comercio.',
   PACK_NOT_PUBLISHABLE: 'Este pack no se puede publicar en su estado actual.',
+  PACK_NOT_RESUMABLE: 'No se puede reanudar este pack. Comprueba que siga en pausa y que tu comercio esté verificado.',
+  PACK_NOT_ACTIVE: 'Solo puedes pausar un pack que esté activo.',
+  PACK_NOT_OWNED: 'Este pack no pertenece a tu comercio.',
   PACK_NOT_FOUND: 'No se encontró el pack.',
+  SHOP_NOT_VERIFIED: 'Tu comercio aún no está verificado. No puedes publicar packs hasta que se apruebe.',
 
   // Sesión / cuenta
   CALLER_NOT_ACTIVE: 'Tu cuenta no está activa. Inicia sesión de nuevo.',
@@ -151,6 +160,8 @@ export function translateDbError(error: unknown, fallback = 'No se pudo completa
       return `Dato no válido. ${message}`
     case 'PGRST301':
       return 'Tu sesión ha expirado. Inicia sesión de nuevo.'
+    case 'P0001':
+      return message
     default:
       break
   }
