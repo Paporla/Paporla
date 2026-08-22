@@ -5,7 +5,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { supabaseBrowser } from '@/lib/supabase/client'
 import { useAuth } from '@/hooks/useAuth'
 import { useBusinessShop } from '@/lib/query/useBusinessShop'
-import { getPackAction, type PackStatus } from '@/lib/utils/packActions'
+import { canArchivePack, getPackAction, type PackStatus } from '@/lib/utils/packActions'
 import { translateDbError } from '@/lib/utils/db-errors'
 
 export interface BusinessPack {
@@ -43,6 +43,8 @@ export function useBusinessPacks() {
   const [success, setSuccess] = useState('')
   /** Id del pack cuya acción de estado está en curso. */
   const [updatingPackId, setUpdatingPackId] = useState<string | null>(null)
+  /** Id del pack que se está eliminando, para deshabilitar solo esa tarjeta. */
+  const [archivingPackId, setArchivingPackId] = useState<string | null>(null)
 
   const packsQuery = useQuery({
     queryKey: ['business-packs', user?.id],
@@ -126,6 +128,44 @@ export function useBusinessPacks() {
     }
   }
 
+  /**
+   * Elimina (archiva) el pack. `archive_pack` es un soft delete: marca
+   * `status='archived'` y `archived_at`, no borra la fila. Aun así, para el
+   * comerciante es definitivo, porque no existe `unarchive_pack` y este hook
+   * filtra los archivados del listado.
+   *
+   * La comprobación de estado se repite aquí aunque la interfaz ya oculte el
+   * botón: la interfaz puede quedarse con datos viejos y el pack haber sido
+   * publicado desde otra pestaña. La base de datos es la última palabra
+   * (rechaza con P0001 si hay reservas vivas), esto solo evita el viaje.
+   */
+  const archivePack = async (id: string) => {
+    const pack = allPacks.find((p) => p.id === id)
+    if (!pack) {
+      setError('No se encontró el pack.')
+      return
+    }
+
+    if (!canArchivePack(pack.status)) {
+      setError('Pausa el pack antes de eliminarlo.')
+      return
+    }
+
+    setArchivingPackId(id)
+    setError('')
+    try {
+      const { error: err } = await supabaseBrowser().rpc('archive_pack', { p_pack_id: id })
+      if (err) throw err
+
+      setSuccess(`Se eliminó «${pack.title}».`)
+      await queryClient.invalidateQueries({ queryKey: ['business-packs'] })
+    } catch (e: unknown) {
+      setError(translateDbError(e, 'No se pudo eliminar el pack.'))
+    } finally {
+      setArchivingPackId(null)
+    }
+  }
+
   return {
     loading: packsQuery.isLoading,
     error: error || (packsQuery.error ? translateDbError(packsQuery.error) : ''),
@@ -138,7 +178,9 @@ export function useBusinessPacks() {
     shopId: shop?.id ?? null,
     stats,
     updatingPackId,
+    archivingPackId,
     changePackState,
+    archivePack,
     reload: () => queryClient.invalidateQueries({ queryKey: ['business-packs'] }),
   }
 }

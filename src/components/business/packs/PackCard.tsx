@@ -16,12 +16,15 @@ import {
   FileEdit,
   XCircle,
   CalendarX,
+  Trash2,
 } from 'lucide-react'
 import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
 import { formatMinorPrice } from '@/lib/utils/formatPrice'
 import { formatDate } from '@/lib/utils/formatDate'
 import {
+  canArchivePack,
+  getArchiveBlockedReason,
   getPackAction,
   getPackActionDisabledReason,
   type PackActionKind,
@@ -83,9 +86,20 @@ interface Props {
   updatingPackId: string | null
   /** Publica, pausa o reanuda el pack según su estado actual. */
   onChangeState: (id: string) => void
+  /** Id del pack que se está eliminando, o `null`. */
+  archivingPackId: string | null
+  /** Pide confirmación para eliminar. No elimina: la confirmación vive en la página. */
+  onRequestDelete: (pack: BusinessPack) => void
 }
 
-export default function PackCard({ pack, index, updatingPackId, onChangeState }: Props) {
+export default function PackCard({
+  pack,
+  index,
+  updatingPackId,
+  onChangeState,
+  archivingPackId,
+  onRequestDelete,
+}: Props) {
   const stock = getStockStatus(pack.remaining_stock, pack.total_stock)
   const StockIcon = stock.icon
   const pct = pack.total_stock > 0 ? Math.round((pack.remaining_stock / pack.total_stock) * 100) : 0
@@ -97,6 +111,8 @@ export default function PackCard({ pack, index, updatingPackId, onChangeState }:
   const style = action.kind === 'none' ? null : ACTION_STYLES[action.kind]
   const disabledReason = getPackActionDisabledReason(pack.status)
   const isUpdating = updatingPackId === pack.id
+  const isArchiving = archivingPackId === pack.id
+  const canDelete = canArchivePack(pack.status)
 
   return (
     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.05 }}>
@@ -188,6 +204,50 @@ export default function PackCard({ pack, index, updatingPackId, onChangeState }:
                   {disabledReason}
                 </span>
               )
+            )}
+
+            {/*
+              Eliminar es la única acción destructiva de la tarjeta, así que va
+              en gris y separada por un divisor: se encuentra cuando se busca,
+              pero no compite con Publicar/Pausar ni intimida como la papelera
+              roja anterior. El rojo aparece solo al confirmar, dentro del modal.
+
+              Un pack publicado no se puede eliminar: primero hay que pausarlo.
+              En ese caso el botón se muestra deshabilitado, no oculto, para que
+              el comerciante vea que la opción existe y por qué no está activa.
+            */}
+            {/*
+              Solo mostramos el botón cuando la acción es posible.
+
+              Un pack publicado no se puede eliminar (hay que pausarlo antes), y
+              en ese caso enseñamos el motivo como texto en lugar de un botón
+              apagado: un botón deshabilitado no explica nada, y si el motivo va
+              en un `title` no lo ve nadie en móvil ni navegando con teclado.
+            */}
+            <div className="w-px h-8 dark:bg-gray-700 bg-gray-200 mx-1" aria-hidden="true" />
+            {canDelete ? (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => onRequestDelete(pack)}
+                disabled={isArchiving}
+                ariaLabel={`Eliminar ${pack.title}`}
+                className="p-2 hover:text-red-500"
+                data-testid="pack-delete-button"
+              >
+                {isArchiving ? (
+                  <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <Trash2 className="w-4 h-4" />
+                )}
+              </Button>
+            ) : (
+              <span
+                className="text-xs dark:text-gray-500 text-gray-400 max-w-[8rem] text-right"
+                data-testid="pack-delete-blocked"
+              >
+                {getArchiveBlockedReason(pack.status)}
+              </span>
             )}
           </div>
         </div>

@@ -220,4 +220,98 @@ describe('useBusinessPacks', () => {
       expect(result.current.updatingPackId).toBeNull()
     })
   })
+
+  describe('archivePack: eliminar es archivar, y no desde cualquier estado', () => {
+    it('un borrador se elimina con archive_pack', async () => {
+      setupMockClient([listed('Borrador', 'draft', 'p-1')])
+      const { result } = renderHook(() => useBusinessPacks(), { wrapper: createWrapper() })
+      await waitFor(() => expect(result.current.loading).toBe(false))
+
+      await act(async () => {
+        await result.current.archivePack('p-1')
+      })
+
+      expect(rpc).toHaveBeenCalledWith('archive_pack', { p_pack_id: 'p-1' })
+      expect(result.current.error).toBe('')
+    })
+
+    it('un pack pausado se elimina', async () => {
+      setupMockClient([listed('Pausado', 'paused', 'p-3')])
+      const { result } = renderHook(() => useBusinessPacks(), { wrapper: createWrapper() })
+      await waitFor(() => expect(result.current.loading).toBe(false))
+
+      await act(async () => {
+        await result.current.archivePack('p-3')
+      })
+
+      expect(rpc).toHaveBeenCalledWith('archive_pack', { p_pack_id: 'p-3' })
+    })
+
+    it('un pack PUBLICADO no se elimina: primero hay que pausarlo', async () => {
+      setupMockClient([listed('Activo', 'active', 'p-2')])
+      const { result } = renderHook(() => useBusinessPacks(), { wrapper: createWrapper() })
+      await waitFor(() => expect(result.current.loading).toBe(false))
+
+      await act(async () => {
+        await result.current.archivePack('p-2')
+      })
+
+      expect(rpc).not.toHaveBeenCalledWith('archive_pack', expect.anything())
+      expect(result.current.error).toMatch(/pausa el pack/i)
+    })
+
+    it('el mensaje de éxito nombra el pack, para que se vea cuál se eliminó', async () => {
+      setupMockClient([listed('Pan Artesanal', 'paused', 'p-5')])
+      const { result } = renderHook(() => useBusinessPacks(), { wrapper: createWrapper() })
+      await waitFor(() => expect(result.current.loading).toBe(false))
+
+      await act(async () => {
+        await result.current.archivePack('p-5')
+      })
+
+      expect(result.current.success).toContain('Pan Artesanal')
+    })
+
+    it('traduce P0001 cuando el pack tiene reservas vivas', async () => {
+      setupMockClient([listed('Pausado', 'paused', 'p-3')], {
+        archive_pack: { message: 'PACK_HAS_ACTIVE_RESERVATIONS', code: 'P0001' },
+      })
+      const { result } = renderHook(() => useBusinessPacks(), { wrapper: createWrapper() })
+      await waitFor(() => expect(result.current.loading).toBe(false))
+
+      await act(async () => {
+        await result.current.archivePack('p-3')
+      })
+
+      expect(result.current.error).not.toBe('')
+      expect(result.current.error).not.toBe('PACK_HAS_ACTIVE_RESERVATIONS')
+      expect(result.current.error).not.toContain('[object Object]')
+    })
+
+    it('nunca deja el indicador de eliminación colgado tras un error', async () => {
+      setupMockClient([listed('Pausado', 'paused', 'p-3')], {
+        archive_pack: { message: 'PACK_HAS_ACTIVE_RESERVATIONS', code: 'P0001' },
+      })
+      const { result } = renderHook(() => useBusinessPacks(), { wrapper: createWrapper() })
+      await waitFor(() => expect(result.current.loading).toBe(false))
+
+      await act(async () => {
+        await result.current.archivePack('p-3')
+      })
+
+      expect(result.current.archivingPackId).toBeNull()
+    })
+
+    it('un id inexistente no lanza excepción', async () => {
+      setupMockClient([])
+      const { result } = renderHook(() => useBusinessPacks(), { wrapper: createWrapper() })
+      await waitFor(() => expect(result.current.loading).toBe(false))
+
+      await act(async () => {
+        await result.current.archivePack('no-existe')
+      })
+
+      expect(result.current.error).toMatch(/no se encontró/i)
+    })
+  })
 })

@@ -11,6 +11,8 @@ interface PackGroupProps {
   packs: BusinessPack[]
   updatingPackId: string | null
   onChangeState: (id: string) => void
+  archivingPackId: string | null
+  onRequestDelete: (pack: BusinessPack) => void
   emptyMessage?: string
   /** Los packs publicados interesan de un vistazo; el historial puede ir plegado. */
   defaultExpanded?: boolean
@@ -21,6 +23,8 @@ export default function PackGroup({
   packs,
   updatingPackId,
   onChangeState,
+  archivingPackId,
+  onRequestDelete,
   emptyMessage,
   defaultExpanded = false,
 }: PackGroupProps) {
@@ -74,6 +78,8 @@ export default function PackGroup({
                   index={idx}
                   updatingPackId={updatingPackId}
                   onChangeState={onChangeState}
+                  archivingPackId={archivingPackId}
+                  onRequestDelete={onRequestDelete}
                 />
               ))}
             </div>
