@@ -14,6 +14,7 @@ import ProfileSettingsForm from '@/components/business/profile/ProfileSettingsFo
 import ProfilePreview from '@/components/business/ProfilePreview'
 import UnsavedChangesBar from '@/components/business/UnsavedChangesBar'
 import { DAY_LABELS } from '@/lib/constants/hours'
+import { translateDbError } from '@/lib/utils/db-errors'
 import {
   buildShopHourPayloads,
   createDefaultHours,
@@ -89,7 +90,7 @@ async function persistHours(
     payloads.map(async (payload, displayIndex) => {
       const { error } = await client.rpc('set_shop_hour', payload)
       if (!error) return null
-      return { day: DAY_LABELS[displayIndex], message: error.message } as HourFailure
+      return { day: DAY_LABELS[displayIndex], message: translateDbError(error) } as HourFailure
     }),
   )
 
@@ -133,7 +134,7 @@ export default function BusinessProfilePage() {
     const loadShop = async () => {
       const { data, error } = await supabase.rpc('get_my_shop')
       if (error) {
-        setToast({ message: error.message, type: 'error' })
+        setToast({ message: translateDbError(error, 'No se pudo cargar el comercio.'), type: 'error' })
         setLoading(false)
         return
       }
@@ -339,7 +340,7 @@ export default function BusinessProfilePage() {
       setToast({ message: msg, type: 'success' })
       setIsDirty(false)
     } catch (err: unknown) {
-      setToast({ message: err instanceof Error ? err.message : 'Error al guardar los cambios', type: 'error' })
+      setToast({ message: translateDbError(err, 'No se pudieron guardar los cambios.'), type: 'error' })
     } finally {
       setSaving(false)
       setIsSaving(false)
