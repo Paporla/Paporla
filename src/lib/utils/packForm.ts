@@ -1,3 +1,16 @@
+/**
+ * Estado del formulario de packs.
+ *
+ * NOMENCLATURA: los campos de este modulo son nombres de INTERFAZ, no de base
+ * de datos. La tabla packs usa price_minor, original_price_minor,
+ * pickup_start_at, pickup_end_at, image_path y status. Aqui se mantienen
+ * price_cents, pickup_date + horas sueltas, image_url e is_active porque es lo
+ * que manejan los campos del formulario, que son tres controles separados
+ * (fecha, hora de inicio, hora de fin) y no dos timestamps.
+ *
+ * La traduccion entre ambos mundos ocurre en un unico sitio,
+ * buildPackContentParams(), para que no se disperse por los componentes.
+ */
 export interface PackFormData {
   title: string
   description: string
@@ -21,6 +34,30 @@ export interface PackFormErrors {
   general?: string
 }
 
+/**
+ * Desfase fijo de Chile. Los packs se crean y se leen con este offset.
+ * DEUDA: cuando haya mas de un mercado debe salir de shops.timezone /
+ * packs.timezone_snapshot en lugar de estar aqui fijado.
+ */
+export const CHILE_UTC_OFFSET = '-04:00'
+
+/** Convierte fecha + hora del formulario en un timestamptz con zona explicita. */
+export function toChileTimestamp(date: string, time: string): string {
+  return `${date}T${time}:00${CHILE_UTC_OFFSET}`
+}
+
+/**
+ * Valida el formulario.
+ *
+ * La recogida es OBLIGATORIA. Antes era opcional y ese fue el origen de los
+ * packs que nacian caducados: sin fecha, pickup_start_at acababa siendo el
+ * momento de creacion, el pack no aparecia en el catalogo (search_available_packs
+ * exige pickup_start_at > now()) y ademas no se podia reanudar.
+ *
+ * La comparacion se hace contra el instante actual real, no contra medianoche:
+ * un pack con recogida hoy a las 09:00 creado a las 11:00 ya es invalido, y la
+ * base de datos lo rechazaria con INVALID_PICKUP_WINDOW.
+ */
 export function validatePackForm(data: PackFormData): PackFormErrors {
   const errors: PackFormErrors = {}
 
@@ -32,59 +69,41 @@ export function validatePackForm(data: PackFormData): PackFormErrors {
     errors.price_cents = 'El precio debe ser mayor a 0'
   }
 
+  if (data.original_price_cents > 0 && data.original_price_cents < data.price_cents) {
+    errors.price_cents = 'El precio original no puede ser menor que el precio de venta'
+  }
+
   if (data.total_stock <= 0) {
     errors.total_stock = 'El stock debe ser mayor a 0'
   }
 
-  if (data.pickup_date) {
-    const pickupDate = new Date(data.pickup_date)
-    const today = new Date()
-    today.setHours(0, 0, 0, 0)
-
-    if (pickupDate < today) {
-      errors.pickup_date = 'La fecha de recogida debe ser hoy o futura'
-    }
+  if (!data.pickup_date) {
+    errors.pickup_date = 'La fecha de recogida es obligatoria'
   }
 
-  if (data.pickup_start_time && data.pickup_end_time) {
+  if (!data.pickup_start_time) {
+    errors.pickup_start_time = 'La hora de inicio es obligatoria'
+  }
+
+  if (!data.pickup_end_time) {
+    errors.pickup_end_time = 'La hora de fin es obligatoria'
+  }
+
+  if (data.pickup_date && data.pickup_start_time && data.pickup_end_time) {
     if (data.pickup_start_time >= data.pickup_end_time) {
       errors.pickup_end_time = 'La hora de fin debe ser posterior a la hora de inicio'
     }
 
-    if (data.pickup_date) {
-      const pickupDate = new Date(data.pickup_date)
-      const today = new Date()
-      today.setHours(0, 0, 0, 0)
+    const start = new Date(toChileTimestamp(data.pickup_date, data.pickup_start_time))
 
-      if (pickupDate.getTime() === today.getTime()) {
-        const [startHours, startMinutes] = data.pickup_start_time.split(':').map(Number)
-        const now = new Date()
-        const startTime = new Date()
-        startTime.setHours(startHours, startMinutes, 0, 0)
-
-        if (startTime < now) {
-          errors.pickup_start_time = 'La hora de inicio no puede ser en el pasado'
-        }
-      }
+    if (Number.isNaN(start.getTime())) {
+      errors.pickup_date = 'La fecha de recogida no es valida'
+    } else if (start.getTime() <= Date.now()) {
+      errors.pickup_start_time = 'La recogida debe empezar en el futuro'
     }
   }
 
   return errors
-}
-
-export function calculateTimestamps(pickupDate: string, startTime: string, endTime: string) {
-  let startsAt: string | null = null
-  let endsAt: string | null = null
-
-  if (pickupDate && startTime) {
-    startsAt = new Date(`${pickupDate}T${startTime}:00`).toISOString()
-  }
-
-  if (pickupDate && endTime) {
-    endsAt = new Date(`${pickupDate}T${endTime}:00`).toISOString()
-  }
-
-  return { startsAt, endsAt }
 }
 
 export function getDefaultPackData(_shopId: string): PackFormData {
@@ -103,6 +122,13 @@ export function getDefaultPackData(_shopId: string): PackFormData {
   }
 }
 
+/**
+ * Rellena el formulario a partir de un pack existente.
+ *
+ * Quien llama debe entregar los datos ya adaptados al contrato de la interfaz
+ * (lo hace la pantalla de edicion en business/packs/[id]/page.tsx, que ademas
+ * resuelve image_path a una URL publica del bucket).
+ */
 export function packToFormData(pack: {
   title: string
   description: string | null
@@ -131,46 +157,65 @@ export function packToFormData(pack: {
   }
 }
 
-export interface PackInsertData {
-  shop_id: string
-  title: string
-  description: string | null
-  price_cents: number
-  original_price_cents: number | null
-  total_stock: number
-  remaining_stock?: number
-  pickup_date: string | null
-  pickup_start_time: string | null
-  pickup_end_time: string | null
-  starts_at: string | null
-  ends_at: string | null
-  image_url: string | null
-  is_active: boolean
-  status?: string
+/**
+ * Campos del pack que el formulario no muestra pero que las RPC exigen.
+ * Se arrastran tal cual desde el pack original para que guardar una edicion
+ * nunca los borre por omision.
+ */
+export interface PackContentExtras {
+  category: string
+  tags: string[]
+  allergen_notice: string
+  handling_notice: string
+  sales_start_at: string
+  image_path: string
+  image_gallery: string[]
 }
 
-export function buildPackInsertData(shopId: string, data: PackFormData, isNew: boolean): PackInsertData {
-  const { startsAt, endsAt } = calculateTimestamps(data.pickup_date, data.pickup_start_time, data.pickup_end_time)
-  const packData: PackInsertData = {
-    shop_id: shopId,
-    title: data.title.trim(),
-    description: data.description.trim() || null,
-    price_cents: data.price_cents,
-    original_price_cents: data.original_price_cents ?? null,
-    total_stock: data.total_stock,
-    pickup_date: data.pickup_date ?? null,
-    pickup_start_time: data.pickup_start_time ?? null,
-    pickup_end_time: data.pickup_end_time ?? null,
-    starts_at: startsAt,
-    ends_at: endsAt,
-    image_url: data.image_url ?? null,
-    is_active: data.is_active,
-  }
+/** Los 14 parametros de create_pack_draft / update_pack_content, en su orden. */
+export interface PackContentParams {
+  p_title: string
+  p_description: string
+  p_category: string
+  p_tags: string[]
+  p_allergen_notice: string
+  p_handling_notice: string
+  p_price_minor: number
+  p_original_price_minor: number
+  p_sales_start_at: string
+  p_pickup_start_at: string
+  p_pickup_end_at: string
+  p_image_path: string
+  p_image_gallery: string[]
+}
 
-  if (isNew) {
-    packData.remaining_stock = data.total_stock
-    packData.status = 'active'
+/**
+ * Unico punto de traduccion entre el formulario y el contrato de la base de
+ * datos. Reglas que aplica:
+ *
+ *  - price_cents -> price_minor. El nombre cambia; el valor es el mismo entero
+ *    en la unidad minima de la moneda. En CLP no hay decimales.
+ *  - Si no se indica precio original, se usa el de venta: la columna es NOT NULL
+ *    en la practica para el calculo de descuento, y un 0 daria un -infinito%.
+ *  - image_path viaja como RUTA del bucket, nunca como URL publica. Guardar la
+ *    URL corromperia la referencia y la imagen dejaria de resolverse.
+ *  - Las horas se envian con el offset de Chile explicito, no en hora local del
+ *    navegador: el comercio y su cliente pueden estar en husos distintos.
+ */
+export function buildPackContentParams(data: PackFormData, extras: PackContentExtras): PackContentParams {
+  return {
+    p_title: data.title.trim(),
+    p_description: data.description.trim(),
+    p_category: extras.category,
+    p_tags: extras.tags,
+    p_allergen_notice: extras.allergen_notice,
+    p_handling_notice: extras.handling_notice,
+    p_price_minor: data.price_cents,
+    p_original_price_minor: data.original_price_cents > 0 ? data.original_price_cents : data.price_cents,
+    p_sales_start_at: extras.sales_start_at,
+    p_pickup_start_at: toChileTimestamp(data.pickup_date, data.pickup_start_time),
+    p_pickup_end_at: toChileTimestamp(data.pickup_date, data.pickup_end_time),
+    p_image_path: extras.image_path,
+    p_image_gallery: extras.image_gallery,
   }
-
-  return packData
 }
