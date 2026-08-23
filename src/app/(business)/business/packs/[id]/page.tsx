@@ -28,6 +28,7 @@ interface PackRow {
   title: string
   description: string | null
   category: string
+  tags: string[] | null
   price_minor: number
   original_price_minor: number | null
   total_stock: number
@@ -36,6 +37,9 @@ interface PackRow {
   pickup_end_at: string
   sales_start_at: string | null
   image_path: string | null
+  image_gallery: string[] | null
+  allergen_notice: string | null
+  handling_notice: string | null
   status: string
   archived_at: string | null
 }
@@ -55,13 +59,18 @@ function toChileDateTime(iso: string): { date: string; time: string } {
 }
 
 /*
- * Traduce la fila real de la base de datos al contrato que hoy espera
- * PackFormSimplified. Es un adaptador temporal: en el paso 2 el formulario
- * pasara a hablar el esquema nuevo y esta funcion desaparece.
+ * Traduce la fila real de la base de datos al contrato del formulario, que usa
+ * los nombres de interfaz (price_cents, pickup_date + horas sueltas, image_url).
  *
- * imageUrl llega ya resuelto porque packs.image_path guarda una ruta relativa
- * dentro del bucket (shopId/packId/archivo.jpg), no una URL. Pasarla en crudo
- * a un <img src> produce una imagen rota.
+ * Se pasan DOS campos distintos para la imagen y no es redundante:
+ *   - image_url: la URL publica ya resuelta, para pintar la vista previa.
+ *   - image_path: la ruta dentro del bucket, que es lo que hay que volver a
+ *     guardar al editar. Mandar la URL a la base de datos corromperia la
+ *     referencia y la imagen dejaria de resolverse.
+ *
+ * category, tags, allergen_notice, handling_notice e image_gallery viajan
+ * aunque el formulario apenas los muestre: update_pack_content reescribe los 14
+ * parametros de golpe, sin merge parcial, asi que lo que no se reenvie se borra.
  */
 function toFormPack(row: PackRow, imageUrl: string | null) {
   const start = toChileDateTime(row.pickup_start_at)
@@ -83,6 +92,12 @@ function toFormPack(row: PackRow, imageUrl: string | null) {
     image_url: imageUrl,
     is_active: row.status === 'active',
     status: row.status,
+    image_path: row.image_path,
+    category: row.category,
+    tags: row.tags,
+    allergen_notice: row.allergen_notice,
+    handling_notice: row.handling_notice,
+    image_gallery: row.image_gallery,
   }
 }
 
