@@ -2,7 +2,7 @@
 
 import { useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
-import { Package, AlertCircle, CheckCircle } from 'lucide-react'
+import { Package, AlertCircle, CheckCircle, Rocket } from 'lucide-react'
 import { logger } from '@/lib/logger'
 import Button from '@/components/ui/Button'
 import Toast from '@/components/ui/Toast'
@@ -18,6 +18,7 @@ import {
   getDefaultPackData,
   packToFormData,
   buildPackContentParams,
+  getPublishBlockers,
 } from '@/lib/utils/packForm'
 
 /*
@@ -60,6 +61,12 @@ interface Props {
   pack?: Pack
   isDuplicate?: boolean
   onSuccess?: () => void
+  /*
+   * shops.status. Solo un comercio 'verified' puede publicar. Llega desde la
+   * pantalla, que ya consulta get_my_shop, para no repetir la llamada aqui.
+   * Si no se pasa, no se bloquea por este motivo y decide la RPC.
+   */
+  shopStatus?: string | null
 }
 
 function fileExt(file: File) {
@@ -68,7 +75,7 @@ function fileExt(file: File) {
   return 'jpg'
 }
 
-export default function PackFormSimplified({ shopId, pack, isDuplicate = false, onSuccess }: Props) {
+export default function PackFormSimplified({ shopId, pack, isDuplicate = false, onSuccess, shopStatus }: Props) {
   const router = useRouter()
   const supabaseRef = useRef(supabaseBrowser())
   const supabase = supabaseRef.current
@@ -79,6 +86,19 @@ export default function PackFormSimplified({ shopId, pack, isDuplicate = false, 
   const [selectedCategory, setSelectedCategory] = useState<string | null>(pack?.category ?? null)
   const [allergenNotice, setAllergenNotice] = useState(pack?.allergen_notice ?? '')
   const [packFile, setPackFile] = useState<File | null>(null)
+  /*
+   * Que boton se pulso, por duplicado y a proposito:
+   *
+   *   - La REF es la que manda al guardar. handleSubmit la lee en el mismo tick
+   *     del submit, cuando un setState todavia no se habria aplicado.
+   *   - El ESTADO existe solo para pintar el spinner en el boton correcto. Leer
+   *     la ref durante el render no dispara re-render (y el linter lo prohibe
+   *     con razon: react-hooks/refs), asi que el spinner se quedaria pegado.
+   *
+   * Los dos se escriben juntos en onClick.
+   */
+  const publishIntentRef = useRef(false)
+  const [pendingAction, setPendingAction] = useState<'save' | 'publish' | null>(null)
   const [formData, setFormData] = useState<PackFormData>(() => {
     if (!pack) {
       return getDefaultPackData(shopId)
@@ -129,6 +149,22 @@ export default function PackFormSimplified({ shopId, pack, isDuplicate = false, 
     total_stock: formData.total_stock,
     image_url: formData.image_url,
   }
+
+  /*
+   * Motivos por los que no se puede publicar todavia. Se recalculan en cada
+   * render para que el aviso siga al formulario mientras se rellena.
+   *
+   * hasImage: vale cualquiera de las tres vias por las que el pack acabara
+   * teniendo imagen — un archivo recien elegido, la que ya tenia, o la del
+   * comercio que createNewPack usa como respaldo.
+   */
+  const publishBlockers = getPublishBlockers(formData, {
+    allergenNotice,
+    hasImage: !!packFile || !!formData.image_url || !!pack?.image_path,
+    shopStatus,
+    packStatus: isEditing ? pack?.status : 'draft',
+  })
+  const canPublish = publishBlockers.length === 0
 
   /*
    * Sube la imagen elegida al bucket y devuelve su RUTA (no su URL).
@@ -193,7 +229,31 @@ export default function PackFormSimplified({ shopId, pack, isDuplicate = false, 
       logger.error('PackFormSimplified savePack', err)
       setError(translateDbError(err, 'No se pudo guardar el pack.'))
       setLoading(false)
+    } finally {
+      publishIntentRef.current = false
+      setPendingAction(null)
     }
+  }
+
+  /*
+   * Publica un pack recien guardado.
+   *
+   * Va DESPUES de guardar y en llamada aparte porque publish_pack es una RPC
+   * independiente: lee de la tabla, asi que el contenido debe estar escrito
+   * antes. Si el guardado fue bien pero la publicacion falla, el pack queda
+   * como borrador con los cambios a salvo y se avisa del motivo; perder lo
+   * escrito seria mucho peor que quedarse sin publicar.
+   */
+  const publishSavedPack = async (packId: string): Promise<boolean> => {
+    const { error: pubErr } = await supabase.rpc('publish_pack', { p_pack_id: packId })
+    if (pubErr) {
+      logger.error('PackFormSimplified publishPack', pubErr)
+      setError(
+        translateDbError(pubErr, 'El pack se guardó, pero no se pudo publicar. Revísalo y publícalo desde la lista.'),
+      )
+      return false
+    }
+    return true
   }
 
   /*
@@ -215,7 +275,17 @@ export default function PackFormSimplified({ shopId, pack, isDuplicate = false, 
     })
     if (updErr) throw updErr
 
-    setSuccess('Cambios guardados.')
+    if (publishIntentRef.current) {
+      const published = await publishSavedPack(current.id)
+      if (!published) {
+        setLoading(false)
+        return
+      }
+      setSuccess('Cambios guardados y pack publicado.')
+    } else {
+      setSuccess('Cambios guardados.')
+    }
+
     setTimeout(() => {
       router.push('/business/packs')
       router.refresh()
@@ -256,11 +326,21 @@ export default function PackFormSimplified({ shopId, pack, isDuplicate = false, 
       if (updErr) throw updErr
     }
 
-    setSuccess(
-      imagePath
-        ? 'Pack guardado como borrador con imagen.'
-        : 'Pack guardado como borrador. Falta imagen para publicar.',
-    )
+    if (publishIntentRef.current) {
+      const published = await publishSavedPack(created.pack_id)
+      if (!published) {
+        setLoading(false)
+        return
+      }
+      setSuccess('Pack publicado. Ya se puede reservar.')
+    } else {
+      setSuccess(
+        imagePath
+          ? 'Pack guardado como borrador con imagen.'
+          : 'Pack guardado como borrador. Falta imagen para publicar.',
+      )
+    }
+
     setTimeout(() => {
       router.push('/business/packs')
       router.refresh()
@@ -336,18 +416,70 @@ export default function PackFormSimplified({ shopId, pack, isDuplicate = false, 
           </div>
         )}
 
-        <div className="flex gap-4 pt-4">
-          <Button type="submit" className="flex-1" disabled={loading} loading={loading}>
-            <Package className="w-4 h-4 mr-2" />
-            {loading
-              ? 'Guardando...'
-              : isEditing
-                ? 'Guardar cambios'
-                : isDuplicate
-                  ? 'Duplicar Pack'
-                  : 'Crear borrador'}
+        {/*
+         * Que falta para publicar. Se muestra solo cuando hay algo que decir,
+         * para que el comercio sepa por que el boton verde no esta disponible
+         * en vez de pulsarlo y recibir un PACK_NOT_PUBLISHABLE sin detalle.
+         */}
+        {!canPublish && publishBlockers.length > 0 && (
+          <div className="rounded-xl border dark:border-white/10 border-gray-200 dark:bg-white/5 bg-gray-50 p-4">
+            <p className="text-sm font-medium dark:text-gray-300 text-gray-700">Para publicar te falta:</p>
+            <ul className="mt-2 space-y-1">
+              {publishBlockers.map((blocker) => (
+                <li key={blocker} className="flex items-start gap-2 text-sm dark:text-gray-400 text-gray-600">
+                  <span className="text-primary mt-0.5">•</span>
+                  {blocker}
+                </li>
+              ))}
+            </ul>
+            <p className="mt-3 text-xs dark:text-gray-500 text-gray-500">
+              Puedes guardarlo como borrador y publicarlo más tarde.
+            </p>
+          </div>
+        )}
+
+        <div className="flex flex-col sm:flex-row gap-3 pt-4">
+          {/*
+           * Publicar es la accion principal: es lo que el comercio quiere de
+           * verdad. Guardar borrador queda como salida secundaria, no como el
+           * unico camino que obligaba a salir y volver a entrar para publicar.
+           */}
+          <Button
+            type="submit"
+            className="flex-1 order-1 sm:order-2"
+            disabled={loading || !canPublish}
+            loading={loading && pendingAction === 'publish'}
+            onClick={() => {
+              publishIntentRef.current = true
+              setPendingAction('publish')
+            }}
+          >
+            <Rocket className="w-4 h-4 mr-2" />
+            Guardar y publicar
           </Button>
-          <Button type="button" variant="outline" onClick={() => router.back()} className="flex-1" disabled={loading}>
+
+          <Button
+            type="submit"
+            variant="outline"
+            className="flex-1 order-2 sm:order-1"
+            disabled={loading}
+            loading={loading && pendingAction === 'save'}
+            onClick={() => {
+              publishIntentRef.current = false
+              setPendingAction('save')
+            }}
+          >
+            <Package className="w-4 h-4 mr-2" />
+            {isEditing ? 'Guardar cambios' : isDuplicate ? 'Guardar copia' : 'Guardar borrador'}
+          </Button>
+
+          <Button
+            type="button"
+            variant="ghost"
+            onClick={() => router.back()}
+            className="sm:w-32 order-3"
+            disabled={loading}
+          >
             Cancelar
           </Button>
         </div>
