@@ -46,6 +46,27 @@ export function toChileTimestamp(date: string, time: string): string {
   return `${date}T${time}:00${CHILE_UTC_OFFSET}`
 }
 
+const CHILE_OFFSET_MINUTES = -240
+
+/**
+ * Fecha (YYYY-MM-DD) en el calendario de Chile, no en UTC.
+ *
+ * Usar new Date().toISOString() para esto es un error silencioso: a las 21:00
+ * en Chile ya es el dia siguiente en UTC, asi que "hoy" salia con la fecha de
+ * manana y el preset ponia un dia de mas. Solo se notaba por la tarde-noche,
+ * que es justo cuando un comercio publica los packs del dia.
+ */
+export function chileDateIn(days: number, from: number = Date.now()): string {
+  const shifted = new Date(from + CHILE_OFFSET_MINUTES * 60000 + days * 86400000)
+  return shifted.toISOString().slice(0, 10)
+}
+
+/** Hora (HH:MM) actual en Chile. */
+export function chileTimeNow(from: number = Date.now()): string {
+  const shifted = new Date(from + CHILE_OFFSET_MINUTES * 60000)
+  return shifted.toISOString().slice(11, 16)
+}
+
 /**
  * Valida el formulario.
  *
@@ -107,7 +128,7 @@ export function validatePackForm(data: PackFormData): PackFormErrors {
 }
 
 export function getDefaultPackData(_shopId: string): PackFormData {
-  const tomorrow = new Date(Date.now() + 86400000).toISOString().split('T')[0]
+  const tomorrow = chileDateIn(1)
   return {
     title: '',
     description: '',
@@ -142,7 +163,7 @@ export function packToFormData(pack: {
   is_active: boolean
   shopLogo?: string | null
 }): PackFormData {
-  const tomorrow = new Date(Date.now() + 86400000).toISOString().split('T')[0]
+  const tomorrow = chileDateIn(1)
   return {
     title: pack.title,
     description: pack.description ?? '',
