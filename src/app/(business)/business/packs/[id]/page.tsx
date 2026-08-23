@@ -6,10 +6,14 @@ import Button from '@/components/ui/Button'
 import PackFormSimplified from '@/components/business/PackFormSimplified'
 import { logger } from '@/lib/logger'
 
+/*
+ * En Next 15+ los params de las rutas dinamicas son una Promise y hay que
+ * await-earlos. Declararlos como objeto plano hace que la desestructuracion
+ * devuelva undefined, se consulte get_my_pack(undefined) y la pagina caiga en
+ * notFound(). Mismo contrato que src/app/(public)/packs/[id]/page.tsx.
+ */
 interface EditPackPageProps {
-  params: {
-    id: string
-  }
+  params: Promise<{ id: string }>
 }
 
 /*
@@ -79,7 +83,7 @@ function toFormPack(row: PackRow) {
 }
 
 export default async function EditPackPage({ params }: EditPackPageProps) {
-  const { id } = params
+  const { id } = await params
 
   const supabase = await createClient()
 
@@ -196,13 +200,16 @@ export default async function EditPackPage({ params }: EditPackPageProps) {
   })
 
   if (packError) {
-    logger.error('EditPackPage getPack', packError)
+    logger.error('EditPackPage getPack', { packId: id, error: packError })
     notFound()
   }
 
   const row = (packPayload as PackRow | null) ?? null
 
   if (!row) {
+    // Sin error de PostgREST pero sin fila: o el uuid no existe, o el pack es
+    // de otro comercio. Se registra el id para poder distinguirlo en los logs.
+    logger.error('EditPackPage packNotFound', { packId: id, shopId: shop.id })
     notFound()
   }
 
