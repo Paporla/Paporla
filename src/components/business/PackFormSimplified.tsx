@@ -127,9 +127,17 @@ export default function PackFormSimplified({ shopId, pack, isDuplicate = false, 
     tags: pack?.tags ?? [],
     allergen_notice: allergenNotice,
     handling_notice: pack?.handling_notice ?? '',
-    sales_start_at: pack?.starts_at ?? new Date().toISOString(),
+    /*
+     * Al duplicar se empieza a vender ahora, no cuando empezo el original: su
+     * sales_start_at es una fecha pasada que no describe al pack nuevo.
+     */
+    sales_start_at: isEditing ? (pack?.starts_at ?? new Date().toISOString()) : new Date().toISOString(),
     image_path: imagePath,
-    image_gallery: pack?.image_gallery ?? [],
+    /*
+     * La galeria tampoco se hereda: sus rutas apuntan a la carpeta del pack
+     * original, asi que la copia quedaria dependiendo de archivos ajenos.
+     */
+    image_gallery: isEditing ? (pack?.image_gallery ?? []) : [],
   })
 
   const handleSubmit = async (e: React.FormEvent) => {
