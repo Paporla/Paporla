@@ -157,7 +157,7 @@ export default async function NewPackPage() {
         </div>
       </div>
       <div className="max-w-4xl mx-auto">
-        <PackFormSimplified shopId={shop.id} />
+        <PackFormSimplified shopId={shop.id} shopStatus={shop.status} />
       </div>
     </div>
   )
