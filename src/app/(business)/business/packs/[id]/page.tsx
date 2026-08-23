@@ -5,6 +5,7 @@ import { ArrowLeft, Copy, Package, ShieldAlert, AlertTriangle, Lock } from 'luci
 import Button from '@/components/ui/Button'
 import PackFormSimplified from '@/components/business/PackFormSimplified'
 import { logger } from '@/lib/logger'
+import { toFormPack, type PackRow } from '@/lib/utils/packRow'
 
 /*
  * En Next 15+ los params de las rutas dinamicas son una Promise y hay que
@@ -14,91 +15,6 @@ import { logger } from '@/lib/logger'
  */
 interface EditPackPageProps {
   params: Promise<{ id: string }>
-}
-
-/*
- * Fila completa de packs, tal y como la devuelve get_my_pack() (migracion 0023).
- * Nombres del esquema actual: price_minor, pickup_start_at, image_path, status.
- * No confundir con los price_cents / pickup_date / is_active del formulario,
- * que son del esquema anterior y se traducen mas abajo en toFormPack().
- */
-interface PackRow {
-  id: string
-  shop_id: string
-  title: string
-  description: string | null
-  category: string
-  tags: string[] | null
-  price_minor: number
-  original_price_minor: number | null
-  total_stock: number
-  remaining_stock: number
-  pickup_start_at: string
-  pickup_end_at: string
-  sales_start_at: string | null
-  image_path: string | null
-  image_gallery: string[] | null
-  allergen_notice: string | null
-  handling_notice: string | null
-  status: string
-  archived_at: string | null
-}
-
-/*
- * Los packs se crean con el desfase fijo de Chile (-04:00), igual que hace
- * PackFormSimplified al llamar a create_pack_draft. Se replica aqui para que
- * la hora que se guardo sea exactamente la que se ve al reabrir el formulario.
- * DEUDA: cuando haya mas de un mercado, esto debe salir de packs.timezone_snapshot.
- */
-const CHILE_OFFSET_MINUTES = -240
-
-function toChileDateTime(iso: string): { date: string; time: string } {
-  const shifted = new Date(new Date(iso).getTime() + CHILE_OFFSET_MINUTES * 60000)
-  const asIso = shifted.toISOString()
-  return { date: asIso.slice(0, 10), time: asIso.slice(11, 16) }
-}
-
-/*
- * Traduce la fila real de la base de datos al contrato del formulario, que usa
- * los nombres de interfaz (price_cents, pickup_date + horas sueltas, image_url).
- *
- * Se pasan DOS campos distintos para la imagen y no es redundante:
- *   - image_url: la URL publica ya resuelta, para pintar la vista previa.
- *   - image_path: la ruta dentro del bucket, que es lo que hay que volver a
- *     guardar al editar. Mandar la URL a la base de datos corromperia la
- *     referencia y la imagen dejaria de resolverse.
- *
- * category, tags, allergen_notice, handling_notice e image_gallery viajan
- * aunque el formulario apenas los muestre: update_pack_content reescribe los 14
- * parametros de golpe, sin merge parcial, asi que lo que no se reenvie se borra.
- */
-function toFormPack(row: PackRow, imageUrl: string | null) {
-  const start = toChileDateTime(row.pickup_start_at)
-  const end = toChileDateTime(row.pickup_end_at)
-
-  return {
-    id: row.id,
-    title: row.title,
-    description: row.description,
-    price_cents: row.price_minor,
-    original_price_cents: row.original_price_minor,
-    total_stock: row.total_stock,
-    remaining_stock: row.remaining_stock,
-    pickup_date: start.date,
-    pickup_start_time: start.time,
-    pickup_end_time: end.time,
-    starts_at: row.sales_start_at,
-    ends_at: row.pickup_end_at,
-    image_url: imageUrl,
-    is_active: row.status === 'active',
-    status: row.status,
-    image_path: row.image_path,
-    category: row.category,
-    tags: row.tags,
-    allergen_notice: row.allergen_notice,
-    handling_notice: row.handling_notice,
-    image_gallery: row.image_gallery,
-  }
 }
 
 export default async function EditPackPage({ params }: EditPackPageProps) {
