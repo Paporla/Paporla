@@ -70,7 +70,12 @@ export default async function EditPackPage({ params }: EditPackPageProps) {
     redirect('/business/profile')
   }
 
-  const shop = (myShop as { shop?: { id: string; name: string; status: string } } | null)?.shop ?? null
+  const shop =
+    (
+      myShop as {
+        shop?: { id: string; name: string; status: string; default_pack_image_path?: string | null }
+      } | null
+    )?.shop ?? null
 
   if (!shop) {
     redirect('/business/profile')
@@ -204,7 +209,12 @@ export default async function EditPackPage({ params }: EditPackPageProps) {
         </div>
 
         <div className="max-w-4xl mx-auto">
-          <PackFormSimplified shopId={shop.id} pack={pack} shopStatus={shop.status} />
+          <PackFormSimplified
+            shopId={shop.id}
+            pack={pack}
+            shopStatus={shop.status}
+            shopImagePath={shop.default_pack_image_path}
+          />
         </div>
       </div>
     )
@@ -282,7 +292,12 @@ export default async function EditPackPage({ params }: EditPackPageProps) {
 
       {isEditable ? (
         <div className="max-w-4xl mx-auto">
-          <PackFormSimplified shopId={shop.id} pack={pack} shopStatus={shop.status} />
+          <PackFormSimplified
+            shopId={shop.id}
+            pack={pack}
+            shopStatus={shop.status}
+            shopImagePath={shop.default_pack_image_path}
+          />
         </div>
       ) : (
         <div className="max-w-4xl mx-auto">

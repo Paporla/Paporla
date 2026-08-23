@@ -2,7 +2,7 @@
 
 import { useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
-import { Package, AlertCircle, CheckCircle, Rocket } from 'lucide-react'
+import { Package, AlertCircle, CheckCircle, Rocket, Image as ImageIcon } from 'lucide-react'
 import { logger } from '@/lib/logger'
 import Button from '@/components/ui/Button'
 import Toast from '@/components/ui/Toast'
@@ -67,6 +67,13 @@ interface Props {
    * Si no se pasa, no se bloquea por este motivo y decide la RPC.
    */
   shopStatus?: string | null
+  /*
+   * shops.default_pack_image_path: la foto que el comercio configuro una vez
+   * en su perfil y que se usa cuando el pack no trae una propia, para no
+   * obligar a subir una imagen en cada publicacion.
+   * Es una RUTA del bucket, no una URL.
+   */
+  shopImagePath?: string | null
 }
 
 function fileExt(file: File) {
@@ -75,7 +82,14 @@ function fileExt(file: File) {
   return 'jpg'
 }
 
-export default function PackFormSimplified({ shopId, pack, isDuplicate = false, onSuccess, shopStatus }: Props) {
+export default function PackFormSimplified({
+  shopId,
+  pack,
+  isDuplicate = false,
+  onSuccess,
+  shopStatus,
+  shopImagePath,
+}: Props) {
   const router = useRouter()
   const supabaseRef = useRef(supabaseBrowser())
   const supabase = supabaseRef.current
@@ -154,13 +168,20 @@ export default function PackFormSimplified({ shopId, pack, isDuplicate = false, 
    * Motivos por los que no se puede publicar todavia. Se recalculan en cada
    * render para que el aviso siga al formulario mientras se rellena.
    *
-   * hasImage: vale cualquiera de las tres vias por las que el pack acabara
-   * teniendo imagen — un archivo recien elegido, la que ya tenia, o la del
-   * comercio que createNewPack usa como respaldo.
+   * hasImage: vale cualquiera de las vias por las que el pack acabara teniendo
+   * imagen — un archivo recien elegido, la que ya tenia, o la foto por defecto
+   * que el comercio configuro en su perfil. Contar esa ultima es lo que evita
+   * pedir una foto en cada publicacion.
+   *
+   * Solo cuenta default_pack_image_path: el logo y la portada retratan el
+   * local, no el producto, y usarlos como foto de pack da mal resultado en el
+   * catalogo.
    */
+  const usesShopImage = !packFile && !formData.image_url && !pack?.image_path && !!shopImagePath
+
   const publishBlockers = getPublishBlockers(formData, {
     allergenNotice,
-    hasImage: !!packFile || !!formData.image_url || !!pack?.image_path,
+    hasImage: !!packFile || !!formData.image_url || !!pack?.image_path || !!shopImagePath,
     shopStatus,
     packStatus: isEditing ? pack?.status : 'draft',
   })
@@ -264,7 +285,12 @@ export default function PackFormSimplified({ shopId, pack, isDuplicate = false, 
    * El stock no se envia: no es un parametro de esta funcion.
    */
   const saveExistingPack = async (current: Pack) => {
-    let imagePath = current.image_path ?? ''
+    /*
+     * Sin imagen propia se cae a la del comercio. Antes esto solo pasaba al
+     * crear, asi que un pack duplicado perdia la foto y no se podia publicar
+     * hasta subir una a mano.
+     */
+    let imagePath = current.image_path ?? shopImagePath ?? ''
     if (packFile) {
       imagePath = await uploadPackImage(current.id, packFile)
     }
@@ -299,9 +325,17 @@ export default function PackFormSimplified({ shopId, pack, isDuplicate = false, 
    * comercio como respaldo) y solo si hay archivo se hace la segunda llamada.
    */
   const createNewPack = async () => {
-    const { data: shopPayload } = await supabase.rpc('get_my_shop')
-    const shopRow = (shopPayload as { shop?: { cover_path?: string | null; logo_path?: string | null } } | null)?.shop
-    const fallbackPath = shopRow?.cover_path || shopRow?.logo_path || ''
+    /*
+     * La foto del comercio ya viaja como prop desde la pantalla, que la obtuvo
+     * de get_my_shop. Solo se vuelve a pedir si no llego, para no gastar una
+     * llamada de mas en el camino normal.
+     */
+    let fallbackPath = shopImagePath ?? ''
+    if (!fallbackPath) {
+      const { data: shopPayload } = await supabase.rpc('get_my_shop')
+      const shopRow = (shopPayload as { shop?: { default_pack_image_path?: string | null } } | null)?.shop
+      fallbackPath = shopRow?.default_pack_image_path ?? ''
+    }
 
     const params = buildPackContentParams(formData, buildExtras(fallbackPath))
 
@@ -393,6 +427,18 @@ export default function PackFormSimplified({ shopId, pack, isDuplicate = false, 
             placeholder="Ej: Puede contener gluten, lácteos y trazas de frutos secos."
           />
         </div>
+
+        {/*
+         * Sin foto propia el pack sale con la del comercio. Se avisa aqui para
+         * que no parezca que se publico sin imagen, y para que quede claro que
+         * subir una es opcional y no un requisito de cada publicacion.
+         */}
+        {usesShopImage && (
+          <p className="flex items-start gap-2 text-sm dark:text-gray-400 text-gray-600">
+            <ImageIcon className="w-4 h-4 mt-0.5 shrink-0 text-primary" />
+            Se usará la foto por defecto de tus packs. Sube una propia solo si quieres destacar este.
+          </p>
+        )}
 
         <PackFormPickupTime data={pickupData} onChange={(d) => setFormData((prev) => ({ ...prev, ...d }))} />
 

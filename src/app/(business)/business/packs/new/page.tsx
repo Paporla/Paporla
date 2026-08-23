@@ -12,6 +12,8 @@ type MyShopPayload = {
     name: string
     status: string
     deleted_at?: string | null
+    /* Respaldo de imagen para los packs que no traen foto propia. */
+    default_pack_image_path?: string | null
   } | null
 }
 
@@ -157,7 +159,7 @@ export default async function NewPackPage() {
         </div>
       </div>
       <div className="max-w-4xl mx-auto">
-        <PackFormSimplified shopId={shop.id} shopStatus={shop.status} />
+        <PackFormSimplified shopId={shop.id} shopStatus={shop.status} shopImagePath={shop.default_pack_image_path} />
       </div>
     </div>
   )
