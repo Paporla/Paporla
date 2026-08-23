@@ -1,5 +1,7 @@
 'use client'
 
+import { useState } from 'react'
+import Image from 'next/image'
 import { Package, Tag } from 'lucide-react'
 import Input from '@/components/ui/Input'
 import ImageUpload from '@/components/ui/ImageUpload'
@@ -27,6 +29,13 @@ interface Props {
    * silencio, asi que se muestra en solo lectura.
    */
   stockReadOnly?: boolean
+  /*
+   * URL publica de la foto por defecto que el comercio configuro en su perfil.
+   * Cuando existe, el campo de subida se pliega detras de un enlace: el caso
+   * normal es no subir nada, y un formulario mas corto es un pack publicado
+   * antes. Se sigue pudiendo abrir para destacar un pack concreto.
+   */
+  defaultImageUrl?: string | null
 }
 
 export default function PackFormBasicInfo({
@@ -36,8 +45,14 @@ export default function PackFormBasicInfo({
   onError,
   onFileChosen,
   stockReadOnly = false,
+  defaultImageUrl,
 }: Props) {
   const update = (partial: Partial<BasicData>) => onChange({ ...data, ...partial })
+
+  /* Ya hay una imagen elegida para este pack: entonces no se pliega nada. */
+  const hasOwnImage = !!data.image_url
+  const canCollapse = !!defaultImageUrl && !hasOwnImage
+  const [showUpload, setShowUpload] = useState(false)
 
   const discount =
     data.original_price_cents > data.price_cents
@@ -135,16 +150,39 @@ export default function PackFormBasicInfo({
           </div>
         )}
 
-        <ImageUpload
-          bucket="pack-images"
-          path={`${shopId}/pending`}
-          deferUpload
-          onFileChosen={onFileChosen}
-          existingImage={data.image_url || null}
-          onUploadComplete={(url) => update({ image_url: url })}
-          onError={onError}
-          label="Foto del pack (si no subes, se usará la del comercio si existe)"
-        />
+        {canCollapse && !showUpload ? (
+          <div className="flex items-center gap-3 rounded-xl dark:bg-white/5 bg-gray-50 border dark:border-white/10 border-gray-200 p-3">
+            {/*
+              Miniatura de la foto del perfil: confirma de un vistazo con que
+              imagen saldra el pack, sin ocupar el espacio de un campo entero.
+              Es decorativa, el texto de al lado ya lo explica.
+            */}
+            <div className="relative w-14 h-14 rounded-lg overflow-hidden shrink-0">
+              <Image src={defaultImageUrl as string} alt="" fill className="object-cover" sizes="56px" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="text-sm dark:text-gray-300 text-gray-700">Se usará la foto por defecto de tus packs.</p>
+              <button
+                type="button"
+                onClick={() => setShowUpload(true)}
+                className="text-sm text-primary hover:underline"
+              >
+                Usar otra foto solo para este pack
+              </button>
+            </div>
+          </div>
+        ) : (
+          <ImageUpload
+            bucket="pack-images"
+            path={`${shopId}/pending`}
+            deferUpload
+            onFileChosen={onFileChosen}
+            existingImage={data.image_url || null}
+            onUploadComplete={(url) => update({ image_url: url })}
+            onError={onError}
+            label={canCollapse ? 'Foto solo para este pack' : 'Foto del pack'}
+          />
+        )}
       </div>
     </div>
   )

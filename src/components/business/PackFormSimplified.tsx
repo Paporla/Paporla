@@ -2,7 +2,7 @@
 
 import { useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
-import { Package, AlertCircle, CheckCircle, Rocket, Image as ImageIcon } from 'lucide-react'
+import { Package, AlertCircle, CheckCircle, Rocket } from 'lucide-react'
 import { logger } from '@/lib/logger'
 import Button from '@/components/ui/Button'
 import Toast from '@/components/ui/Toast'
@@ -177,7 +177,15 @@ export default function PackFormSimplified({
    * local, no el producto, y usarlos como foto de pack da mal resultado en el
    * catalogo.
    */
-  const usesShopImage = !packFile && !formData.image_url && !pack?.image_path && !!shopImagePath
+  /*
+   * shopImagePath es una ruta del bucket; para pintar la miniatura hace falta
+   * la URL publica. shop-images es un bucket publico, asi que getPublicUrl no
+   * hace red: solo compone la cadena. Se usa supabaseBrowser() y no el ref
+   * porque leer un ref durante el render esta prohibido (react-hooks/refs).
+   */
+  const defaultImageUrl = shopImagePath
+    ? supabaseBrowser().storage.from('shop-images').getPublicUrl(shopImagePath).data.publicUrl
+    : null
 
   const publishBlockers = getPublishBlockers(formData, {
     allergenNotice,
@@ -413,6 +421,7 @@ export default function PackFormSimplified({
           onError={setError}
           onFileChosen={(file) => setPackFile(file)}
           stockReadOnly={isEditing}
+          defaultImageUrl={defaultImageUrl}
         />
 
         <div className="dark:bg-black/40 bg-white rounded-2xl p-6 border dark:border-white/10 border-gray-200">
@@ -427,18 +436,6 @@ export default function PackFormSimplified({
             placeholder="Ej: Puede contener gluten, lácteos y trazas de frutos secos."
           />
         </div>
-
-        {/*
-         * Sin foto propia el pack sale con la del comercio. Se avisa aqui para
-         * que no parezca que se publico sin imagen, y para que quede claro que
-         * subir una es opcional y no un requisito de cada publicacion.
-         */}
-        {usesShopImage && (
-          <p className="flex items-start gap-2 text-sm dark:text-gray-400 text-gray-600">
-            <ImageIcon className="w-4 h-4 mt-0.5 shrink-0 text-primary" />
-            Se usará la foto por defecto de tus packs. Sube una propia solo si quieres destacar este.
-          </p>
-        )}
 
         <PackFormPickupTime data={pickupData} onChange={(d) => setFormData((prev) => ({ ...prev, ...d }))} />
 
