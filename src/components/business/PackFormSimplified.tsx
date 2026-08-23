@@ -80,10 +80,39 @@ export default function PackFormSimplified({ shopId, pack, isDuplicate = false, 
   const [allergenNotice, setAllergenNotice] = useState(pack?.allergen_notice ?? '')
   const [packFile, setPackFile] = useState<File | null>(null)
   const [formData, setFormData] = useState<PackFormData>(() => {
-    if (pack && !isDuplicate) {
-      return packToFormData({ ...pack })
+    if (!pack) {
+      return getDefaultPackData(shopId)
     }
-    return getDefaultPackData(shopId)
+
+    const base = packToFormData({ ...pack })
+
+    if (!isDuplicate) {
+      return base
+    }
+
+    /*
+     * DUPLICAR tambien parte de los datos del original: es el sentido de la
+     * pantalla. Antes se ignoraba el pack y se cargaban los valores por
+     * defecto, asi que titulo, descripcion, precios y stock salian vacios,
+     * mientras que categoria y alergenos si se copiaban porque viven en
+     * estados aparte. De ahi que la copia saliera a medias.
+     *
+     * Dos excepciones, que no son datos del pack sino de ESTA venta concreta:
+     *
+     *   - La fecha de recogida vuelve al valor por defecto (manana). La del
+     *     original suele estar ya pasada y la copia naceria caducada, que es
+     *     justo el fallo que se corrigio al hacer la recogida obligatoria.
+     *   - La imagen no se hereda: image_path apunta a la carpeta del pack
+     *     original, asi que la copia dependeria de un archivo ajeno. Se sube
+     *     de nuevo, y mientras tanto se usa la del comercio como respaldo.
+     */
+    const defaults = getDefaultPackData(shopId)
+
+    return {
+      ...base,
+      pickup_date: defaults.pickup_date,
+      image_url: '',
+    }
   })
 
   const pickupData = {
