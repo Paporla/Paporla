@@ -68,6 +68,69 @@ export function chileTimeNow(from: number = Date.now()): string {
 }
 
 /**
+ * Datos que no viven en PackFormData pero que publish_pack exige.
+ * Se pasan aparte porque el formulario los guarda en estados sueltos.
+ */
+export interface PublishContext {
+  /** Aviso de alergenos tal cual lo escribio el comercio. */
+  allergenNotice: string
+  /** Habra imagen cuando se guarde: archivo nuevo, la del pack o la del comercio. */
+  hasImage: boolean
+  /** shops.status. 'verified' es el unico que permite publicar. */
+  shopStatus?: string | null
+  /** packs.status. Solo se publica desde draft o paused. */
+  packStatus?: string | null
+}
+
+/**
+ * Lista lo que impide publicar, en lenguaje de comercio.
+ *
+ * Replica en el cliente las condiciones de publish_pack (migracion 0009) para
+ * poder avisar ANTES de llamar a la RPC, que solo sabe responder con un
+ * PACK_NOT_PUBLISHABLE generico sin decir cual de las seis condiciones fallo.
+ *
+ * Es un espejo, no la autoridad: la base de datos sigue mandando. Si algun dia
+ * cambia publish_pack hay que cambiar esta funcion tambien.
+ */
+export function getPublishBlockers(data: PackFormData, ctx: PublishContext): string[] {
+  const blockers: string[] = []
+
+  if (ctx.shopStatus && ctx.shopStatus !== 'verified') {
+    blockers.push('Tu comercio aún no está verificado.')
+  }
+
+  if (ctx.packStatus && ctx.packStatus !== 'draft' && ctx.packStatus !== 'paused') {
+    blockers.push('Solo se puede publicar un pack en borrador o en pausa.')
+  }
+
+  if (!ctx.allergenNotice.trim()) {
+    blockers.push('Falta el aviso de alérgenos.')
+  }
+
+  if (!ctx.hasImage) {
+    blockers.push('Falta la foto del pack.')
+  }
+
+  if (data.total_stock < 1) {
+    blockers.push('Necesitas al menos 1 unidad disponible.')
+  }
+
+  /*
+   * La ventana de recogida debe seguir en el futuro. validatePackForm ya lo
+   * comprueba, pero alli es un error de formulario y aqui un motivo por el que
+   * el boton de publicar no esta disponible: son dos mensajes distintos.
+   */
+  if (data.pickup_date && data.pickup_start_time) {
+    const start = new Date(toChileTimestamp(data.pickup_date, data.pickup_start_time))
+    if (!Number.isNaN(start.getTime()) && start.getTime() <= Date.now()) {
+      blockers.push('La hora de recogida ya pasó.')
+    }
+  }
+
+  return blockers
+}
+
+/**
  * Valida el formulario.
  *
  * La recogida es OBLIGATORIA. Antes era opcional y ese fue el origen de los
