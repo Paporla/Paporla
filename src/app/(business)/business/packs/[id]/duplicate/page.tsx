@@ -113,7 +113,7 @@ export default async function DuplicatePackPage({ params }: DuplicatePackPagePro
       </div>
 
       <div className="max-w-4xl mx-auto">
-        <PackFormSimplified shopId={shop.id} pack={pack} isDuplicate />
+        <PackFormSimplified shopId={shop.id} pack={pack} isDuplicate shopStatus={shop.status} />
       </div>
     </div>
   )

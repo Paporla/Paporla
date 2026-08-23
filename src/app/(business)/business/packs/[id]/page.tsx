@@ -204,7 +204,7 @@ export default async function EditPackPage({ params }: EditPackPageProps) {
         </div>
 
         <div className="max-w-4xl mx-auto">
-          <PackFormSimplified shopId={shop.id} pack={pack} />
+          <PackFormSimplified shopId={shop.id} pack={pack} shopStatus={shop.status} />
         </div>
       </div>
     )
@@ -282,7 +282,7 @@ export default async function EditPackPage({ params }: EditPackPageProps) {
 
       {isEditable ? (
         <div className="max-w-4xl mx-auto">
-          <PackFormSimplified shopId={shop.id} pack={pack} />
+          <PackFormSimplified shopId={shop.id} pack={pack} shopStatus={shop.status} />
         </div>
       ) : (
         <div className="max-w-4xl mx-auto">
