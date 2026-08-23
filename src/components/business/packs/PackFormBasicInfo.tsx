@@ -19,9 +19,24 @@ interface Props {
   shopId: string
   onError: (err: string) => void
   onFileChosen?: (file: File) => void
+  /*
+   * En edicion el stock NO se toca desde aqui. update_pack_content (0009) no
+   * actualiza total_stock: de eso se encarga adjust_pack_stock, que bloquea la
+   * fila y rechaza bajar por debajo de las unidades ya comprometidas. Dejar el
+   * campo editable haria creer que el cambio se guarda cuando se descarta en
+   * silencio, asi que se muestra en solo lectura.
+   */
+  stockReadOnly?: boolean
 }
 
-export default function PackFormBasicInfo({ data, onChange, shopId, onError, onFileChosen }: Props) {
+export default function PackFormBasicInfo({
+  data,
+  onChange,
+  shopId,
+  onError,
+  onFileChosen,
+  stockReadOnly = false,
+}: Props) {
   const update = (partial: Partial<BasicData>) => onChange({ ...data, ...partial })
 
   const discount =
@@ -81,15 +96,32 @@ export default function PackFormBasicInfo({ data, onChange, shopId, onError, onF
             onChange={(e) => update({ original_price_cents: e.target.value ? parseInt(e.target.value, 10) || 0 : 0 })}
           />
 
-          <Input
-            label="Stock disponible *"
-            type="number"
-            placeholder="10"
-            value={data.total_stock}
-            onChange={(e) => update({ total_stock: parseInt(e.target.value, 10) || 0 })}
-            icon={<Package className="w-4 h-4" />}
-            required
-          />
+          {stockReadOnly ? (
+            <div>
+              <Input
+                label="Stock total"
+                type="number"
+                value={data.total_stock}
+                readOnly
+                disabled
+                icon={<Package className="w-4 h-4" />}
+                className="opacity-60 cursor-not-allowed"
+              />
+              <p className="mt-1.5 text-xs dark:text-gray-500 text-gray-500">
+                El stock se ajusta desde el listado de packs, no aquí.
+              </p>
+            </div>
+          ) : (
+            <Input
+              label="Stock disponible *"
+              type="number"
+              placeholder="10"
+              value={data.total_stock}
+              onChange={(e) => update({ total_stock: parseInt(e.target.value, 10) || 0 })}
+              icon={<Package className="w-4 h-4" />}
+              required
+            />
+          )}
         </div>
 
         <p className="text-xs dark:text-gray-500 text-gray-500">

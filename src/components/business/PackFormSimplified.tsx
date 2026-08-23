@@ -7,11 +7,30 @@ import { logger } from '@/lib/logger'
 import Button from '@/components/ui/Button'
 import Toast from '@/components/ui/Toast'
 import { supabaseBrowser } from '@/lib/supabase/client'
+import { translateDbError } from '@/lib/utils/db-errors'
 import PackCategoryTemplates from './packs/PackCategoryTemplates'
 import PackFormBasicInfo from './packs/PackFormBasicInfo'
 import PackFormPickupTime from './packs/PackFormPickupTime'
-import { PackFormData, validatePackForm, getDefaultPackData, packToFormData } from '@/lib/utils/packForm'
+import {
+  PackFormData,
+  PackContentExtras,
+  validatePackForm,
+  getDefaultPackData,
+  packToFormData,
+  buildPackContentParams,
+} from '@/lib/utils/packForm'
 
+/*
+ * Contrato que la pantalla que monta el formulario debe entregar.
+ *
+ * Los nombres son de INTERFAZ (price_cents, pickup_date, image_url), no de la
+ * tabla packs. La pantalla de edicion traduce la fila real en toFormPack().
+ *
+ * image_url es la URL publica ya resuelta, para pintarla en el <img>.
+ * image_path es la ruta dentro del bucket, que es lo que hay que volver a
+ * guardar. Son dos cosas distintas y por eso viajan en dos campos: confundirlas
+ * fue justo el bug de la imagen rota.
+ */
 interface Pack {
   id: string
   title: string
@@ -28,6 +47,12 @@ interface Pack {
   image_url: string | null
   is_active: boolean
   status: string
+  image_path?: string | null
+  category?: string | null
+  tags?: string[] | null
+  allergen_notice?: string | null
+  handling_notice?: string | null
+  image_gallery?: string[] | null
 }
 
 interface Props {
@@ -35,10 +60,6 @@ interface Props {
   pack?: Pack
   isDuplicate?: boolean
   onSuccess?: () => void
-}
-
-function chileDateTime(date: string, time: string) {
-  return `${date}T${time}:00-04:00`
 }
 
 function fileExt(file: File) {
@@ -55,8 +76,8 @@ export default function PackFormSimplified({ shopId, pack, isDuplicate = false, 
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
-  const [allergenNotice, setAllergenNotice] = useState('')
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(pack?.category ?? null)
+  const [allergenNotice, setAllergenNotice] = useState(pack?.allergen_notice ?? '')
   const [packFile, setPackFile] = useState<File | null>(null)
   const [formData, setFormData] = useState<PackFormData>(() => {
     if (pack && !isDuplicate) {
@@ -80,6 +101,37 @@ export default function PackFormSimplified({ shopId, pack, isDuplicate = false, 
     image_url: formData.image_url,
   }
 
+  /*
+   * Sube la imagen elegida al bucket y devuelve su RUTA (no su URL).
+   * El nombre incluye el packId para que cada pack tenga su propia carpeta y
+   * dos packs no puedan pisarse el archivo.
+   */
+  const uploadPackImage = async (packId: string, file: File) => {
+    const objectPath = `${shopId}/${packId}/${crypto.randomUUID()}.${fileExt(file)}`
+    const { error: upErr } = await supabase.storage.from('pack-images').upload(objectPath, file, {
+      cacheControl: '3600',
+      upsert: false,
+    })
+    if (upErr) throw upErr
+    return objectPath
+  }
+
+  /*
+   * Campos que este formulario no muestra pero que las RPC exigen. Se arrastran
+   * desde el pack original para que guardar una edicion no los borre por
+   * omision: update_pack_content escribe SIEMPRE los 14 parametros, no hace
+   * merge parcial, asi que lo que no se reenvie se pierde.
+   */
+  const buildExtras = (imagePath: string): PackContentExtras => ({
+    category: selectedCategory ?? pack?.category ?? 'surprise',
+    tags: pack?.tags ?? [],
+    allergen_notice: allergenNotice,
+    handling_notice: pack?.handling_notice ?? '',
+    sales_start_at: pack?.starts_at ?? new Date().toISOString(),
+    image_path: imagePath,
+    image_gallery: pack?.image_gallery ?? [],
+  })
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
@@ -87,9 +139,6 @@ export default function PackFormSimplified({ shopId, pack, isDuplicate = false, 
     setSuccess('')
 
     const errors = validatePackForm(formData)
-    if (!formData.pickup_date || !formData.pickup_start_time || !formData.pickup_end_time) {
-      errors.general = 'Fecha y horario de recogida son obligatorios'
-    }
     const firstError = Object.values(errors)[0]
     if (firstError) {
       setError(firstError)
@@ -97,87 +146,89 @@ export default function PackFormSimplified({ shopId, pack, isDuplicate = false, 
       return
     }
 
-    if (isEditing && pack) {
-      setError('La edicion de packs se activara en el siguiente paso.')
-      setLoading(false)
-      return
-    }
-
-    const pickupStart = chileDateTime(formData.pickup_date, formData.pickup_start_time)
-    const pickupEnd = chileDateTime(formData.pickup_date, formData.pickup_end_time)
-    const original = formData.original_price_cents > 0 ? formData.original_price_cents : formData.price_cents
-    const category = selectedCategory ?? 'surprise'
-
     try {
-      const { data: shopPayload } = await supabase.rpc('get_my_shop')
-      const shopRow = (shopPayload as { shop?: { cover_path?: string | null; logo_path?: string | null } } | null)?.shop
-      const fallbackPath = shopRow?.cover_path || shopRow?.logo_path || ''
-
-      const { data, error: err } = await supabase.rpc('create_pack_draft', {
-        p_shop_id: shopId,
-        p_title: formData.title,
-        p_description: formData.description,
-        p_category: category,
-        p_tags: [],
-        p_allergen_notice: allergenNotice,
-        p_handling_notice: '',
-        p_price_minor: formData.price_cents,
-        p_original_price_minor: original,
-        p_total_stock: formData.total_stock,
-        p_sales_start_at: new Date().toISOString(),
-        p_pickup_start_at: pickupStart,
-        p_pickup_end_at: pickupEnd,
-        p_image_path: fallbackPath,
-        p_image_gallery: [],
-      })
-      if (err) throw err
-
-      const created = data as { pack_id?: string }
-      if (!created?.pack_id) throw new Error('No se pudo crear el pack')
-
-      let imagePath = fallbackPath
-      if (packFile) {
-        const objectPath = `${shopId}/${created.pack_id}/${crypto.randomUUID()}.${fileExt(packFile)}`
-        const { error: upErr } = await supabase.storage.from('pack-images').upload(objectPath, packFile, {
-          cacheControl: '3600',
-          upsert: false,
-        })
-        if (upErr) throw upErr
-        imagePath = objectPath
-
-        const { error: updErr } = await supabase.rpc('update_pack_content', {
-          p_pack_id: created.pack_id,
-          p_title: formData.title,
-          p_description: formData.description,
-          p_category: category,
-          p_tags: [],
-          p_allergen_notice: allergenNotice,
-          p_handling_notice: '',
-          p_price_minor: formData.price_cents,
-          p_original_price_minor: original,
-          p_sales_start_at: new Date().toISOString(),
-          p_pickup_start_at: pickupStart,
-          p_pickup_end_at: pickupEnd,
-          p_image_path: imagePath,
-          p_image_gallery: [],
-        })
-        if (updErr) throw updErr
+      if (isEditing && pack) {
+        await saveExistingPack(pack)
+      } else {
+        await createNewPack()
       }
-
-      setSuccess(
-        imagePath
-          ? 'Pack guardado como borrador con imagen.'
-          : 'Pack guardado como borrador. Falta imagen para publicar.',
-      )
-      setTimeout(() => {
-        router.push('/business/packs')
-        onSuccess?.()
-      }, 1500)
     } catch (err: unknown) {
       logger.error('PackFormSimplified savePack', err)
-      setError(err instanceof Error ? err.message : 'Error al guardar el pack')
+      setError(translateDbError(err, 'No se pudo guardar el pack.'))
       setLoading(false)
     }
+  }
+
+  /*
+   * EDICION. update_pack_content exige que el pack este en draft o paused; la
+   * pantalla ya no monta el formulario en otros estados, pero si la RPC lo
+   * rechaza el mensaje se traduce y se muestra tal cual.
+   *
+   * El stock no se envia: no es un parametro de esta funcion.
+   */
+  const saveExistingPack = async (current: Pack) => {
+    let imagePath = current.image_path ?? ''
+    if (packFile) {
+      imagePath = await uploadPackImage(current.id, packFile)
+    }
+
+    const { error: updErr } = await supabase.rpc('update_pack_content', {
+      p_pack_id: current.id,
+      ...buildPackContentParams(formData, buildExtras(imagePath)),
+    })
+    if (updErr) throw updErr
+
+    setSuccess('Cambios guardados.')
+    setTimeout(() => {
+      router.push('/business/packs')
+      router.refresh()
+      onSuccess?.()
+    }, 1200)
+  }
+
+  /*
+   * CREACION. create_pack_draft necesita el pack ya creado para poder subir la
+   * imagen a su carpeta, asi que primero se crea el borrador (con la imagen del
+   * comercio como respaldo) y solo si hay archivo se hace la segunda llamada.
+   */
+  const createNewPack = async () => {
+    const { data: shopPayload } = await supabase.rpc('get_my_shop')
+    const shopRow = (shopPayload as { shop?: { cover_path?: string | null; logo_path?: string | null } } | null)?.shop
+    const fallbackPath = shopRow?.cover_path || shopRow?.logo_path || ''
+
+    const params = buildPackContentParams(formData, buildExtras(fallbackPath))
+
+    const { data, error: err } = await supabase.rpc('create_pack_draft', {
+      p_shop_id: shopId,
+      p_total_stock: formData.total_stock,
+      ...params,
+    })
+    if (err) throw err
+
+    const created = data as { pack_id?: string }
+    if (!created?.pack_id) throw new Error('No se pudo crear el pack')
+
+    let imagePath = fallbackPath
+    if (packFile) {
+      imagePath = await uploadPackImage(created.pack_id, packFile)
+
+      const { error: updErr } = await supabase.rpc('update_pack_content', {
+        p_pack_id: created.pack_id,
+        ...buildPackContentParams(formData, buildExtras(imagePath)),
+      })
+      if (updErr) throw updErr
+    }
+
+    setSuccess(
+      imagePath
+        ? 'Pack guardado como borrador con imagen.'
+        : 'Pack guardado como borrador. Falta imagen para publicar.',
+    )
+    setTimeout(() => {
+      router.push('/business/packs')
+      router.refresh()
+      onSuccess?.()
+    }, 1500)
   }
 
   const handleCategorySelect = (
@@ -210,6 +261,7 @@ export default function PackFormSimplified({ shopId, pack, isDuplicate = false, 
           shopId={shopId}
           onError={setError}
           onFileChosen={(file) => setPackFile(file)}
+          stockReadOnly={isEditing}
         />
 
         <div className="dark:bg-black/40 bg-white rounded-2xl p-6 border dark:border-white/10 border-gray-200">
@@ -253,7 +305,7 @@ export default function PackFormSimplified({ shopId, pack, isDuplicate = false, 
             {loading
               ? 'Guardando...'
               : isEditing
-                ? 'Actualizar Pack'
+                ? 'Guardar cambios'
                 : isDuplicate
                   ? 'Duplicar Pack'
                   : 'Crear borrador'}
