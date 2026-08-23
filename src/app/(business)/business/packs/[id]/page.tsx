@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect, notFound } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowLeft, Copy, Package, ShieldAlert, AlertTriangle } from 'lucide-react'
+import { ArrowLeft, Copy, Package, ShieldAlert, AlertTriangle, Lock } from 'lucide-react'
 import Button from '@/components/ui/Button'
 import PackFormSimplified from '@/components/business/PackFormSimplified'
 import { logger } from '@/lib/logger'
@@ -9,6 +9,72 @@ import { logger } from '@/lib/logger'
 interface EditPackPageProps {
   params: {
     id: string
+  }
+}
+
+/*
+ * Fila completa de packs, tal y como la devuelve get_my_pack() (migracion 0023).
+ * Nombres del esquema actual: price_minor, pickup_start_at, image_path, status.
+ * No confundir con los price_cents / pickup_date / is_active del formulario,
+ * que son del esquema anterior y se traducen mas abajo en toFormPack().
+ */
+interface PackRow {
+  id: string
+  shop_id: string
+  title: string
+  description: string | null
+  category: string
+  price_minor: number
+  original_price_minor: number | null
+  total_stock: number
+  remaining_stock: number
+  pickup_start_at: string
+  pickup_end_at: string
+  sales_start_at: string | null
+  image_path: string | null
+  status: string
+  archived_at: string | null
+}
+
+/*
+ * Los packs se crean con el desfase fijo de Chile (-04:00), igual que hace
+ * PackFormSimplified al llamar a create_pack_draft. Se replica aqui para que
+ * la hora que se guardo sea exactamente la que se ve al reabrir el formulario.
+ * DEUDA: cuando haya mas de un mercado, esto debe salir de packs.timezone_snapshot.
+ */
+const CHILE_OFFSET_MINUTES = -240
+
+function toChileDateTime(iso: string): { date: string; time: string } {
+  const shifted = new Date(new Date(iso).getTime() + CHILE_OFFSET_MINUTES * 60000)
+  const asIso = shifted.toISOString()
+  return { date: asIso.slice(0, 10), time: asIso.slice(11, 16) }
+}
+
+/*
+ * Traduce la fila real de la base de datos al contrato que hoy espera
+ * PackFormSimplified. Es un adaptador temporal: en el paso 2 el formulario
+ * pasara a hablar el esquema nuevo y esta funcion desaparece.
+ */
+function toFormPack(row: PackRow) {
+  const start = toChileDateTime(row.pickup_start_at)
+  const end = toChileDateTime(row.pickup_end_at)
+
+  return {
+    id: row.id,
+    title: row.title,
+    description: row.description,
+    price_cents: row.price_minor,
+    original_price_cents: row.original_price_minor,
+    total_stock: row.total_stock,
+    remaining_stock: row.remaining_stock,
+    pickup_date: start.date,
+    pickup_start_time: start.time,
+    pickup_end_time: end.time,
+    starts_at: row.sales_start_at,
+    ends_at: row.pickup_end_at,
+    image_url: row.image_path,
+    is_active: row.status === 'active',
+    status: row.status,
   }
 }
 
@@ -48,22 +114,26 @@ export default async function EditPackPage({ params }: EditPackPageProps) {
     redirect('/dashboard')
   }
 
-  const { data: shop, error: shopError } = await supabase
-    .from('shops')
-    .select('id, name, status, deleted_at')
-    .eq('owner_id', user.id)
-    .maybeSingle()
+  /*
+   * El comercio se pide con get_my_shop(), no con .from('shops').
+   *
+   * La migracion 0012 hace REVOKE ALL ON ALL TABLES FROM authenticated: en este
+   * proyecto el cliente no lee tablas directamente, todo pasa por funciones
+   * SECURITY DEFINER. Consultar la tabla devolvia 42501 'permission denied for
+   * table shops', el catch redirigia a /business/profile y la pantalla de
+   * edicion era inalcanzable. Dar GRANT sobre shops habria roto el modelo de
+   * seguridad del proyecto entero para arreglar una sola pagina.
+   */
+  const { data: myShop, error: shopError } = await supabase.rpc('get_my_shop')
 
   if (shopError) {
     logger.error('EditPackPage getShop', shopError)
     redirect('/business/profile')
   }
 
-  if (!shop) {
-    redirect('/business/profile')
-  }
+  const shop = (myShop as { shop?: { id: string; name: string; status: string } } | null)?.shop ?? null
 
-  if (shop.deleted_at) {
+  if (!shop) {
     redirect('/business/profile')
   }
 
@@ -108,22 +178,43 @@ export default async function EditPackPage({ params }: EditPackPageProps) {
     )
   }
 
-  const { data: pack, error: packError } = await supabase
-    .from('packs')
-    .select('*')
-    .eq('id', id)
-    .eq('shop_id', shop.id)
-    .is('archived_at', null)
-    .maybeSingle()
+  /*
+   * El pack se pide con get_my_pack() (migracion 0023) por el mismo motivo que
+   * el comercio: la tabla packs tampoco tiene GRANT para `authenticated`.
+   *
+   * No se usa list_my_packs porque solo devuelve las 12 columnas del listado.
+   * El formulario necesita la fila completa (description, category, tags,
+   * allergen_notice, original_price_minor, sales_start_at...): con las 12 se
+   * abriria con campos vacios y al guardar los borraria.
+   *
+   * get_my_pack ya comprueba la propiedad (s.owner_id = auth.uid()), asi que
+   * hace de filtro de autorizacion ademas de fuente de datos: si el pack es de
+   * otro comercio devuelve NULL, no un error.
+   */
+  const { data: packPayload, error: packError } = await supabase.rpc('get_my_pack', {
+    p_pack_id: id,
+  })
 
   if (packError) {
     logger.error('EditPackPage getPack', packError)
     notFound()
   }
 
-  if (!pack) {
+  const row = (packPayload as PackRow | null) ?? null
+
+  if (!row) {
     notFound()
   }
+
+  const pack = toFormPack(row)
+
+  /*
+   * update_pack_content (0009) exige que el pack este en draft o paused; con
+   * cualquier otro estado lanza P0001 PACK_MUST_BE_DRAFT_OR_PAUSED. Se refleja
+   * aqui para no ofrecer un formulario que la base de datos va a rechazar.
+   */
+  const isEditable = row.status === 'draft' || row.status === 'paused'
+  const isFinalStatus = row.status === 'sold_out' || row.status === 'expired' || row.status === 'archived'
 
   if (shop.status !== 'verified') {
     return (
@@ -168,8 +259,6 @@ export default async function EditPackPage({ params }: EditPackPageProps) {
     )
   }
 
-  const isFinalStatus = pack.status === 'sold_out' || pack.status === 'expired' || pack.status === 'archived'
-
   return (
     <div className="space-y-8">
       <div className="relative overflow-hidden bg-gradient-to-br from-primary/5 via-transparent to-secondary/5 -mt-8 -mx-4 px-4 py-8 rounded-b-3xl">
@@ -197,14 +286,13 @@ export default async function EditPackPage({ params }: EditPackPageProps) {
 
               <div className="flex flex-wrap gap-2 mt-4">
                 <span className="inline-flex items-center rounded-full border dark:border-white/10 border-gray-200 dark:bg-white/5 bg-gray-100 px-3 py-1 text-xs dark:text-gray-300 text-gray-700">
-                  Estado:{' '}
-                  <span className="ml-1 dark:text-white text-gray-900 font-medium">{pack.status ?? 'active'}</span>
+                  Estado: <span className="ml-1 dark:text-white text-gray-900 font-medium">{row.status}</span>
                 </span>
 
                 <span className="inline-flex items-center rounded-full border dark:border-white/10 border-gray-200 dark:bg-white/5 bg-gray-100 px-3 py-1 text-xs dark:text-gray-300 text-gray-700">
                   Stock:{' '}
                   <span className="ml-1 dark:text-white text-gray-900 font-medium">
-                    {pack.remaining_stock}/{pack.total_stock}
+                    {row.remaining_stock}/{row.total_stock}
                   </span>
                 </span>
 
@@ -233,18 +321,52 @@ export default async function EditPackPage({ params }: EditPackPageProps) {
               <h2 className="text-sm font-semibold text-yellow-200">Este pack tiene un estado final</h2>
 
               <p className="text-sm text-yellow-100/70 mt-1">
-                Este pack está marcado como <span className="font-medium">{pack.status}</span>. Puedes revisar o
-                duplicar la información, pero para nuevas ventas lo más recomendable es duplicarlo y publicar un pack
-                nuevo.
+                Este pack esta marcado como <span className="font-medium">{row.status}</span>. Puedes revisar o duplicar
+                la informacion, pero para nuevas ventas lo mas recomendable es duplicarlo y publicar un pack nuevo.
               </p>
             </div>
           </div>
         </div>
       )}
 
-      <div className="max-w-4xl mx-auto">
-        <PackFormSimplified shopId={shop.id} pack={pack} />
-      </div>
+      {isEditable ? (
+        <div className="max-w-4xl mx-auto">
+          <PackFormSimplified shopId={shop.id} pack={pack} />
+        </div>
+      ) : (
+        <div className="max-w-4xl mx-auto">
+          <div className="rounded-2xl border dark:border-white/10 border-gray-200 dark:bg-white/5 bg-gray-50 p-6 flex gap-4">
+            <div className="w-11 h-11 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0">
+              <Lock className="w-5 h-5 text-primary" />
+            </div>
+
+            <div className="flex-1">
+              <h2 className="text-lg font-semibold dark:text-white text-gray-900">
+                {row.status === 'active' ? 'Pausa el pack para poder editarlo' : 'Este pack ya no se puede editar'}
+              </h2>
+
+              <p className="text-sm dark:text-gray-400 text-gray-600 mt-2 max-w-2xl">
+                {row.status === 'active'
+                  ? 'Un pack publicado no se puede modificar mientras esta a la venta: alguien podria estar reservandolo en este momento. Ponlo en pausa desde el listado de packs y vuelve aqui para editarlo.'
+                  : 'Solo los packs en borrador o en pausa admiten cambios. Duplica este pack para crear uno nuevo con la misma informacion.'}
+              </p>
+
+              <div className="flex flex-wrap gap-3 mt-5">
+                <Link href="/business/packs">
+                  <Button variant="outline">Ir al listado de packs</Button>
+                </Link>
+
+                <Link href={`/business/packs/${id}/duplicate`}>
+                  <Button variant="outline" className="flex items-center gap-2">
+                    <Copy className="w-4 h-4" />
+                    Duplicar pack
+                  </Button>
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
