@@ -58,8 +58,12 @@ function toChileDateTime(iso: string): { date: string; time: string } {
  * Traduce la fila real de la base de datos al contrato que hoy espera
  * PackFormSimplified. Es un adaptador temporal: en el paso 2 el formulario
  * pasara a hablar el esquema nuevo y esta funcion desaparece.
+ *
+ * imageUrl llega ya resuelto porque packs.image_path guarda una ruta relativa
+ * dentro del bucket (shopId/packId/archivo.jpg), no una URL. Pasarla en crudo
+ * a un <img src> produce una imagen rota.
  */
-function toFormPack(row: PackRow) {
+function toFormPack(row: PackRow, imageUrl: string | null) {
   const start = toChileDateTime(row.pickup_start_at)
   const end = toChileDateTime(row.pickup_end_at)
 
@@ -76,7 +80,7 @@ function toFormPack(row: PackRow) {
     pickup_end_time: end.time,
     starts_at: row.sales_start_at,
     ends_at: row.pickup_end_at,
-    image_url: row.image_path,
+    image_url: imageUrl,
     is_active: row.status === 'active',
     status: row.status,
   }
@@ -213,7 +217,16 @@ export default async function EditPackPage({ params }: EditPackPageProps) {
     notFound()
   }
 
-  const pack = toFormPack(row)
+  /*
+   * El bucket pack-images es publico (0013_storage.sql), asi que basta con
+   * getPublicUrl: no hace falta firmar la URL. Mismo patron que usa la ficha
+   * publica del pack en src/app/(public)/packs/[id]/page.tsx.
+   */
+  const imageUrl = row.image_path
+    ? supabase.storage.from('pack-images').getPublicUrl(row.image_path).data.publicUrl
+    : null
+
+  const pack = toFormPack(row, imageUrl)
 
   /*
    * update_pack_content (0009) exige que el pack este en draft o paused; con
