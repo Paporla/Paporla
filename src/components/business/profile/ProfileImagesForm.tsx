@@ -12,6 +12,12 @@ interface ProfileImagesFormProps {
   /* Foto por defecto de los packs: se configura una vez y la heredan todos. */
   packImageUrl: string
   onPackImageChange: (url: string) => void
+  /*
+   * Los fallos de subida se avisaban con un onError vacio, asi que la imagen
+   * simplemente no aparecia y no habia forma de saber por que. Ahora suben a
+   * la pantalla para que se vean.
+   */
+  onImageError: (message: string) => void
   shopId: string
 }
 
@@ -28,6 +34,7 @@ export default function ProfileImagesForm({
   onCoverChange,
   packImageUrl,
   onPackImageChange,
+  onImageError,
   shopId,
 }: ProfileImagesFormProps) {
   const hasPackImage = !!packImageUrl
@@ -63,7 +70,7 @@ export default function ProfileImagesForm({
           path={`${shopId}/pack-default`}
           existingImage={toPreview('shop-images', packImageUrl)}
           onUploadComplete={onPackImageChange}
-          onError={() => {}}
+          onError={onImageError}
           label="Foto para tus packs (JPEG, PNG o WebP, máx. 2 MB)"
         />
 
@@ -89,7 +96,7 @@ export default function ProfileImagesForm({
           path={`${shopId}/logo`}
           existingImage={toPreview('shop-images', logoUrl)}
           onUploadComplete={onLogoChange}
-          onError={() => {}}
+          onError={onImageError}
           label="Logo del comercio (JPEG, PNG o WebP, máx. 2 MB)"
         />
 
@@ -98,7 +105,7 @@ export default function ProfileImagesForm({
           path={`${shopId}/cover`}
           existingImage={toPreview('shop-images', coverUrl)}
           onUploadComplete={onCoverChange}
-          onError={() => {}}
+          onError={onImageError}
           label="Imagen de portada"
         />
 

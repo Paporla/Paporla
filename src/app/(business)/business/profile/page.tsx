@@ -422,6 +422,7 @@ export default function BusinessProfilePage() {
             onCoverChange={(url) => updateForm('coverUrl', url)}
             packImageUrl={formData.packImageUrl}
             onPackImageChange={(url) => updateForm('packImageUrl', url)}
+            onImageError={(message) => setToast({ message, type: 'error' })}
             shopId={shop?.id ?? ''}
           />
         )}
