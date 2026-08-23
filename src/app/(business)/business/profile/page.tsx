@@ -44,6 +44,7 @@ interface ShopData {
   cover_url: string | null
   logo_path: string | null
   cover_path: string | null
+  default_pack_image_path: string | null
   hours: string | null
   verified: boolean
   owner_id: string
@@ -123,6 +124,7 @@ export default function BusinessProfilePage() {
     instagram: '',
     logoUrl: '',
     coverUrl: '',
+    packImageUrl: '',
     verified: false,
   })
 
@@ -163,6 +165,7 @@ export default function BusinessProfilePage() {
           cover_url: null,
           logo_path: (row.logo_path as string | null) ?? null,
           cover_path: (row.cover_path as string | null) ?? null,
+          default_pack_image_path: (row.default_pack_image_path as string | null) ?? null,
           hours: null,
           verified: row.status === 'verified',
           owner_id: user.id,
@@ -182,6 +185,7 @@ export default function BusinessProfilePage() {
           instagram: mapped.instagram ?? '',
           logoUrl: mapped.logo_path ?? '',
           coverUrl: mapped.cover_path ?? '',
+          packImageUrl: mapped.default_pack_image_path ?? '',
           verified: mapped.verified,
         })
       }
@@ -234,6 +238,7 @@ export default function BusinessProfilePage() {
       if (shop?.id) {
         const logoPath = storagePath(formData.logoUrl, shop.logo_path)
         const coverPath = storagePath(formData.coverUrl, shop.cover_path)
+        const packImagePath = storagePath(formData.packImageUrl, shop.default_pack_image_path)
         const { error } = await supabase.rpc('update_own_shop', {
           p_shop_id: shop.id,
           p_locality_id: SANTIAGO_LOCALITY_ID,
@@ -250,6 +255,8 @@ export default function BusinessProfilePage() {
           p_longitude: parseCoord(formData.longitude),
           p_logo_path: logoPath,
           p_cover_path: coverPath,
+          // Cadena vacia = borrar. La RPC distingue '' de null a proposito.
+          p_default_pack_image_path: packImagePath,
         })
         if (error) throw error
 
@@ -268,6 +275,7 @@ export default function BusinessProfilePage() {
           longitude: parseCoord(formData.longitude),
           logo_path: logoPath || null,
           cover_path: coverPath || null,
+          default_pack_image_path: packImagePath || null,
         })
 
         if (failures.length > 0) {
@@ -321,6 +329,7 @@ export default function BusinessProfilePage() {
         cover_url: null,
         logo_path: null,
         cover_path: null,
+        default_pack_image_path: null,
         hours: null,
         verified: false,
         owner_id: user!.id,
@@ -363,6 +372,7 @@ export default function BusinessProfilePage() {
         instagram: shop.instagram ?? '',
         logoUrl: shop.logo_path ?? '',
         coverUrl: shop.cover_path ?? '',
+        packImageUrl: shop.default_pack_image_path ?? '',
         verified: shop.verified ?? false,
       })
     }
@@ -410,6 +420,8 @@ export default function BusinessProfilePage() {
             coverUrl={formData.coverUrl}
             onLogoChange={(url) => updateForm('logoUrl', url)}
             onCoverChange={(url) => updateForm('coverUrl', url)}
+            packImageUrl={formData.packImageUrl}
+            onPackImageChange={(url) => updateForm('packImageUrl', url)}
             shopId={shop?.id ?? ''}
           />
         )}
