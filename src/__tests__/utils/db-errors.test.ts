@@ -151,6 +151,11 @@ describe('translateDbError', () => {
         'PACK_NOT_RESUMABLE',
         'PACK_NOT_ACTIVE',
         'SHOP_NOT_VERIFIED',
+        'PACK_NOT_OWNED_OR_INACTIVE',
+        'PACK_MUST_BE_DRAFT_OR_PAUSED',
+        'INVALID_PICKUP_WINDOW',
+        'STOCK_BELOW_COMMITTED_UNITS',
+        'INVALID_STOCK_CHANGE',
       ]
       for (const message of reales) {
         const salida = translateDbError({ message, code: 'P0001' }, 'FALLBACK')
@@ -161,4 +166,69 @@ describe('translateDbError', () => {
       }
     })
   })
+
+  describe('edición de packs y stock (0009)', () => {
+    /*
+     * PACK_NOT_OWNED es prefijo de PACK_NOT_OWNED_OR_INACTIVE. Como la búsqueda
+     * es por inclusión, sin ordenar por longitud el segundo recibiría el mensaje
+     * del primero. Este es el test que faltaba: el módulo lo daba por hecho en
+     * un comentario, pero nadie lo comprobaba.
+     */
+    it('distingue PACK_NOT_OWNED_OR_INACTIVE de PACK_NOT_OWNED', () => {
+      const largo = translateDbError({ message: 'PACK_NOT_OWNED_OR_INACTIVE', code: '42501' })
+      const corto = translateDbError({ message: 'PACK_NOT_OWNED', code: '42501' })
+      expect(largo).not.toBe(corto)
+      expect(largo).toMatch(/no está disponible para editar/i)
+      expect(corto).toBe('Este pack no pertenece a tu comercio.')
+    })
+
+    it('pide pausar el pack antes de editarlo', () => {
+      expect(translateDbError({ message: 'PACK_MUST_BE_DRAFT_OR_PAUSED', code: 'P0001' })).toMatch(/pausa/i)
+    })
+
+    it('explica la ventana de recogida invertida', () => {
+      expect(translateDbError({ message: 'INVALID_PICKUP_WINDOW', code: '22023' })).toMatch(/posterior a la de inicio/i)
+    })
+
+    it('explica que no se puede bajar el stock por debajo de lo reservado', () => {
+      const salida = translateDbError({ message: 'STOCK_BELOW_COMMITTED_UNITS', code: 'P0001' })
+      expect(salida).toMatch(/reservado/i)
+      // El RAISE no envía la cifra, así que el texto no debe fingir conocerla.
+      expect(salida).not.toMatch(/\d+ unidades/)
+    })
+
+    it('traduce una cantidad de stock inválida', () => {
+      expect(translateDbError({ message: 'INVALID_STOCK_CHANGE', code: '22023' })).toMatch(/no válida/i)
+    })
+
+    it('el 22023 con mensaje conocido no cae en el texto genérico de SQLSTATE', () => {
+      // Antes, INVALID_PICKUP_WINDOW salía como 'Dato no válido. INVALID_PICKUP_WINDOW'.
+      const salida = translateDbError({ message: 'INVALID_PICKUP_WINDOW', code: '22023' })
+      expect(salida).not.toMatch(/Dato no válido/)
+      expect(salida).not.toMatch(/INVALID_PICKUP_WINDOW/)
+    })
+
+    /*
+     * Red de seguridad para el futuro: si alguien añade una clave que sea
+     * subcadena de otra, el orden por longitud lo resuelve. Este test comprueba
+     * que TODAS las claves se traducen a su propio mensaje, colisionen o no.
+     */
+    it('cada clave se traduce a su propio mensaje, aunque unas contengan a otras', () => {
+      const claves = Object.keys(MENSAJES_ESPERADOS)
+      for (const clave of claves) {
+        expect(translateDbError({ message: clave, code: 'P0001' })).toBe(MENSAJES_ESPERADOS[clave])
+      }
+    })
+  })
 })
+
+/*
+ * Pares clave -> mensaje exacto de los códigos que más se cruzan entre sí.
+ * Se declara fuera del describe para que el test anterior quede legible.
+ */
+const MENSAJES_ESPERADOS: Record<string, string> = {
+  PACK_NOT_OWNED: 'Este pack no pertenece a tu comercio.',
+  PACK_NOT_OWNED_OR_INACTIVE: 'Este pack ya no está disponible para editar. Comprueba que tu comercio siga activo.',
+  PACK_NOT_FOUND: 'No se encontró el pack.',
+  PACK_NOT_ACTIVE: 'Solo puedes pausar un pack que esté activo.',
+}

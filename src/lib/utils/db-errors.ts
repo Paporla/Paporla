@@ -82,10 +82,15 @@ const RPC_MESSAGES: Record<string, string> = {
   ADMIN_REQUIRED: 'Esta acción requiere permisos de administrador.',
   INVALID_REVIEW_DECISION: 'La decisión de revisión no es válida. Debes indicar un motivo de al menos 3 caracteres.',
 
-  // Packs — publish_pack / set_pack_paused / archive_pack (migraciones 0009, 0016)
-  // Invariante verificada por test: ninguna clave de este mapa es subcadena de otra.
-  // La búsqueda es por inclusión, así que si alguna vez lo fuera, el orden decidiría
-  // el resultado y el mensaje podría ser el equivocado.
+  // Packs — publish_pack / set_pack_paused / archive_pack / update_pack_content /
+  // adjust_pack_stock (migraciones 0009, 0016)
+  //
+  // OJO: hay claves que son prefijo de otras (PACK_NOT_OWNED vs
+  // PACK_NOT_OWNED_OR_INACTIVE). La búsqueda por inclusión a secas devolvería
+  // el mensaje de la más corta según el orden del objeto, que es justo el fallo
+  // silencioso que este módulo existe para evitar. Por eso `translateDbError`
+  // ordena las claves de más larga a más corta antes de comparar, y hay un test
+  // que comprueba que las dos se traducen distinto.
   PACK_HAS_ACTIVE_RESERVATIONS:
     'No puedes eliminar este pack porque tiene reservas activas. Pausa el pack para que deje de venderse; podrás eliminarlo cuando se completen o cancelen.',
   PACK_NOT_AUTHORIZED: 'Este pack no pertenece a tu comercio.',
@@ -96,10 +101,32 @@ const RPC_MESSAGES: Record<string, string> = {
   PACK_NOT_FOUND: 'No se encontró el pack.',
   SHOP_NOT_VERIFIED: 'Tu comercio aún no está verificado. No puedes publicar packs hasta que se apruebe.',
 
+  // Edición de contenido — update_pack_content (0009:1477 y 0009:1546)
+  // El pack existe pero no es tuyo, o el comercio está suspendido o cerrado.
+  PACK_NOT_OWNED_OR_INACTIVE: 'Este pack ya no está disponible para editar. Comprueba que tu comercio siga activo.',
+  PACK_MUST_BE_DRAFT_OR_PAUSED:
+    'Para editar este pack, pausa primero su publicación. Mientras está activo no se puede modificar el contenido.',
+  INVALID_PICKUP_WINDOW: 'La hora de fin de la recogida debe ser posterior a la de inicio.',
+
+  // Stock — adjust_pack_stock (0009:1708 y 0009:1714)
+  // El mensaje del RAISE no incluye cuántas unidades hay reservadas, así que no
+  // se puede citar la cifra aquí sin inventarla. Se explica la regla y se apunta
+  // a dónde mirar.
+  STOCK_BELOW_COMMITTED_UNITS:
+    'No puedes dejar el stock por debajo de las unidades que ya te han reservado. Revisa las reservas del pack para saber el mínimo.',
+  INVALID_STOCK_CHANGE:
+    'Cantidad no válida. El stock no puede ser negativo ni cambiarse en un pack caducado o archivado.',
+
   // Sesión / cuenta
   CALLER_NOT_ACTIVE: 'Tu cuenta no está activa. Inicia sesión de nuevo.',
   RATE_LIMITED: 'Demasiados intentos. Espera unos segundos e inténtalo de nuevo.',
 }
+
+/**
+ * Claves de RPC_MESSAGES ordenadas de más larga a más corta. Se calcula una vez
+ * al cargar el módulo, no en cada error.
+ */
+const RPC_MESSAGE_KEYS_BY_LENGTH = Object.keys(RPC_MESSAGES).sort((a, b) => b.length - a.length)
 
 /**
  * Restricciones CHECK de la base de datos. Si una llega hasta el usuario es,
@@ -136,8 +163,10 @@ export function translateDbError(error: unknown, fallback = 'No se pudo completa
   if (!message) return fallback
 
   // 1. ¿Es uno de nuestros RAISE EXCEPTION?
-  for (const [key, text] of Object.entries(RPC_MESSAGES)) {
-    if (message.includes(key)) return text
+  // De la clave más larga a la más corta: si no, 'PACK_NOT_OWNED_OR_INACTIVE'
+  // encajaría con 'PACK_NOT_OWNED' y mostraría el mensaje equivocado.
+  for (const key of RPC_MESSAGE_KEYS_BY_LENGTH) {
+    if (message.includes(key)) return RPC_MESSAGES[key]
   }
 
   // 2. ¿Menciona una restricción CHECK conocida?
