@@ -82,6 +82,20 @@ const RPC_MESSAGES: Record<string, string> = {
   ADMIN_REQUIRED: 'Esta acción requiere permisos de administrador.',
   INVALID_REVIEW_DECISION: 'La decisión de revisión no es válida. Debes indicar un motivo de al menos 3 caracteres.',
 
+  // Reservas — create_payment_reservation (0009:209)
+  // OJO: MARKET_MISMATCH es sufijo de LOCALITY_MARKET_MISMATCH. El orden de
+  // más larga a más corta (RPC_MESSAGE_KEYS_BY_LENGTH) hace que gane la clave
+  // larga, igual que con PACK_NOT_OWNED vs PACK_NOT_OWNED_OR_INACTIVE.
+  USER_ROLE_REQUIRED:
+    'Esta acción está reservada a cuentas de usuario. Si iniciaste sesión con una cuenta de comercio, usa tu cuenta de usuario.',
+  PACK_AND_IDEMPOTENCY_REQUIRED: 'Faltan datos para crear la reserva. Vuelve a intentarlo.',
+  IDEMPOTENCY_KEY_CONFLICT: 'Ya existe una reserva con esos datos para otro pack. Vuelve a intentarlo.',
+  MARKET_MISMATCH: 'Este pack pertenece a otro mercado. Revisa tu ubicación y vuelve a intentarlo.',
+  PACK_NOT_AVAILABLE:
+    'Este pack no está disponible ahora mismo: puede que se agotó o que su ventana de recogida ya no esté abierta.',
+  RESERVATIONS_TEMPORARILY_BLOCKED:
+    'Tu cuenta no puede reservar de momento por las políticas del mercado. Escríbenos si crees que es un error.',
+
   // Packs — publish_pack / set_pack_paused / archive_pack / update_pack_content /
   // adjust_pack_stock (migraciones 0009, 0016)
   //
@@ -139,7 +153,7 @@ const CONSTRAINT_MESSAGES: Record<string, string> = {
   shops_longitude_check: 'La longitud debe estar entre -180 y 180.',
   shops_name_check: 'El nombre del comercio debe tener entre 2 y 160 caracteres.',
   shops_phone_e164_check: 'El teléfono debe tener formato internacional, por ejemplo +56912345678.',
-  shops_website_url_check: 'La web debe empezar por https://',
+  shops_website_url_check: 'La web debe empezar con https://',
   shops_instagram_handle_check: 'El usuario de Instagram solo admite letras, números, puntos y guiones bajos.',
   shops_description_check: 'La descripción no puede superar los 4000 caracteres.',
   shop_hours_time_check: 'La hora de cierre debe ser posterior a la de apertura.',
