@@ -210,13 +210,32 @@ describe('ReserveModal', () => {
     )
   })
 
-  it('cierra con Escape y con clic en el fondo', () => {
+  it('cierra con Escape', () => {
     const onClose = vi.fn()
     render(<ReserveModal isOpen onClose={onClose} pack={makePack()} />)
     fireEvent.keyDown(window, { key: 'Escape' })
     expect(onClose).toHaveBeenCalledTimes(1)
-    const overlay = document.querySelector('[aria-hidden="true"]')
-    if (overlay) fireEvent.click(overlay)
-    expect(onClose).toHaveBeenCalledTimes(2)
+  })
+
+  it('cierra con clic en el fondo (el layer de pantalla completa, no en el panel)', () => {
+    const onClose = vi.fn()
+    render(<ReserveModal isOpen onClose={onClose} pack={makePack()} />)
+    const dialog = screen.getByRole('dialog')
+    fireEvent.click(dialog)
+    expect(onClose).toHaveBeenCalledTimes(1)
+  })
+
+  it('bottom sheet en móvil / centrado en escritorio, y el contenido se scrolle adentro (footer siempre visible)', () => {
+    renderOpen()
+    const dialog = screen.getByRole('dialog')
+    // Móvil: anclado abajo. Escritorio: centrado (flexbox, no translate:
+    // framer-motion pisaría los translate de Tailwind — el bug del modal "muy abajo").
+    expect(dialog.className).toContain('items-end')
+    expect(dialog.className).toContain('sm:items-center')
+    const panel = dialog.firstElementChild as HTMLElement
+    expect(panel.className).toContain('max-h-[100dvh]')
+    expect(panel.className).toContain('flex flex-col')
+    const scrollable = Array.from(panel.querySelectorAll('div')).find((el) => el.className.includes('overflow-y-auto'))
+    expect(scrollable).toBeDefined()
   })
 })
