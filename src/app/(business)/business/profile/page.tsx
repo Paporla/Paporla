@@ -15,6 +15,7 @@ import ProfilePreview from '@/components/business/ProfilePreview'
 import UnsavedChangesBar from '@/components/business/UnsavedChangesBar'
 import { DAY_LABELS } from '@/lib/constants/hours'
 import { translateDbError } from '@/lib/utils/db-errors'
+import { parseShopStatus, canSubmitForReview, getMissingRequiredFields, type ShopStatus } from '@/lib/utils/shopReview'
 import {
   buildShopHourPayloads,
   createDefaultHours,
@@ -46,7 +47,11 @@ interface ShopData {
   cover_path: string | null
   default_pack_image_path: string | null
   hours: string | null
-  verified: boolean
+  /** Estado canonico de la tabla `shops`. Antes solo se guardaba el booleano
+   *  `verified`, que aplastaba los seis estados en dos y hacia que un comercio
+   *  en `draft` leyera "sera revisado en 24-48 horas" sin haberlo enviado. */
+  status: ShopStatus
+  status_reason: string | null
   owner_id: string
 }
 
@@ -109,6 +114,7 @@ export default function BusinessProfilePage() {
   const [saving, setSaving] = useState(false)
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null)
   const [isSaving, setIsSaving] = useState(false)
+  const [submittingReview, setSubmittingReview] = useState(false)
 
   const [formData, setFormData] = useState({
     name: '',
@@ -167,7 +173,8 @@ export default function BusinessProfilePage() {
           cover_path: (row.cover_path as string | null) ?? null,
           default_pack_image_path: (row.default_pack_image_path as string | null) ?? null,
           hours: null,
-          verified: row.status === 'verified',
+          status: parseShopStatus(row.status),
+          status_reason: (row.status_reason as string | null) ?? null,
           owner_id: user.id,
         }
         setShop(mapped)
@@ -186,7 +193,7 @@ export default function BusinessProfilePage() {
           logoUrl: mapped.logo_path ?? '',
           coverUrl: mapped.cover_path ?? '',
           packImageUrl: mapped.default_pack_image_path ?? '',
-          verified: mapped.verified,
+          verified: mapped.status === 'verified',
         })
       }
 
@@ -216,14 +223,19 @@ export default function BusinessProfilePage() {
     setIsDirty(true)
   }
 
-  const handleSave = async (toastMessage?: string) => {
+  /**
+   * Guarda el perfil. Devuelve `true` solo si todo se guardo correctamente,
+   * para que "Guardar y enviar" pueda encadenar el envio a revision sin
+   * mandar a revisar una version que no llego a persistirse.
+   */
+  const handleSave = async (toastMessage?: string): Promise<boolean> => {
     setSaving(true)
     setIsSaving(true)
 
     try {
       if (!formData.name.trim()) {
         setToast({ message: 'El nombre del comercio es obligatorio.', type: 'error' })
-        return
+        return false
       }
 
       // Validar los horarios ANTES de tocar la base de datos: si un día es
@@ -232,7 +244,7 @@ export default function BusinessProfilePage() {
       if (hourErrors.length > 0) {
         setToast({ message: `Revisa los horarios. ${hourErrors[0]}`, type: 'error' })
         setActiveTab('hours')
-        return
+        return false
       }
 
       if (shop?.id) {
@@ -285,13 +297,13 @@ export default function BusinessProfilePage() {
             type: 'error',
           })
           setIsDirty(false)
-          return
+          return false
         }
 
         const msg = typeof toastMessage === 'string' ? toastMessage : 'Perfil y horarios actualizados'
         setToast({ message: msg, type: 'success' })
         setIsDirty(false)
-        return
+        return true
       }
 
       const { data, error } = await supabase.rpc('create_own_shop', {
@@ -331,7 +343,8 @@ export default function BusinessProfilePage() {
         cover_path: null,
         default_pack_image_path: null,
         hours: null,
-        verified: false,
+        status: 'draft',
+        status_reason: null,
         owner_id: user!.id,
       })
 
@@ -342,17 +355,65 @@ export default function BusinessProfilePage() {
           type: 'error',
         })
         setIsDirty(false)
-        return
+        return false
       }
 
       const msg = typeof toastMessage === 'string' ? toastMessage : 'Comercio creado en borrador'
       setToast({ message: msg, type: 'success' })
       setIsDirty(false)
+      return true
     } catch (err: unknown) {
       setToast({ message: translateDbError(err, 'No se pudieron guardar los cambios.'), type: 'error' })
+      return false
     } finally {
       setSaving(false)
       setIsSaving(false)
+    }
+  }
+
+  /**
+   * Envia el comercio a revision (RPC `submit_own_shop_for_review`).
+   *
+   * La RPC exige estado draft|rejected y 8 campos NOT NULL. Aqui se comprueban
+   * ambas cosas ANTES de llamar, para que el comercio no reciba un
+   * `SHOP_PROFILE_INCOMPLETE` generico sin saber que le falta. Las guardas de
+   * abajo son una red de seguridad: la UI ya desactiva el boton en esos casos.
+   */
+  const handleSubmitForReview = async () => {
+    if (!shop?.id) return
+    if (!canSubmitForReview(shop.status)) return
+
+    // Faltan datos obligatorios: no se llama a la RPC para que el comercio no
+    // reciba un SHOP_PROFILE_INCOMPLETE generico. Se le lleva a la pestana.
+    const missing = getMissingRequiredFields(formData)
+    if (missing.length > 0) {
+      setToast({ message: `Faltan datos obligatorios: ${missing.map((f) => f.label).join(', ')}.`, type: 'error' })
+      setActiveTab(missing[0].tab)
+      return
+    }
+
+    setSubmittingReview(true)
+    try {
+      // Hay cambios sin guardar: se guardan primero. Obligar al comercio a
+      // guardar, bajar a buscar el boton y volver arriba a enviar son tres
+      // pasos para un solo gesto. Si el guardado falla, NO se envia: se
+      // revisaria una version distinta de la que el comercio ve en pantalla.
+      if (isDirty) {
+        const saved = await handleSave('Cambios guardados. Enviando a revision...')
+        if (!saved) return
+      }
+
+      const { error } = await supabase.rpc('submit_own_shop_for_review', { p_shop_id: shop.id })
+      if (error) throw error
+
+      // La RPC deja el comercio en `pending_review` y limpia el motivo del
+      // rechazo anterior. Se refleja igual en pantalla para no recargar.
+      setShop({ ...shop, status: 'pending_review', status_reason: null })
+      setToast({ message: 'Comercio enviado a revision. Te avisaremos en 24-48 horas.', type: 'success' })
+    } catch (err: unknown) {
+      setToast({ message: translateDbError(err, 'No se pudo enviar a revision.'), type: 'error' })
+    } finally {
+      setSubmittingReview(false)
     }
   }
 
@@ -373,7 +434,7 @@ export default function BusinessProfilePage() {
         logoUrl: shop.logo_path ?? '',
         coverUrl: shop.cover_path ?? '',
         packImageUrl: shop.default_pack_image_path ?? '',
-        verified: shop.verified ?? false,
+        verified: shop.status === 'verified',
       })
     }
     setIsDirty(false)
@@ -394,15 +455,27 @@ export default function BusinessProfilePage() {
   const filled = completionFields.filter((f) => formData[f as keyof typeof formData]).length
   const completionPercentage = Math.round((filled / completionFields.length) * 100)
 
+  // OJO: `completionPercentage` mide OTROS campos (incluye description y
+  // coverUrl, que la RPC no exige; omite latitud/longitud, que si exige). No
+  // sirve para decidir si se puede enviar a revision: se calcula aparte.
+  const missingRequired = getMissingRequiredFields(formData)
+
   return (
     <div className="space-y-6">
       <BusinessProfileLayout
         activeTab={activeTab}
         onTabChange={setActiveTab}
         shopName={formData.name}
-        verified={formData.verified}
         completionPercentage={completionPercentage}
         onPreview={() => setPreviewMode(true)}
+        status={shop?.status ?? 'draft'}
+        statusReason={shop?.status_reason ?? null}
+        missingFields={missingRequired}
+        hasUnsavedChanges={isDirty}
+        onSubmitForReview={handleSubmitForReview}
+        onGoToTab={setActiveTab}
+        submitting={submittingReview}
+        shopExists={Boolean(shop?.id)}
       >
         <UnsavedChangesBar isDirty={isDirty} onSave={handleSave} onDiscard={handleDiscard} saving={saving} />
         {isSaving && (
