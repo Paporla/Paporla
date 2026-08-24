@@ -3,6 +3,7 @@
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { useState } from 'react'
 import {
   AlertCircle,
   ArrowLeft,
@@ -13,30 +14,34 @@ import {
   Store,
   CheckCircle,
   Shield,
-  Star,
   Truck,
   ExternalLink,
+  Wallet,
 } from 'lucide-react'
 import { motion } from 'framer-motion'
 import Button from '@/components/ui/Button'
-import { formatMinorPrice } from '@/lib/utils/formatPrice'
 import ShareButton from '@/components/ui/ShareButton'
+import ReserveModal from './components/ReserveModal'
+import { useAuth } from '@/hooks/useAuth'
+import { formatMinorPrice } from '@/lib/utils/formatPrice'
+import { getReserveBlockReason, formatPickupWindow } from '@/lib/utils/reserve'
+import { trackClickReserve } from '@/lib/analytics/events'
 
 export interface SerializedPack {
   id: string
   title: string
   description: string | null
   allergen_notice: string | null
-  price_cents: number
-  original_price_cents: number | null
-  total_stock: number
+  category: string
+  price_minor: number
+  original_price_minor: number | null
+  currency_code: string
   remaining_stock: number
-  pickup_date: string | null
-  pickup_start_time: string | null
-  pickup_end_time: string | null
-  ends_at: string | null
+  /** Ventana de recogida, ISO 8601 (NOT NULL en packs, 0004). */
+  pickup_start_at: string
+  pickup_end_at: string
+  timezone: string
   image_url: string | null
-  is_active: boolean
   shop_id: string
   shop: {
     id: string
@@ -53,32 +58,31 @@ export interface SerializedPack {
 
 interface Props {
   initialPack: SerializedPack
-  packId: string
 }
 
-function formatPickup(endsAt: string | null) {
-  if (!endsAt) return null
-  try {
-    return new Intl.DateTimeFormat('es-CL', {
-      weekday: 'long',
-      day: 'numeric',
-      month: 'short',
-      hour: '2-digit',
-      minute: '2-digit',
-      timeZone: 'America/Santiago',
-    }).format(new Date(endsAt))
-  } catch {
-    return null
-  }
+/** El botón deshabilitado SIEMPRE explica por qué (regla del proyecto). */
+const BLOCK_TEXT: Record<string, { label: string; reason: string }> = {
+  'sold-out': {
+    label: 'Agotado',
+    reason: 'Se agotó el stock de este pack. Los comercios publican nuevos packs todos los días.',
+  },
+  'window-passed': {
+    label: 'Recogida finalizada',
+    reason: 'La ventana de recogida de este pack ya terminó.',
+  },
 }
 
 export default function PackDetailClient({ initialPack }: Props) {
   const router = useRouter()
+  const { user, loading: authLoading } = useAuth()
+  const [reserveOpen, setReserveOpen] = useState(false)
+
   const pack = initialPack
-  const priceLabel = (n: number) => formatMinorPrice(n, 'CLP', 'es-CL')
-  const hasDiscount = pack.original_price_cents != null && pack.original_price_cents > pack.price_cents
-  const discount = hasDiscount ? Math.round((1 - pack.price_cents / pack.original_price_cents!) * 100) : null
-  const pickupLabel = formatPickup(pack.ends_at)
+  const priceLabel = (n: number) => formatMinorPrice(n, pack.currency_code, 'es-CL')
+  const hasDiscount = pack.original_price_minor != null && pack.original_price_minor > pack.price_minor
+  const discount = hasDiscount ? Math.round((1 - pack.price_minor / pack.original_price_minor!) * 100) : null
+  const pickupWindow = formatPickupWindow(pack.pickup_start_at, pack.pickup_end_at, pack.timezone)
+  const blockReason = getReserveBlockReason({ remainingStock: pack.remaining_stock, pickupEndAt: pack.pickup_end_at })
 
   if (!pack?.id) {
     return (
@@ -88,6 +92,23 @@ export default function PackDetailClient({ initialPack }: Props) {
         <Button onClick={() => router.push('/packs')}>Volver a packs</Button>
       </div>
     )
+  }
+
+  /**
+   * Clic en "Reservar":
+   *  - Sin sesión → a login con redirect de vuelta a este mismo pack
+   *    (useAuth.signIn respeta el parámetro ?redirect=/).
+   *  - Con sesión → abre el modal de confirmación.
+   * El evento click_reserve del funnel se dispara en los dos casos.
+   */
+  const handleReserve = () => {
+    if (blockReason || authLoading) return
+    trackClickReserve(pack.id, pack.title, pack.price_minor, pack.currency_code)
+    if (!user) {
+      router.push(`/login?redirect=${encodeURIComponent(`/packs/${pack.id}`)}`)
+      return
+    }
+    setReserveOpen(true)
   }
 
   return (
@@ -140,21 +161,22 @@ export default function PackDetailClient({ initialPack }: Props) {
               <h1 className="text-3xl md:text-4xl font-bold dark:text-white text-gray-900 mb-2">{pack.title}</h1>
               <div className="flex items-center justify-between">
                 <div className="flex items-baseline gap-2">
-                  <span className="text-3xl font-bold text-primary">{priceLabel(pack.price_cents)}</span>
+                  <span className="text-3xl font-bold text-primary">{priceLabel(pack.price_minor)}</span>
                   {hasDiscount && (
-                    <span className="text-lg text-gray-500 line-through">{priceLabel(pack.original_price_cents!)}</span>
+                    <span className="text-lg text-gray-500 line-through">{priceLabel(pack.original_price_minor!)}</span>
                   )}
                 </div>
                 <ShareButton
                   title={`${pack.title} — Paporla`}
-                  text={`Pack ${pack.title} por ${priceLabel(pack.price_cents)} en ${pack.shop.name}.`}
+                  text={`Pack ${pack.title} por ${priceLabel(pack.price_minor)} en ${pack.shop.name}.`}
                   variant="icon"
                 />
               </div>
             </div>
 
             <p className="text-sm dark:text-gray-400 text-gray-600">
-              Stock: <span className="text-primary font-semibold">{pack.remaining_stock}</span> / {pack.total_stock}
+              {pack.remaining_stock === 1 ? 'Queda' : 'Quedan'}{' '}
+              <span className="text-primary font-semibold">{pack.remaining_stock}</span> en stock
             </p>
 
             {pack.description && (
@@ -171,16 +193,28 @@ export default function PackDetailClient({ initialPack }: Props) {
               </div>
             )}
 
-            {pickupLabel && (
+            {pickupWindow && (
               <div className="p-4 glass-card rounded-xl flex items-center gap-2 text-sm dark:text-gray-300 text-gray-700">
                 <Clock className="w-4 h-4 text-primary" />
-                Recogida: {pickupLabel}
+                Recogida: {pickupWindow}
               </div>
             )}
 
-            <Button disabled className="w-full py-6 text-lg">
-              Reservas próximamente
-            </Button>
+            <div>
+              <Button
+                onClick={handleReserve}
+                disabled={!!blockReason}
+                loading={authLoading}
+                className="w-full py-6 text-lg"
+              >
+                {blockReason ? BLOCK_TEXT[blockReason].label : 'Reservar'}
+              </Button>
+              {blockReason && (
+                <p className="text-xs text-center dark:text-gray-500 text-gray-400 mt-2">
+                  {BLOCK_TEXT[blockReason].reason}
+                </p>
+              )}
+            </div>
 
             <Link href={`/shops/${pack.shop.id}`}>
               <div className="p-4 glass-card rounded-xl hover:border-primary/50 transition-all">
@@ -207,18 +241,20 @@ export default function PackDetailClient({ initialPack }: Props) {
 
             <div className="flex items-center justify-center gap-4 text-xs dark:text-gray-500 text-gray-400 pt-2">
               <span className="flex items-center gap-1">
-                <Shield className="w-3 h-3" /> Pago seguro
+                <Wallet className="w-3 h-3" /> Sin cobro por ahora
               </span>
               <span className="flex items-center gap-1">
                 <Truck className="w-3 h-3" /> Recogida local
               </span>
               <span className="flex items-center gap-1">
-                <Star className="w-3 h-3" /> Comercio verificado
+                <Shield className="w-3 h-3" /> Comercio verificado
               </span>
             </div>
           </motion.div>
         </div>
       </div>
+
+      <ReserveModal isOpen={reserveOpen} onClose={() => setReserveOpen(false)} pack={pack} />
     </div>
   )
 }

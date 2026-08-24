@@ -24,7 +24,7 @@ function createWrapper() {
 
 const PACK_INFO = {
   title: 'Pack sushi sorpresa',
-  image_path: 'shop-1/pack-1/abc.jpg',
+  imageUrl: 'https://staging.storage.supabase.com/shop-1/pack-1/abc.jpg',
   price_minor: 9990,
   currency_code: 'CLP',
   shopName: 'Sushi Do',
