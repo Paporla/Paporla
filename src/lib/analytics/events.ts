@@ -66,27 +66,35 @@ export function trackViewPackDetail(packId: string, packTitle: string, shopName:
   })
 }
 
-/** Usuario hace clic en "Reservar ahora" (abre el modal de pre-confirmación) */
-export function trackClickReserve(packId: string, packTitle: string, priceCents: number): void {
+/** Usuario hace clic en "Reservar" (abre el modal de pre-confirmación). */
+export function trackClickReserve(packId: string, packTitle: string, amountMinor: number, currencyCode: string): void {
   sendEvent({
     event: 'click_reserve',
     pack_id: packId,
     pack_title: packTitle,
-    price_cents: priceCents,
+    currency: currencyCode,
+    value: minorToMajor(amountMinor, currencyCode),
   })
 }
 
-/** Usuario abre el modal de pre-confirmación (begin_checkout en GA4) */
-export function trackBeginCheckout(packId: string, packTitle: string, priceCents: number, shopName: string): void {
+/** Usuario abre el modal de pre-confirmación (begin_checkout en GA4). */
+export function trackBeginCheckout(
+  packId: string,
+  packTitle: string,
+  amountMinor: number,
+  currencyCode: string,
+  shopName: string,
+): void {
+  const value = minorToMajor(amountMinor, currencyCode)
   sendEvent({
     event: 'begin_checkout',
-    currency: 'CLP',
-    value: priceCents / 100,
+    currency: currencyCode,
+    value,
     items: [
       {
         item_id: packId,
         item_name: packTitle,
-        price: priceCents / 100,
+        price: value,
         item_brand: shopName,
         quantity: 1,
       },

@@ -28,22 +28,31 @@ async function loadPublicPack(id: string) {
   return { supabase, row }
 }
 
+/**
+ * Mapea una fila plana de `search_available_packs` (migración 0014:13) al
+ * shape que pinta la página. Esa RPC solo devuelve packs activos, con stock,
+ * ventana de recogida futura y de comercios verificados: por eso `verified`
+ * es siempre true aquí (un pack de comercio no verificado jamás aparece).
+ *
+ * Los nombres de campo son los canónicos de la base (price_minor,
+ * currency_code, pickup_start_at…), sin la capa heredada de "centavos".
+ */
 function toSerializedPack(row: Record<string, unknown>, imageUrl: string | null): SerializedPack {
   return {
     id: String(row.pack_id),
     title: String(row.title ?? ''),
     description: (row.description as string | null) ?? null,
     allergen_notice: (row.allergen_notice as string | null) ?? null,
-    price_cents: Number(row.price_minor ?? 0),
-    original_price_cents: row.original_price_minor != null ? Number(row.original_price_minor) : null,
-    total_stock: Number(row.remaining_stock ?? 0),
+    category: String(row.category ?? ''),
+    price_minor: Number(row.price_minor ?? 0),
+    original_price_minor: row.original_price_minor != null ? Number(row.original_price_minor) : null,
+    currency_code: String(row.currency_code ?? 'CLP'),
     remaining_stock: Number(row.remaining_stock ?? 0),
-    pickup_date: null,
-    pickup_start_time: null,
-    pickup_end_time: null,
-    ends_at: (row.pickup_end_at as string | null) ?? null,
+    // NOT NULL en packs (0004) y garantizados por el WHERE del search.
+    pickup_start_at: String(row.pickup_start_at ?? ''),
+    pickup_end_at: String(row.pickup_end_at ?? ''),
+    timezone: String(row.timezone ?? 'America/Santiago'),
     image_url: imageUrl,
-    is_active: true,
     shop_id: String(row.shop_id),
     shop: {
       id: String(row.shop_id),
@@ -129,7 +138,7 @@ export default async function PackDetailPage({ params }: Props) {
   return (
     <>
       <script type="application/ld+json" nonce={nonce} dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
-      <PackDetailClient initialPack={initialPack} packId={id} />
+      <PackDetailClient initialPack={initialPack} />
     </>
   )
 }

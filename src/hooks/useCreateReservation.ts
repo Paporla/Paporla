@@ -16,7 +16,8 @@ const RESERVATIONS_QUERY_KEY = 'reservations'
  */
 export interface PackReservationInfo {
   title: string
-  image_path: string | null
+  /** URL pública de la imagen tal como la pinta la UI (no es ruta de storage). */
+  imageUrl: string | null
   price_minor: number
   currency_code: string
   shopName: string
