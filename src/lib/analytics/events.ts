@@ -32,6 +32,20 @@ function sendEvent(event: GtagEvent): void {
   window.gtag('event', event.event, event)
 }
 
+// ─── Helpers de dinero ───────────────────────────────────────
+
+/**
+ * Dígitos decimales por moneda para pasar de unidades menores (como se guardan
+ * en la base) a la unidad mayor (la que entiende GA4). CLP no usa decimales;
+ * el resto de monedas LATAM habituales usan dos.
+ */
+const CURRENCY_FRACTION_DIGITS: Record<string, number> = { CLP: 0 }
+
+function minorToMajor(amountMinor: number, currencyCode: string): number {
+  const digits = CURRENCY_FRACTION_DIGITS[currencyCode] ?? 2
+  return amountMinor / 10 ** digits
+}
+
 // ─── Funnel de conversión ────────────────────────────────────
 
 /** Usuario entra a la página de listado de packs */
@@ -80,24 +94,26 @@ export function trackBeginCheckout(packId: string, packTitle: string, priceCents
   })
 }
 
-/** Reserva confirmada exitosamente (purchase en GA4) */
+/** Reserva confirmada exitosamente (purchase en GA4). */
 export function trackPurchase(
   reservationId: string,
   packId: string,
   packTitle: string,
-  priceCents: number,
+  amountMinor: number,
+  currencyCode: string,
   shopName: string,
 ): void {
+  const value = minorToMajor(amountMinor, currencyCode)
   sendEvent({
     event: 'purchase',
     transaction_id: reservationId,
-    currency: 'CLP',
-    value: priceCents / 100,
+    currency: currencyCode,
+    value,
     items: [
       {
         item_id: packId,
         item_name: packTitle,
-        price: priceCents / 100,
+        price: value,
         item_brand: shopName,
         quantity: 1,
       },
