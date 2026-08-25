@@ -41,6 +41,10 @@ const filaEjemplo = {
   timezone: 'America/Santiago',
   cancel_reason: null,
   created_at: '2026-08-24T12:00:00Z',
+  image_path: 'packs/r-1.jpg',
+  updated_at: '2026-08-24T13:05:00Z',
+  shop_latitude: -33.42,
+  shop_longitude: -70.63,
 }
 
 beforeEach(() => {
@@ -80,6 +84,29 @@ describe('GET /api/reservations', () => {
     const body = await response.json()
     expect(body.reservations[0].total_amount_minor).toBe(2999)
     expect(typeof body.reservations[0].total_amount_minor).toBe('number')
+  })
+
+  it('mapea los campos nuevos de 0028: foto, updated_at y coordenadas (con sus nulos)', async () => {
+    mockRpc.mockResolvedValue({
+      data: [
+        filaEjemplo,
+        { ...filaEjemplo, reservation_id: 'r-2', image_path: null, shop_latitude: null, shop_longitude: null },
+      ],
+      error: null,
+    })
+    mockCreateClient.mockResolvedValue(makeClient(true) as any)
+    const { GET } = await import('@/app/api/reservations/route')
+    const response = await GET(new Request('http://localhost/api/reservations'))
+    const body = await response.json()
+    expect(body.reservations[0].image_path).toBe('packs/r-1.jpg')
+    expect(body.reservations[0].updated_at).toBe('2026-08-24T13:05:00Z')
+    expect(body.reservations[0].shop_latitude).toBe(-33.42)
+    expect(body.reservations[0].shop_latitude).not.toBe('')
+    expect(body.reservations[0].shop_longitude).toBe(-70.63)
+    // Row con nulos en la base: llega como null, no como 0 ni string vacío.
+    expect(body.reservations[1].image_path).toBeNull()
+    expect(body.reservations[1].shop_latitude).toBeNull()
+    expect(body.reservations[1].shop_longitude).toBeNull()
   })
 
   it('pasa el cursor tal cual cuando viene en la URL', async () => {

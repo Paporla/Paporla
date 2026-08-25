@@ -58,13 +58,16 @@ export default function UserDashboardPage() {
     else if (points >= 50) level = 'Rescatador Avanzado'
     else if (points >= 10) level = 'Rescatador'
 
+    // 0028: "Hace X" se cuenta desde el último cambio de la reserva
+    // (updated_at): en una activa es igual a created_at; en una cancelada,
+    // el momento exacto de la cancelación.
     const recentActivities = reservations.slice(0, 5).map((r) => ({
       id: r.reservation_id,
       type: 'reservation' as const,
       title: r.pack_title,
       description: r.shop_name,
       status: r.status,
-      created_at: r.created_at,
+      created_at: r.updated_at || r.created_at,
       link: '/dashboard/reservations',
     }))
 
@@ -105,7 +108,7 @@ export default function UserDashboardPage() {
         />
       )}
 
-      <OnboardingBanner type="user" />
+      <OnboardingBanner type="user" level={stats.level} />
 
       <ErrorBoundary fallback={<div className="p-4 text-sm text-gray-500">Error al cargar banner</div>}>
         <UserWelcomeBanner

@@ -24,11 +24,13 @@ const commerceSteps: Step[] = [
 
 interface Props {
   type: 'user' | 'commerce'
+  /** Nivel real del usuario ("Aprendiz", "Rescatador"...). Si no se pasa, se usa la palabra genérica. */
+  level?: string
 }
 
 const STORAGE_KEY = 'paporla_onboarding_dismissed'
 
-export default function OnboardingBanner({ type }: Props) {
+export default function OnboardingBanner({ type, level }: Props) {
   const [visible, setVisible] = useState(false)
   const steps = type === 'user' ? userSteps : commerceSteps
 
@@ -59,7 +61,7 @@ export default function OnboardingBanner({ type }: Props) {
               <div>
                 <h2 className="text-lg font-bold dark:text-white text-gray-900">
                   Bienvenido a Paporla!{' '}
-                  <span className="text-primary">{type === 'user' ? 'Rescatador' : 'Comercio'}</span>
+                  <span className="text-primary">{type === 'user' ? (level ?? 'Rescatador') : 'Comercio'}</span>
                 </h2>
                 <p className="text-sm dark:text-gray-400 text-gray-600 mt-1">
                   {type === 'user'

@@ -36,6 +36,11 @@ describe('formatRelativeDate', () => {
     expect(formatRelativeDate('2024-06-15T14:00:00Z')).toBe('Hace 4 horas')
   })
 
+  it('returns singular "Hace 1 hora" when exactly one hour', () => {
+    vi.setSystemTime(new Date('2024-06-15T15:00:00Z'))
+    expect(formatRelativeDate('2024-06-15T14:00:00Z')).toBe('Hace 1 hora')
+  })
+
   it('returns "Ayer" for yesterday', () => {
     vi.setSystemTime(new Date('2024-06-15T12:00:00Z'))
     expect(formatRelativeDate('2024-06-14T10:00:00Z')).toBe('Ayer')

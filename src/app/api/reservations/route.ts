@@ -63,6 +63,11 @@ export async function GET(request: Request) {
     ...row,
     total_amount_minor: Number(row.total_amount_minor ?? 0),
     cancel_reason: (row.cancel_reason as string | null) ?? null,
+    // 0028: foto, último cambio y coordenadas del comercio (nulos en la base).
+    image_path: (row.image_path as string | null) ?? null,
+    updated_at: (row.updated_at as string | null) ?? '',
+    shop_latitude: row.shop_latitude != null ? Number(row.shop_latitude) : null,
+    shop_longitude: row.shop_longitude != null ? Number(row.shop_longitude) : null,
   }))
 
   return NextResponse.json({ success: true, reservations })
