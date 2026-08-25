@@ -13,10 +13,13 @@ vi.mock('@/lib/analytics/events', () => ({
   trackPurchase: vi.fn(),
 }))
 
+let activeQueryClient: QueryClient | null = null
+
 function createWrapper() {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false } },
   })
+  activeQueryClient = queryClient
   return function Wrapper({ children }: { children: React.ReactNode }) {
     return <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
   }
@@ -72,6 +75,7 @@ function argsOf(callIndex: number): { p_pack_id: string; p_idempotency_key: stri
 describe('useCreateReservation', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    activeQueryClient = null
     setupMockClient()
     rpc.mockResolvedValue(rpcSuccess())
     mockUseAuth.mockReturnValue({ user: { id: 'user-1', email: 'user@paporla.cl', displayName: 'Test' } })
@@ -187,5 +191,25 @@ describe('useCreateReservation', () => {
     })
 
     expect(trackPurchase).toHaveBeenCalledWith('res-1', 'pack-1', 'Pack sushi sorpresa', 9990, 'CLP', 'Sushi Do')
+  })
+
+  it('al exito invalida la caché del catálogo (public-packs) y de "mis reservas"', async () => {
+    const wrapper = createWrapper()
+    const qc = activeQueryClient!
+    // Datos cacheados como si el usuario estuviera navegando antes de reservar.
+    qc.setQueryData(['public-packs', 'cl-market', '', null, null, 10], ['pack-1'])
+    qc.setQueryData(['reservations'], [])
+
+    const { result } = renderHook(() => useCreateReservation(), { wrapper })
+
+    await act(async () => {
+      await result.current.createReservation('pack-1', PACK_INFO)
+    })
+
+    // El hook no hace fetch él mismo: marca las cachés como stale para que el
+    // catálogo y el dashboard se actualicen en cuanto se usen ("Seguir
+    // explorando" ya no mostraría el pack agotado esperando 30 s ni F5).
+    expect(qc.getQueryState(['public-packs', 'cl-market', '', null, null, 10])?.isInvalidated).toBe(true)
+    expect(qc.getQueryState(['reservations'])?.isInvalidated).toBe(true)
   })
 })
