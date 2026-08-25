@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import Link from 'next/link'
-import { ShoppingBag, Eye, Clock, CheckCircle, XCircle, ChevronDown, ChevronUp } from 'lucide-react'
+import { ShoppingBag, Eye, Clock, CheckCircle, XCircle, ChevronDown, ChevronUp, Ban } from 'lucide-react'
 import { formatRelativeDate } from '@/lib/utils/formatDate'
 import { formatPrice } from '@/lib/utils/formatPrice'
 
@@ -31,17 +31,28 @@ interface RecentActivityProps {
   activities?: Activity[]
 }
 
+/**
+ * Estados canónicos (los mismos de RESERVATION_STATUSES). No incluye el
+ * legacy 'pending': el dashboard solo emite estados de list_my_reservations.
+ * Un estado desconocido cae al fallback de abajo y se muestra crudo.
+ */
 const statusConfig: Record<
   string,
   { label: string; icon: React.ComponentType<{ className?: string }>; color: string; bg: string }
 > = {
+  payment_pending: {
+    label: 'Aguardando confirmación',
+    icon: Clock,
+    color: 'text-amber-400',
+    bg: 'bg-amber-500/10',
+  },
   confirmed: { label: 'Confirmada', icon: CheckCircle, color: 'text-blue-400', bg: 'bg-blue-500/10' },
-  pending: { label: 'Pendiente', icon: Clock, color: 'text-yellow-400', bg: 'bg-yellow-500/10' },
   ready_pickup: { label: 'Lista para recoger', icon: Clock, color: 'text-primary', bg: 'bg-primary/10' },
   picked_up: { label: 'Recogido', icon: CheckCircle, color: 'text-green-400', bg: 'bg-green-500/10' },
   completed: { label: 'Completado', icon: CheckCircle, color: 'text-green-400', bg: 'bg-green-500/10' },
   cancelled: { label: 'Cancelado', icon: XCircle, color: 'text-red-400', bg: 'bg-red-500/10' },
-  no_show: { label: 'No retirado', icon: XCircle, color: 'text-gray-400', bg: 'bg-gray-500/10' },
+  no_show: { label: 'No retirado', icon: XCircle, color: 'text-orange-400', bg: 'bg-orange-500/10' },
+  expired: { label: 'Expirada', icon: Ban, color: 'text-gray-400', bg: 'bg-gray-500/10' },
 }
 
 export default function RecentActivity({ activities = [] }: RecentActivityProps) {
@@ -57,7 +68,8 @@ export default function RecentActivity({ activities = [] }: RecentActivityProps)
       icon: Clock,
       color: 'text-primary',
       bg: 'bg-primary/10',
-      activities: activities.filter((a) => ['pending', 'confirmed', 'ready_pickup'].includes(a.status ?? '')),
+      // payment_pending SÍ es activa: el usuario puede seguirla y cancelarla.
+      activities: activities.filter((a) => ['payment_pending', 'confirmed', 'ready_pickup'].includes(a.status ?? '')),
     },
     {
       title: 'Completadas',
@@ -67,11 +79,11 @@ export default function RecentActivity({ activities = [] }: RecentActivityProps)
       activities: activities.filter((a) => ['picked_up', 'completed'].includes(a.status ?? '')),
     },
     {
-      title: 'Canceladas',
+      title: 'Canceladas y no retiradas',
       icon: XCircle,
       color: 'text-red-400',
       bg: 'bg-red-500/10',
-      activities: activities.filter((a) => a.status === 'cancelled'),
+      activities: activities.filter((a) => ['cancelled', 'no_show', 'expired'].includes(a.status ?? '')),
     },
   ].filter((group) => group.activities.length > 0)
 
@@ -102,7 +114,7 @@ export default function RecentActivity({ activities = [] }: RecentActivityProps)
           <h3 className="text-lg font-semibold dark:text-white text-gray-900">Actividad reciente</h3>
           <p className="text-xs dark:text-gray-500 text-gray-400">Tus reservas y movimientos</p>
         </div>
-        <Link href="/reservations" className="text-xs text-primary hover:text-primary/80 transition-colors">
+        <Link href="/dashboard/reservations" className="text-xs text-primary hover:text-primary/80 transition-colors">
           Ver todas →
         </Link>
       </div>

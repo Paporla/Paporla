@@ -96,6 +96,20 @@ const RPC_MESSAGES: Record<string, string> = {
   RESERVATIONS_TEMPORARILY_BLOCKED:
     'Tu cuenta no puede reservar de momento por las políticas del mercado. Escríbenos si crees que es un error.',
 
+  // Reservas — list_my_reservations (0014:281)
+  // Solo debería dispararse con un cursor a medias (created_at sin id o al
+  // revés), que la API nunca envía; por si acaso el usuario ve algo humano.
+  INVALID_RESERVATION_PAGE_ARGUMENTS: 'No se pudo cargar la página de reservas. Vuelve a intentarlo.',
+
+  // Reservas — cancel_reservation (0009:366)
+  // La UI ya pide el motivo antes de llamar; si aun así llega este error,
+  // el texto repite la regla en vez de soltar el código del RAISE.
+  CANCELLATION_REASON_REQUIRED: 'Para cancelar, indícanos un motivo (al menos 3 letras).',
+  RESERVATION_NOT_FOUND: 'La reserva no existe o ya no está disponible.',
+  RESERVATION_NOT_CANCELLABLE: 'Esta reserva ya no puede cancelarse.',
+  NOT_AUTHORIZED_FOR_RESERVATION: 'No tienes permiso para gestionar esta reserva.',
+  CANCELLATION_WINDOW_CLOSED: 'Pasó el plazo para cancelar esta reserva.',
+
   // Packs — publish_pack / set_pack_paused / archive_pack / update_pack_content /
   // adjust_pack_stock (migraciones 0009, 0016)
   //

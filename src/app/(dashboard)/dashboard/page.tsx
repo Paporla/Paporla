@@ -16,8 +16,7 @@ import RecentActivity from '@/components/dashboard/RecentActivity'
 import DashboardSkeleton from '@/components/dashboard/DashboardSkeleton'
 import Toast from '@/components/ui/Toast'
 import ErrorBoundary from '@/components/ErrorBoundary'
-import { sortReservationsByPickupTime } from '@/lib/constants/reservations'
-import type { ReservationWithDetails } from '@/types/reservation'
+import { isActiveStatus, sortReservationsByPickupTime } from '@/lib/constants/reservations'
 
 export default function UserDashboardPage() {
   const { user } = useAuth()
@@ -25,7 +24,7 @@ export default function UserDashboardPage() {
   const { reservations, loading, error: hookError } = useReservations()
   const [showReservedToast, setShowReservedToast] = useState(false)
 
-  // Mostrar toast de exito cuando el usuario viene de una reserva exitosa
+  // Mostrar toast cuando el usuario viene de una reserva exitosa
   useEffect(() => {
     if (searchParams.get('reserved') === 'true') {
       setShowReservedToast(true)
@@ -37,13 +36,20 @@ export default function UserDashboardPage() {
   }, [searchParams])
 
   const { activeReservations, stats, activities } = useMemo(() => {
-    const valid = reservations.filter((r): r is ReservationWithDetails => !!r.pack && !!r.shop)
-    const active = sortReservationsByPickupTime(valid.filter((r) => ['confirmed', 'pending'].includes(r.status)))
-    const completed = valid.filter((r) => r.status === 'picked_up')
+    // La API ya devuelve las filas en orden más reciente primero
+    // (created_at DESC en list_my_reservations), con todos los campos
+    // canónicos: no hay nada que filtrar por "completitud".
+    const active = sortReservationsByPickupTime(reservations.filter((r) => isActiveStatus(r.status)))
+    const completed = reservations.filter((r) => r.status === 'picked_up' || r.status === 'completed')
 
     const totalPacksRescued = completed.length
     const co2Saved = Math.round(totalPacksRescued * 1.2)
-    const moneySavedCents = completed.reduce((sum, r) => sum + (r.total_price_cents ?? 0), 0)
+    // moneySaved en unidades mayores. CLP no tiene decimales; cuando LATAM
+    // use monedas con centavos, se dividen entre 100.
+    const moneySaved = completed.reduce(
+      (sum, r) => sum + r.total_amount_minor / 10 ** (r.currency_code === 'CLP' ? 0 : 2),
+      0,
+    )
     const points = totalPacksRescued * 10
 
     let level = 'Aprendiz'
@@ -52,14 +58,14 @@ export default function UserDashboardPage() {
     else if (points >= 50) level = 'Rescatador Avanzado'
     else if (points >= 10) level = 'Rescatador'
 
-    const recentActivities = valid.slice(0, 5).map((r) => ({
-      id: r.id,
+    const recentActivities = reservations.slice(0, 5).map((r) => ({
+      id: r.reservation_id,
       type: 'reservation' as const,
-      title: r.pack.title,
-      description: `${r.shop.name} - ${r.quantity ?? 1}x`,
+      title: r.pack_title,
+      description: r.shop_name,
       status: r.status,
       created_at: r.created_at,
-      link: '/reservations',
+      link: '/dashboard/reservations',
     }))
 
     return {
@@ -68,7 +74,7 @@ export default function UserDashboardPage() {
         activeReservations: active.length,
         totalPacksRescued,
         co2Saved,
-        moneySaved: moneySavedCents / 100,
+        moneySaved,
         points,
         level,
       },
@@ -89,10 +95,10 @@ export default function UserDashboardPage() {
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-primary/[0.02] rounded-full blur-3xl" />
       </div>
 
-      {/* Toast de reserva exitosa */}
+      {/* Toast de reserva exitosa (mensaje honesto: el código llega en la fase 4) */}
       {showReservedToast && (
         <Toast
-          message="Reserva confirmada! Presenta tu codigo al recoger el pedido."
+          message="¡Reserva creada! El comercio la confirma pronto. Podrás seguirla en Mis reservas."
           type="success"
           onClose={() => setShowReservedToast(false)}
           duration={6000}

@@ -220,6 +220,56 @@ describe('translateDbError', () => {
       }
     })
   })
+
+  describe('errores de cancelación (cancel_reservation, 0009:366)', () => {
+    it('pide el motivo cuando falta o es muy corto', () => {
+      const salida = translateDbError({ message: 'CANCELLATION_REASON_REQUIRED', code: '22023' })
+      expect(salida).toBe('Para cancelar, indícanos un motivo (al menos 3 letras).')
+    })
+
+    it('traduce la reserva inexistente', () => {
+      expect(translateDbError({ message: 'RESERVATION_NOT_FOUND', code: 'P0002' })).toBe(
+        'La reserva no existe o ya no está disponible.',
+      )
+    })
+
+    it('traduce el estado no cancelable', () => {
+      expect(translateDbError({ message: 'RESERVATION_NOT_CANCELLABLE', code: 'P0001' })).toBe(
+        'Esta reserva ya no puede cancelarse.',
+      )
+    })
+
+    it('traduce el falta de permiso', () => {
+      expect(translateDbError({ message: 'NOT_AUTHORIZED_FOR_RESERVATION', code: '42501' })).toBe(
+        'No tienes permiso para gestionar esta reserva.',
+      )
+    })
+
+    it('traduce el plazo agotado', () => {
+      expect(translateDbError({ message: 'CANCELLATION_WINDOW_CLOSED', code: 'P0001' })).toBe(
+        'Pasó el plazo para cancelar esta reserva.',
+      )
+    })
+
+    it('traduce el cursor inválido de la lista', () => {
+      expect(translateDbError({ message: 'INVALID_RESERVATION_PAGE_ARGUMENTS', code: '22023' })).toBe(
+        'No se pudo cargar la página de reservas. Vuelve a intentarlo.',
+      )
+    })
+
+    /*
+     * RESERVATION_NOT_FOUND y RESERVATION_NOT_CANCELLABLE comparten el prefijo
+     * 'RESERVATION_NOT_'. Sin el orden de más larga a más corta, uno se
+     * tragaría al otro según el orden del objeto. Este test frena ese futuro.
+     */
+    it('no confunde RESERVATION_NOT_FOUND con RESERVATION_NOT_CANCELLABLE', () => {
+      const noEncontrada = translateDbError({ message: 'RESERVATION_NOT_FOUND', code: 'P0002' })
+      const noCancelable = translateDbError({ message: 'RESERVATION_NOT_CANCELLABLE', code: 'P0001' })
+      expect(noEncontrada).not.toBe(noCancelable)
+      expect(noEncontrada).toContain('no existe')
+      expect(noCancelable).toContain('ya no puede cancelarse')
+    })
+  })
 })
 
 /*
@@ -231,4 +281,10 @@ const MENSAJES_ESPERADOS: Record<string, string> = {
   PACK_NOT_OWNED_OR_INACTIVE: 'Este pack ya no está disponible para editar. Comprueba que tu comercio siga activo.',
   PACK_NOT_FOUND: 'No se encontró el pack.',
   PACK_NOT_ACTIVE: 'Solo puedes pausar un pack que esté activo.',
+  CANCELLATION_REASON_REQUIRED: 'Para cancelar, indícanos un motivo (al menos 3 letras).',
+  RESERVATION_NOT_FOUND: 'La reserva no existe o ya no está disponible.',
+  RESERVATION_NOT_CANCELLABLE: 'Esta reserva ya no puede cancelarse.',
+  NOT_AUTHORIZED_FOR_RESERVATION: 'No tienes permiso para gestionar esta reserva.',
+  CANCELLATION_WINDOW_CLOSED: 'Pasó el plazo para cancelar esta reserva.',
+  INVALID_RESERVATION_PAGE_ARGUMENTS: 'No se pudo cargar la página de reservas. Vuelve a intentarlo.',
 }
