@@ -5,9 +5,34 @@ import ReserveModal from '@/app/(public)/packs/[id]/components/ReserveModal'
 import type { PackReservationInfo, ReservationDetails } from '@/hooks/useCreateReservation'
 import type { SerializedPack } from '@/app/(public)/packs/[id]/PackDetailClient'
 import { trackBeginCheckout } from '@/lib/analytics/events'
+import { MARKET_MISMATCH_MESSAGE } from '@/lib/utils/db-errors'
 
 vi.mock('@/lib/analytics/events', () => ({
   trackBeginCheckout: vi.fn(),
+}))
+
+/**
+ * Estado de sesión simulado. El modal solo mira `user.marketId` para decidir
+ * cómo explica el MARKET_MISMATCH; el resto del perfil es irrelevante aquí.
+ */
+const authState = { user: null as { marketId: string | null } | null }
+
+vi.mock('@/hooks/useAuth', () => ({
+  useAuth: () => ({
+    user: authState.user,
+    loading: false,
+    error: null,
+    signIn: vi.fn(),
+    signUp: vi.fn(),
+    signOut: vi.fn(),
+    getUser: vi.fn(),
+  }),
+}))
+
+const routerState = { push: vi.fn() }
+
+vi.mock('next/navigation', () => ({
+  useRouter: () => routerState,
 }))
 
 // Mock del hook CON estado real (useState): la UI re-renderiza exactamente
@@ -112,10 +137,21 @@ function renderOpen(pack: SerializedPack = makePack()) {
   return render(<ReserveModal isOpen onClose={() => {}} pack={pack} />)
 }
 
+/** Acepta políticas y pulsa Reservar; devuelve el alert de error si aparece. */
+async function tryReserve() {
+  fireEvent.click(screen.getByRole('checkbox'))
+  await act(async () => {
+    fireEvent.click(screen.getByRole('button', { name: 'Reservar' }))
+  })
+  return screen.findByRole('alert')
+}
+
 beforeEach(() => {
   nextResult = { details: null, error: '' }
   calls.length = 0
+  authState.user = null
   vi.mocked(trackBeginCheckout).mockClear()
+  routerState.push.mockClear()
 })
 
 describe('ReserveModal', () => {
@@ -183,10 +219,7 @@ describe('ReserveModal', () => {
   it('error: muestra el mensaje traducido y permite reintentar (misma intención de reserva)', async () => {
     nextResult = { details: null, error: 'El pack ya no está disponible.' }
     renderOpen()
-    fireEvent.click(screen.getByRole('checkbox'))
-    await act(async () => {
-      fireEvent.click(screen.getByRole('button', { name: 'Reservar' }))
-    })
+    await tryReserve()
     const alert = await screen.findByRole('alert')
     expect(alert).toHaveTextContent('El pack ya no está disponible.')
 
@@ -196,6 +229,52 @@ describe('ReserveModal', () => {
     })
     await screen.findByText('¡Pack reservado!')
     expect(calls).toHaveLength(2)
+  })
+
+  describe('MARKET_MISMATCH (create_payment_reservation, 0009:285)', () => {
+    it('perfil sin mercado: explica que falta elegirlo, ofrece el botón y no el Reintentar de siempre', async () => {
+      authState.user = { marketId: null }
+      nextResult = { details: null, error: MARKET_MISMATCH_MESSAGE }
+      renderOpen()
+      await tryReserve()
+
+      const alert = await screen.findByRole('alert')
+      expect(alert).toHaveTextContent('Aún no has elegido tu mercado')
+      expect(alert).toHaveTextContent(/Mi perfil/)
+
+      // Reintentar sin cambiar de mercado da siempre igual: no se ofrece.
+      expect(screen.queryByRole('button', { name: 'Reintentar' })).toBeNull()
+
+      // El CTA lleva a Mi perfil, donde vive el selector de mercado.
+      fireEvent.click(screen.getByRole('button', { name: 'Elegir mi mercado' }))
+      expect(routerState.push).toHaveBeenCalledWith('/profile')
+    })
+
+    it('perfil con otro mercado: explica el choque y ofrece cambiarlo', async () => {
+      authState.user = { marketId: '10000000-0000-4000-8000-000000000002' }
+      nextResult = { details: null, error: MARKET_MISMATCH_MESSAGE }
+      renderOpen()
+      await tryReserve()
+
+      const alert = await screen.findByRole('alert')
+      expect(alert).toHaveTextContent('Este pack es de otro mercado')
+      expect(alert).toHaveTextContent(/Cámbialo para reservar este pack/)
+
+      fireEvent.click(screen.getByRole('button', { name: 'Cambiar mi mercado' }))
+      expect(routerState.push).toHaveBeenCalledWith('/profile')
+    })
+
+    it('errores que no son de mercado no muestran el bloque de mercado', async () => {
+      authState.user = { marketId: null }
+      nextResult = { details: null, error: 'El pack ya no está disponible.' }
+      renderOpen()
+      await tryReserve()
+
+      expect(await screen.findByRole('alert')).toHaveTextContent('El pack ya no está disponible.')
+      expect(screen.queryByRole('button', { name: /Elegir mi mercado|Cambiar mi mercado/ })).toBeNull()
+      // El flujo normal de error sigue intacto.
+      expect(screen.getByRole('button', { name: 'Reintentar' })).toBeDefined()
+    })
   })
 
   it('dispara begin_checkout al abrir, una vez, con los datos del pack', () => {

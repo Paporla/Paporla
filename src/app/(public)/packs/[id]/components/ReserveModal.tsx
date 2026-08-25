@@ -3,9 +3,12 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { AlertCircle, CheckCircle, Clock, MapPin, Navigation, Package } from 'lucide-react'
 import Button from '@/components/ui/Button'
 import { useCreateReservation, type PackReservationInfo } from '@/hooks/useCreateReservation'
+import { useAuth } from '@/hooks/useAuth'
+import { isMarketMismatchMessage } from '@/lib/utils/db-errors'
 import { trackBeginCheckout } from '@/lib/analytics/events'
 import { formatMinorPrice } from '@/lib/utils/formatPrice'
 import { formatPickupWindow } from '@/lib/utils/reserve'
@@ -30,6 +33,15 @@ type Phase = 'confirm' | 'success'
  *    emite más adelante en el flujo y aparecerá en "Mis reservas".
  *  - El botón confirmación deshabilitado SIEMPRE explica por qué.
  *
+ * Caso MARKET_MISMATCH (0009:285): la base rechaza la reserva porque el
+ * mercado del perfil no coincide con el del pack. El error genérico
+ * ("revisa tu ubicación") no era accionable: no hay detección de ubicación
+ * de verdad, el catálogo del piloto siempre es Chile y el problema real es
+ * que el perfil aún no tiene mercado elegido (o tiene otro). Aquí se
+ * sustituye el aviso por la explicación exacta según el perfil del usuario
+ * y un botón que lleva a elegir/cambiar el mercado en Mi perfil; "Reintentar"
+ * no aparece porque reintentar sin cambiar el mercado da siempre igual.
+ *
  * Layout (mobile-first, como Too-Good-To-Go):
  *  - Móvil: bottom sheet anclado abajo (items-end). El panel no crece más
  *    que la pantalla (max-h dvh); el contenido se scrolle hacia adentro y
@@ -40,6 +52,8 @@ type Phase = 'confirm' | 'success'
  */
 export default function ReserveModal({ isOpen, onClose, pack }: ReserveModalProps) {
   const { createReservation, lastReservation, loading, error, clearError } = useCreateReservation()
+  const { user } = useAuth()
+  const router = useRouter()
   const [phase, setPhase] = useState<Phase>('confirm')
   const [acceptPolicies, setAcceptPolicies] = useState(false)
 
@@ -131,6 +145,11 @@ export default function ReserveModal({ isOpen, onClose, pack }: ReserveModalProp
   const windowLabel = formatPickupWindow(pack.pickup_start_at, pack.pickup_end_at, pack.timezone)
   const totalLabel = formatMinorPrice(pack.price_minor, pack.currency_code, 'es-CL')
 
+  // ¿El fallo fue de mercado? En ese caso el modal deja de ser un "intenta
+  // otra vez" y pasa a ser una invitación a elegir/cambiar de mercado.
+  const marketBlocked = isMarketMismatchMessage(error)
+  const hasMarket = user?.marketId != null
+
   return (
     <AnimatePresence>
       {isOpen && (
@@ -208,13 +227,34 @@ export default function ReserveModal({ isOpen, onClose, pack }: ReserveModalProp
                     </p>
                   </div>
 
-                  {error && (
+                  {error && !marketBlocked && (
                     <div
                       role="alert"
                       className="flex gap-2 rounded-lg border border-red-500/40 bg-red-500/10 p-3 text-sm dark:text-red-300 text-red-700"
                     >
                       <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
                       <span>{error}</span>
+                    </div>
+                  )}
+
+                  {marketBlocked && (
+                    <div
+                      role="alert"
+                      className="rounded-lg border border-red-500/40 bg-red-500/10 p-3 text-sm dark:text-red-300 text-red-700"
+                    >
+                      <div className="flex gap-2">
+                        <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+                        <div>
+                          <p className="font-semibold">
+                            {hasMarket ? 'Este pack es de otro mercado' : 'Aún no has elegido tu mercado'}
+                          </p>
+                          <p className="mt-0.5">
+                            {hasMarket
+                              ? 'Solo puedes reservar desde el mercado que elegiste en tu perfil. Cámbialo para reservar este pack.'
+                              : 'Para reservar, elige el país donde buscas packs. Se hace en un minuto, desde Mi perfil.'}
+                          </p>
+                        </div>
+                      </div>
                     </div>
                   )}
 
@@ -299,7 +339,16 @@ export default function ReserveModal({ isOpen, onClose, pack }: ReserveModalProp
             <div className="px-6 pt-4 pb-[max(1rem,env(safe-area-inset-bottom))] border-t dark:border-gray-700 border-gray-200 shrink-0">
               {phase === 'confirm' ? (
                 <div className="space-y-2">
-                  {error ? (
+                  {marketBlocked ? (
+                    <div className="flex gap-3">
+                      <Button onClick={handleClose} variant="outline" className="flex-1">
+                        Cerrar
+                      </Button>
+                      <Button onClick={() => router.push('/profile')} className="flex-1">
+                        {hasMarket ? 'Cambiar mi mercado' : 'Elegir mi mercado'}
+                      </Button>
+                    </div>
+                  ) : error ? (
                     <div className="flex gap-3">
                       <Button onClick={handleClose} variant="outline" className="flex-1">
                         Cerrar

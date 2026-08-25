@@ -62,6 +62,15 @@ export function extractErrorCode(error: unknown): string | null {
 }
 
 /**
+ * Texto exacto que ve el usuario cuando la base rechaza una reserva por
+ * mercado distinto (create_payment_reservation, 0009:285). Se exporta porque
+ * ReserveModal lo compara para mostrar la explicación y el botón exactos
+ * (ver `isMarketMismatchMessage`).
+ */
+export const MARKET_MISMATCH_MESSAGE =
+  'Este pack pertenece a otro mercado que el tuyo. Puedes cambiar tu mercado en Mi perfil.'
+
+/**
  * Mensajes que lanzan nuestras funciones RPC con RAISE EXCEPTION.
  * La clave es el MESSAGE exacto del RAISE; el valor, el texto para el usuario.
  */
@@ -90,7 +99,7 @@ const RPC_MESSAGES: Record<string, string> = {
     'Esta acción está reservada a cuentas de usuario. Si iniciaste sesión con una cuenta de comercio, usa tu cuenta de usuario.',
   PACK_AND_IDEMPOTENCY_REQUIRED: 'Faltan datos para crear la reserva. Vuelve a intentarlo.',
   IDEMPOTENCY_KEY_CONFLICT: 'Ya existe una reserva con esos datos para otro pack. Vuelve a intentarlo.',
-  MARKET_MISMATCH: 'Este pack pertenece a otro mercado. Revisa tu ubicación y vuelve a intentarlo.',
+  MARKET_MISMATCH: MARKET_MISMATCH_MESSAGE,
   PACK_NOT_AVAILABLE:
     'Este pack no está disponible ahora mismo: puede que se agotó o que su ventana de recogida ya no esté abierta.',
   RESERVATIONS_TEMPORARILY_BLOCKED:
@@ -155,6 +164,17 @@ const RPC_MESSAGES: Record<string, string> = {
  * al cargar el módulo, no en cada error.
  */
 const RPC_MESSAGE_KEYS_BY_LENGTH = Object.keys(RPC_MESSAGES).sort((a, b) => b.length - a.length)
+
+/**
+ * ¿El mensaje (ya traducido) es el de choque de mercados?
+ *
+ * `useCreateReservation` traduce el error antes de pasarlo a la UI, así que el
+ * modal solo tiene el texto en español; compararlo con el texto exacto es la
+ * forma robusta de saber que el fallo fue MARKET_MISMATCH y no otro.
+ */
+export function isMarketMismatchMessage(message: string | null | undefined): boolean {
+  return message === MARKET_MISMATCH_MESSAGE
+}
 
 /**
  * Restricciones CHECK de la base de datos. Si una llega hasta el usuario es,
