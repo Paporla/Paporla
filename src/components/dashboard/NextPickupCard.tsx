@@ -41,6 +41,24 @@ function marketEndTimeHHmm(iso: string, timezone: string): string | null {
   }
 }
 
+/**
+ * Tarjeta "Próxima recogida" del dashboard.
+ *
+ * Layout SIEMPRE de una columna (aunque haya ancho): vive en la columna
+ * derecha del dashboard, que en escritorio ya es estrecha y en móvil ocupa
+ * toda la pantalla. La versión anterior usaba `md:flex-row` de 3 columnas y
+ * en esa medida apretada todo se partía: el comercio en 3 líneas, la cuenta
+ * atrás en vertical ("6d / 3h / 54m") y el chip en 2 líneas.
+ *
+ * Reglas de esta versión:
+ *  - `whitespace-nowrap` en la cuenta atrás y en el chip: nunca se parten.
+ *  - `line-clamp-1` en pack/comercio y `truncate` en dirección: una línea
+ *    y punto; el detalle se ve en "Ver detalles".
+ *  - Acciones a ancho completo en fila: pulgares cómodos en móvil.
+ *
+ * El código de recogida NO existe hasta la fase 4 (lo emite el comercio al
+ * confirmar). En lugar de un código inventado, la carta dice la verdad.
+ */
 export default function NextPickupCard({ reservation, loading, error }: NextPickupCardProps) {
   if (error) {
     return (
@@ -57,14 +75,19 @@ export default function NextPickupCard({ reservation, loading, error }: NextPick
     return (
       <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}>
         <Card glass className="border-primary/20 p-5 animate-pulse">
-          <div className="flex flex-col md:flex-row items-start md:items-center gap-4">
-            <div className="w-20 h-20 rounded-xl bg-gray-200 dark:bg-gray-700 flex-shrink-0" />
-            <div className="flex-1 space-y-2">
-              <div className="h-3 w-24 bg-gray-200 dark:bg-gray-700 rounded" />
-              <div className="h-5 w-48 bg-gray-200 dark:bg-gray-700 rounded" />
-              <div className="h-4 w-32 bg-gray-100 dark:bg-gray-600 rounded" />
+          <div className="flex flex-col gap-4">
+            <div className="flex items-start gap-3">
+              <div className="w-14 h-14 rounded-xl bg-gray-200 dark:bg-gray-700 flex-shrink-0" />
+              <div className="flex-1 space-y-2">
+                <div className="h-3 w-28 bg-gray-200 dark:bg-gray-700 rounded" />
+                <div className="h-5 w-44 bg-gray-200 dark:bg-gray-700 rounded" />
+                <div className="h-4 w-36 bg-gray-100 dark:bg-gray-600 rounded" />
+              </div>
+              <div className="w-16 h-6 bg-gray-200 dark:bg-gray-700 rounded" />
             </div>
-            <div className="w-28 h-16 bg-gray-200 dark:bg-gray-700 rounded-xl" />
+            <div className="h-3 w-3/4 bg-gray-100 dark:bg-gray-600 rounded" />
+            <div className="h-12 bg-gray-200 dark:bg-gray-700 rounded-xl" />
+            <div className="h-8 w-full bg-gray-200 dark:bg-gray-700 rounded-lg" />
           </div>
         </Card>
       </motion.div>
@@ -81,7 +104,7 @@ export default function NextPickupCard({ reservation, loading, error }: NextPick
     : null
 
   // El código de recogida NO existe hasta la fase 4 (lo emite el comercio al
-  // confirmar). En lugar de un código inventado, la carta dice la verdad.
+  // confirmar). En lugar de un código inventado, la nota dice la verdad.
   const codeNote =
     reservation.status === 'payment_pending'
       ? 'El comercio recibirá tu reserva y la confirmará. Tu código de recogida aparecerá aquí cuando quede lista.'
@@ -90,83 +113,92 @@ export default function NextPickupCard({ reservation, loading, error }: NextPick
   return (
     <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.1 }}>
       <Card glass className="border-primary/30 overflow-hidden">
-        <div className="flex flex-col md:flex-row items-start md:items-center gap-4 p-5">
-          {/* Icono de pack (la fila canónica no trae imagen). */}
-          <div className="w-20 h-20 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center flex-shrink-0">
-            <Package className="w-9 h-9 text-primary" />
-          </div>
-
-          {/* Información principal */}
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 mb-1">
-              <span className="text-xs font-bold text-primary uppercase tracking-wider">Próxima recogida</span>
-              <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
+        <div className="p-5 flex flex-col gap-4">
+          {/* Fila 1: icono + títulos + precio (el precio arriba a la derecha,
+              donde el ojo va a buscar el total). */}
+          <div className="flex items-start gap-3">
+            <div className="w-14 h-14 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0">
+              <Package className="w-7 h-7 text-primary" />
             </div>
-            <Link href={`/packs/${reservation.pack_id}`}>
-              <h3 className="text-lg font-bold dark:text-white text-gray-900 hover:text-primary transition-colors line-clamp-1">
-                {reservation.pack_title}
-              </h3>
-            </Link>
-            <Link href={`/shops/${reservation.shop_id}`}>
-              <p className="text-sm dark:text-gray-400 text-gray-600 hover:text-primary transition-colors">
-                {reservation.shop_name}
-              </p>
-            </Link>
-
-            {reservation.shop_address && (
-              <p className="text-xs text-gray-500 flex items-center gap-1 mt-1">
-                <MapPin className="w-3 h-3" />
-                {reservation.shop_address}
-              </p>
-            )}
-
-            {windowLabel && (
-              <div className="flex flex-wrap items-center gap-3 mt-2">
-                <div className="flex items-center gap-1 text-xs text-gray-500">
-                  <Clock className="w-3 h-3" />
-                  <span>{windowLabel}</span>
-                </div>
-                {endHHmm && <CountdownTimer targetDate={reservation.pickup_end_at} targetEndTime={endHHmm} />}
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-1.5">
+                <span className="text-[10px] font-bold text-primary uppercase tracking-wider">Próxima recogida</span>
+                <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
               </div>
-            )}
-
-            <div className="mt-2">
-              <span className={`text-xs px-2 py-0.5 rounded-full ${config.bg} ${config.color}`}>{config.label}</span>
-            </div>
-          </div>
-
-          {/* Nota honesta de código + acciones */}
-          <div className="flex flex-col items-stretch gap-2 w-full md:w-auto md:min-w-[190px]">
-            <div className="bg-primary/10 border border-primary/30 rounded-xl px-4 py-2 text-center">
-              <p className="text-[10px] dark:text-gray-400 text-gray-600 flex items-center justify-center gap-1">
-                <ShieldCheck className="w-3 h-3" />
-                Código de recogida
-              </p>
-              <p className="text-[11px] dark:text-gray-300 text-gray-600 mt-1 leading-snug">{codeNote}</p>
-            </div>
-
-            <div className="text-right">
-              <p className="text-lg font-bold text-primary">{totalLabel}</p>
-            </div>
-
-            <div className="flex gap-2">
-              {googleMapsUrl && (
-                <a
-                  href={googleMapsUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-lg bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
-                >
-                  <Navigation className="w-3 h-3" />
-                  Cómo llegar
-                </a>
-              )}
-              <Link href={`/packs/${reservation.pack_id}`} className="flex-1 md:flex-none">
-                <Button variant="outline" size="sm" className="w-full">
-                  Ver detalles
-                </Button>
+              <Link href={`/packs/${reservation.pack_id}`} className="block mt-0.5">
+                <h3 className="text-base font-bold dark:text-white text-gray-900 hover:text-primary transition-colors line-clamp-1">
+                  {reservation.pack_title}
+                </h3>
+              </Link>
+              <Link href={`/shops/${reservation.shop_id}`} className="block">
+                <p className="text-sm dark:text-gray-400 text-gray-600 hover:text-primary transition-colors line-clamp-1">
+                  {reservation.shop_name}
+                </p>
               </Link>
             </div>
+            <p className="text-lg font-bold text-primary shrink-0 leading-tight">{totalLabel}</p>
+          </div>
+
+          {/* Fila 2: dirección (1 línea, trunca). */}
+          {reservation.shop_address && (
+            <p className="text-xs text-gray-500 flex items-center gap-1 min-w-0">
+              <MapPin className="w-3 h-3 shrink-0" />
+              <span className="truncate">{reservation.shop_address}</span>
+            </p>
+          )}
+
+          {/* Fila 3: ventana de recogida (puede partir en 2 líneas si es
+              larga: es texto natural, no un dato que se rompa). */}
+          {windowLabel && (
+            <p className="text-xs text-gray-500 flex items-start gap-1.5 min-w-0">
+              <Clock className="w-3 h-3 shrink-0 mt-0.5" />
+              <span>{windowLabel}</span>
+            </p>
+          )}
+
+          {/* Fila 4: cuenta atrás (izquierda, nunca partida) + estado
+              (derecha, nunca partido). */}
+          <div className="flex items-center justify-between gap-2 min-w-0">
+            {endHHmm ? (
+              <span className="whitespace-nowrap">
+                <CountdownTimer targetDate={reservation.pickup_end_at} targetEndTime={endHHmm} />
+              </span>
+            ) : (
+              <span />
+            )}
+            <span
+              className={`text-[11px] px-2 py-0.5 rounded-full whitespace-nowrap shrink-0 ${config.bg} ${config.color}`}
+            >
+              {config.label}
+            </span>
+          </div>
+
+          {/* Nota honesta del código de recogida. */}
+          <div className="bg-primary/10 border border-primary/30 rounded-xl px-3 py-2">
+            <p className="text-[11px] dark:text-gray-300 text-gray-600 flex items-start gap-1.5 leading-snug">
+              <ShieldCheck className="w-3.5 h-3.5 shrink-0 mt-0.5 text-primary" />
+              <span>{codeNote}</span>
+            </p>
+          </div>
+
+          {/* Acciones a ancho completo: pulgares cómodos en móvil. */}
+          <div className="flex gap-2">
+            {googleMapsUrl && (
+              <a
+                href={googleMapsUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-medium rounded-lg bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
+              >
+                <Navigation className="w-3.5 h-3.5" />
+                Cómo llegar
+              </a>
+            )}
+            <Link href={`/packs/${reservation.pack_id}`} className={googleMapsUrl ? 'flex-1' : 'w-full'}>
+              <Button variant="outline" size="sm" className="w-full">
+                Ver detalles
+              </Button>
+            </Link>
           </div>
         </div>
       </Card>
