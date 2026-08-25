@@ -3,6 +3,7 @@
 import { Navigation, MapPin } from 'lucide-react'
 import Input from '@/components/ui/Input'
 import { useState } from 'react'
+import { parseCoordinate, validateCoordinatePair } from '@/lib/utils/coordinates'
 
 interface ProfileLocationFormProps {
   latitude: string
@@ -18,9 +19,14 @@ export default function ProfileLocationForm({
   onLongitudeChange,
 }: ProfileLocationFormProps) {
   const [locating, setLocating] = useState(false)
-  const lat = parseFloat(latitude)
-  const lng = parseFloat(longitude)
-  const isValid = latitude && longitude && !isNaN(lat) && !isNaN(lng)
+  const lat = parseCoordinate(latitude)
+  const lng = parseCoordinate(longitude)
+  // Espejo de los CHECK de la base (0003:142-149) con mensaje en español
+  // (F2b: el control dice por qué no se puede guardar, antes del RPC).
+  const validation = validateCoordinatePair(latitude, longitude)
+  // La vista previa del punto solo con un par COMPLETAMENTE válido: con una
+  // coordenada a medias el pin mentiría.
+  const isValid = validation.ok && lat !== null && lng !== null
 
   const detectLocation = () => {
     if (!navigator.geolocation) {
@@ -115,6 +121,14 @@ export default function ProfileLocationForm({
           step="0.000001"
         />
       </div>
+
+      {/* F2b: si el par no es válido, decir AQUÍ por qué (y el botón de
+          guardar repite el mismo mensaje al intentar guardar). */}
+      {!validation.ok && (
+        <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-4">
+          <p className="text-xs text-red-400">{validation.error}</p>
+        </div>
+      )}
 
       <div className="dark:bg-black/40 bg-gray-50 border dark:border-white/10 border-gray-200 rounded-xl p-4">
         <p className="text-xs dark:text-gray-500 text-gray-400">

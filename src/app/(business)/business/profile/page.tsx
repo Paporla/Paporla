@@ -24,6 +24,7 @@ import {
   type HoursData,
   type ShopHourRow,
 } from '@/lib/utils/shopHours'
+import { parseCoordinate, validateCoordinatePair } from '@/lib/utils/coordinates'
 
 const CHILE_MARKET_ID = '10000000-0000-4000-8000-000000000001'
 const SANTIAGO_LOCALITY_ID = '10000000-0000-4000-8000-000000000101'
@@ -59,13 +60,6 @@ interface ShopData {
 interface HourFailure {
   day: string
   message: string
-}
-
-function parseCoord(value: string): number | null {
-  const trimmed = value.trim()
-  if (!trimmed) return null
-  const n = Number(trimmed)
-  return Number.isFinite(n) ? n : null
 }
 
 function storagePath(value: string, fallback: string | null) {
@@ -247,6 +241,17 @@ export default function BusinessProfilePage() {
         return false
       }
 
+      // Validar coordenadas ANTES de tocar la base: espejo de los CHECK de
+      // 0003 (par obligatorio y rangos). Sin esto, una latitud mal tipeada
+      // (999, sin el signo, o a medias) cae en el RPC con un error feo de
+      // Postgres en vez de un mensaje claro (F2b).
+      const coordCheck = validateCoordinatePair(formData.latitude, formData.longitude)
+      if (!coordCheck.ok) {
+        setToast({ message: coordCheck.error ?? 'Coordenadas inválidas.', type: 'error' })
+        setActiveTab('location')
+        return false
+      }
+
       if (shop?.id) {
         const logoPath = storagePath(formData.logoUrl, shop.logo_path)
         const coverPath = storagePath(formData.coverUrl, shop.cover_path)
@@ -263,8 +268,8 @@ export default function BusinessProfilePage() {
           p_address_line1: formData.address,
           p_address_line2: '',
           p_postal_code: '',
-          p_latitude: parseCoord(formData.latitude),
-          p_longitude: parseCoord(formData.longitude),
+          p_latitude: parseCoordinate(formData.latitude),
+          p_longitude: parseCoordinate(formData.longitude),
           p_logo_path: logoPath,
           p_cover_path: coverPath,
           // Cadena vacia = borrar. La RPC distingue '' de null a proposito.
@@ -283,8 +288,8 @@ export default function BusinessProfilePage() {
           phone: formData.phone || null,
           website: formData.website || null,
           instagram: formData.instagram || null,
-          latitude: parseCoord(formData.latitude),
-          longitude: parseCoord(formData.longitude),
+          latitude: parseCoordinate(formData.latitude),
+          longitude: parseCoordinate(formData.longitude),
           logo_path: logoPath || null,
           cover_path: coverPath || null,
           default_pack_image_path: packImagePath || null,
@@ -316,6 +321,10 @@ export default function BusinessProfilePage() {
         p_address_line1: formData.address,
         p_address_line2: '',
         p_postal_code: '',
+        // La RPC ya aceptaba coordenadas (0009:1285) pero la página nunca
+        // las mandaba: al crear, lo tipeado se tiraba en silencio.
+        p_latitude: parseCoordinate(formData.latitude),
+        p_longitude: parseCoordinate(formData.longitude),
       })
       if (error) throw error
 
@@ -332,8 +341,8 @@ export default function BusinessProfilePage() {
         address: formData.address || null,
         city: 'Santiago',
         country: 'CL',
-        latitude: null,
-        longitude: null,
+        latitude: parseCoordinate(formData.latitude),
+        longitude: parseCoordinate(formData.longitude),
         phone: formData.phone || null,
         website: formData.website || null,
         instagram: formData.instagram || null,
