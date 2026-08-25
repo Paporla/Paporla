@@ -95,9 +95,12 @@ export async function PUT(request: Request) {
   }
 
   const supabase = await createClient()
+  // Nombres EXACTOS de la firma real (0009:366): cancel_reservation(p_reservation_id uuid, p_reason text).
+  // Si PostgREST no encuentra la función por el nombre de un parámetro, devuelve
+  // "Could not find the function ..." — por eso los tests fijan estos nombres.
   const { error } = await supabase.rpc('cancel_reservation', {
     p_reservation_id: id,
-    p_cancel_reason: reason,
+    p_reason: reason,
   })
 
   if (error) {
