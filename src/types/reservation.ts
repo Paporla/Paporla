@@ -36,4 +36,20 @@ export interface MyReservation {
   /** Motivo de cancelación; solo tiene valor cuando status = 'cancelled'. */
   cancel_reason: string | null
   created_at: string
+  /**
+   * Foto del pack: ruta dentro del bucket 'pack-images', o null si el
+   * comercio no publicó foto. Añadida en 0028 para la tarjeta
+   * "Próxima recogida".
+   */
+  image_path: string | null
+  /**
+   * Último cambio de estado de la reserva. Igual a created_at mientras la
+   * reserva no cambia; en una cancelada, el momento exacto de la
+   * cancelación. 0028: "Hace X" se cuenta desde el evento, no desde la
+   * creación de la reserva.
+   */
+  updated_at: string
+  /** Coordenadas del comercio (null si no tiene). 0028: "Cómo llegar" al punto exacto. */
+  shop_latitude: number | null
+  shop_longitude: number | null
 }

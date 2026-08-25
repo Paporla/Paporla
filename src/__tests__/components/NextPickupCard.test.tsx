@@ -1,7 +1,17 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import NextPickupCard from '@/components/dashboard/NextPickupCard'
 import type { MyReservation } from '@/types/reservation'
+
+vi.mock('@/lib/supabase/client', () => ({
+  supabaseBrowser: () => ({
+    storage: {
+      from: () => ({
+        getPublicUrl: (path: string) => ({ data: { publicUrl: `https://cdn.test/${path}` } }),
+      }),
+    },
+  }),
+}))
 
 /**
  * La tarjeta "Próxima recogida" vive en la columna derecha del dashboard,
@@ -28,6 +38,10 @@ function makeReservation(overrides: Partial<MyReservation> = {}): MyReservation 
     timezone: 'America/Santiago',
     cancel_reason: null,
     created_at: '2026-09-30T15:00:00Z',
+    image_path: null,
+    updated_at: '2026-09-30T15:00:00Z',
+    shop_latitude: null,
+    shop_longitude: null,
     ...overrides,
   }
 }
@@ -84,6 +98,26 @@ describe('NextPickupCard', () => {
     expect(maps.getAttribute('href')).toContain('google.com/maps')
     expect(maps.getAttribute('href')).toContain(encodeURIComponent('Calle Los Aromos 123, Providencia, Santiago'))
     expect(screen.getByRole('link', { name: 'Ver detalles' })).toHaveAttribute('href', '/packs/p-0001')
+  })
+
+  it('muestra la foto del pack cuando hay image_path (0028); sin foto no hay <img>', () => {
+    const { rerender } = render(<NextPickupCard reservation={makeReservation({ image_path: 'packs/p-0001.jpg' })} />)
+    const img = screen.getByRole('img', { name: 'Pack Sushi Sorpresa' })
+    // next/image envuelve el src con su optimizador (/_next/image?url=…); lo
+    // importante es que la URL pública de storage (getPublicUrl) esté ahí.
+    expect(img.getAttribute('src')).toContain('https%3A%2F%2Fcdn.test%2Fpacks%2Fp-0001.jpg')
+
+    // Sin foto: se queda el icono genérico, no un <img> roto.
+    rerender(<NextPickupCard reservation={makeReservation()} />)
+    expect(screen.queryByRole('img')).toBeNull()
+  })
+
+  it('"Cómo llegar" usa las coordenadas del comercio cuando existen (0028), no el texto de la dirección', () => {
+    render(<NextPickupCard reservation={makeReservation({ shop_latitude: -33.42, shop_longitude: -70.63 })} />)
+    const maps = screen.getByRole('link', { name: /Cómo llegar/i })
+    const href = maps.getAttribute('href') ?? ''
+    expect(href).toContain('-33.42,-70.63')
+    expect(href).not.toContain(encodeURIComponent('Calle Los Aromos 123, Providencia, Santiago'))
   })
 
   it('loading muestra skeleton sin datos y error muestra el mensaje', () => {

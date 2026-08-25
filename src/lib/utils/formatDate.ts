@@ -15,7 +15,7 @@ export const formatRelativeDate = (date: string): string => {
   const diffHours = Math.floor((now.getTime() - target.getTime()) / (1000 * 60 * 60))
 
   if (diffHours < 1) return 'Hace menos de 1 hora'
-  if (diffHours < 24) return `Hace ${diffHours} horas`
+  if (diffHours < 24) return diffHours === 1 ? 'Hace 1 hora' : `Hace ${diffHours} horas`
   if (diffHours < 48) return 'Ayer'
   return formatDate(date)
 }

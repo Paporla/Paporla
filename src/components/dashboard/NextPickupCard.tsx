@@ -1,9 +1,11 @@
 'use client'
 
+import Image from 'next/image'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
 import { Navigation, Clock, MapPin, AlertCircle, Package, ShieldCheck } from 'lucide-react'
 import Card from '@/components/ui/Card'
+import { supabaseBrowser } from '@/lib/supabase/client'
 import Button from '@/components/ui/Button'
 import CountdownTimer from '@/components/ui/CountdownTimer'
 import { getStatusConfig } from '@/lib/constants/reservations'
@@ -99,8 +101,21 @@ export default function NextPickupCard({ reservation, loading, error }: NextPick
   const endHHmm = marketEndTimeHHmm(reservation.pickup_end_at, reservation.timezone)
   const totalLabel = formatMinorPrice(reservation.total_amount_minor, reservation.currency_code, 'es-CL')
 
-  const googleMapsUrl = reservation.shop_address
-    ? `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(reservation.shop_address)}`
+  // "Cómo llegar": si el comercio tiene coordenadas (0028) se usan — Google
+  // lleva al punto exacto. Sin ellas, respaldo al texto de la dirección
+  // (que puede ser ambiguo: "Calle 59a" existe en muchas ciudades y puede
+  // caer en otra).
+  const hasCoords = reservation.shop_latitude != null && reservation.shop_longitude != null
+  const googleMapsUrl = hasCoords
+    ? `https://www.google.com/maps/dir/?api=1&destination=${reservation.shop_latitude},${reservation.shop_longitude}`
+    : reservation.shop_address
+      ? `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(reservation.shop_address)}`
+      : null
+
+  // Foto del pack (0028): ruta de storage → URL pública, mismo patrón que el
+  // catálogo (usePublicPacks). Sin foto, la tarjeta conserva el icono.
+  const imageUrl = reservation.image_path
+    ? supabaseBrowser().storage.from('pack-images').getPublicUrl(reservation.image_path).data.publicUrl
     : null
 
   // El código de recogida NO existe hasta la fase 4 (lo emite el comercio al
@@ -117,9 +132,19 @@ export default function NextPickupCard({ reservation, loading, error }: NextPick
           {/* Fila 1: icono + títulos + precio (el precio arriba a la derecha,
               donde el ojo va a buscar el total). */}
           <div className="flex items-start gap-3">
-            <div className="w-14 h-14 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0">
-              <Package className="w-7 h-7 text-primary" />
-            </div>
+            {imageUrl ? (
+              <Image
+                src={imageUrl}
+                alt={reservation.pack_title}
+                width={56}
+                height={56}
+                className="w-14 h-14 rounded-xl object-cover border border-primary/20 shrink-0"
+              />
+            ) : (
+              <div className="w-14 h-14 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0">
+                <Package className="w-7 h-7 text-primary" />
+              </div>
+            )}
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-1.5">
                 <span className="text-[10px] font-bold text-primary uppercase tracking-wider">Próxima recogida</span>
