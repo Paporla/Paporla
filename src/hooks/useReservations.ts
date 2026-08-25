@@ -4,15 +4,23 @@ import { useCallback } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useAuth } from './useAuth'
 import { apiFetch } from '@/lib/utils/api-client'
-import type { ReservationWithDetails } from '@/types/reservation'
+import type { MyReservation } from '@/types/reservation'
 
 const RESERVATIONS_QUERY_KEY = 'reservations'
 
-async function fetchReservations() {
-  const data = await apiFetch<{ success: boolean; reservations: ReservationWithDetails[] }>('/api/reservations')
+async function fetchReservations(): Promise<MyReservation[]> {
+  const data = await apiFetch<{ success: boolean; reservations: MyReservation[] }>('/api/reservations')
   return data.reservations
 }
 
+/**
+ * Reservas del usuario (list_my_reservations vía GET /api/reservations).
+ *
+ * Solo listado + cancelación. La creación NO pasa por aquí:
+ * useCreateReservation llama directo al RPC create_payment_reservation
+ * (fase 3.1). La validación de recogida tampoco: es acción del comercio
+ * (fase 4).
+ */
 export function useReservations() {
   const { user } = useAuth()
   const queryClient = useQueryClient()
@@ -28,68 +36,29 @@ export function useReservations() {
     staleTime: 15 * 1000,
   })
 
+  // Prefijo 'reservations' (sin userId): así también invalida si el usuario
+  // cambia entre sesiones, y es el mismo prefijo que usa useCreateReservation
+  // al terminar de crear una reserva.
   const invalidate = useCallback(() => {
-    queryClient.invalidateQueries({ queryKey: [RESERVATIONS_QUERY_KEY, user?.id] })
-  }, [queryClient, user?.id])
-
-  const createReservation = useMutation({
-    mutationFn: async ({ packId, shopId, quantity = 1 }: { packId: string; shopId: string; quantity?: number }) => {
-      if (!user) throw new Error('Debes iniciar sesión para reservar')
-      return apiFetch<{ success: boolean; reservation: ReservationWithDetails }>('/api/reservations', {
-        method: 'POST',
-        body: JSON.stringify({ pack_id: packId, shop_id: shopId, quantity }),
-      })
-    },
-    onSuccess: () => invalidate(),
-  })
+    queryClient.invalidateQueries({ queryKey: [RESERVATIONS_QUERY_KEY] })
+  }, [queryClient])
 
   const cancelReservation = useMutation({
-    mutationFn: async ({ reservationId, reason }: { reservationId: string; reason?: string }) => {
-      if (!user) throw new Error('Debes iniciar sesión para cancelar')
-      return apiFetch<{ success: boolean; reservation: ReservationWithDetails }>('/api/reservations', {
+    mutationFn: async ({ reservationId, reason }: { reservationId: string; reason: string }) => {
+      return apiFetch<{ success: boolean; message?: string }>('/api/reservations', {
         method: 'PUT',
-        body: JSON.stringify({ id: reservationId, status: 'cancelled', cancel_reason: reason }),
+        body: JSON.stringify({ id: reservationId, cancel_reason: reason }),
       })
     },
     onSuccess: () => invalidate(),
   })
-
-  const validatePickup = useMutation({
-    mutationFn: async (pickupCode: string) => {
-      if (!user) throw new Error('Debes iniciar sesión para validar')
-      return apiFetch<{ success: boolean; data: { success: boolean } }>('/api/reservations', {
-        method: 'PUT',
-        body: JSON.stringify({ id: '', status: 'validate_pickup', pickup_code: pickupCode }),
-      })
-    },
-    onSuccess: () => invalidate(),
-  })
-
-  const getBusinessReservations = async (shopId: string): Promise<ReservationWithDetails[]> => {
-    if (!user) throw new Error('Debes iniciar sesión')
-    const data = await apiFetch<{ success: boolean; reservations: ReservationWithDetails[] }>(
-      `/api/reservations?shopId=${shopId}`,
-    )
-    return data.reservations
-  }
-
-  const getReservationById = async (reservationId: string): Promise<ReservationWithDetails | null> => {
-    if (!user) throw new Error('Debes iniciar sesión')
-    const data = await apiFetch<{ success: boolean; reservation: ReservationWithDetails | null }>(
-      `/api/reservations?id=${reservationId}`,
-    )
-    return data.reservation
-  }
 
   return {
     reservations,
     loading: isLoading,
     error: error?.message ?? null,
-    createReservation: createReservation.mutateAsync,
     cancelReservation: cancelReservation.mutateAsync,
-    validatePickup: validatePickup.mutateAsync,
-    getBusinessReservations,
-    getReservationById,
+    cancelling: cancelReservation.isPending,
     invalidate,
   }
 }

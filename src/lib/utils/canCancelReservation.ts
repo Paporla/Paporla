@@ -1,49 +1,20 @@
+import { canCancelStatus } from '@/lib/constants/reservations'
+
 /**
- * Verifica si una reserva puede ser cancelada según el tiempo restante
- * antes de la fecha/hora de recogida.
+ * ¿Puede el usuario cancelar esta reserva?
  *
- * Regla: Solo se puede cancelar si faltan al menos 2 horas
- * para la fecha y hora de recogida.
+ * Aquí solo se mira el ESTADO. El plazo (corte de cancelación según el
+ * mercado, markets.cancellation_cutoff_minutes) lo decide la base de datos
+ * DENTRO de cancel_reservation: si ya pasó, el error
+ * CANCELLATION_WINDOW_CLOSED llega traducido por translateDbError y se
+ * muestra en pantalla. No se replica ese cálculo en el cliente: el cliente
+ * no conoce el corte del mercado y terminaría inventando una regla mentirosa.
  */
+export function canCancelReservation(reservation: { status: string }): { allowed: boolean; reason?: string } {
+  if (canCancelStatus(reservation.status)) return { allowed: true }
 
-export function canCancelReservation(reservation: {
-  status: string
-  pickup_date: string | null
-  pickup_start_time: string | null
-}): { allowed: boolean; reason?: string } {
-  // Solo se pueden cancelar reservas pendientes o confirmadas
-  if (!['pending', 'confirmed'].includes(reservation.status)) {
-    return { allowed: false, reason: 'Esta reserva ya no puede ser cancelada' }
+  return {
+    allowed: false,
+    reason: 'Esta reserva ya no está en una etapa que se pueda cancelar.',
   }
-
-  // Si no tiene fecha de recogida, permitir cancelación
-  if (!reservation.pickup_date) {
-    return { allowed: true }
-  }
-
-  const now = new Date()
-
-  // Construir la fecha y hora de recogida
-  const pickupDate = new Date(reservation.pickup_date)
-
-  if (reservation.pickup_start_time) {
-    const [hours, minutes] = reservation.pickup_start_time.split(':').map(Number)
-    pickupDate.setHours(hours, minutes, 0, 0)
-  } else {
-    // Si no hay hora de inicio, usar el final del día
-    pickupDate.setHours(23, 59, 59, 0)
-  }
-
-  // Calcular la diferencia en milisegundos
-  const diffMs = pickupDate.getTime() - now.getTime()
-  const diffHours = diffMs / (1000 * 60 * 60)
-
-  if (diffHours < 2) {
-    return {
-      allowed: false,
-      reason: `La reserva vence en menos de 2 horas (${Math.max(0, Math.floor(diffHours * 60))} min restantes). Ya no puedes cancelarla.`,
-    }
-  }
-
-  return { allowed: true }
 }
