@@ -277,6 +277,22 @@ describe('ReserveModal', () => {
     })
   })
 
+  it('éxito: "Seguir explorando" navega al catálogo /packs (no se queda en la página vieja del pack)', async () => {
+    nextResult = { details: makeDetails(), error: '' }
+    renderOpen()
+    fireEvent.click(screen.getByRole('checkbox'))
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: 'Reservar' }))
+    })
+    await screen.findByText('¡Pack reservado!')
+
+    fireEvent.click(screen.getByRole('button', { name: 'Seguir explorando' }))
+    expect(routerState.push).toHaveBeenCalledWith('/packs')
+
+    // "Ver mis reservas" sigue apuntando a la lista real.
+    expect(screen.getByRole('link', { name: 'Ver mis reservas' })).toHaveAttribute('href', '/dashboard/reservations')
+  })
+
   it('dispara begin_checkout al abrir, una vez, con los datos del pack', () => {
     renderOpen()
     expect(vi.mocked(trackBeginCheckout)).toHaveBeenCalledTimes(1)

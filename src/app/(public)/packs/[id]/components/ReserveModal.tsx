@@ -42,6 +42,11 @@ type Phase = 'confirm' | 'success'
  * y un botón que lleva a elegir/cambiar el mercado en Mi perfil; "Reintentar"
  * no aparece porque reintentar sin cambiar el mercado da siempre igual.
  *
+ * Pantalla de éxito: "Seguir explorando" navega al catálogo (/packs) y no
+ * solo cierra el modal. Cerrar y quedarse en el detalle del pack deja una
+ * página vieja (el pack ya no tiene stock) y daba la sensación de que el
+ * botón "no hacía nada".
+ *
  * Layout (mobile-first, como Too-Good-To-Go):
  *  - Móvil: bottom sheet anclado abajo (items-end). El panel no crece más
  *    que la pantalla (max-h dvh); el contenido se scrolle hacia adentro y
@@ -375,11 +380,16 @@ export default function ReserveModal({ isOpen, onClose, pack }: ReserveModalProp
                 </div>
               ) : (
                 <div className="flex gap-3">
-                  <Button onClick={handleClose} variant="outline" className="flex-1">
+                  {/* Navega al catálogo: volver a la página del pack dejaría
+                      una vista vieja (el stock ya se fue) y el botón parecería
+                      que no hace nada. */}
+                  <Button onClick={() => router.push('/packs')} className="flex-1">
                     Seguir explorando
                   </Button>
                   <Link href="/dashboard/reservations" className="flex-1">
-                    <Button className="w-full">Ver mis reservas</Button>
+                    <Button variant="outline" className="w-full">
+                      Ver mis reservas
+                    </Button>
                   </Link>
                 </div>
               )}
