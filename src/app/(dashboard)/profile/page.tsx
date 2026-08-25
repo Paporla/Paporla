@@ -14,6 +14,7 @@ import Button from '@/components/ui/Button'
 import Input from '@/components/ui/Input'
 import Toast from '@/components/ui/Toast'
 import PageLoadingSpinner from '@/components/ui/PageLoadingSpinner'
+import MarketSelect from '@/components/dashboard/MarketSelect'
 
 interface ProfileFormProps {
   profile: UserProfile
@@ -25,6 +26,7 @@ function ProfileForm({ profile, refreshProfile, signOut }: ProfileFormProps) {
   const { updateProfile } = useProfile()
   const [displayName, setDisplayName] = useState(profile.displayName ?? '')
   const [phone, setPhone] = useState(profile.phoneE164 ?? '')
+  const [savingMarket, setSavingMarket] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
 
@@ -51,6 +53,38 @@ function ProfileForm({ profile, refreshProfile, signOut }: ProfileFormProps) {
     setError('')
     setSuccess('')
     await updateMutation.mutateAsync().catch(() => {})
+  }
+
+  /*
+   * El cambio de mercado se guarda en cuanto se elige, sin esperar al botón
+   * "Guardar cambios": es la acción que desbloquea las reservas, y pedir un
+   * segundo paso sería fricción sin sentido. `update_own_profile`
+   * (0009:1164) valida que el mercado exista y esté abierto antes de escribir.
+   * El resto de los datos se manda tal cual están en el perfil: aquí solo
+   * cambia el mercado, no el nombre ni el teléfono.
+   */
+  const saveMarket = async (marketId: string) => {
+    setError('')
+    setSuccess('')
+    setSavingMarket(true)
+    try {
+      await updateProfile({
+        displayName: profile.displayName ?? '',
+        phoneE164: profile.phoneE164,
+        avatarPath: profile.avatarPath,
+        marketId,
+        localityId: profile.localityId,
+        locale: profile.locale,
+      })
+      await refreshProfile()
+      setSuccess('Mercado actualizado. Ya puedes reservar packs de este mercado.')
+    } catch (marketError) {
+      setError(
+        marketError instanceof Error ? marketError.message : 'No se pudo actualizar tu mercado. Inténtalo de nuevo.',
+      )
+    } finally {
+      setSavingMarket(false)
+    }
   }
 
   const memberSince = new Intl.DateTimeFormat(profile.locale || 'es-CL', {
@@ -88,6 +122,8 @@ function ProfileForm({ profile, refreshProfile, signOut }: ProfileFormProps) {
           </div>
         </Card>
       </div>
+
+      <MarketSelect value={profile.marketId} onSelect={saveMarket} disabled={savingMarket} />
 
       <Card glass className="p-6 space-y-4">
         <h2 className="text-lg font-semibold dark:text-white text-gray-900">Información personal</h2>

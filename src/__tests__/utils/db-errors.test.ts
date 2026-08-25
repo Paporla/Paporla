@@ -1,5 +1,11 @@
 import { describe, it, expect } from 'vitest'
-import { translateDbError, extractErrorMessage, extractErrorCode } from '@/lib/utils/db-errors'
+import {
+  translateDbError,
+  extractErrorMessage,
+  extractErrorCode,
+  isMarketMismatchMessage,
+  MARKET_MISMATCH_MESSAGE,
+} from '@/lib/utils/db-errors'
 
 /**
  * El caso que motivó este módulo: los errores de Supabase son objetos planos,
@@ -102,6 +108,49 @@ describe('translateDbError', () => {
     for (const c of casos) {
       expect(translateDbError(c).length).toBeGreaterThan(0)
     }
+  })
+
+  describe('reservas — mercado (create_payment_reservation, 0009:285)', () => {
+    it('traduce MARKET_MISMATCH al texto accionable que apunta a Mi perfil', () => {
+      const salida = translateDbError({ message: 'MARKET_MISMATCH', code: '42501' })
+      expect(salida).toBe(MARKET_MISMATCH_MESSAGE)
+      expect(salida).toContain('otro mercado')
+      expect(salida).toContain('Mi perfil')
+      // El texto viejo ("Revisa tu ubicación") era un callejón sin salida:
+      // no hay detección de ubicación real en el piloto.
+      expect(salida).not.toContain('Revisa tu ubicación')
+    })
+
+    /*
+     * MARKET_MISMATCH es sufijo de LOCALITY_MARKET_MISMATCH. Sin el orden de
+     * más larga a más corta, el error de comercio recibía el mensaje de
+     * usuario (o al revés, según el orden del objeto).
+     */
+    it('no confunde MARKET_MISMATCH con LOCALITY_MARKET_MISMATCH', () => {
+      const usuario = translateDbError({ message: 'MARKET_MISMATCH', code: '42501' })
+      const comercio = translateDbError({ message: 'LOCALITY_MARKET_MISMATCH', code: '22023' })
+      expect(usuario).not.toBe(comercio)
+      expect(usuario).toContain('Mi perfil')
+      expect(comercio).toContain('ciudad')
+    })
+  })
+
+  describe('isMarketMismatchMessage', () => {
+    it('reconoce el mensaje exacto de mercado', () => {
+      expect(isMarketMismatchMessage(MARKET_MISMATCH_MESSAGE)).toBe(true)
+      // Así llega el mensaje desde useCreateReservation: ya traducido.
+      expect(isMarketMismatchMessage(translateDbError({ message: 'MARKET_MISMATCH', code: '42501' }))).toBe(true)
+    })
+
+    it('no lo confunde con el mensaje de mercado-localidad ni con errores parecidos', () => {
+      expect(isMarketMismatchMessage(translateDbError({ message: 'LOCALITY_MARKET_MISMATCH', code: '22023' }))).toBe(
+        false,
+      )
+      expect(isMarketMismatchMessage('Este pack pertenece a otro mercado.')).toBe(false)
+      expect(isMarketMismatchMessage('')).toBe(false)
+      expect(isMarketMismatchMessage(null)).toBe(false)
+      expect(isMarketMismatchMessage(undefined)).toBe(false)
+    })
   })
 
   describe('errores de packs (0009, 0016)', () => {
@@ -281,6 +330,7 @@ const MENSAJES_ESPERADOS: Record<string, string> = {
   PACK_NOT_OWNED_OR_INACTIVE: 'Este pack ya no está disponible para editar. Comprueba que tu comercio siga activo.',
   PACK_NOT_FOUND: 'No se encontró el pack.',
   PACK_NOT_ACTIVE: 'Solo puedes pausar un pack que esté activo.',
+  MARKET_MISMATCH: 'Este pack pertenece a otro mercado que el tuyo. Puedes cambiar tu mercado en Mi perfil.',
   CANCELLATION_REASON_REQUIRED: 'Para cancelar, indícanos un motivo (al menos 3 letras).',
   RESERVATION_NOT_FOUND: 'La reserva no existe o ya no está disponible.',
   RESERVATION_NOT_CANCELLABLE: 'Esta reserva ya no puede cancelarse.',
