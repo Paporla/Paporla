@@ -4,23 +4,29 @@ import { createClient } from '@/lib/supabase/server'
 import PackDetailClient from './PackDetailClient'
 import type { SerializedPack } from './PackDetailClient'
 import { notFound } from 'next/navigation'
-import { DEFAULT_MARKET } from '@/lib/constants/markets'
 
 interface Props {
   params: Promise<{ id: string }>
 }
 
+/**
+ * Carga el pack para la página de detalle.
+ *
+ * Usa get_pack_public (migración 0029) en vez de search_available_packs:
+ * la búsqueda del catálogo solo expone packs RESERVABLES (stock > 0 y
+ * ventana futura), así que un pack agotado — o con la ventana ya pasada —
+ * no aparecía y la página daba 404. get_pack_public devuelve el pack por su
+ * id aunque esté agotado: la página entonces muestra el estado real (botón
+ * "Agotado" / "Recogida finalizada") en vez de un 404.
+ *
+ * Sigue dando 404 cuando de verdad no existe: id inválido, mercado
+ * waitlist/cerrado, pack no activo o comercio no verificado/eliminado.
+ */
 async function loadPublicPack(id: string) {
   const supabase = await createClient()
-  const { data, error } = await supabase.rpc('search_available_packs', {
-    p_market_id: DEFAULT_MARKET.id,
-    p_locality_id: undefined,
-    p_latitude: undefined,
-    p_longitude: undefined,
-    p_radius_meters: 10000,
-    p_query: undefined,
-    p_limit: 50,
-  })
+  // p_pack_id es el nombre EXACTO del parámetro en la base (0029): PostgREST
+  // localiza la función por nombre de parámetro (los tests lo fijan).
+  const { data, error } = await supabase.rpc('get_pack_public', { p_pack_id: id })
 
   if (error) return { supabase, row: null as Record<string, unknown> | null }
 
@@ -29,13 +35,16 @@ async function loadPublicPack(id: string) {
 }
 
 /**
- * Mapea una fila plana de `search_available_packs` (migración 0014:13) al
- * shape que pinta la página. Esa RPC solo devuelve packs activos, con stock,
- * ventana de recogida futura y de comercios verificados: por eso `verified`
- * es siempre true aquí (un pack de comercio no verificado jamás aparece).
+ * Mapea una fila de `get_pack_public` (migración 0029) al shape que pinta la
+ * página. Esa función (como search_available_packs) solo devuelve packs de
+ * comercios verificados en mercados pilot/active: por eso `verified` es
+ * siempre true aquí (un pack de comercio no verificado jamás aparece).
  *
  * Los nombres de campo son los canónicos de la base (price_minor,
  * currency_code, pickup_start_at…), sin la capa heredada de "centavos".
+ * OJO: a diferencia del catálogo, `remaining_stock` PUEDE ser 0 y la ventana
+ * PUEDE estar pasada: la página muestra "Agotado" / "Recogida finalizada"
+ * (getReserveBlockReason) en vez de un 404.
  */
 function toSerializedPack(row: Record<string, unknown>, imageUrl: string | null): SerializedPack {
   return {
@@ -95,7 +104,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       images: imageUrl ? [{ url: imageUrl, width: 1200, height: 630, alt: title }] : [],
     },
     twitter: {
-      title: `${title} | Paporla`,
+      title,
       description,
       images: imageUrl ? [imageUrl] : [],
     },
