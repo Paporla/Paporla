@@ -9,6 +9,7 @@ import { useAuth } from '@/hooks/useAuth'
 import { useReservations } from '@/hooks/useReservations'
 import UserWelcomeBanner from '@/components/dashboard/UserWelcomeBanner'
 import OnboardingBanner from '@/components/onboarding/OnboardingBanner'
+import MarketSelectionBanner from '@/components/dashboard/MarketSelectionBanner'
 import UserStatsGrid from '@/components/dashboard/UserStatsGrid'
 import UserQuickActions from '@/components/dashboard/UserQuickActions'
 import NextPickupCard from '@/components/dashboard/NextPickupCard'
@@ -109,6 +110,12 @@ export default function UserDashboardPage() {
       )}
 
       <OnboardingBanner type="user" level={stats.level} />
+
+      {/* Bloqueo funcional (F2b): sin mercado, create_payment_reservation
+          (0009:285) rechaza la reserva con MARKET_MISMATCH. El banner se
+          explica y enlaza al selector de /profile; no es cerrable porque
+          no es un aviso opcional. Desaparece solo con mercado elegido. */}
+      {user && !user.marketId && <MarketSelectionBanner />}
 
       <ErrorBoundary fallback={<div className="p-4 text-sm text-gray-500">Error al cargar banner</div>}>
         <UserWelcomeBanner
