@@ -8,6 +8,10 @@ import { translateDbError } from '@/lib/utils/db-errors'
 import { trackPurchase } from '@/lib/analytics/events'
 
 const RESERVATIONS_QUERY_KEY = 'reservations'
+// Debe coincidir con la primera parte de la clave que usa usePublicPacks
+// (['public-packs', marketId, ...filtros]): invalidateQueries opera por
+// prefijo, con este segmento cubrimos todas las variantes del catálogo.
+const PUBLIC_PACKS_QUERY_KEY = 'public-packs'
 
 /**
  * Datos canónicos del pack que el llamador ya tiene en pantalla (payload de
@@ -148,6 +152,11 @@ export function useCreateReservation() {
       intentRef.current = null
       // Invalida "mis reservas" y cualquier dashboard que consuma esa query.
       queryClient.invalidateQueries({ queryKey: [RESERVATIONS_QUERY_KEY] })
+      // Mantener el catálogo al día: una reserva exitosa cambia el stock y el
+      // pack puede pasar a 'sold_out' (0009). Sin esto, "Seguir explorando"
+      // mostraría la lista cacheada hasta 30 s (staleTime de usePublicPacks)
+      // con el pack todavía visible, o habría que recargar (F5).
+      queryClient.invalidateQueries({ queryKey: [PUBLIC_PACKS_QUERY_KEY] })
     },
     onError: (err: unknown) => {
       setError(translateDbError(err, 'No se pudo crear la reserva. Inténtalo de nuevo.'))
