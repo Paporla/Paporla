@@ -156,9 +156,13 @@ describe('PUT /api/reservations', () => {
     expect(response.status).toBe(200)
     expect(body.success).toBe(true)
     expect(body.message).toBe('Reserva cancelada')
+    // Guardia de regresión: la firma real en la base (0009:366) es
+    // cancel_reservation(p_reservation_id uuid, p_reason text). Si un día el
+    // route vuelve a enviar otro nombre (p. ej. p_cancel_reason), PostgREST
+    // responde "Could not find the function" y este test debe fallar.
     expect(mockRpc).toHaveBeenCalledWith('cancel_reservation', {
       p_reservation_id: 'r-1',
-      p_cancel_reason: 'ya no puedo ir a esa hora',
+      p_reason: 'ya no puedo ir a esa hora',
     })
   })
 
