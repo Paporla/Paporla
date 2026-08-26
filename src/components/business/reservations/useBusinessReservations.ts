@@ -12,8 +12,9 @@ import { dateKeyInTimezone } from '@/lib/utils/formatDate'
  * Fila canónica de `list_shop_reservations` (migración 0014:333). Son
  * EXACTAMENTE las 12 columnas que la base expone al comercio, ni una más:
  * privacidad (solo el nombre visible del cliente, sin email ni teléfono),
- * sin código de recogida (no existe hasta que el comercio confirma, fase 4)
- * y el importe en la unidad menor de su moneda (CLP: pesos, sin centavos).
+ * sin código de recogida (se emite una sola vez al confirmar, 0031: en la
+ * base solo vive su huella sha256) y el importe en la unidad menor de su
+ * moneda (CLP: pesos, sin centavos).
  */
 export interface ReservationItem {
   reservation_id: string
@@ -45,6 +46,18 @@ export interface BusinessReservationStats {
 }
 
 /**
+ * Resultado de confirmar una reserva (piloto sin pagos, 0031).
+ * `code` es el código de recogida del cliente, que se muestra UNA sola vez
+ * (la base solo guarda su huella sha256); null = la reserva ya estaba
+ * confirmada (repetición), y en ese caso `note` lo explica.
+ */
+export interface ConfirmResult {
+  code: string | null
+  packTitle: string
+  note: string | null
+}
+
+/**
  * Zona horaria de referencia del piloto: solo existe el mercado Chile.
  * (Cada fila además trae su propia `timezone`, que usamos para mostrar la
  * ventana de recogida; para "hoy" necesitamos UNA sola referencia.)
@@ -71,7 +84,8 @@ const normalizeTerm = (value: string) =>
  *    por estado y búsqueda EN EL CLIENTE. Así la barra de estadísticas
  *    siempre ve el cuadro completo; la paginación con cursor
  *    (p_before_pickup_start_at) llega cuando el volumen la exija.
- *  - La única acción disponible es cancelar, vía la RPC canónica
+ *  - Las acciones disponibles son confirmar (piloto sin pagos, 0031) y
+ *    cancelar, cada una por su RPC canónica: `confirm_shop_reservation` y
  *    `cancel_reservation` con `p_reason` (el nombre del parámetro importa:
  *    la RPC no acepta `p_cancel_reason`).
  */
@@ -83,6 +97,7 @@ export function useBusinessReservations() {
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
   const [updating, setUpdating] = useState<string | null>(null)
+  const [confirmResult, setConfirmResult] = useState<ConfirmResult | null>(null)
 
   const {
     data: reservations = [],
@@ -128,6 +143,24 @@ export function useBusinessReservations() {
     },
     onSuccess: () => {
       setSuccess('Reserva cancelada y stock reintegrado')
+      invalidate()
+    },
+    onError: (err) => {
+      setError(translateDbError(err))
+    },
+  })
+
+  const confirmMutation = useMutation({
+    mutationFn: async (reservationId: string) => {
+      const supabase = supabaseBrowser()
+      const { data, error: rpcError } = await supabase.rpc('confirm_shop_reservation', {
+        p_reservation_id: reservationId,
+      })
+      if (rpcError) throw rpcError
+      if (!data?.success) throw new Error(data?.error || 'Error al confirmar la reserva')
+      return data as { idempotent_replay: boolean; pickup_code: string | null; note?: string | null }
+    },
+    onSuccess: () => {
       invalidate()
     },
     onError: (err) => {
@@ -182,9 +215,9 @@ export function useBusinessReservations() {
   }, [reservations])
 
   /**
-   * Cancela una reserva (la única acción del piloto).
-   * Éxitos y errores los gestiona la mutation (toast + invalidación +
-   * traducción del error a español); aquí solo se controla el botón.
+   * Cancela una reserva. Éxitos y errores los gestiona la mutation (toast +
+   * invalidación + traducción del error a español); aquí solo se controla el
+   * botón.
    */
   const cancelReservation = async (reservationId: string) => {
     setUpdating(reservationId)
@@ -192,6 +225,34 @@ export function useBusinessReservations() {
     setSuccess('')
     try {
       await cancelMutation.mutateAsync(reservationId)
+    } catch {
+      // El onError de la mutation ya dejó el mensaje traducido en `error`.
+    } finally {
+      setUpdating(null)
+    }
+  }
+
+  /**
+   * Confirma una reserva (piloto sin pagos, 0031): la pasa a ready_pickup +
+   * paid y genera el código de recogida del cliente, que la RPC devuelve UNA
+   * sola vez (en la base solo se guarda su huella sha256). El resultado queda
+   * en `confirmResult` para que la página muestre el código en su modal.
+   */
+  const confirmReservation = async (reservationId: string) => {
+    setUpdating(reservationId)
+    setError('')
+    setSuccess('')
+    setConfirmResult(null)
+    try {
+      const data = await confirmMutation.mutateAsync(reservationId)
+      const row = reservations.find((r) => r.reservation_id === reservationId)
+      const packTitle = row?.pack_title ?? 'Pack'
+      if (data.idempotent_replay) {
+        setConfirmResult({ code: null, packTitle, note: data.note ?? 'La reserva ya estaba confirmada.' })
+      } else {
+        setConfirmResult({ code: data.pickup_code ?? null, packTitle, note: null })
+        setSuccess('Reserva confirmada. Comparte el código de recogida con tu cliente.')
+      }
     } catch {
       // El onError de la mutation ya dejó el mensaje traducido en `error`.
     } finally {
@@ -214,6 +275,9 @@ export function useBusinessReservations() {
     stats,
     updating,
     cancelReservation,
+    confirmReservation,
+    confirmResult,
+    setConfirmResult,
     reload: invalidate,
   }
 }

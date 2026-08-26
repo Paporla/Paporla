@@ -5,12 +5,15 @@ import BusinessReservationsPage from '@/app/(business)/business/reservations/pag
 /**
  * Página del panel de reservas (tests de presentación): el hook de datos se
  * mockea completo; lo que se comprueba es cómo se agrupa, qué se muestra y
- * qué acciones se ofrecen.
+ * qué acciones se ofrecen. TodayPickups y el validador de códigos se stubean
+ * (su lógica de datos se prueba en sus propios archivos).
  */
 const hookState = vi.hoisted(() => ({
   reservations: [] as Record<string, unknown>[],
   stats: null as Record<string, number> | null,
   cancelReservation: null as ((...args: unknown[]) => Promise<void>) | null,
+  confirmReservation: null as ((...args: unknown[]) => Promise<void>) | null,
+  confirmResult: null as { code: string | null; packTitle: string; note: string | null } | null,
 }))
 
 vi.mock('@/components/business/reservations/useBusinessReservations', () => ({
@@ -29,8 +32,21 @@ vi.mock('@/components/business/reservations/useBusinessReservations', () => ({
     stats: hookState.stats,
     updating: null,
     cancelReservation: (...args: unknown[]) => hookState.cancelReservation!(...args),
+    confirmReservation: (...args: unknown[]) => hookState.confirmReservation!(...args),
+    confirmResult: hookState.confirmResult,
+    setConfirmResult: (value: { code: string | null; packTitle: string; note: string | null } | null) => {
+      hookState.confirmResult = value
+    },
     reload: vi.fn(),
   }),
+}))
+
+vi.mock('@/components/business/TodayPickups', () => ({
+  default: () => <div data-testid="today-pickups">Recogidas de hoy (stub)</div>,
+}))
+
+vi.mock('@/components/business/PickupCodeValidator', () => ({
+  default: () => <div data-testid="pickup-validator">Validar código de recogida (stub)</div>,
 }))
 
 function row(overrides: Record<string, unknown> = {}) {
@@ -69,7 +85,9 @@ describe('business/reservations page', () => {
     vi.clearAllMocks()
     hookState.reservations = []
     hookState.stats = { ...baseStats }
+    hookState.confirmResult = null
     hookState.cancelReservation = vi.fn().mockResolvedValue(undefined)
+    hookState.confirmReservation = vi.fn().mockResolvedValue(undefined)
   })
 
   it('agrupa por estados canónicos y separa el historial', () => {
@@ -87,19 +105,18 @@ describe('business/reservations page', () => {
     expect(screen.getByRole('heading', { name: 'Canceladas' })).toBeTruthy()
   })
 
-  it('el grupo de pendientes explica qué falta (regla F2b)', () => {
+  it('el grupo de pendientes explica qué hace confirmar (regla F2b)', () => {
     hookState.reservations = [row()]
     render(<BusinessReservationsPage />)
-    expect(
-      screen.getByText(/La confirmación y el código de recogida para el cliente se activan en el próximo paso/),
-    ).toBeTruthy()
+    expect(screen.getByText(/Al confirmar, la reserva pasa a lista para recoger/)).toBeTruthy()
   })
 
-  it('muestra el placeholder de los controles que vuelven el próximo paso', () => {
+  it('muestra Recogidas de hoy y el validador (el placeholder ya no existe)', () => {
     hookState.reservations = [row()]
     render(<BusinessReservationsPage />)
-    expect(screen.getByText('Recogidas de hoy y validación de códigos')).toBeTruthy()
-    expect(screen.getByText(/vuelven activos en el próximo paso del piloto/)).toBeTruthy()
+    expect(screen.getByTestId('today-pickups')).toBeTruthy()
+    expect(screen.getByTestId('pickup-validator')).toBeTruthy()
+    expect(screen.queryByText(/vuelven activos en el próximo paso/)).toBeNull()
   })
 
   it('cancela una reserva pasando por el modal de confirmación', async () => {
@@ -114,6 +131,31 @@ describe('business/reservations page', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Sí, cancelar' }))
 
     await waitFor(() => expect(hookState.cancelReservation).toHaveBeenCalledWith('r-1'))
+  })
+
+  it('confirma una reserva por el modal y muestra el código (una sola vez)', async () => {
+    hookState.reservations = [row()]
+    const { rerender } = render(<BusinessReservationsPage />)
+
+    fireEvent.click(screen.getByRole('heading', { name: 'Pendientes de confirmar' }))
+    fireEvent.click(await screen.findByRole('button', { name: /^Confirmar$/ }))
+
+    expect(await screen.findByText(/¿Confirmar esta reserva\?/)).toBeTruthy()
+
+    // El "hook" simulado emite el código al confirmar (como hace el real, 0031).
+    hookState.confirmReservation = vi.fn(async () => {
+      hookState.confirmResult = { code: 'P4P-ABCD1234', packTitle: 'Pack Panadería Artesanal', note: null }
+      return undefined
+    })
+    fireEvent.click(screen.getByRole('button', { name: 'Sí, confirmar' }))
+
+    await waitFor(() => expect(hookState.confirmReservation).toHaveBeenCalledTimes(1))
+    expect(await screen.findByText('P4P-ABCD1234')).toBeTruthy()
+    expect(screen.getByText(/Este código se muestra una sola vez/)).toBeTruthy()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Entendido' }))
+    rerender(<BusinessReservationsPage />)
+    expect(screen.queryByText('P4P-ABCD1234')).toBeNull()
   })
 
   it('no pinta el estado legacy "Pendiente" ni datos de contacto del cliente', async () => {
@@ -134,6 +176,7 @@ describe('business/reservations page', () => {
     fireEvent.click(screen.getByRole('heading', { name: 'Canceladas' }))
     await waitFor(() => expect(screen.getByText('Cliente A')).toBeTruthy())
     expect(screen.queryByRole('button', { name: /Cancelar/ })).toBeNull()
+    expect(screen.queryByRole('button', { name: /^Confirmar$/ })).toBeNull()
   })
 
   it('muestra los ingresos formateados como CLP canónico', () => {

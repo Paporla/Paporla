@@ -6,13 +6,15 @@ import { CheckCircle, Clock, XCircle, User, Ban, Eye, X } from 'lucide-react'
 import Button from '@/components/ui/Button'
 import { formatMinorPrice } from '@/lib/utils/formatPrice'
 import { formatPickupWindow } from '@/lib/utils/formatDate'
-import { getStatusConfig, canCancelStatus } from '@/lib/constants/reservations'
+import { getStatusConfig, canCancelStatus, canConfirmStatus } from '@/lib/constants/reservations'
 import type { ReservationItem } from './useBusinessReservations'
 
 interface ReservationCardProps {
   reservation: ReservationItem
   index: number
   updating: string | null
+  /** Si llega, la tarjeta pinta el botón Confirmar (solo para payment_pending, piloto 0031). */
+  onConfirmClick?: (id: string) => void
   /** Si llega, la tarjeta pinta el botón Cancelar (solo para estados cancelables). */
   onCancelClick?: (id: string) => void
 }
@@ -45,13 +47,20 @@ const borderColorMap: Record<string, string> = {
  * Muestra solo lo que list_shop_reservations (0014:333) expone: título del
  * pack, nombre visible del cliente (sin email ni teléfono), importe en la
  * unidad menor de su moneda y la ventana de recogida en la zona horaria del
- * mercado. Sin código de recogida: en el piloto no existe hasta que el
- * comercio confirma (fase 4, paso 2).
+ * mercado. Sin código de recogida: se emite una sola vez al confirmar
+ * (0031) y solo su huella sha256 vive en la base.
  */
-export default function ReservationCard({ reservation, index, updating, onCancelClick }: ReservationCardProps) {
+export default function ReservationCard({
+  reservation,
+  index,
+  updating,
+  onConfirmClick,
+  onCancelClick,
+}: ReservationCardProps) {
   const config = getStatusConfig(reservation.status)
   const StatusIcon = iconMap[reservation.status] ?? Clock
   const cancellable = canCancelStatus(reservation.status)
+  const confirmable = canConfirmStatus(reservation.status)
   const isReady = reservation.status === 'ready_pickup'
 
   return (
@@ -90,6 +99,17 @@ export default function ReservationCard({ reservation, index, updating, onCancel
           </p>
         </div>
         <div className="flex items-center gap-2 shrink-0">
+          {confirmable && onConfirmClick && (
+            <Button
+              variant="primary"
+              size="sm"
+              onClick={() => onConfirmClick(reservation.reservation_id)}
+              disabled={updating === reservation.reservation_id}
+              className="flex items-center gap-1"
+            >
+              <CheckCircle className="w-3.5 h-3.5" /> Confirmar
+            </Button>
+          )}
           {cancellable && onCancelClick && (
             <Button
               variant="danger"

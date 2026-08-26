@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { render, screen, fireEvent } from '@testing-library/react'
 import ReservationCard from '@/components/business/reservations/ReservationCard'
 import type { ReservationItem } from '@/components/business/reservations/useBusinessReservations'
 
@@ -67,5 +67,29 @@ describe('ReservationCard (lado business)', () => {
     const { container } = render(<ReservationCard reservation={item()} index={0} updating={null} />)
     expect(screen.getByText('Cliente A')).toBeTruthy()
     expect(container.textContent).not.toMatch(/@|\+\d{6,}/)
+  })
+
+  it('ofrece Confirmar en payment_pending con onConfirmClick y llama al handler', () => {
+    const onConfirm = vi.fn()
+    render(<ReservationCard reservation={item()} index={0} updating={null} onConfirmClick={onConfirm} />)
+    const button = screen.getByRole('button', { name: /^Confirmar$/ })
+    expect(button).toBeTruthy()
+    fireEvent.click(button)
+    expect(onConfirm).toHaveBeenCalledWith('r-1')
+  })
+
+  it('no ofrece Confirmar sin onConfirmClick ni en estados que no son payment_pending', () => {
+    render(
+      <ReservationCard
+        reservation={item({ status: 'confirmed' })}
+        index={0}
+        updating={null}
+        onConfirmClick={vi.fn()}
+      />,
+    )
+    expect(screen.queryByRole('button', { name: /^Confirmar$/ })).toBeNull()
+
+    render(<ReservationCard reservation={item()} index={0} updating={null} />)
+    expect(screen.queryByRole('button', { name: /^Confirmar$/ })).toBeNull()
   })
 })

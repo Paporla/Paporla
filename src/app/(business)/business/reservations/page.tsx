@@ -3,12 +3,16 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { pageVariants } from '@/lib/utils/motion'
-import { Calendar, ShoppingBag } from 'lucide-react'
+import { Calendar, CheckCircle, ShoppingBag } from 'lucide-react'
 import Card from '@/components/ui/Card'
+import Button from '@/components/ui/Button'
 import Toast from '@/components/ui/Toast'
 import ConfirmModal from '@/components/ui/ConfirmModal'
+import CopyButton from '@/components/ui/CopyButton'
 import LoadingSkeleton from '@/components/business/LoadingSkeleton'
 import ExportCSVButton from '@/components/business/ExportCSVButton'
+import TodayPickups from '@/components/business/TodayPickups'
+import PickupCodeValidator from '@/components/business/PickupCodeValidator'
 import { useBusinessReservations, ReservationItem } from '@/components/business/reservations/useBusinessReservations'
 import ReservationStatsBar from '@/components/business/reservations/ReservationStatsBar'
 import ReservationFilters from '@/components/business/reservations/ReservationFilters'
@@ -47,23 +51,41 @@ export default function BusinessReservationsPage() {
     stats,
     updating,
     cancelReservation,
+    confirmReservation,
+    confirmResult,
+    setConfirmResult,
   } = useBusinessReservations()
 
-  const [modalOpen, setModalOpen] = useState(false)
+  const [cancelModalOpen, setCancelModalOpen] = useState(false)
   const [reservationToCancel, setReservationToCancel] = useState<string | null>(null)
+  const [confirmModalOpen, setConfirmModalOpen] = useState(false)
+  const [reservationToConfirm, setReservationToConfirm] = useState<string | null>(null)
 
   const grouped = groupReservations(reservations)
 
-  const confirmCancel = (id: string) => {
+  const requestCancel = (id: string) => {
     setReservationToCancel(id)
-    setModalOpen(true)
+    setCancelModalOpen(true)
+  }
+
+  const requestConfirm = (id: string) => {
+    setReservationToConfirm(id)
+    setConfirmModalOpen(true)
   }
 
   const handleCancel = async () => {
     if (reservationToCancel) {
       await cancelReservation(reservationToCancel)
-      setModalOpen(false)
+      setCancelModalOpen(false)
       setReservationToCancel(null)
+    }
+  }
+
+  const handleConfirm = async () => {
+    if (reservationToConfirm) {
+      await confirmReservation(reservationToConfirm)
+      setConfirmModalOpen(false)
+      setReservationToConfirm(null)
     }
   }
 
@@ -84,27 +106,14 @@ export default function BusinessReservationsPage() {
         </div>
       </div>
 
-      {/*
-        Recogidas de hoy + validador de códigos: OCULTOS temporalmente.
-        Esos dos componentes siguen leyendo la tabla legacy sin permiso
-        (42501); se reconectan en el siguiente paso del piloto junto con la
-        confirmación del comercio y el código de recogida. (F2b: el
-        control deshabilitado siempre dice por qué.)
-      */}
-      <Card glass className="p-5 flex items-start gap-3">
-        <div className="p-2 rounded-lg bg-primary/10 inline-flex shrink-0">
-          <Calendar className="w-4 h-4 text-primary" />
-        </div>
-        <div>
-          <p className="text-sm font-semibold dark:text-white text-gray-900">
-            Recogidas de hoy y validación de códigos
-          </p>
-          <p className="text-xs dark:text-gray-500 text-gray-500 mt-1">
-            Estos controles vuelven activos en el próximo paso del piloto: aquí verás las recogidas del día y podrás
-            validar el código de recogida. Mientras tanto, gestiona las reservas de la lista de abajo.
-          </p>
-        </div>
-      </Card>
+      {/* Recogidas de hoy + validador de códigos: reactivados en este paso
+          (0031). El comercio confirma (confirm_shop_reservation emite el
+          código una sola vez) y valida la llegada con el código
+          (validate_pickup). Ambos sobre RPCs canónicas. */}
+      <div className="space-y-6">
+        <TodayPickups shopId={shopId} />
+        <PickupCodeValidator shopId={shopId} />
+      </div>
 
       {/* Estadísticas */}
       <ReservationStatsBar stats={stats} />
@@ -143,8 +152,9 @@ export default function BusinessReservationsPage() {
             title="Pendientes de confirmar"
             reservations={grouped.payment_pending}
             updating={updating}
-            onCancelClick={confirmCancel}
-            note="La confirmación y el código de recogida para el cliente se activan en el próximo paso del piloto. Por ahora la reserva queda aguardando y el stock ya está apartado."
+            onConfirmClick={requestConfirm}
+            onCancelClick={requestCancel}
+            note="Al confirmar, la reserva pasa a lista para recoger y se genera el código de recogida para tu cliente (se muestra una sola vez)."
           />
         )}
 
@@ -154,7 +164,7 @@ export default function BusinessReservationsPage() {
             title="Confirmadas"
             reservations={grouped.confirmed}
             updating={updating}
-            onCancelClick={confirmCancel}
+            onCancelClick={requestCancel}
           />
         )}
 
@@ -164,7 +174,7 @@ export default function BusinessReservationsPage() {
             title="Listas para recoger"
             reservations={grouped.ready_pickup}
             updating={updating}
-            onCancelClick={confirmCancel}
+            onCancelClick={requestCancel}
           />
         )}
 
@@ -211,14 +221,70 @@ export default function BusinessReservationsPage() {
 
       {/* Modal de confirmación para cancelar */}
       <ConfirmModal
-        isOpen={modalOpen}
-        onClose={() => setModalOpen(false)}
+        isOpen={cancelModalOpen}
+        onClose={() => setCancelModalOpen(false)}
         onConfirm={handleCancel}
         title="Cancelar reserva"
         message="¿Estás seguro de que quieres cancelar esta reserva? El stock se reintegrará al pack y esta acción no se puede deshacer."
         confirmText="Sí, cancelar"
         cancelText="Volver"
       />
+
+      {/* Modal de confirmación para confirmar (piloto sin pagos, 0031) */}
+      <ConfirmModal
+        isOpen={confirmModalOpen}
+        onClose={() => setConfirmModalOpen(false)}
+        onConfirm={handleConfirm}
+        title="Confirmar reserva"
+        message="¿Confirmar esta reserva? Se generará el código de recogida para tu cliente y esta acción no se puede deshacer."
+        confirmText="Sí, confirmar"
+        cancelText="Volver"
+      />
+
+      {/* Modal del código de recogida: se muestra UNA sola vez (en la base
+          solo vive su huella sha256, 0031). */}
+      {confirmResult && (
+        <div className="fixed inset-0 z-50">
+          <div className="absolute inset-0 dark:bg-black/80 bg-black/50 backdrop-blur-sm" aria-hidden="true" />
+          <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-md">
+            <div className="dark:bg-gray-900 bg-white rounded-2xl border dark:border-gray-700 border-gray-200 shadow-2xl overflow-hidden">
+              <div className="p-6 text-center">
+                <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-green-500/10 flex items-center justify-center">
+                  <CheckCircle className="w-8 h-8 text-green-400" />
+                </div>
+                <h3 className="text-xl font-semibold dark:text-white text-gray-900 mb-2">
+                  {confirmResult.code ? '¡Reserva confirmada!' : 'Reserva ya confirmada'}
+                </h3>
+                {confirmResult.code ? (
+                  <>
+                    <p className="dark:text-gray-400 text-gray-600 text-sm mb-4">{confirmResult.packTitle}</p>
+                    <div className="dark:bg-white/5 bg-gray-50 border dark:border-white/10 border-gray-200 rounded-xl p-4 mb-3">
+                      <p className="text-[10px] uppercase tracking-widest text-gray-500 mb-1">Código de recogida</p>
+                      <p className="text-3xl font-mono font-bold tracking-widest text-primary">{confirmResult.code}</p>
+                    </div>
+                    <div className="flex justify-center mb-3">
+                      <CopyButton text={confirmResult.code} />
+                    </div>
+                    <p className="text-xs dark:text-gray-400 text-gray-600">
+                      Este código se muestra una sola vez: compártelo con tu cliente ahora, porque no se podrá volver a
+                      ver.
+                    </p>
+                  </>
+                ) : (
+                  <p className="dark:text-gray-400 text-gray-600 text-sm">
+                    {confirmResult.note} El código se mostró cuando se confirmó la reserva y no se puede volver a ver.
+                  </p>
+                )}
+              </div>
+              <div className="flex gap-3 p-4 pt-0">
+                <Button onClick={() => setConfirmResult(null)} variant="primary" className="flex-1">
+                  Entendido
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Toasts */}
       {error && <Toast message={error} type="error" onClose={() => setError('')} />}

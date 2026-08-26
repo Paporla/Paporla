@@ -10,6 +10,8 @@ interface ReservationGroupProps {
   title: string
   reservations: ReservationItem[]
   updating: string | null
+  /** Solo los grupos activos la reciben; el historial nunca ofrece acciones. */
+  onConfirmClick?: (id: string) => void
   onCancelClick?: (id: string) => void
   /**
    * Nota bajo el encabezado (regla F2b: un control ausente o deshabilitado
@@ -22,6 +24,7 @@ export default function ReservationGroup({
   title,
   reservations,
   updating,
+  onConfirmClick,
   onCancelClick,
   note,
 }: ReservationGroupProps) {
@@ -71,6 +74,7 @@ export default function ReservationGroup({
                   reservation={reservation}
                   index={idx}
                   updating={updating}
+                  onConfirmClick={onConfirmClick}
                   onCancelClick={onCancelClick}
                 />
               ))}

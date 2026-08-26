@@ -123,6 +123,22 @@ const RPC_MESSAGES: Record<string, string> = {
   SHOP_NOT_AUTHORIZED: 'Esta cuenta no gestiona ese comercio. Inicia sesión con la cuenta que lo administra.',
   INVALID_SHOP_RESERVATION_PAGE_ARGUMENTS: 'No se pudo cargar la página de reservas. Vuelve a intentarlo.',
 
+  // Reservas — confirm_shop_reservation (0031) y validate_pickup (0009:503)
+  // El código de recogida se emite una sola vez al confirmar (solo se guarda
+  // su huella sha256, 0031), así que varios de estos errores explican por
+  // qué una validación no funciona: fuera de horario, código ya usado, ...
+  RESERVATION_ID_REQUIRED: 'Falta el identificador de la reserva. Vuelve a intentarlo.',
+  RESERVATION_NOT_CONFIRMABLE:
+    'Esta reserva ya no está a la espera de confirmación, así que no se puede confirmar desde el panel.',
+  MERCHANT_OR_ADMIN_REQUIRED: 'Esta acción solo la puede hacer el comercio del local o un administrador.',
+  INVALID_PICKUP_CREDENTIAL: 'Ese código no tiene el formato esperado (debe ser del tipo P4P-XXXXXXXX).',
+  PICKUP_CREDENTIAL_NOT_FOUND:
+    'No encontramos ninguna reserva con ese código de recogida. Revisa que esté completo y bien escrito.',
+  WRONG_SHOP: 'Ese código de recogida pertenece a otra tienda.',
+  RESERVATION_NOT_READY: 'Esa reserva todavía no está lista para recoger: debe estar confirmada y con el pago cerrado.',
+  OUTSIDE_PICKUP_WINDOW:
+    'La recogida aún no está dentro de su horario (o ya terminó). Revisa la ventana de la reserva.',
+
   // Packs — publish_pack / set_pack_paused / archive_pack / update_pack_content /
   // adjust_pack_stock (migraciones 0009, 0016)
   //

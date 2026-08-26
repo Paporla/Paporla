@@ -126,6 +126,16 @@ export function canCancelStatus(status: string): boolean {
   return ACTIVE_STATUSES.includes(status)
 }
 
+/**
+ * ¿Puede el comercio CONFIRMAR esta reserva? (piloto sin pagos, 0031)
+ * Solo `payment_pending`: la confirmación emula la cadena de pagos
+ * (confirmed -> ready_pickup + paid) y emite el código de recogida del
+ * cliente, que la RPC devuelve una sola vez.
+ */
+export function canConfirmStatus(status: string): boolean {
+  return status === 'payment_pending'
+}
+
 /** Instante de pickup_start_at en ms, o Infinity si no hay / está rota. */
 function toPickupTime(value: string | null | undefined): number {
   if (!value) return Infinity

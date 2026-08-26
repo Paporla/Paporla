@@ -319,6 +319,75 @@ describe('translateDbError', () => {
       expect(noCancelable).toContain('ya no puede cancelarse')
     })
   })
+
+  describe('errores de confirmación y recogida (0031, 0009:503)', () => {
+    it('traduce la confirmación no posible', () => {
+      expect(translateDbError({ message: 'RESERVATION_NOT_CONFIRMABLE', code: 'P0001' })).toBe(
+        'Esta reserva ya no está a la espera de confirmación, así que no se puede confirmar desde el panel.',
+      )
+    })
+
+    it('traduce el error de rol del validador', () => {
+      expect(translateDbError({ message: 'MERCHANT_OR_ADMIN_REQUIRED', code: '42501' })).toBe(
+        'Esta acción solo la puede hacer el comercio del local o un administrador.',
+      )
+    })
+
+    it('traduce el código con formato inesperado', () => {
+      expect(translateDbError({ message: 'INVALID_PICKUP_CREDENTIAL', code: '22023' })).toMatch(/formato esperado/i)
+    })
+
+    it('traduce el código que no corresponde a ninguna reserva', () => {
+      expect(translateDbError({ message: 'PICKUP_CREDENTIAL_NOT_FOUND', code: 'P0002' })).toMatch(
+        /no encontramos ninguna reserva/i,
+      )
+    })
+
+    it('traduce el código de otra tienda', () => {
+      expect(translateDbError({ message: 'WRONG_SHOP', code: '42501' })).toBe(
+        'Ese código de recogida pertenece a otra tienda.',
+      )
+    })
+
+    it('traduce la reserva que no está lista para recoger', () => {
+      expect(translateDbError({ message: 'RESERVATION_NOT_READY', code: 'P0001' })).toMatch(/todavía no está lista/i)
+    })
+
+    it('traduce la recogida fuera de su horario', () => {
+      expect(translateDbError({ message: 'OUTSIDE_PICKUP_WINDOW', code: 'P0001' })).toMatch(/horario/i)
+    })
+
+    it('no confunde OUTSIDE_PICKUP_WINDOW con INVALID_PICKUP_WINDOW', () => {
+      const ventana = translateDbError({ message: 'OUTSIDE_PICKUP_WINDOW', code: 'P0001' })
+      const formulario = translateDbError({ message: 'INVALID_PICKUP_WINDOW', code: '22023' })
+      expect(ventana).not.toBe(formulario)
+      expect(ventana).not.toMatch(/posterior a la de inicio/i)
+    })
+
+    it('no confunde RESERVATION_NOT_READY con RESERVATION_NOT_CONFIRMABLE', () => {
+      const noLista = translateDbError({ message: 'RESERVATION_NOT_READY', code: 'P0001' })
+      const noConfirmable = translateDbError({ message: 'RESERVATION_NOT_CONFIRMABLE', code: 'P0001' })
+      expect(noLista).not.toBe(noConfirmable)
+    })
+
+    it('los nuevos errores no caen en el fallback genérico', () => {
+      const nuevos = [
+        'RESERVATION_ID_REQUIRED',
+        'RESERVATION_NOT_CONFIRMABLE',
+        'MERCHANT_OR_ADMIN_REQUIRED',
+        'INVALID_PICKUP_CREDENTIAL',
+        'PICKUP_CREDENTIAL_NOT_FOUND',
+        'WRONG_SHOP',
+        'RESERVATION_NOT_READY',
+        'OUTSIDE_PICKUP_WINDOW',
+      ]
+      for (const message of nuevos) {
+        const salida = translateDbError({ message, code: 'P0001' }, 'FALLBACK')
+        expect(salida).not.toBe('FALLBACK')
+        expect(salida).not.toBe(message)
+      }
+    })
+  })
 })
 
 /*
@@ -337,4 +406,15 @@ const MENSAJES_ESPERADOS: Record<string, string> = {
   NOT_AUTHORIZED_FOR_RESERVATION: 'No tienes permiso para gestionar esta reserva.',
   CANCELLATION_WINDOW_CLOSED: 'Pasó el plazo para cancelar esta reserva.',
   INVALID_RESERVATION_PAGE_ARGUMENTS: 'No se pudo cargar la página de reservas. Vuelve a intentarlo.',
+  RESERVATION_ID_REQUIRED: 'Falta el identificador de la reserva. Vuelve a intentarlo.',
+  RESERVATION_NOT_CONFIRMABLE:
+    'Esta reserva ya no está a la espera de confirmación, así que no se puede confirmar desde el panel.',
+  MERCHANT_OR_ADMIN_REQUIRED: 'Esta acción solo la puede hacer el comercio del local o un administrador.',
+  INVALID_PICKUP_CREDENTIAL: 'Ese código no tiene el formato esperado (debe ser del tipo P4P-XXXXXXXX).',
+  PICKUP_CREDENTIAL_NOT_FOUND:
+    'No encontramos ninguna reserva con ese código de recogida. Revisa que esté completo y bien escrito.',
+  WRONG_SHOP: 'Ese código de recogida pertenece a otra tienda.',
+  RESERVATION_NOT_READY: 'Esa reserva todavía no está lista para recoger: debe estar confirmada y con el pago cerrado.',
+  OUTSIDE_PICKUP_WINDOW:
+    'La recogida aún no está dentro de su horario (o ya terminó). Revisa la ventana de la reserva.',
 }
