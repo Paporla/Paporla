@@ -7,9 +7,8 @@
  * datos (list_shop_reservations, 0014:333) y la que producen las funciones
  * canónicas (create_payment_reservation nace en 'payment_pending').
  *
- * OJO: NO existe estado 'pending' — ese es legado de la tabla vieja. Solo
- * sobrevive como alias en STATUS_CONFIG (abajo) para el lado business, que
- * se migra en la fase 4.
+ * OJO: NO existe estado 'pending' — ese era legado de la tabla vieja. El
+ * lado business se migró a esta lista canónica en la fase 4.
  */
 export const RESERVATION_STATUSES = [
   'payment_pending',
@@ -35,9 +34,8 @@ export interface StatusConfig {
  * Etiqueta y colores por estado.
  *
  * Tipado como Record<string, StatusConfig> a propósito: la base manda
- * `text` y el lado business (ReservationCard) indexa con strings legacy
- * hasta la fase 4. La seguridad ante valores desconocidos la da
- * `getStatusConfig` (abajo), no esta tabla.
+ * `text`, y si algún día llega un estado que todavía no pintamos, la
+ * seguridad la da `getStatusConfig` (abajo), no esta tabla.
  */
 export const STATUS_CONFIG: Record<string, StatusConfig> = {
   payment_pending: {
@@ -87,15 +85,6 @@ export const STATUS_CONFIG: Record<string, StatusConfig> = {
     color: 'text-gray-400',
     bg: 'bg-gray-500/10',
     border: 'border-gray-500/20',
-  },
-  // LEGADO (alias deprecado): el lado business (ReservationCard) sigue
-  // leyendo 'pending' hasta la fase 4. Se pinta igual que payment_pending
-  // para que ambos lados no choquen. Borrarlo junto con ese lado.
-  pending: {
-    label: 'Pendiente',
-    color: 'text-amber-400',
-    bg: 'bg-amber-500/10',
-    border: 'border-amber-500/20',
   },
 }
 

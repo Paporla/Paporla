@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { useState } from 'react'
 import { motion } from 'framer-motion'
@@ -9,22 +9,25 @@ import Toast from '@/components/ui/Toast'
 import ConfirmModal from '@/components/ui/ConfirmModal'
 import LoadingSkeleton from '@/components/business/LoadingSkeleton'
 import ExportCSVButton from '@/components/business/ExportCSVButton'
-import TodayPickups from '@/components/business/TodayPickups'
-import PickupCodeValidator from '@/components/business/PickupCodeValidator'
 import { useBusinessReservations, ReservationItem } from '@/components/business/reservations/useBusinessReservations'
 import ReservationStatsBar from '@/components/business/reservations/ReservationStatsBar'
 import ReservationFilters from '@/components/business/reservations/ReservationFilters'
 import ReservationGroup from '@/components/business/reservations/ReservationGroup'
+import { STATUS_LABELS } from '@/lib/constants/reservations'
+import { formatDate, formatPickupWindow } from '@/lib/utils/formatDate'
 
-// Agrupar reservas por estado
+// Agrupa las reservas por estado canónico. "recogidas" une picked_up +
+// completed (ambas significan que el pack ya salió del local).
 const groupReservations = (reservations: ReservationItem[]) => {
+  const byStatus = (status: string) => reservations.filter((r) => r.status === status)
   return {
-    ready_pickup: reservations.filter((r) => r.status === 'ready_pickup'),
-    pending: reservations.filter((r) => r.status === 'pending'),
-    confirmed: reservations.filter((r) => r.status === 'confirmed'),
-    picked_up: reservations.filter((r) => r.status === 'picked_up'),
-    no_show: reservations.filter((r) => r.status === 'no_show'),
-    cancelled: reservations.filter((r) => r.status === 'cancelled'),
+    payment_pending: byStatus('payment_pending'),
+    confirmed: byStatus('confirmed'),
+    ready_pickup: byStatus('ready_pickup'),
+    recogidas: [...byStatus('picked_up'), ...byStatus('completed')],
+    no_show: byStatus('no_show'),
+    cancelled: byStatus('cancelled'),
+    expired: byStatus('expired'),
   }
 }
 
@@ -43,14 +46,11 @@ export default function BusinessReservationsPage() {
     reservations,
     stats,
     updating,
-    updateStatus,
+    cancelReservation,
   } = useBusinessReservations()
 
   const [modalOpen, setModalOpen] = useState(false)
   const [reservationToCancel, setReservationToCancel] = useState<string | null>(null)
-
-  const today = new Date().toISOString().split('T')[0]
-  const todayCount = reservations.filter((r) => r.created_at?.startsWith(today)).length
 
   const grouped = groupReservations(reservations)
 
@@ -61,7 +61,7 @@ export default function BusinessReservationsPage() {
 
   const handleCancel = async () => {
     if (reservationToCancel) {
-      await updateStatus(reservationToCancel, 'cancelled')
+      await cancelReservation(reservationToCancel)
       setModalOpen(false)
       setReservationToCancel(null)
     }
@@ -84,16 +84,30 @@ export default function BusinessReservationsPage() {
         </div>
       </div>
 
-      {/* Validador y recogidas del día */}
-      {shopId && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <PickupCodeValidator />
-          <TodayPickups shopId={shopId} />
+      {/*
+        Recogidas de hoy + validador de códigos: OCULTOS temporalmente.
+        Esos dos componentes siguen leyendo la tabla legacy sin permiso
+        (42501); se reconectan en el siguiente paso del piloto junto con la
+        confirmación del comercio y el código de recogida. (F2b: el
+        control deshabilitado siempre dice por qué.)
+      */}
+      <Card glass className="p-5 flex items-start gap-3">
+        <div className="p-2 rounded-lg bg-primary/10 inline-flex shrink-0">
+          <Calendar className="w-4 h-4 text-primary" />
         </div>
-      )}
+        <div>
+          <p className="text-sm font-semibold dark:text-white text-gray-900">
+            Recogidas de hoy y validación de códigos
+          </p>
+          <p className="text-xs dark:text-gray-500 text-gray-500 mt-1">
+            Estos controles vuelven activos en el próximo paso del piloto: aquí verás las recogidas del día y podrás
+            validar el código de recogida. Mientras tanto, gestiona las reservas de la lista de abajo.
+          </p>
+        </div>
+      </Card>
 
       {/* Estadísticas */}
-      <ReservationStatsBar stats={{ ...stats, todayCount }} />
+      <ReservationStatsBar stats={stats} />
 
       {/* Filtros + Exportar */}
       <div className="flex items-center gap-4 flex-wrap">
@@ -108,15 +122,12 @@ export default function BusinessReservationsPage() {
         {reservations.length > 0 && (
           <ExportCSVButton
             data={reservations.map((r) => ({
-              Fecha: r.created_at ? new Date(r.created_at).toLocaleDateString('es-CL') : '-',
-              Pack: r.pack?.title ?? '-',
-              Cliente: r.user?.name ?? '-',
-              Email: r.user?.email ?? '-',
-              Cantidad: r.quantity,
-              'Precio (CLP)': r.total_price_cents,
-              Estado: r.status,
-              Código: r.pickup_code ?? '-',
-              Recogida: r.pickup_date ? new Date(r.pickup_date).toLocaleDateString('es-CL') : '-',
+              Fecha: r.created_at ? formatDate(r.created_at) : '-',
+              Pack: r.pack_title,
+              Cliente: r.customer_display_name,
+              'Precio (CLP)': r.total_amount_minor,
+              Estado: STATUS_LABELS[r.status] ?? r.status,
+              Recogida: formatPickupWindow(r.pickup_start_at, r.pickup_end_at, r.timezone),
             }))}
             filename="reservas_paporla"
             label="Exportar CSV"
@@ -126,27 +137,14 @@ export default function BusinessReservationsPage() {
 
       {/* Reservas agrupadas por estado */}
       <div className="space-y-4">
-        {/* Listas para recoger */}
-        {grouped.ready_pickup.length > 0 && (
+        {/* Pendientes de confirmar */}
+        {grouped.payment_pending.length > 0 && (
           <ReservationGroup
-            title="Listas para recoger"
-            reservations={grouped.ready_pickup}
+            title="Pendientes de confirmar"
+            reservations={grouped.payment_pending}
             updating={updating}
-            onValidate={(id) => updateStatus(id, 'picked_up')}
-            onNoShow={(id) => updateStatus(id, 'no_show')}
             onCancelClick={confirmCancel}
-          />
-        )}
-
-        {/* Pendientes */}
-        {grouped.pending.length > 0 && (
-          <ReservationGroup
-            title="Pendientes"
-            reservations={grouped.pending}
-            updating={updating}
-            onValidate={(id) => updateStatus(id, 'confirmed')}
-            onNoShow={(id) => updateStatus(id, 'no_show')}
-            onCancelClick={confirmCancel}
+            note="La confirmación y el código de recogida para el cliente se activan en el próximo paso del piloto. Por ahora la reserva queda aguardando y el stock ya está apartado."
           />
         )}
 
@@ -156,22 +154,33 @@ export default function BusinessReservationsPage() {
             title="Confirmadas"
             reservations={grouped.confirmed}
             updating={updating}
-            onValidate={(id) => updateStatus(id, 'picked_up')}
-            onNoShow={(id) => updateStatus(id, 'no_show')}
+            onCancelClick={confirmCancel}
+          />
+        )}
+
+        {/* Listas para recoger */}
+        {grouped.ready_pickup.length > 0 && (
+          <ReservationGroup
+            title="Listas para recoger"
+            reservations={grouped.ready_pickup}
+            updating={updating}
             onCancelClick={confirmCancel}
           />
         )}
 
         {/* Historial */}
-        {(grouped.picked_up.length > 0 || grouped.no_show.length > 0 || grouped.cancelled.length > 0) && (
+        {(grouped.recogidas.length > 0 ||
+          grouped.no_show.length > 0 ||
+          grouped.cancelled.length > 0 ||
+          grouped.expired.length > 0) && (
           <div className="space-y-4">
             <div className="flex items-center gap-2 mt-6 pt-4 border-t border-dark-border">
               <div className="w-1 h-5 dark:bg-gray-600 bg-gray-300 rounded-full" />
               <h2 className="text-lg font-semibold dark:text-gray-400 text-gray-500">Historial</h2>
             </div>
 
-            {grouped.picked_up.length > 0 && (
-              <ReservationGroup title="Recogidas" reservations={grouped.picked_up} updating={updating} />
+            {grouped.recogidas.length > 0 && (
+              <ReservationGroup title="Recogidas" reservations={grouped.recogidas} updating={updating} />
             )}
 
             {grouped.no_show.length > 0 && (
@@ -180,6 +189,10 @@ export default function BusinessReservationsPage() {
 
             {grouped.cancelled.length > 0 && (
               <ReservationGroup title="Canceladas" reservations={grouped.cancelled} updating={updating} />
+            )}
+
+            {grouped.expired.length > 0 && (
+              <ReservationGroup title="Expiradas" reservations={grouped.expired} updating={updating} />
             )}
           </div>
         )}
@@ -202,7 +215,7 @@ export default function BusinessReservationsPage() {
         onClose={() => setModalOpen(false)}
         onConfirm={handleCancel}
         title="Cancelar reserva"
-        message="¿Estás seguro de que quieres cancelar esta reserva? Esta acción no se puede deshacer."
+        message="¿Estás seguro de que quieres cancelar esta reserva? El stock se reintegrará al pack y esta acción no se puede deshacer."
         confirmText="Sí, cancelar"
         cancelText="Volver"
       />
