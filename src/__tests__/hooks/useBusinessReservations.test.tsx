@@ -73,6 +73,13 @@ function setupMockClient(
       locality_id: null,
     },
   },
+  confirmData: Record<string, unknown> = {
+    success: true,
+    idempotent_replay: false,
+    status: 'ready_pickup',
+    payment_status: 'paid',
+    pickup_code: 'P4P-ABCD1234',
+  },
 ) {
   rpc = vi.fn().mockImplementation((name: string, args?: Record<string, unknown>) => {
     if (rpcErrors[name]) return Promise.resolve({ data: null, error: rpcErrors[name] })
@@ -86,6 +93,11 @@ function setupMockClient(
           reservation_id: args?.p_reservation_id,
           payment_action: 'cancel_checkout',
         },
+        error: null,
+      })
+    if (name === 'confirm_shop_reservation')
+      return Promise.resolve({
+        data: { ...confirmData, reservation_id: args?.p_reservation_id },
         error: null,
       })
     return Promise.resolve({ data: { success: true }, error: null })
@@ -257,5 +269,65 @@ describe('useBusinessReservations', () => {
       revenue: 3990, // solo r-1 (picked_up): r-2 sigue a la espera, r-4 cancelada
       todayCount: 1, // solo r-2: activa y con recogida hoy (r-1 ya se recogió, r-3 mañana, r-4 cancelada)
     })
+  })
+
+  it('confirma con p_reservation_id (NUNCA otro nombre) y devuelve el código de recogida', async () => {
+    const { result } = renderHook(() => useBusinessReservations(), { wrapper: createWrapper() })
+    await waitFor(() => expect(result.current.shopId).toBe('shop-a'))
+    await waitFor(() => expect(result.current.loading).toBe(false))
+
+    await act(async () => {
+      await result.current.confirmReservation('r-1')
+    })
+
+    const confirmCall = rpc.mock.calls.find(([name]) => name === 'confirm_shop_reservation')
+    expect(confirmCall).toBeDefined()
+    expect(confirmCall![1]).toEqual({ p_reservation_id: 'r-1' })
+    expect(result.current.confirmResult).toEqual({
+      code: 'P4P-ABCD1234',
+      packTitle: 'Pack Panadería Artesanal',
+      note: null,
+    })
+    expect(result.current.success).toContain('confirmada')
+    // Invalidación: la lista se vuelve a pedir.
+    expect(rpc.mock.calls.filter(([name]) => name === 'list_shop_reservations')).toHaveLength(2)
+  })
+
+  it('repetir la confirmación devuelve la nota sin código (repetición idempotente)', async () => {
+    setupMockClient([shopRow({ status: 'ready_pickup' })], {}, undefined, {
+      success: true,
+      idempotent_replay: true,
+      status: 'ready_pickup',
+      payment_status: 'paid',
+      pickup_code: null,
+      note: 'El codigo ya fue emitido y solo se muestra una vez (se guarda su huella).',
+    })
+    const { result } = renderHook(() => useBusinessReservations(), { wrapper: createWrapper() })
+    await waitFor(() => expect(result.current.shopId).toBe('shop-a'))
+    await waitFor(() => expect(result.current.loading).toBe(false))
+
+    await act(async () => {
+      await result.current.confirmReservation('r-1')
+    })
+
+    expect(result.current.confirmResult?.code).toBeNull()
+    expect(result.current.confirmResult?.note).toContain('una vez')
+    expect(result.current.confirmResult?.packTitle).toBe('Pack Panadería Artesanal')
+  })
+
+  it('traduce a español el error de la confirmación', async () => {
+    setupMockClient([shopRow()], {
+      confirm_shop_reservation: { message: 'NOT_AUTHORIZED_FOR_RESERVATION', code: '42501' },
+    })
+    const { result } = renderHook(() => useBusinessReservations(), { wrapper: createWrapper() })
+    await waitFor(() => expect(result.current.shopId).toBe('shop-a'))
+    await waitFor(() => expect(result.current.loading).toBe(false))
+
+    await act(async () => {
+      await result.current.confirmReservation('r-1')
+    })
+
+    expect(result.current.confirmResult).toBeNull()
+    expect(result.current.error).toBe('No tienes permiso para gestionar esta reserva.')
   })
 })

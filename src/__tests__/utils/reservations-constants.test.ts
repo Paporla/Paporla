@@ -7,6 +7,7 @@ import {
   sortReservationsByPickupTime,
   isActiveStatus,
   canCancelStatus,
+  canConfirmStatus,
 } from '@/lib/constants/reservations'
 
 describe('RESERVATION_STATUSES', () => {
@@ -142,5 +143,18 @@ describe('canCancelStatus', () => {
     expect(canCancelStatus('cancelled')).toBe(false)
     expect(canCancelStatus('no_show')).toBe(false)
     expect(canCancelStatus('expired')).toBe(false)
+  })
+})
+
+describe('canConfirmStatus', () => {
+  it('solo payment_pending se puede confirmar (piloto sin pagos, 0031)', () => {
+    expect(canConfirmStatus('payment_pending')).toBe(true)
+    expect(canConfirmStatus('confirmed')).toBe(false)
+    expect(canConfirmStatus('ready_pickup')).toBe(false)
+    expect(canConfirmStatus('picked_up')).toBe(false)
+    expect(canConfirmStatus('completed')).toBe(false)
+    expect(canConfirmStatus('cancelled')).toBe(false)
+    expect(canConfirmStatus('no_show')).toBe(false)
+    expect(canConfirmStatus('expired')).toBe(false)
   })
 })
