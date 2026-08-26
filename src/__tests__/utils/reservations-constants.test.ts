@@ -44,9 +44,13 @@ describe('STATUS_CONFIG', () => {
     expect(STATUS_CONFIG['payment_pending'].label).toBe('Aguardando confirmación')
   })
 
-  it('conserva el alias legacy "pending" para el lado business (fase 4)', () => {
-    expect(STATUS_CONFIG['pending']).toBeDefined()
-    expect(STATUS_CONFIG['pending'].label).toBe('Pendiente')
+  it('ya no tiene el alias legacy "pending" (el lado business se migró en la fase 4)', () => {
+    expect(STATUS_CONFIG['pending']).toBeUndefined()
+  })
+
+  it('un estado desconocido cae en getStatusConfig, no en STATUS_CONFIG', () => {
+    expect(getStatusConfig('pending').label).toBe('pending')
+    expect(getStatusConfig('pending').color).toContain('gray')
   })
 })
 

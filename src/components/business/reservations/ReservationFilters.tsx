@@ -12,14 +12,18 @@ interface ReservationFiltersProps {
   onStatusFilterChange: (value: string) => void
 }
 
+// Estados canónicos (RESERVATION_STATUSES): la lista EXACTA que valida
+// list_shop_reservations (0014:333). Sin el 'pending' legacy.
 const statusOptions = [
   { value: 'all', label: 'Todas', color: 'text-gray-400' },
-  { value: 'pending', label: 'Pendientes', color: 'text-yellow-400' },
+  { value: 'payment_pending', label: 'Pendientes de confirmar', color: 'text-amber-400' },
   { value: 'confirmed', label: 'Confirmadas', color: 'text-blue-400' },
-  { value: 'ready_pickup', label: 'Listas', color: 'text-primary' },
+  { value: 'ready_pickup', label: 'Listas para recoger', color: 'text-primary' },
   { value: 'picked_up', label: 'Recogidas', color: 'text-green-400' },
+  { value: 'completed', label: 'Completadas', color: 'text-green-400' },
   { value: 'no_show', label: 'No retiradas', color: 'text-orange-400' },
   { value: 'cancelled', label: 'Canceladas', color: 'text-red-400' },
+  { value: 'expired', label: 'Expiradas', color: 'text-gray-400' },
 ]
 
 export default function ReservationFilters({
@@ -36,7 +40,7 @@ export default function ReservationFilters({
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
           <Input
-            placeholder="Buscar por cliente, email o pack..."
+            placeholder="Buscar por cliente o pack..."
             value={searchTerm}
             onChange={(e) => onSearchChange(e.target.value)}
             className="pl-10"

@@ -119,6 +119,10 @@ const RPC_MESSAGES: Record<string, string> = {
   NOT_AUTHORIZED_FOR_RESERVATION: 'No tienes permiso para gestionar esta reserva.',
   CANCELLATION_WINDOW_CLOSED: 'Pasó el plazo para cancelar esta reserva.',
 
+  // Reservas — list_shop_reservations (0014:333)
+  SHOP_NOT_AUTHORIZED: 'Esta cuenta no gestiona ese comercio. Inicia sesión con la cuenta que lo administra.',
+  INVALID_SHOP_RESERVATION_PAGE_ARGUMENTS: 'No se pudo cargar la página de reservas. Vuelve a intentarlo.',
+
   // Packs — publish_pack / set_pack_paused / archive_pack / update_pack_content /
   // adjust_pack_stock (migraciones 0009, 0016)
   //

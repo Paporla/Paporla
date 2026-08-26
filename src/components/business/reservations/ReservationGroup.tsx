@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ChevronDown, ChevronUp } from 'lucide-react'
+import { ChevronDown, ChevronUp, Info } from 'lucide-react'
 import ReservationCard from './ReservationCard'
 import type { ReservationItem } from './useBusinessReservations'
 
@@ -10,18 +10,20 @@ interface ReservationGroupProps {
   title: string
   reservations: ReservationItem[]
   updating: string | null
-  onValidate?: (id: string) => void
-  onNoShow?: (id: string) => void
   onCancelClick?: (id: string) => void
+  /**
+   * Nota bajo el encabezado (regla F2b: un control ausente o deshabilitado
+   * siempre dice por qué). Se pinta aunque el grupo esté colapsado.
+   */
+  note?: string
 }
 
 export default function ReservationGroup({
   title,
   reservations,
   updating,
-  onValidate,
-  onNoShow,
   onCancelClick,
+  note,
 }: ReservationGroupProps) {
   const [isExpanded, setIsExpanded] = useState(false)
 
@@ -46,6 +48,13 @@ export default function ReservationGroup({
         )}
       </button>
 
+      {note && (
+        <p className="flex items-start gap-2 px-4 pb-3 text-xs dark:text-gray-500 text-gray-500">
+          <Info className="w-3.5 h-3.5 mt-0.5 shrink-0" />
+          <span>{note}</span>
+        </p>
+      )}
+
       {/* Contenido expandible */}
       <AnimatePresence>
         {isExpanded && (
@@ -58,14 +67,11 @@ export default function ReservationGroup({
             <div className="p-4 space-y-3">
               {reservations.map((reservation, idx) => (
                 <ReservationCard
-                  key={reservation.id}
+                  key={reservation.reservation_id}
                   reservation={reservation}
                   index={idx}
                   updating={updating}
-                  onValidate={onValidate}
-                  onNoShow={onNoShow}
                   onCancelClick={onCancelClick}
-                  compact
                 />
               ))}
             </div>
