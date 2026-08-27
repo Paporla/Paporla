@@ -289,12 +289,15 @@ describe('ReserveModal', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Seguir explorando' }))
     expect(routerState.push).toHaveBeenCalledWith('/packs')
 
-    // "Ver mis reservas" sigue apuntando a la lista real.
-    expect(screen.getByRole('link', { name: 'Ver mis reservas' })).toHaveAttribute('href', '/dashboard/reservations')
+    // "Ver mis reservas" sigue apuntando a la lista real (ruta canónica /reservations).
+    expect(screen.getByRole('link', { name: 'Ver mis reservas' })).toHaveAttribute('href', '/reservations')
   })
 
   it('dispara begin_checkout al abrir, una vez, con los datos del pack', () => {
     renderOpen()
+    // El enlace "Mis reservas" de la nota informativa apunta a la ruta
+    // canónica /reservations (/dashboard/reservations no existe y daba 404).
+    expect(screen.getByRole('link', { name: 'Mis reservas' })).toHaveAttribute('href', '/reservations')
     expect(vi.mocked(trackBeginCheckout)).toHaveBeenCalledTimes(1)
     expect(vi.mocked(trackBeginCheckout)).toHaveBeenCalledWith(
       '11111111-1111-4111-8111-111111111111',

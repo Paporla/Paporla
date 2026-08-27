@@ -56,10 +56,13 @@ const statusConfig: Record<
 }
 
 export default function RecentActivity({ activities = [] }: RecentActivityProps) {
+  // Las llaves SON los títulos de los grupos. (Un bug anterior usaba
+  // 'activas'/'completadas'/'canceladas', que nunca coincidían con el lookup
+  // por group.title: por eso ningún grupo partía expandido.)
   const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({
-    activas: true,
-    completadas: false,
-    canceladas: false,
+    'Reservas Activas': true,
+    Completadas: false,
+    'Canceladas y no retiradas': false,
   })
 
   const groups: ActivityGroup[] = [
@@ -114,7 +117,7 @@ export default function RecentActivity({ activities = [] }: RecentActivityProps)
           <h3 className="text-lg font-semibold dark:text-white text-gray-900">Actividad reciente</h3>
           <p className="text-xs dark:text-gray-500 text-gray-400">Tus reservas y movimientos</p>
         </div>
-        <Link href="/dashboard/reservations" className="text-xs text-primary hover:text-primary/80 transition-colors">
+        <Link href="/reservations" className="text-xs text-primary hover:text-primary/80 transition-colors">
           Ver todas →
         </Link>
       </div>

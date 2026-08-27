@@ -225,7 +225,7 @@ export default function ReserveModal({ isOpen, onClose, pack }: ReserveModalProp
                     <p>El pack queda apartado mientras el comercio confirma. La reserva no genera ningún cobro.</p>
                     <p>
                       El código de recogida aparecerá en{' '}
-                      <Link href="/dashboard/reservations" className="text-primary underline">
+                      <Link href="/reservations" className="text-primary underline">
                         Mis reservas
                       </Link>{' '}
                       cuando la reserva quede confirmada.
@@ -386,7 +386,7 @@ export default function ReserveModal({ isOpen, onClose, pack }: ReserveModalProp
                   <Button onClick={() => router.push('/packs')} className="flex-1">
                     Seguir explorando
                   </Button>
-                  <Link href="/dashboard/reservations" className="flex-1">
+                  <Link href="/reservations" className="flex-1">
                     <Button variant="outline" className="w-full">
                       Ver mis reservas
                     </Button>
