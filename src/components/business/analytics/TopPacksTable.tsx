@@ -3,11 +3,13 @@
 import { motion } from 'framer-motion'
 import Link from 'next/link'
 import { Package, TrendingUp, TrendingDown, Eye } from 'lucide-react'
+import { formatChilePesos } from '@/lib/utils/formatPrice'
 
 interface TopPack {
   id: string
   title: string
   totalSold: number
+  /** Importe en la unidad menor de la moneda (piloto CLP: pesos). */
   revenue: number
   cancellationRate: number
 }
@@ -69,7 +71,7 @@ export default function TopPacksTable({ packs }: TopPacksTableProps) {
                 </p>
                 <div className="flex items-center gap-3 mt-1">
                   <span className="text-xs dark:text-gray-500 text-gray-400">{pack.totalSold} vendidos</span>
-                  <span className="text-xs text-green-400">${pack.revenue.toFixed(2)}</span>
+                  <span className="text-xs text-green-400">{formatChilePesos(pack.revenue)}</span>
                 </div>
               </div>
 

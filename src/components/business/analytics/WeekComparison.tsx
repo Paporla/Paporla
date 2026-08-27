@@ -3,6 +3,7 @@
 import { motion } from 'framer-motion'
 import { TrendingUp, TrendingDown, Minus, Calendar } from 'lucide-react'
 import type { WeeklyComparison } from './useBusinessAnalytics'
+import { formatChilePesos } from '@/lib/utils/formatPrice'
 
 interface Props {
   comparison: WeeklyComparison
@@ -66,14 +67,17 @@ export default function WeekComparison({ comparison }: Props) {
             <div className="dark:bg-white/5 bg-gray-50 rounded-xl p-3">
               <p className="text-xs dark:text-gray-500 text-gray-400">Esta semana</p>
               <div className="flex items-center gap-2 mt-1">
-                <span className="text-2xl font-bold text-green-400">${comparison.currentWeek.revenue.toFixed(2)}</span>
+                {/* Determinista: "$3.990" en cualquier máquina (piloto CLP). */}
+                <span className="text-2xl font-bold text-green-400">
+                  {formatChilePesos(comparison.currentWeek.revenue)}
+                </span>
                 <ChangeBadge value={comparison.revenueChange} />
               </div>
             </div>
             <div className="dark:bg-white/5 bg-gray-50 rounded-xl p-3">
               <p className="text-xs dark:text-gray-500 text-gray-400">Semana anterior</p>
               <p className="text-2xl font-bold dark:text-gray-400 text-gray-500 mt-1">
-                ${comparison.lastWeek.revenue.toFixed(2)}
+                {formatChilePesos(comparison.lastWeek.revenue)}
               </p>
             </div>
           </div>
