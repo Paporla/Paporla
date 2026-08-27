@@ -3,14 +3,16 @@
 import { motion } from 'framer-motion'
 import Link from 'next/link'
 import { Package, Calendar, ShoppingBag, DollarSign, Users } from 'lucide-react'
+import { formatChilePesos } from '@/lib/utils/formatPrice'
 
 interface DashboardStats {
   activePacks: number
   totalPacks: number
   todayReservations: number
   totalReservations: number
-  totalRevenue: number
   pendingReservations: number
+  /** Importe en la unidad menor de la moneda (piloto CLP: pesos). */
+  totalRevenue: number
 }
 
 interface BusinessStatsGridProps {
@@ -51,7 +53,9 @@ const statItems = [
     icon: ShoppingBag,
     color: 'text-yellow-400',
     bg: 'bg-yellow-500/10',
-    link: '/business/reservations?status=pending',
+    // Estado canónico (sin el 'pending' legacy): la página de reservas
+    // arranca ya filtrada con este parámetro.
+    link: '/business/reservations?status=payment_pending',
     suffix: '',
   },
   {
@@ -77,10 +81,12 @@ const statItems = [
 
 export default function BusinessStatsGrid({ stats }: BusinessStatsGridProps) {
   const getValue = (key: string, isPrice?: boolean) => {
+    const value = stats[key as keyof DashboardStats] as number
     if (isPrice) {
-      return `$${((stats[key as keyof DashboardStats] as number) / 100).toLocaleString()}`
+      // Determinista (formatChilePesos): "$3.990" en cualquier máquina.
+      return formatChilePesos(value)
     }
-    return stats[key as keyof DashboardStats]
+    return value
   }
 
   return (

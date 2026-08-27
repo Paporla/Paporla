@@ -27,3 +27,15 @@ Object.defineProperty(window, 'matchMedia', {
     dispatchEvent: vi.fn(),
   })),
 })
+
+// jsdom no implementa ResizeObserver (lo usa recharts/ResponsiveContainer).
+// Stub estándar: los gráficos se montan sin medir; los tests asientan los
+// textos, no el layout.
+class ResizeObserverStub {
+  observe() {}
+  unobserve() {}
+  disconnect() {}
+}
+if (typeof globalThis.ResizeObserver === 'undefined') {
+  globalThis.ResizeObserver = ResizeObserverStub as unknown as typeof globalThis.ResizeObserver
+}

@@ -47,3 +47,20 @@ function formatCents(cents: number, locale: string, currency: string): string {
     return `${currency} ${amount.toFixed(2)}`
   }
 }
+
+/**
+ * Formatea importes en pesos chilenos (unidad menor = peso, sin decimales)
+ * de forma DETERMINISTA: "$3.990" en cualquier máquina.
+ *
+ * Por qué existe: `toLocaleString()` sin locale depende de la ICU del
+ * dispositivo — el separador de miles varía entre navegadores, nodos e
+ * incluso versiones (5,490 / 5.490 / 5 490). En el piloto el único mercado
+ * es Chile, así que el panel del comercio pinta SIEMPRE el mismo formato.
+ */
+export const formatChilePesos = (amountMinor: number | null | undefined): string => {
+  const value = Math.round(amountMinor ?? 0)
+  const digits = Math.abs(value)
+    .toString()
+    .replace(/\B(?=(\d{3})+(?!\d))/g, '.')
+  return `${value < 0 ? '-' : ''}$${digits}`
+}

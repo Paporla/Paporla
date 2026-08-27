@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { formatMinorPrice, formatPrice } from '@/lib/utils/formatPrice'
+import { formatChilePesos, formatMinorPrice, formatPrice } from '@/lib/utils/formatPrice'
 
 describe('formatPrice', () => {
   describe('con locale y currency explicitos (USD)', () => {
@@ -70,6 +70,28 @@ describe('formatPrice', () => {
       const result = formatPrice(1500, 'xx-XX', 'XYZ')
       expect(result).toContain('15')
       expect(result).toContain('XYZ')
+    })
+  })
+
+  describe('formatChilePesos (determinista, piloto CLP)', () => {
+    // Este formateo existe porque toLocaleString() sin locale varía por
+    // máquina (5,490 / 5.490 / 5 490): los tests de página asientan el
+    // string EXACTO gracias a que aquí no depende de la ICU.
+    it('pinta pesos chilenos con separador de punto, sin decimales', () => {
+      expect(formatChilePesos(3990)).toBe('$3.990')
+      expect(formatChilePesos(5490)).toBe('$5.490')
+      expect(formatChilePesos(1234567)).toBe('$1.234.567')
+    })
+
+    it('cero, null y undefined pintan $0 (estado vacío honesto)', () => {
+      expect(formatChilePesos(0)).toBe('$0')
+      expect(formatChilePesos(null)).toBe('$0')
+      expect(formatChilePesos(undefined)).toBe('$0')
+    })
+
+    it('redondea y maneja negativos', () => {
+      expect(formatChilePesos(1234.6)).toBe('$1.235')
+      expect(formatChilePesos(-2500)).toBe('-$2.500')
     })
   })
 })
