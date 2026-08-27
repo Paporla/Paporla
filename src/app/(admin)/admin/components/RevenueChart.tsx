@@ -1,37 +1,47 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { supabaseBrowser } from '@/lib/supabase/client'
-import { logger } from '@/lib/logger'
+import { useAdminTrend } from '@/components/admin/useAdminTrend'
+import { formatMinorPrice } from '@/lib/utils/formatPrice'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
+
+/**
+ * Gráfico de ingresos del panel admin (Fase 6.5): sobre la RPC canónica
+ * `admin_dashboard_trend` (0032) vía useAdminTrend. La versión anterior hacía
+ * `.from('reservations')` directo (que el esquema 0012 deniega) y leía
+ * `total_price_cents` (campo legacy inexistente; el real es
+ * `total_amount_minor`), así que siempre mostraba "no hay datos" aunque
+ * existieran reservas.
+ */
 
 interface RevenueData {
   month: string
-  total_revenue_cents: number
-  total_commissions_cents: number
-  total_reservations: number
+  revenue_minor: number
+  commissions_minor: number
+  count: number
 }
 
-const CustomTooltip = ({
-  active,
-  payload,
-}: {
+interface TooltipPayload {
   active?: boolean
   payload?: { value: number; payload: RevenueData }[]
-}) => {
+}
+
+/**
+ * Tooltip del gráfico. Fuera del componente (no se puede definir un
+ * componente durante el render): la moneda llega por props y recharts
+ * inyecta las suyas (active/payload) encima.
+ */
+const ChartTooltip = ({ currency, active, payload }: { currency: string } & TooltipPayload) => {
   if (active && payload && payload.length) {
     return (
       <div className="dark:bg-black/90 bg-white/90 backdrop-blur-sm dark:border-white/10 border-gray-200 rounded-xl p-3 shadow-xl">
         <p className="text-sm font-semibold dark:text-white text-gray-900 mb-2">{payload[0].payload.month}</p>
         <p className="text-xs text-primary">
-          Ingresos: <span className="font-bold">${(payload[0].value / 100).toLocaleString()}</span>
+          Ingresos: <span className="font-bold">{formatMinorPrice(payload[0].value, currency, 'es-CL')}</span>
         </p>
         <p className="text-xs text-secondary">
-          Comisiones: <span className="font-bold">${(payload[1].value / 100).toLocaleString()}</span>
+          Comisiones: <span className="font-bold">{formatMinorPrice(payload[1].value, currency, 'es-CL')}</span>
         </p>
-        <p className="text-xs dark:text-gray-500 text-gray-400 mt-1">
-          Reservas: {payload[0].payload.total_reservations}
-        </p>
+        <p className="text-xs dark:text-gray-500 text-gray-400 mt-1">Reservas: {payload[0].payload.count}</p>
       </div>
     )
   }
@@ -39,76 +49,21 @@ const CustomTooltip = ({
 }
 
 export default function RevenueChart() {
-  const supabase = supabaseBrowser()
-  const [data, setData] = useState<RevenueData[]>([])
-  const [loading, setLoading] = useState(true)
-  const [totalRevenue, setTotalRevenue] = useState(0)
-  const [growth, setGrowth] = useState(0)
+  const trend = useAdminTrend()
 
-  useEffect(() => {
-    const loadRevenueData = async () => {
-      setLoading(true)
+  const data: RevenueData[] = (trend.data?.revenue_by_month ?? []).map((m) => ({
+    month: new Date(`${m.month}-01`).toLocaleDateString('es', { month: 'short' }),
+    revenue_minor: m.revenue_minor,
+    commissions_minor: m.commissions_minor,
+    count: m.count,
+  }))
+  const currency = trend.data?.currency_code ?? 'CLP'
 
-      // Consultar reservas completadas (picked_up) en vez de la tabla revenue_metrics que no existe
-      const { data: reservations, error } = await supabase
-        .from('reservations')
-        .select('id, total_price_cents, created_at')
-        .eq('status', 'picked_up')
-        .order('created_at', { ascending: true })
+  // El RPC devuelve siempre 12 meses (rellenados con ceros); para el usuario
+  // "ningún mes con reservas" es lo mismo que no hay datos: estado vacío.
+  const hasData = data.some((d) => d.count > 0)
 
-      if (error) {
-        logger.error('Admin RevenueChart', error)
-        setLoading(false)
-        return
-      }
-
-      if (!reservations || reservations.length === 0) {
-        setLoading(false)
-        return
-      }
-
-      // Agrupar por mes en JS
-      const monthlyMap = new Map<string, { revenue: number; commissions: number; count: number }>()
-
-      for (const r of reservations) {
-        const date = new Date(r.created_at)
-        const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
-        const existing = monthlyMap.get(monthKey) ?? { revenue: 0, commissions: 0, count: 0 }
-        const revenue = r.total_price_cents ?? 0
-        existing.revenue += revenue
-        existing.commissions += Math.round(revenue * 0.1) // 10% comision
-        existing.count += 1
-        monthlyMap.set(monthKey, existing)
-      }
-
-      const formattedData: RevenueData[] = Array.from(monthlyMap.entries())
-        .sort(([a], [b]) => a.localeCompare(b))
-        .map(([monthKey, values]) => ({
-          month: new Date(`${monthKey}-01`).toLocaleDateString('es', { month: 'short' }),
-          total_revenue_cents: values.revenue,
-          total_commissions_cents: values.commissions,
-          total_reservations: values.count,
-        }))
-
-      setData(formattedData)
-
-      const total = formattedData.reduce((sum, item) => sum + item.total_revenue_cents, 0)
-      setTotalRevenue(total)
-
-      if (formattedData.length >= 2) {
-        const last = formattedData[formattedData.length - 1].total_revenue_cents
-        const prev = formattedData[formattedData.length - 2].total_revenue_cents
-        if (prev > 0) setGrowth(Math.round(((last - prev) / prev) * 100))
-      }
-
-      setLoading(false)
-    }
-
-    loadRevenueData()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
-
-  if (loading) {
+  if (trend.isLoading) {
     return (
       <div className="glass-card rounded-2xl p-6">
         <div className="animate-pulse space-y-4">
@@ -120,7 +75,16 @@ export default function RevenueChart() {
     )
   }
 
-  if (data.length === 0) {
+  if (trend.isError) {
+    return (
+      <div className="glass-card rounded-2xl p-6 text-center">
+        <p className="text-sm text-red-400">No se pudieron cargar los datos de ingresos.</p>
+        <p className="text-xs dark:text-gray-600 text-gray-500 mt-1">Revisa tu sesión o vuelve a intentarlo.</p>
+      </div>
+    )
+  }
+
+  if (!hasData) {
     return (
       <div className="glass-card rounded-2xl p-6 text-center">
         <p className="dark:text-gray-500 text-gray-400 text-sm">No hay datos de ingresos disponibles</p>
@@ -129,6 +93,16 @@ export default function RevenueChart() {
         </p>
       </div>
     )
+  }
+
+  const totalRevenue = data.reduce((sum, item) => sum + item.revenue_minor, 0)
+
+  let growth = 0
+  const withReservations = data.filter((d) => d.count > 0)
+  if (withReservations.length >= 2) {
+    const last = withReservations[withReservations.length - 1].revenue_minor
+    const prev = withReservations[withReservations.length - 2].revenue_minor
+    if (prev > 0) growth = Math.round(((last - prev) / prev) * 100)
   }
 
   return (
@@ -152,7 +126,7 @@ export default function RevenueChart() {
 
       <div className="flex items-baseline gap-3 mb-6">
         <span className="text-3xl font-black dark:text-white text-gray-900">
-          ${(totalRevenue / 100).toLocaleString()}
+          {formatMinorPrice(totalRevenue, currency, 'es-CL')}
         </span>
         {growth !== 0 && (
           <span
@@ -168,10 +142,16 @@ export default function RevenueChart() {
         <BarChart data={data} barGap={2}>
           <CartesianGrid strokeDasharray="3 3" stroke="#333" vertical={false} opacity={0.3} />
           <XAxis dataKey="month" stroke="#888" fontSize={11} tickLine={false} axisLine={false} />
-          <YAxis stroke="#888" fontSize={11} tickLine={false} axisLine={false} tickFormatter={(v) => `$${v / 100}k`} />
-          <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(255,255,255,0.03)' }} />
-          <Bar dataKey="total_revenue_cents" fill="#00ff88" radius={[4, 4, 0, 0]} name="Ingresos" />
-          <Bar dataKey="total_commissions_cents" fill="#ff8a3c" radius={[4, 4, 0, 0]} name="Comisiones" />
+          <YAxis
+            stroke="#888"
+            fontSize={11}
+            tickLine={false}
+            axisLine={false}
+            tickFormatter={(v) => formatMinorPrice(v, currency, 'es-CL')}
+          />
+          <Tooltip content={<ChartTooltip currency={currency} />} cursor={{ fill: 'rgba(255,255,255,0.03)' }} />
+          <Bar dataKey="revenue_minor" fill="#00ff88" radius={[4, 4, 0, 0]} name="Ingresos" />
+          <Bar dataKey="commissions_minor" fill="#ff8a3c" radius={[4, 4, 0, 0]} name="Comisiones" />
         </BarChart>
       </ResponsiveContainer>
     </div>
