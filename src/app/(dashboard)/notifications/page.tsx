@@ -1,10 +1,10 @@
-﻿'use client'
+'use client'
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { pageVariants } from '@/lib/utils/motion'
-import { Bell, CheckCheck, Trash2, Clock, Package, CheckCircle, XCircle, AlertCircle, Store, Heart } from 'lucide-react'
+import { Bell, CheckCheck, Clock, Package, CheckCircle, XCircle, AlertCircle, Store, Heart } from 'lucide-react'
 import { useNotifications } from '@/hooks/useNotifications'
 import { useAuth } from '@/hooks/useAuth'
 import { formatRelativeTime } from '@/lib/utils/formatTime'
@@ -29,19 +29,13 @@ const defaultIcon = { icon: Bell, color: 'text-gray-400', bg: 'bg-gray-500/10' }
 
 export default function NotificationsPage() {
   const router = useRouter()
-  const {
-    notifications,
-    unreadCount,
-    loading: notifLoading,
-    markAsRead,
-    markAllAsRead,
-    deleteNotification,
-  } = useNotifications()
+  const { notifications, unreadCount, loading: notifLoading, markAsRead, markAllAsRead } = useNotifications()
   const { loading: authLoading } = useAuth()
   const [filter, setFilter] = useState<'all' | 'unread'>('all')
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null)
 
-  const filteredNotifications = filter === 'all' ? notifications : notifications.filter((n) => !n.is_read)
+  // "No leída" = `read_at IS NULL` (columna real de 0006; no existe `is_read`).
+  const filteredNotifications = filter === 'all' ? notifications : notifications.filter((n) => n.read_at === null)
 
   const isLoading = authLoading || notifLoading
 
@@ -103,9 +97,13 @@ export default function NotificationsPage() {
             <Button
               variant="outline"
               size="sm"
-              onClick={() => {
-                markAllAsRead()
-                setToast({ message: 'Todas marcadas como leidas', type: 'success' })
+              onClick={async () => {
+                const ok = await markAllAsRead()
+                setToast(
+                  ok
+                    ? { message: 'Todas marcadas como leidas', type: 'success' }
+                    : { message: 'No se pudieron marcar todas como leídas. Inténtalo de nuevo.', type: 'error' },
+                )
                 setTimeout(() => setToast(null), 2000)
               }}
               className="flex items-center gap-1"
@@ -149,7 +147,7 @@ export default function NotificationsPage() {
         <div className="space-y-3">
           {filteredNotifications.map((notification, idx) => {
             const { icon: Icon, color, bg } = iconMap[notification.type] || defaultIcon
-            const isUnread = !notification.is_read
+            const isUnread = notification.read_at === null
 
             return (
               <motion.div
@@ -169,8 +167,11 @@ export default function NotificationsPage() {
                       <p
                         className={`text-sm ${isUnread ? 'dark:text-white text-gray-900 font-medium' : 'dark:text-gray-400 text-gray-600'}`}
                       >
-                        {notification.message}
+                        {notification.title}
                       </p>
+                      {notification.body ? (
+                        <p className="text-xs dark:text-gray-500 text-gray-500 mt-0.5">{notification.body}</p>
+                      ) : null}
                       <div className="flex items-center gap-3 mt-2">
                         <span className="text-[10px] text-gray-500 flex items-center gap-1">
                           <Clock className="w-3 h-3" />
@@ -178,17 +179,6 @@ export default function NotificationsPage() {
                         </span>
                       </div>
                     </div>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        deleteNotification(notification.id)
-                        setToast({ message: 'Notificacion eliminada', type: 'success' })
-                        setTimeout(() => setToast(null), 2000)
-                      }}
-                      className="p-1.5 rounded-lg text-gray-500 hover:text-red-400 hover:bg-red-500/10 transition-all opacity-0 group-hover:opacity-100"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
                   </div>
                 </Card>
               </motion.div>

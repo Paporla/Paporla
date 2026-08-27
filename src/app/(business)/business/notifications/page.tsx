@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
-import { Bell, CheckCheck, Trash2, Clock, Package, CheckCircle, XCircle, AlertCircle, Store } from 'lucide-react'
+import { Bell, CheckCheck, Clock, Package, CheckCircle, XCircle, AlertCircle, Store } from 'lucide-react'
 import { formatRelativeTime } from '@/lib/utils/formatTime'
 import { useNotifications } from '@/hooks/useNotifications'
 import Card from '@/components/ui/Card'
@@ -27,21 +27,20 @@ const defaultIcon = { icon: Bell, color: 'text-gray-400', bg: 'bg-gray-500/10' }
 
 export default function BusinessNotificationsPage() {
   const router = useRouter()
-  const { notifications, unreadCount, markAsRead, markAllAsRead, deleteNotification, loading } = useNotifications()
+  const { notifications, unreadCount, markAsRead, markAllAsRead, loading } = useNotifications()
   const [filter, setFilter] = useState<'all' | 'unread'>('all')
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null)
 
-  const filteredNotifications = filter === 'all' ? notifications : notifications.filter((n) => !n.is_read)
+  // "No leída" = `read_at IS NULL` (columna real de 0006; no existe `is_read`).
+  const filteredNotifications = filter === 'all' ? notifications : notifications.filter((n) => n.read_at === null)
 
   const handleMarkAll = async () => {
-    await markAllAsRead()
-    setToast({ message: 'Todas las notificaciones marcadas como leídas', type: 'success' })
-    setTimeout(() => setToast(null), 2000)
-  }
-
-  const handleDelete = async (id: string) => {
-    await deleteNotification(id)
-    setToast({ message: 'Notificación eliminada', type: 'success' })
+    const ok = await markAllAsRead()
+    setToast(
+      ok
+        ? { message: 'Todas las notificaciones marcadas como leídas', type: 'success' }
+        : { message: 'No se pudieron marcar todas como leídas. Inténtalo de nuevo.', type: 'error' },
+    )
     setTimeout(() => setToast(null), 2000)
   }
 
@@ -137,7 +136,7 @@ export default function BusinessNotificationsPage() {
         <div className="space-y-3">
           {filteredNotifications.map((notification, idx) => {
             const { icon: Icon, color, bg } = iconMap[notification.type] || defaultIcon
-            const isUnread = !notification.is_read
+            const isUnread = notification.read_at === null
 
             return (
               <motion.div
@@ -157,8 +156,11 @@ export default function BusinessNotificationsPage() {
                       <p
                         className={`text-sm ${isUnread ? 'dark:text-white text-gray-900 font-medium' : 'dark:text-gray-400 text-gray-600'}`}
                       >
-                        {notification.message}
+                        {notification.title}
                       </p>
+                      {notification.body ? (
+                        <p className="text-xs dark:text-gray-500 text-gray-500 mt-0.5">{notification.body}</p>
+                      ) : null}
                       <div className="flex items-center gap-3 mt-2">
                         <span className="text-[10px] text-gray-500 flex items-center gap-1">
                           <Clock className="w-3 h-3" />
@@ -171,15 +173,6 @@ export default function BusinessNotificationsPage() {
                         )}
                       </div>
                     </div>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        handleDelete(notification.id)
-                      }}
-                      className="p-1.5 rounded-lg text-gray-500 hover:text-red-400 hover:bg-red-500/10 transition-all opacity-0 group-hover:opacity-100"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
                   </div>
                 </Card>
               </motion.div>
