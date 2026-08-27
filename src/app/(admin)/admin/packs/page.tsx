@@ -2,18 +2,57 @@ import { createClient } from '@/lib/supabase/server'
 import { requireAuth } from '@/lib/auth/requireAuth'
 import Link from 'next/link'
 import { Package, Eye } from 'lucide-react'
-import { formatPrice } from '@/lib/utils/formatPrice'
+import { formatMinorPrice } from '@/lib/utils/formatPrice'
+import { formatDate } from '@/lib/utils/formatDate'
+import { translateDbError } from '@/lib/utils/db-errors'
+
+/**
+ * Página /admin/packs (Fase 6.5): sobre la RPC canónica `list_admin_packs`
+ * (0032). La versión anterior hacía `.from('packs')` directo —que el
+ * esquema (0012) deniega: "permission denied for table packs"— y leía
+ * campos legacy que no existen en la tabla real (price_cents, is_active).
+ * Los valores reales: price_minor + currency_code y el enum de status
+ * (0004: draft/active/paused/sold_out/expired/archived).
+ */
+
+/** Fila que devuelve la RPC `list_admin_packs` (0032). */
+interface AdminPackRow {
+  pack_id: string
+  shop_id: string
+  shop_name: string | null
+  title: string
+  description: string | null
+  category: string
+  price_minor: number | string
+  original_price_minor: number | string | null
+  currency_code: string
+  total_stock: number
+  remaining_stock: number
+  status: string
+  pickup_start_at: string
+  pickup_end_at: string
+  timezone_snapshot: string
+  image_path: string | null
+  created_at: string
+  updated_at: string
+}
+
+const packStatusConfig: Record<string, { label: string; className: string }> = {
+  draft: { label: 'Borrador', className: 'bg-gray-500/10 text-gray-400' },
+  active: { label: 'Activo', className: 'bg-green-500/10 text-green-400' },
+  paused: { label: 'Pausado', className: 'bg-amber-500/10 text-amber-400' },
+  sold_out: { label: 'Agotado', className: 'bg-red-500/10 text-red-400' },
+  expired: { label: 'Expirado', className: 'bg-orange-500/10 text-orange-400' },
+  archived: { label: 'Archivado', className: 'bg-gray-500/10 text-gray-500' },
+}
 
 export default async function AdminPacksPage() {
   await requireAuth(['admin', 'super_admin'])
 
   const supabase = await createClient()
 
-  const { data: packs, error } = await supabase
-    .from('packs')
-    .select('*, shop:shops(name)')
-    .order('created_at', { ascending: false })
-    .limit(200)
+  const { data: rawPacks, error } = await supabase.rpc('list_admin_packs', { p_limit: 200 })
+  const packs = (rawPacks ?? []) as unknown as AdminPackRow[]
 
   return (
     <div className="space-y-6 pb-8">
@@ -25,7 +64,7 @@ export default async function AdminPacksPage() {
           <div>
             <h1 className="text-3xl font-bold dark:text-white text-gray-900">Packs</h1>
             <p className="dark:text-gray-400 text-gray-600 text-sm">
-              {packs?.length ?? 0} packs en total — gestion de todos los comercios
+              {packs.length} packs en total — gestion de todos los comercios
             </p>
           </div>
         </div>
@@ -33,7 +72,7 @@ export default async function AdminPacksPage() {
 
       {error ? (
         <div className="rounded-2xl border border-red-500/30 bg-red-500/5 p-6 text-center">
-          <p className="text-red-400">Error al cargar packs: {error.message}</p>
+          <p className="text-red-400">Error al cargar packs: {translateDbError(error)}</p>
         </div>
       ) : !packs || packs.length === 0 ? (
         <div className="glass-card rounded-2xl p-12 text-center">
@@ -51,43 +90,41 @@ export default async function AdminPacksPage() {
                   <th className="text-left px-4 py-3 text-xs font-medium dark:text-gray-400 text-gray-600">Precio</th>
                   <th className="text-left px-4 py-3 text-xs font-medium dark:text-gray-400 text-gray-600">Stock</th>
                   <th className="text-left px-4 py-3 text-xs font-medium dark:text-gray-400 text-gray-600">Estado</th>
+                  <th className="text-left px-4 py-3 text-xs font-medium dark:text-gray-400 text-gray-600">Registro</th>
                   <th className="text-right px-4 py-3 text-xs font-medium dark:text-gray-400 text-gray-600">
                     Acciones
                   </th>
                 </tr>
               </thead>
               <tbody className="divide-y dark:divide-white/5 divide-gray-200">
-                {packs.map((pack: Record<string, unknown>) => {
-                  const shop = pack.shop as { name?: string } | null
+                {packs.map((pack) => {
+                  const st = packStatusConfig[pack.status] ?? {
+                    label: pack.status,
+                    className: 'bg-gray-500/10 text-gray-400',
+                  }
                   return (
-                    <tr key={pack.id as string} className="dark:hover:bg-white/5 hover:bg-gray-50 transition-colors">
+                    <tr key={pack.pack_id} className="dark:hover:bg-white/5 hover:bg-gray-50 transition-colors">
                       <td className="px-4 py-3">
-                        <p className="font-medium dark:text-white text-gray-900 truncate max-w-[200px]">
-                          {pack.title as string}
-                        </p>
+                        <p className="font-medium dark:text-white text-gray-900 truncate max-w-[200px]">{pack.title}</p>
+                        <p className="text-[10px] dark:text-gray-500 text-gray-400 capitalize">{pack.category}</p>
                       </td>
-                      <td className="px-4 py-3 dark:text-gray-400 text-gray-600">{shop?.name ?? '—'}</td>
+                      <td className="px-4 py-3 dark:text-gray-400 text-gray-600">{pack.shop_name ?? '—'}</td>
                       <td className="px-4 py-3 dark:text-gray-400 text-gray-600">
-                        {formatPrice((pack.price_cents as number) ?? 0)}
+                        {formatMinorPrice(Number(pack.price_minor ?? 0), pack.currency_code, 'es-CL')}
                       </td>
                       <td className="px-4 py-3 dark:text-gray-400 text-gray-600">
-                        {String(pack.remaining_stock ?? 0)}/{String(pack.total_stock ?? 0)}
+                        {pack.remaining_stock}/{pack.total_stock}
                       </td>
                       <td className="px-4 py-3">
-                        {pack.is_active ? (
-                          <span className="text-[10px] bg-green-500/10 text-green-400 px-2 py-0.5 rounded-full">
-                            Activo
-                          </span>
-                        ) : (
-                          <span className="text-[10px] bg-red-500/10 text-red-400 px-2 py-0.5 rounded-full">
-                            Inactivo
-                          </span>
-                        )}
+                        <span className={`text-[10px] px-2 py-0.5 rounded-full ${st.className}`}>{st.label}</span>
+                      </td>
+                      <td className="px-4 py-3 text-right text-[11px] dark:text-gray-500 text-gray-400">
+                        {formatDate(pack.created_at)}
                       </td>
                       <td className="px-4 py-3 text-right">
                         <div className="flex items-center justify-end gap-1">
                           <Link
-                            href={`/packs/${pack.id}`}
+                            href={`/packs/${pack.pack_id}`}
                             className="p-1.5 rounded-lg hover:bg-white/10 transition-colors"
                             title="Ver"
                           >
