@@ -177,6 +177,19 @@ const RPC_MESSAGES: Record<string, string> = {
   // Notificaciones — mark_notification_read (0009:183)
   NOTIFICATION_NOT_FOUND: 'Esa notificación ya no existe.',
 
+  // Panel admin — list_admin_shops (0027)
+  // Solo debería dispararse con un cursor a medias o un estado inventado, que
+  // la UI nunca envía; por si acaso el usuario ve algo humano.
+  INVALID_ADMIN_SHOPS_PAGE_ARGUMENTS: 'No se pudo cargar la página de comercios. Vuelve a intentarlo.',
+
+  // Panel admin — admin_set_user_role (0009:2287)
+  // OJO: SUPER_ADMIN_REQUIRED contiene ADMIN_REQUIRED; el orden por longitud
+  // (más larga primero) garantiza que gane la clave más específica.
+  INVALID_ROLE_CHANGE: 'No se pudo cambiar el rol: valor no válido o no puedes cambiarte a ti mismo.',
+  SUPER_ADMIN_REQUIRED: 'Ese cambio de rol solo lo puede hacer un super administrador.',
+  TARGET_USER_NOT_FOUND: 'Ese usuario ya no existe.',
+  SHOP_OWNER_ROLE_CONFLICT: 'Ese usuario administra un comercio, así que su rol debe seguir siendo comercio.',
+
   // Sesión / cuenta
   CALLER_NOT_ACTIVE: 'Tu cuenta no está activa. Inicia sesión de nuevo.',
   RATE_LIMITED: 'Demasiados intentos. Espera unos segundos e inténtalo de nuevo.',

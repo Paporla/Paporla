@@ -1,20 +1,192 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, Store, CheckCircle, Ban } from 'lucide-react'
+import { X, Store, CheckCircle, XCircle, Ban } from 'lucide-react'
 import Button from '@/components/ui/Button'
-import { Shop } from '@/types/shop'
+import { formatDate } from '@/lib/utils/formatDate'
+import { getShopStatusConfig, SHOP_MODERATION_ACTIONS, ShopModerationAction } from '@/lib/constants/shopStatus'
+import { AdminShop } from '@/components/admin/useAdminShops'
 
 interface ShopModalProps {
   isOpen: boolean
-  shop: Shop | null
+  shop: AdminShop | null
   onClose: () => void
-  onVerify: (shopId: string, verified: boolean) => void
-  onBan?: (shopId: string, banned: boolean) => void
+  /**
+   * Modera el comercio (RPC `admin_review_shop`, 0009:1383). Devuelve null en
+   * éxito (el modal se cierra) o el error ya traducido (se queda abierto y la
+   * página muestra el toast).
+   */
+  onModerate: (shopId: string, newStatus: ShopModerationAction, reason: string) => Promise<string | null>
+  /** Moderación en curso: deshabilita el botón de confirmar. */
+  busy: boolean
 }
 
-export default function ShopModal({ isOpen, shop, onClose, onVerify, onBan }: ShopModalProps) {
+const ACTION_LABELS: Record<ShopModerationAction, string> = {
+  verified: 'Verificar comercio',
+  rejected: 'Rechazar comercio',
+  suspended: 'Suspender comercio',
+}
+
+const ACTION_ICONS = {
+  verified: CheckCircle,
+  rejected: XCircle,
+  suspended: Ban,
+} as const
+
+/**
+ * Cuerpo del modal con su propio estado (acción elegida + motivo). Va montado
+ * con `key={shop.shop_id}` para que al abrir otro comercio arranque limpio
+ * sin efectos con setState.
+ */
+function ModerationBody({
+  shop,
+  onClose,
+  onModerate,
+  busy,
+}: {
+  shop: AdminShop
+  onClose: () => void
+  onModerate: ShopModalProps['onModerate']
+  busy: boolean
+}) {
+  const [action, setAction] = useState<ShopModerationAction | null>(null)
+  const [reason, setReason] = useState('')
+
+  const statusConfig = getShopStatusConfig(shop.status)
+  const reasonOk = reason.trim().length >= 3
+  // `closed` no es moderable: `admin_review_shop` lo rechaza (SHOP_NOT_FOUND).
+  const isClosed = shop.status === 'closed'
+  const availableActions = SHOP_MODERATION_ACTIONS.filter((a) => a !== shop.status)
+
+  const handleConfirm = async () => {
+    if (!action || !reasonOk || busy) return
+    const error = await onModerate(shop.shop_id, action, reason.trim())
+    if (error === null) onClose()
+  }
+
+  return (
+    <div className="p-5 space-y-5">
+      <div>
+        <label className="block text-sm font-medium dark:text-gray-400 text-gray-600 mb-1">Nombre del comercio</label>
+        <p className="dark:text-white text-gray-900 font-medium">{shop.name}</p>
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium dark:text-gray-400 text-gray-600 mb-1">Propietario</label>
+        <p className="dark:text-gray-300 text-gray-700 text-sm">
+          {shop.owner_name ?? 'Sin nombre'}
+          {shop.owner_email ? ` · ${shop.owner_email}` : ''}
+        </p>
+      </div>
+
+      {shop.address_line1 && (
+        <div>
+          <label className="block text-sm font-medium dark:text-gray-400 text-gray-600 mb-1">Dirección</label>
+          <p className="dark:text-gray-300 text-gray-700 text-sm">{shop.address_line1}</p>
+        </div>
+      )}
+
+      <div className="flex items-center gap-2">
+        <span className="text-sm dark:text-gray-400 text-gray-600">Estado actual:</span>
+        <span className={`text-xs px-2 py-1 rounded-full ${statusConfig.className}`}>{statusConfig.label}</span>
+      </div>
+
+      {shop.status_reason && (
+        <div>
+          <label className="block text-sm font-medium dark:text-gray-400 text-gray-600 mb-1">
+            Motivo de la última decisión
+          </label>
+          <p className="dark:text-gray-300 text-gray-700 text-sm">{shop.status_reason}</p>
+        </div>
+      )}
+
+      {shop.reviewed_at && (
+        <div>
+          <label className="block text-sm font-medium dark:text-gray-400 text-gray-600 mb-1">Última revisión</label>
+          <p className="dark:text-gray-300 text-gray-700 text-sm">{formatDate(shop.reviewed_at)}</p>
+        </div>
+      )}
+
+      <div className="border-t dark:border-white/10 border-gray-200 pt-4">
+        {isClosed ? (
+          <p className="text-sm dark:text-gray-400 text-gray-600">
+            Este comercio está cerrado y no puede moderarse desde el panel.
+          </p>
+        ) : action === null ? (
+          <div className="space-y-3">
+            <p className="text-sm dark:text-gray-400 text-gray-600">¿Qué quieres hacer con este comercio?</p>
+            <div className="flex flex-col gap-2">
+              {availableActions.map((a) => {
+                const Icon = ACTION_ICONS[a]
+                return (
+                  <Button
+                    key={a}
+                    variant={a === 'verified' ? 'primary' : 'outline'}
+                    onClick={() => setAction(a)}
+                    disabled={busy}
+                    className="flex items-center gap-2"
+                  >
+                    <Icon className="w-4 h-4" />
+                    {ACTION_LABELS[a]}
+                  </Button>
+                )
+              })}
+            </div>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <p className="text-sm font-medium dark:text-white text-gray-900">¿{ACTION_LABELS[action]}?</p>
+              <button
+                onClick={() => setAction(null)}
+                className="text-xs text-primary hover:text-primary/80 font-medium transition-colors"
+              >
+                Elegir otra
+              </button>
+            </div>
+            <div>
+              <label
+                htmlFor="motivo-moderacion"
+                className="block text-sm font-medium dark:text-gray-400 text-gray-600 mb-1"
+              >
+                Motivo (obligatorio)
+              </label>
+              <textarea
+                id="motivo-moderacion"
+                value={reason}
+                onChange={(e) => setReason(e.target.value)}
+                rows={3}
+                placeholder="Ej: faltan datos de seguridad alimentaria"
+                className="w-full px-4 py-2.5 rounded-xl dark:bg-white/5 bg-white dark:border-white/10 border-gray-200 dark:text-white text-gray-900 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all duration-200 resize-none"
+              />
+              {!reasonOk && (
+                <p className="mt-1.5 text-xs text-amber-500 dark:text-amber-400">
+                  Mínimo 3 caracteres (la base lo exige).
+                </p>
+              )}
+            </div>
+            <div className="flex gap-3">
+              <Button type="button" variant="outline" onClick={onClose} disabled={busy} className="flex-1">
+                Cancelar
+              </Button>
+              <Button
+                type="button"
+                onClick={() => void handleConfirm()}
+                disabled={!reasonOk || busy}
+                className="flex-1"
+              >
+                Confirmar
+              </Button>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
+export default function ShopModal({ isOpen, shop, onClose, onModerate, busy }: ShopModalProps) {
   // Prevenir scroll del body cuando el modal está abierto
   useEffect(() => {
     if (isOpen) {
@@ -57,7 +229,7 @@ export default function ShopModal({ isOpen, shop, onClose, onVerify, onBan }: Sh
                     <div className="p-2 rounded-lg bg-primary/10">
                       <Store className="w-5 h-5 text-primary" />
                     </div>
-                    <h2 className="text-xl font-bold dark:text-white text-gray-900">Editar Comercio</h2>
+                    <h2 className="text-xl font-bold dark:text-white text-gray-900">Moderar comercio</h2>
                   </div>
                   <button
                     onClick={onClose}
@@ -67,85 +239,8 @@ export default function ShopModal({ isOpen, shop, onClose, onVerify, onBan }: Sh
                   </button>
                 </div>
 
-                {/* Body */}
-                <div className="p-5 space-y-5">
-                  <div>
-                    <label className="block text-sm font-medium dark:text-gray-400 text-gray-600 mb-1">
-                      Nombre del comercio
-                    </label>
-                    <p className="dark:text-white text-gray-900 font-medium">{shop.name}</p>
-                  </div>
-
-                  {shop.owner_id && (
-                    <div>
-                      <label className="block text-sm font-medium dark:text-gray-400 text-gray-600 mb-1">
-                        ID del propietario
-                      </label>
-                      <p className="dark:text-gray-300 text-gray-700 text-sm font-mono break-all">{shop.owner_id}</p>
-                    </div>
-                  )}
-
-                  {shop.address && (
-                    <div>
-                      <label className="block text-sm font-medium dark:text-gray-400 text-gray-600 mb-1">
-                        Direccion
-                      </label>
-                      <p className="dark:text-gray-300 text-gray-700">{shop.address}</p>
-                    </div>
-                  )}
-
-                  <div className="border-t dark:border-white/10 border-gray-200 pt-4 space-y-3">
-                    <p className="text-sm dark:text-gray-400 text-gray-600 mb-2">Acciones</p>
-
-                    <div className="flex gap-3">
-                      {!shop.verified ? (
-                        <Button onClick={() => onVerify(shop.id, true)} className="flex-1 flex items-center gap-2">
-                          <CheckCircle className="w-4 h-4" />
-                          Verificar comercio
-                        </Button>
-                      ) : (
-                        <Button
-                          variant="outline"
-                          onClick={() => onVerify(shop.id, false)}
-                          className="flex-1 flex items-center gap-2"
-                        >
-                          <CheckCircle className="w-4 h-4" />
-                          Remover verificación
-                        </Button>
-                      )}
-                    </div>
-
-                    {onBan && (
-                      <div className="flex gap-3">
-                        {!shop.banned ? (
-                          <Button
-                            variant="danger"
-                            onClick={() => onBan(shop.id, true)}
-                            className="flex-1 flex items-center gap-2"
-                          >
-                            <Ban className="w-4 h-4" />
-                            Banear comercio
-                          </Button>
-                        ) : (
-                          <Button
-                            variant="outline"
-                            onClick={() => onBan(shop.id, false)}
-                            className="flex-1 flex items-center gap-2"
-                          >
-                            <Ban className="w-4 h-4" />
-                            Remover ban
-                          </Button>
-                        )}
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="pt-2">
-                    <Button type="button" variant="outline" onClick={onClose} className="w-full">
-                      Cerrar
-                    </Button>
-                  </div>
-                </div>
+                {/* Body (key: estado limpio al abrir otro comercio) */}
+                <ModerationBody key={shop.shop_id} shop={shop} onClose={onClose} onModerate={onModerate} busy={busy} />
               </div>
             </motion.div>
           </div>

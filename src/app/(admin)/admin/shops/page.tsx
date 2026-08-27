@@ -1,126 +1,88 @@
 'use client'
 
 import { useState } from 'react'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useQueryClient } from '@tanstack/react-query'
 import { supabaseBrowser } from '@/lib/supabase/client'
-import { adminApi } from '@/lib/utils/admin-api'
+import { useAdminShops, AdminShop } from '@/components/admin/useAdminShops'
+import { useAdminCounts } from '@/lib/query/useAdminCounts'
+import { translateDbError } from '@/lib/utils/db-errors'
+import { SHOP_STATUSES, MODERATION_VERB, getShopStatusConfig, ShopModerationAction } from '@/lib/constants/shopStatus'
 import { motion } from 'framer-motion'
 import { Store, Search, Filter } from 'lucide-react'
 import Input from '@/components/ui/Input'
 import Toast from '@/components/ui/Toast'
-import ConfirmModal from '@/components/ui/ConfirmModal'
-import EmptyState from '@/components/ui/EmptyState'
 import ShopsTable from '../components/ShopsTable'
 import ShopModal from '../components/ShopModal'
 import LoadingSkeleton from '../components/LoadingSkeleton'
-import { Shop } from '@/types/shop'
 
+/**
+ * Gestión de comercios (Fase 6, H3+H4): listado sobre la RPC canónica
+ * `list_admin_shops` (0027) y moderación sobre `admin_review_shop`
+ * (0009:1383).
+ *
+ * Decisiones de UI:
+ *  - Sin botón de borrar: el esquema no tiene camino canónico de borrado
+ *    (solo `deleted_at` para el comercio vía su propio flujo).
+ *  - Los filtros por estado van por `p_status` de la RPC; la búsqueda por
+ *    nombre se hace en el cliente (volumen de piloto, mismo patrón que las
+ *    páginas del comercio).
+ */
 export default function AdminShopsPage() {
-  const supabase = supabaseBrowser()
   const queryClient = useQueryClient()
+  const [statusFilter, setStatusFilter] = useState('all')
   const [searchTerm, setSearchTerm] = useState('')
-  const [selectedShop, setSelectedShop] = useState<Shop | null>(null)
+  const [selectedShop, setSelectedShop] = useState<AdminShop | null>(null)
   const [modalOpen, setModalOpen] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
-  const [deleteModalOpen, setDeleteModalOpen] = useState(false)
-  const [shopToDelete, setShopToDelete] = useState<string | null>(null)
+  const [busy, setBusy] = useState(false)
 
-  const { data: shops = [], isLoading: loading } = useQuery({
-    queryKey: ['admin-shops'],
-    queryFn: async () => {
-      const { data, error } = await supabase.from('shops').select('*').order('created_at', { ascending: false })
-
-      if (error) throw error
-      return (data ?? []) as Shop[]
-    },
-    staleTime: 30 * 1000,
-  })
+  const { shops, loading, error: shopsError } = useAdminShops(statusFilter === 'all' ? null : statusFilter)
+  const { data: counts } = useAdminCounts()
 
   const filteredShops = searchTerm
     ? shops.filter((shop) => shop.name.toLowerCase().includes(searchTerm.toLowerCase()))
     : shops
 
-  const invalidateShops = () => queryClient.invalidateQueries({ queryKey: ['admin-shops'] })
-
-  const verifyMutation = useMutation({
-    mutationFn: async ({ shopId, verified }: { shopId: string; verified: boolean }) => {
-      await adminApi(`/api/admin/shops/${shopId}/verify`, { body: { verified } })
-    },
-    onSuccess: (_data, variables) => {
-      setSuccess(variables.verified ? 'Comercio verificado' : 'Verificación removida')
-      invalidateShops()
-    },
-    onError: (err: Error) => setError(err.message),
-    onSettled: () => {
-      setModalOpen(false)
-      setSelectedShop(null)
-    },
-  })
-
-  const banMutation = useMutation({
-    mutationFn: async ({ shopId, banned }: { shopId: string; banned: boolean }) => {
-      await adminApi(`/api/admin/shops/${shopId}/ban`, { body: { banned } })
-    },
-    onSuccess: (_data, variables) => {
-      setSuccess(variables.banned ? 'Comercio baneado' : 'Ban removido')
-      invalidateShops()
-    },
-    onError: (err: Error) => setError(err.message),
-  })
-
-  const deleteMutation = useMutation({
-    mutationFn: async (shopId: string) => {
-      await adminApi(`/api/admin/shops/${shopId}`, { method: 'DELETE' })
-    },
-    onSuccess: () => {
-      setSuccess('Comercio eliminado correctamente')
-      invalidateShops()
-    },
-    onError: (err: Error) => setError(err.message),
-    onSettled: () => {
-      setDeleteModalOpen(false)
-      setShopToDelete(null)
-    },
-  })
-
-  const handleVerifyShop = async (shopId: string, verified: boolean) => {
-    await verifyMutation.mutateAsync({ shopId, verified })
-  }
-
-  const handleBanShop = async (shopId: string, banned: boolean) => {
-    await banMutation.mutateAsync({ shopId, banned })
-  }
-
-  const confirmDelete = (shopId: string) => {
-    setShopToDelete(shopId)
-    setDeleteModalOpen(true)
-  }
-
-  const handleDeleteShop = async () => {
-    if (!shopToDelete) return
-    await deleteMutation.mutateAsync(shopToDelete)
-  }
-
-  const openShopModal = (shop: Shop) => {
+  const openShopModal = (shop: AdminShop) => {
     setSelectedShop(shop)
     setModalOpen(true)
   }
 
-  if (loading) {
-    return <LoadingSkeleton />
+  /**
+   * Modera el comercio vía `admin_review_shop`: estado destino
+   * (verified/rejected/suspended) + motivo de 3+ caracteres (la base lo
+   * exige). Devuelve null en éxito o el error ya traducido para la UI.
+   */
+  const handleModerate = async (
+    shopId: string,
+    newStatus: ShopModerationAction,
+    reason: string,
+  ): Promise<string | null> => {
+    setBusy(true)
+    try {
+      const supabase = supabaseBrowser()
+      const { error } = await supabase.rpc('admin_review_shop', {
+        p_shop_id: shopId,
+        p_new_status: newStatus,
+        p_reason: reason,
+      })
+      if (error) {
+        const translated = translateDbError(error)
+        setError(translated)
+        return translated
+      }
+      setSuccess(`Comercio ${MODERATION_VERB[newStatus]}`)
+      queryClient.invalidateQueries({ queryKey: ['admin-shops'] })
+      queryClient.invalidateQueries({ queryKey: ['admin-counts'] })
+      return null
+    } finally {
+      setBusy(false)
+    }
   }
 
-  if (filteredShops.length === 0 && !loading) {
-    return (
-      <EmptyState
-        type="search"
-        action={{
-          label: 'Limpiar búsqueda',
-          onClick: () => setSearchTerm(''),
-        }}
-      />
-    )
+  if (loading) {
+    return <LoadingSkeleton />
   }
 
   return (
@@ -138,11 +100,42 @@ export default function AdminShopsPage() {
           <div>
             <h1 className="text-3xl md:text-4xl font-bold text-gradient">Gestión de Comercios</h1>
             <p className="dark:text-gray-400 text-gray-600 mt-1">
-              Administra los comercios de la plataforma. Puedes verificar, banear o eliminar.
+              Revisa y modera los comercios de la plataforma: verificar, rechazar o suspender (siempre con motivo).
             </p>
           </div>
         </div>
       </motion.div>
+
+      {/* Filtros por estado (cuentas del dashboard, byStatus de admin_counts) */}
+      <div className="flex gap-2 flex-wrap">
+        <button
+          onClick={() => setStatusFilter('all')}
+          className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
+            statusFilter === 'all'
+              ? 'bg-primary text-white'
+              : 'dark:bg-white/5 bg-gray-100 dark:text-gray-300 text-gray-700 hover:bg-primary/20 dark:hover:bg-white/10'
+          }`}
+        >
+          Todas ({counts?.shops ?? 0})
+        </button>
+        {SHOP_STATUSES.map((status) => {
+          const config = getShopStatusConfig(status)
+          const count = counts?.byStatus?.[status] ?? 0
+          return (
+            <button
+              key={status}
+              onClick={() => setStatusFilter(status)}
+              className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
+                statusFilter === status
+                  ? 'bg-primary text-white'
+                  : 'dark:bg-white/5 bg-gray-100 dark:text-gray-300 text-gray-700 hover:bg-primary/20 dark:hover:bg-white/10'
+              }`}
+            >
+              {config.label} ({count})
+            </button>
+          )
+        })}
+      </div>
 
       {/* Barra de búsqueda */}
       <div className="flex flex-col sm:flex-row gap-4 justify-between">
@@ -162,15 +155,9 @@ export default function AdminShopsPage() {
       </div>
 
       {/* Tabla de comercios */}
-      <ShopsTable
-        shops={filteredShops}
-        onEdit={openShopModal}
-        onVerify={handleVerifyShop}
-        onBan={handleBanShop}
-        onDelete={confirmDelete}
-      />
+      <ShopsTable shops={filteredShops} onEdit={openShopModal} />
 
-      {/* Modal de edición */}
+      {/* Modal de moderación */}
       <ShopModal
         isOpen={modalOpen}
         shop={selectedShop}
@@ -178,22 +165,11 @@ export default function AdminShopsPage() {
           setModalOpen(false)
           setSelectedShop(null)
         }}
-        onVerify={handleVerifyShop}
-        onBan={handleBanShop}
+        onModerate={handleModerate}
+        busy={busy}
       />
 
-      {/* Modal de confirmación para eliminar */}
-      <ConfirmModal
-        isOpen={deleteModalOpen}
-        onClose={() => setDeleteModalOpen(false)}
-        onConfirm={handleDeleteShop}
-        title="Eliminar comercio"
-        message="¿Estás seguro de que quieres eliminar este comercio? Se eliminarán todos sus packs y reservas."
-        confirmText="Sí, eliminar"
-        cancelText="Cancelar"
-      />
-
-      {error && <Toast message={error} type="error" onClose={() => setError('')} />}
+      {(error || shopsError) && <Toast message={error || shopsError} type="error" onClose={() => setError('')} />}
       {success && <Toast message={success} type="success" onClose={() => setSuccess('')} />}
     </div>
   )
