@@ -1,117 +1,79 @@
 'use client'
 
 import { useState } from 'react'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useQueryClient } from '@tanstack/react-query'
 import { useAuth } from '@/hooks/useAuth'
 import { supabaseBrowser } from '@/lib/supabase/client'
-import { adminApi } from '@/lib/utils/admin-api'
+import { useAdminUsers, AdminUser } from '@/components/admin/useAdminUsers'
+import { translateDbError } from '@/lib/utils/db-errors'
 import { motion } from 'framer-motion'
 import { Users, Search, Filter } from 'lucide-react'
 import Input from '@/components/ui/Input'
 import Toast from '@/components/ui/Toast'
-import ConfirmModal from '@/components/ui/ConfirmModal'
-import EmptyState from '@/components/ui/EmptyState'
 import UsersTable from '../components/UsersTable'
 import UserModal from '../components/UserModal'
 import LoadingSkeleton from '../components/LoadingSkeleton'
-import { UserProfile } from '@/lib/supabase/types'
 
+const ROLE_LABELS: Record<string, string> = {
+  user: 'Usuario',
+  comercio: 'Comercio',
+  admin: 'Administrador',
+  super_admin: 'Super Administrador',
+}
+
+/**
+ * Gestión de usuarios (Fase 6): listado sobre `user_profiles` con las
+ * columnas reales (`display_name`, `phone_e164`) y cambio de rol vía la RPC
+ * canónica `admin_set_user_role` (0009:2287). Sin borrado: el esquema no
+ * tiene camino canónico de eliminación de usuarios.
+ */
 export default function AdminUsersPage() {
   const { user: currentUser } = useAuth()
-  const supabase = supabaseBrowser()
   const queryClient = useQueryClient()
   const [searchTerm, setSearchTerm] = useState('')
-  const [selectedUser, setSelectedUser] = useState<UserProfile | null>(null)
+  const [selectedUser, setSelectedUser] = useState<AdminUser | null>(null)
   const [modalOpen, setModalOpen] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
-  const [deleteModalOpen, setDeleteModalOpen] = useState(false)
-  const [userToDelete, setUserToDelete] = useState<string | null>(null)
 
-  const { data: users = [], isLoading: loading } = useQuery({
-    queryKey: ['admin-users'],
-    queryFn: async () => {
-      const { data, error } = await supabase.from('user_profiles').select('*').order('created_at', { ascending: false })
-
-      if (error) throw error
-      return (data ?? []) as UserProfile[]
-    },
-    staleTime: 30 * 1000,
-  })
+  const { users, loading, error: usersError } = useAdminUsers()
 
   const filteredUsers = searchTerm
     ? users.filter(
         (user) =>
-          user.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          user.display_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
           user.email?.toLowerCase().includes(searchTerm.toLowerCase()),
       )
     : users
 
-  const invalidateUsers = () => queryClient.invalidateQueries({ queryKey: ['admin-users'] })
-
-  const updateRoleMutation = useMutation({
-    mutationFn: async ({ userId, newRole }: { userId: string; newRole: string }) => {
-      return await adminApi<{ role: string }>(`/api/admin/users/${userId}/role`, { body: { role: newRole } })
-    },
-    onSuccess: (res: { success: boolean; data?: { role: string } }) => {
-      setSuccess(`Rol actualizado a "${res.data?.role}" correctamente`)
-      invalidateUsers()
-    },
-    onError: (err: Error) => setError(err.message),
-    onSettled: () => {
-      setModalOpen(false)
-      setSelectedUser(null)
-    },
-  })
-
-  const deleteMutation = useMutation({
-    mutationFn: async (userId: string) => {
-      await adminApi(`/api/admin/users/${userId}`, { method: 'DELETE' })
-    },
-    onSuccess: () => {
-      setSuccess('Usuario eliminado correctamente')
-      invalidateUsers()
-    },
-    onError: (err: Error) => setError(err.message),
-    onSettled: () => {
-      setDeleteModalOpen(false)
-      setUserToDelete(null)
-    },
-  })
-
-  const handleRoleChange = async (userId: string, newRole: string) => {
-    await updateRoleMutation.mutateAsync({ userId, newRole })
-  }
-
-  const confirmDelete = (userId: string) => {
-    setUserToDelete(userId)
-    setDeleteModalOpen(true)
-  }
-
-  const handleDeleteUser = async () => {
-    if (!userToDelete) return
-    await deleteMutation.mutateAsync(userToDelete)
-  }
-
-  const openUserModal = (user: UserProfile) => {
+  const openUserModal = (user: AdminUser) => {
     setSelectedUser(user)
     setModalOpen(true)
   }
 
-  if (loading) {
-    return <LoadingSkeleton />
+  /**
+   * Cambio de rol vía `admin_set_user_role`: la base rechaza cambiarse a sí
+   * mismo, roles inválidos y que un admin (no super) toque admin/super_admin.
+   * Aquí solo se traduce el error a español.
+   */
+  const handleRoleChange = async (userId: string, newRole: string) => {
+    const supabase = supabaseBrowser()
+    const { error } = await supabase.rpc('admin_set_user_role', {
+      p_target_user_id: userId,
+      p_new_role: newRole,
+    })
+    if (error) {
+      setError(translateDbError(error))
+      return
+    }
+    setSuccess(`Rol actualizado a ${ROLE_LABELS[newRole] ?? newRole}`)
+    setModalOpen(false)
+    setSelectedUser(null)
+    queryClient.invalidateQueries({ queryKey: ['admin-users'] })
   }
 
-  if (filteredUsers.length === 0 && !loading) {
-    return (
-      <EmptyState
-        type="search"
-        action={{
-          label: 'Limpiar búsqueda',
-          onClick: () => setSearchTerm(''),
-        }}
-      />
-    )
+  if (loading) {
+    return <LoadingSkeleton />
   }
 
   return (
@@ -129,7 +91,7 @@ export default function AdminUsersPage() {
           <div>
             <h1 className="text-3xl md:text-4xl font-bold text-gradient">Gestión de Usuarios</h1>
             <p className="dark:text-gray-400 text-gray-600 mt-1">
-              Administra los usuarios de la plataforma. Puedes cambiar roles, editar o eliminar.
+              Administra los usuarios de la plataforma. Puedes cambiar su rol.
             </p>
           </div>
         </div>
@@ -153,12 +115,7 @@ export default function AdminUsersPage() {
       </div>
 
       {/* Tabla de usuarios */}
-      <UsersTable
-        users={filteredUsers}
-        currentUserId={currentUser?.id}
-        onEdit={openUserModal}
-        onDelete={confirmDelete}
-      />
+      <UsersTable users={filteredUsers} currentUserId={currentUser?.id} onEdit={openUserModal} />
 
       {/* Modal de edición */}
       <UserModal
@@ -171,18 +128,7 @@ export default function AdminUsersPage() {
         onSave={handleRoleChange}
       />
 
-      {/* Modal de confirmación para eliminar */}
-      <ConfirmModal
-        isOpen={deleteModalOpen}
-        onClose={() => setDeleteModalOpen(false)}
-        onConfirm={handleDeleteUser}
-        title="Eliminar usuario"
-        message="¿Estás seguro de que quieres eliminar este usuario? Esta acción no se puede deshacer."
-        confirmText="Sí, eliminar"
-        cancelText="Cancelar"
-      />
-
-      {error && <Toast message={error} type="error" onClose={() => setError('')} />}
+      {(error || usersError) && <Toast message={error || usersError} type="error" onClose={() => setError('')} />}
       {success && <Toast message={success} type="success" onClose={() => setSuccess('')} />}
     </div>
   )

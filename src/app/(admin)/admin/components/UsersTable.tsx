@@ -1,17 +1,16 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { Edit, Trash2, Mail, Calendar, Shield } from 'lucide-react'
+import { Edit, Mail, Calendar, Shield } from 'lucide-react'
 import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
 import { formatDate } from '@/lib/utils/formatDate'
-import { UserProfile } from '@/lib/supabase/types'
+import { AdminUser } from '@/components/admin/useAdminUsers'
 
 interface UsersTableProps {
-  users: UserProfile[]
+  users: AdminUser[]
   currentUserId?: string
-  onEdit: (user: UserProfile) => void
-  onDelete: (userId: string) => void
+  onEdit: (user: AdminUser) => void
 }
 
 const roleLabels: Record<string, { label: string; color: string }> = {
@@ -21,7 +20,13 @@ const roleLabels: Record<string, { label: string; color: string }> = {
   super_admin: { label: 'Super Admin', color: 'bg-secondary/20 text-secondary' },
 }
 
-export default function UsersTable({ users, currentUserId, onEdit, onDelete }: UsersTableProps) {
+/**
+ * Tabla de usuarios del panel admin (Fase 6): columnas reales de
+ * `user_profiles` (0003) — `display_name` y `phone_e164`, no `name`/`phone`.
+ * Una sola acción por fila (editar rol); sin el propio admin, que la base no
+ * deja cambiarse a sí mismo.
+ */
+export default function UsersTable({ users, currentUserId, onEdit }: UsersTableProps) {
   return (
     <Card glass className="overflow-hidden">
       <div className="overflow-x-auto">
@@ -46,15 +51,15 @@ export default function UsersTable({ users, currentUserId, onEdit, onDelete }: U
               >
                 <td className="px-4 py-3">
                   <div>
-                    <p className="font-medium dark:text-white text-gray-900">{user.name ?? 'Sin nombre'}</p>
+                    <p className="font-medium dark:text-white text-gray-900">{user.display_name ?? 'Sin nombre'}</p>
                     <p className="text-xs dark:text-gray-500 text-gray-400 flex items-center gap-1 mt-0.5">
                       <Mail className="w-3 h-3" />
-                      {user.email}
+                      {user.email ?? 'Sin email'}
                     </p>
                   </div>
                 </td>
                 <td className="px-4 py-3">
-                  <span className="dark:text-gray-400 text-gray-600 text-sm">{user.phone ?? '—'}</span>
+                  <span className="dark:text-gray-400 text-gray-600 text-sm">{user.phone_e164 ?? '—'}</span>
                 </td>
                 <td className="px-4 py-3">
                   <span
@@ -70,14 +75,24 @@ export default function UsersTable({ users, currentUserId, onEdit, onDelete }: U
                   </div>
                 </td>
                 <td className="px-4 py-3">
-                  <div className="flex items-center justify-center gap-2">
-                    <Button variant="outline" size="sm" onClick={() => onEdit(user)} className="p-1.5">
-                      <Edit className="w-4 h-4" />
-                    </Button>
-                    {currentUserId !== user.id && (
-                      <Button variant="danger" size="sm" onClick={() => onDelete(user.id)} className="p-1.5">
-                        <Trash2 className="w-4 h-4" />
+                  <div className="flex items-center justify-center">
+                    {currentUserId !== user.id ? (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => onEdit(user)}
+                        ariaLabel={`Editar ${user.display_name ?? 'usuario'}`}
+                        className="p-1.5"
+                      >
+                        <Edit className="w-4 h-4" />
                       </Button>
+                    ) : (
+                      <span
+                        className="text-[10px] dark:text-gray-600 text-gray-500 px-2 py-1 rounded-full dark:bg-white/5 bg-gray-100"
+                        title="No puedes cambiar tu propio rol: la base lo rechaza"
+                      >
+                        Tú
+                      </span>
                     )}
                   </div>
                 </td>

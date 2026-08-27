@@ -4,11 +4,11 @@ import { useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X, Shield } from 'lucide-react'
 import Button from '@/components/ui/Button'
-import { UserProfile } from '@/lib/supabase/types'
+import { AdminUser } from '@/components/admin/useAdminUsers'
 
 interface UserModalProps {
   isOpen: boolean
-  user: UserProfile | null
+  user: AdminUser | null
   onClose: () => void
   onSave: (userId: string, newRole: string) => void
 }
@@ -19,6 +19,13 @@ const roles = [
   { value: 'admin', label: 'Administrador', color: 'text-secondary' },
   { value: 'super_admin', label: 'Super Administrador', color: 'text-red-400' },
 ]
+
+/** Valores reales de `user_profiles.account_status` (0003:41–43). */
+const ACCOUNT_STATUS_LABELS: Record<string, string> = {
+  active: 'Activo',
+  suspended: 'Suspendido',
+  deleted: 'Eliminado',
+}
 
 export default function UserModal({ isOpen, user, onClose, onSave }: UserModalProps) {
   // Prevenir scroll del body cuando el modal está abierto
@@ -84,17 +91,32 @@ export default function UserModal({ isOpen, user, onClose, onSave }: UserModalPr
                 <form onSubmit={handleSave} className="p-5 space-y-5">
                   <div>
                     <label className="block text-sm font-medium dark:text-gray-400 text-gray-600 mb-1">Nombre</label>
-                    <p className="dark:text-white text-gray-900 font-medium">{user.name ?? 'Sin nombre'}</p>
+                    <p className="dark:text-white text-gray-900 font-medium">{user.display_name ?? 'Sin nombre'}</p>
                   </div>
 
                   <div>
                     <label className="block text-sm font-medium dark:text-gray-400 text-gray-600 mb-1">Email</label>
-                    <p className="dark:text-white text-gray-900 font-medium">{user.email}</p>
+                    <p className="dark:text-white text-gray-900 font-medium">{user.email ?? 'Sin email'}</p>
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium dark:text-gray-400 text-gray-600 mb-2">Rol</label>
+                    <label className="block text-sm font-medium dark:text-gray-400 text-gray-600 mb-1">
+                      Estado de la cuenta
+                    </label>
+                    <p className="dark:text-gray-300 text-gray-700 text-sm">
+                      {ACCOUNT_STATUS_LABELS[user.account_status] ?? user.account_status}
+                    </p>
+                  </div>
+
+                  <div>
+                    <label
+                      htmlFor="rol-usuario"
+                      className="block text-sm font-medium dark:text-gray-400 text-gray-600 mb-2"
+                    >
+                      Rol
+                    </label>
                     <select
+                      id="rol-usuario"
                       name="role"
                       defaultValue={user.role}
                       className="w-full px-4 py-2 rounded-xl dark:bg-white/5 bg-gray-100 dark:border-white/10 border-gray-200 dark:text-white text-gray-900 focus:border-primary focus:outline-none transition-all"
