@@ -182,6 +182,12 @@ const RPC_MESSAGES: Record<string, string> = {
   // la UI nunca envía; por si acaso el usuario ve algo humano.
   INVALID_ADMIN_SHOPS_PAGE_ARGUMENTS: 'No se pudo cargar la página de comercios. Vuelve a intentarlo.',
 
+  // Panel admin — list_admin_packs / list_admin_reservations (0032, Fase 6.5)
+  // Solo debería dispararse con un p_limit fuera de rango, que la UI nunca
+  // envía; por si acaso el usuario ve algo humano.
+  INVALID_ADMIN_PACKS_PAGE_ARGUMENTS: 'No se pudo cargar la página de packs. Vuelve a intentarlo.',
+  INVALID_ADMIN_RESERVATIONS_PAGE_ARGUMENTS: 'No se pudo cargar la página de reservas. Vuelve a intentarlo.',
+
   // Panel admin — admin_set_user_role (0009:2287)
   // OJO: SUPER_ADMIN_REQUIRED contiene ADMIN_REQUIRED; el orden por longitud
   // (más larga primero) garantiza que gane la clave más específica.
