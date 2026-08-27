@@ -1,8 +1,7 @@
 'use client'
 
-import { useQuery } from '@tanstack/react-query'
-import { supabaseBrowser } from '@/lib/supabase/client'
 import { useAdminCounts } from '@/lib/query/useAdminCounts'
+import { useAdminTrend } from '@/components/admin/useAdminTrend'
 
 export interface AdminDashboardStats {
   totalUsers: number
@@ -14,34 +13,18 @@ export interface AdminDashboardStats {
   pendingShops: number
 }
 
+/**
+ * Datos del dashboard admin (/admin).
+ *
+ * Fase 6: contadores sobre la RPC `admin_counts` (0027) en vez de los
+ * `.select('verified, banned')` rotos. Fase 6.5: el gráfico de los últimos 7
+ * días sobre `admin_dashboard_trend` (0032) en vez de 7 consultas head
+ * `.from('reservations')` que el esquema (0012) deniega y que dejaban el
+ * gráfico en ceros.
+ */
 export function useAdminDashboard() {
-  const supabase = supabaseBrowser()
-
   const countsQuery = useAdminCounts()
-
-  const chartQuery = useQuery({
-    queryKey: ['admin-reservations-chart'],
-    queryFn: async () => {
-      const last7Days = Array.from({ length: 7 }, (_, i) => {
-        const d = new Date()
-        d.setDate(d.getDate() - i)
-        return d.toISOString().split('T')[0]
-      }).reverse()
-
-      const byDay = await Promise.all(
-        last7Days.map(async (day) => {
-          const { count } = await supabase
-            .from('reservations')
-            .select('*', { count: 'exact', head: true })
-            .gte('created_at', `${day}T00:00:00`)
-            .lt('created_at', `${day}T23:59:59`)
-          return { day: day.slice(5), reservations: count ?? 0 }
-        }),
-      )
-      return byDay
-    },
-    staleTime: 60 * 1000,
-  })
+  const trend = useAdminTrend()
 
   const data = countsQuery.data ?? {
     users: 0,
@@ -54,7 +37,7 @@ export function useAdminDashboard() {
   }
 
   return {
-    loading: countsQuery.isLoading ?? chartQuery.isLoading,
+    loading: countsQuery.isLoading || trend.isLoading,
     stats: {
       totalUsers: data.users,
       totalShops: data.shops,
@@ -64,6 +47,9 @@ export function useAdminDashboard() {
       bannedShops: data.bannedShops,
       pendingShops: data.pendingShops,
     },
-    reservationsByDay: chartQuery.data ?? [],
+    reservationsByDay: (trend.data?.reservations_by_day ?? []).map((d) => ({
+      day: d.day,
+      reservations: d.count,
+    })),
   }
 }

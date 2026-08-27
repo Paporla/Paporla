@@ -3,6 +3,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { supabaseBrowser } from '@/lib/supabase/client'
 import { useAdminCounts } from '@/lib/query/useAdminCounts'
+import { useAdminTrend } from '@/components/admin/useAdminTrend'
 
 export interface AdminSummary {
   totalUsers: number
@@ -11,10 +12,22 @@ export interface AdminSummary {
   totalReservations: number
 }
 
+/**
+ * Estadísticas de la página /admin/stats.
+ *
+ * Fase 6: contadores sobre la RPC `admin_counts` (0027). Fase 6.5: el "top 5
+ * comercios" sobre `admin_dashboard_trend` (0032) en vez de los
+ * `.from('reservations')` + `.from('shops')` directos que el esquema (0012)
+ * deniega a todo rol cliente (los gráficos salían vacíos sin avisar).
+ * Las consultas de `user_profiles` (registros por día y distribución de
+ * roles) siguen siendo directas: esa tabla SÍ tiene GRANT SELECT a
+ * authenticated (0012) y RLS de lectura propia (0011).
+ */
 export function useAdminStats() {
   const supabase = supabaseBrowser()
 
   const countsQuery = useAdminCounts()
+  const trend = useAdminTrend()
 
   const { data: userStats = [] } = useQuery({
     queryKey: ['admin-user-stats'],
@@ -63,21 +76,10 @@ export function useAdminStats() {
     staleTime: 60 * 1000,
   })
 
-  const { data: topShops = [] } = useQuery({
-    queryKey: ['admin-top-shops'],
-    queryFn: async () => {
-      const { data: reservations } = await supabase.from('reservations').select('shop_id')
-      const { data: shops } = await supabase.from('shops').select('id, name')
-      const nameMap = new Map(shops?.map((s) => [s.id, s.name]) || [])
-      const counts = new Map<string, number>()
-      reservations?.forEach((r) => counts.set(r.shop_id, (counts.get(r.shop_id) || 0) + 1))
-      return Array.from(counts.entries())
-        .map(([id, c]) => ({ name: nameMap.get(id) || 'Desconocido', reservations: c }))
-        .sort((a, b) => b.reservations - a.reservations)
-        .slice(0, 5)
-    },
-    staleTime: 60 * 1000,
-  })
+  const topShops = (trend.data?.top_shops ?? []).map((t) => ({
+    name: t.name,
+    reservations: t.reservations,
+  }))
 
   const last7 = userStats.slice(-7).reduce((s, d) => s + d.registrations, 0)
   const prev7 = userStats.slice(-14, -7).reduce((s, d) => s + d.registrations, 0)
@@ -100,7 +102,7 @@ export function useAdminStats() {
   }
 
   return {
-    loading: countsQuery.isLoading,
+    loading: countsQuery.isLoading || trend.isLoading,
     summary,
     userStats,
     roleDistribution,
