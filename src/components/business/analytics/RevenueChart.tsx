@@ -3,6 +3,7 @@
 import { motion } from 'framer-motion'
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import { DollarSign, TrendingUp, TrendingDown } from 'lucide-react'
+import { formatChilePesos } from '@/lib/utils/formatPrice'
 
 interface DataPoint {
   date: string
@@ -28,7 +29,7 @@ const CustomTooltip = ({
     return (
       <div className="bg-dark-card border border-dark-border rounded-xl p-3 shadow-xl">
         <p className="text-xs text-gray-500 mb-1">{label}</p>
-        <p className="text-lg font-bold text-green-400">${payload[0].value.toFixed(2)}</p>
+        <p className="text-lg font-bold text-green-400">{formatChilePesos(payload[0].value)}</p>
       </div>
     )
   }
@@ -64,7 +65,8 @@ export default function RevenueChart({ data, title = 'Ingresos', trend = 0 }: Re
             <h3 className="font-bold dark:text-white text-gray-900">{title}</h3>
           </div>
           <div className="flex items-baseline gap-2">
-            <span className="text-2xl font-bold dark:text-white text-gray-900">${total.toFixed(2)}</span>
+            {/* Determinista: "$3.990" en cualquier máquina (piloto CLP). */}
+            <span className="text-2xl font-bold dark:text-white text-gray-900">{formatChilePesos(total)}</span>
             {trend !== 0 && (
               <div
                 className={`flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full ${isPositive ? 'text-green-400 bg-green-500/10' : 'text-red-400 bg-red-500/10'}`}
@@ -87,7 +89,7 @@ export default function RevenueChart({ data, title = 'Ingresos', trend = 0 }: Re
               tick={{ fill: '#666', fontSize: 11 }}
               axisLine={false}
               tickLine={false}
-              tickFormatter={(v) => `$${v}`}
+              tickFormatter={(v) => formatChilePesos(v as number)}
             />
             <Tooltip content={<CustomTooltip />} />
             <defs>

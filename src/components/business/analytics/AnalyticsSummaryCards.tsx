@@ -3,8 +3,10 @@
 import { motion } from 'framer-motion'
 import Link from 'next/link'
 import { DollarSign, ShoppingBag, Package, CheckCircle, XCircle } from 'lucide-react'
+import { formatChilePesos } from '@/lib/utils/formatPrice'
 
 interface AnalyticsSummary {
+  /** Importe en la unidad menor de la moneda (piloto CLP: pesos). */
   totalRevenue: number
   totalReservations: number
   completedReservations: number
@@ -78,7 +80,8 @@ const cards = [
 export default function AnalyticsSummaryCards({ summary }: AnalyticsSummaryCardsProps) {
   const getValue = (key: string) => {
     if (key === 'totalRevenue') {
-      return `$${(summary.totalRevenue / 100).toLocaleString()}`
+      // Determinista (formatChilePesos): "$3.990" en cualquier máquina.
+      return formatChilePesos(summary.totalRevenue)
     }
     return summary[key as keyof AnalyticsSummary]
   }
