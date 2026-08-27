@@ -23,13 +23,13 @@ export default function UserDashboardPage() {
   const { user } = useAuth()
   const searchParams = useSearchParams()
   const { reservations, loading, error: hookError } = useReservations()
-  const [showReservedToast, setShowReservedToast] = useState(false)
+  // El toast se deriva del parámetro de la URL en el primer render (llegada
+  // tras una reserva exitosa): así no hay setState dentro del efecto.
+  const [showReservedToast, setShowReservedToast] = useState(() => searchParams.get('reserved') === 'true')
 
-  // Mostrar toast cuando el usuario viene de una reserva exitosa
+  // Limpiar el parámetro de la URL sin recargar (el estado ya se derivó arriba).
   useEffect(() => {
     if (searchParams.get('reserved') === 'true') {
-      setShowReservedToast(true)
-      // Limpiar el param de la URL sin recargar
       const url = new URL(window.location.href)
       url.searchParams.delete('reserved')
       window.history.replaceState({}, '', url.toString())
@@ -69,7 +69,7 @@ export default function UserDashboardPage() {
       description: r.shop_name,
       status: r.status,
       created_at: r.updated_at || r.created_at,
-      link: '/dashboard/reservations',
+      link: '/reservations',
     }))
 
     return {
