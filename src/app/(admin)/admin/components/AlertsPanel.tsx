@@ -1,10 +1,11 @@
-﻿'use client'
+'use client'
 
 import { formatRelativeTime } from '@/lib/utils/formatTime'
 import { motion } from 'framer-motion'
 import { AlertTriangle, Clock, XCircle, Info, CheckCircle } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { supabaseBrowser } from '@/lib/supabase/client'
+import { logger } from '@/lib/logger'
 
 interface Alert {
   id: string
@@ -14,6 +15,15 @@ interface Alert {
   time: string
   action?: string
   actionLink?: string
+}
+
+/** Fila de `activity_logs` (0007:210–236): columnas reales del esquema. */
+interface ActivityLog {
+  id: string
+  severity: string
+  action: string | null
+  target_type: string | null
+  occurred_at: string
 }
 
 const levelStyles = {
@@ -73,29 +83,34 @@ export default function AlertsPanel() {
     const loadAlerts = async () => {
       setLoading(true)
 
-      // Get recent critical/warning activity logs
-      const { data: logs } = await supabase
+      // `activity_logs` no tiene `created_at` ni `title`/`description`: la
+      // columna de fecha real es `occurred_at` (0007) y el contenido viene de
+      // `action` (qué pasó) y `target_type` (sobre qué). Con los nombres
+      // viejos la consulta fallaba siempre (42703) y el panel salía vacío.
+      const { data: logs, error } = await supabase
         .from('activity_logs')
         .select('*')
         .in('severity', ['warning', 'error', 'critical'])
-        .order('created_at', { ascending: false })
+        .order('occurred_at', { ascending: false })
         .limit(5)
 
-      if (logs && logs.length > 0) {
-        const mappedAlerts: Alert[] = logs.map(
-          (log: { id: string; severity: string; title: string; description: string | null; created_at: string }) => ({
+      if (error) {
+        logger.error('Admin AlertsPanel', error)
+        setAlerts([])
+      } else {
+        setAlerts(
+          (logs ?? []).map((log: ActivityLog) => ({
             id: log.id,
-            level: log.severity === 'critical' ? 'critical' : log.severity === 'warning' ? 'warning' : 'info',
-            title: log.title,
-            description: log.description ?? '',
-            time: formatRelativeTime(log.created_at),
+            // Solo llegan warning/error/critical: warning en ámbar y el
+            // resto en rojo (un error es tan serio como un crítico aquí).
+            level: log.severity === 'warning' ? 'warning' : 'critical',
+            title: log.action ?? 'Actividad',
+            description: log.target_type ?? '',
+            time: formatRelativeTime(log.occurred_at),
             action: 'Ver mas',
             actionLink: '/admin',
-          }),
+          })),
         )
-        setAlerts(mappedAlerts)
-      } else {
-        setAlerts([])
       }
       setLoading(false)
     }
