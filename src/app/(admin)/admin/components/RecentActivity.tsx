@@ -2,11 +2,12 @@
 
 import { formatRelativeTimeLong } from '@/lib/utils/formatTime'
 import { motion } from 'framer-motion'
-import { UserPlus, ShoppingBag, Store, Package, AlertTriangle, CheckCircle, XCircle, Clock } from 'lucide-react'
+import { UserPlus, ShoppingBag, Store, Package, AlertTriangle, XCircle, Clock } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { supabaseBrowser } from '@/lib/supabase/client'
 import { logger } from '@/lib/logger'
 
+/** Forma del objeto que muestra la UI (sin tocar el render original). */
 interface Activity {
   id: string
   type: string
@@ -14,19 +15,28 @@ interface Activity {
   title: string
   description: string
   created_at: string
-  user_id?: string
-  shop_id?: string
-  metadata?: Record<string, unknown>
+}
+
+/** Fila de `activity_logs` (0007:210–236): columnas reales del esquema. */
+interface ActivityLog {
+  id: string
+  severity: string
+  action: string | null
+  target_type: string | null
+  actor_role: string | null
+  occurred_at: string
 }
 
 const getIcon = (type: string, severity: string) => {
-  if (type === 'user_registered') return { icon: UserPlus, color: 'text-secondary', bg: 'bg-secondary/10' }
-  if (type === 'pack_reserved') return { icon: ShoppingBag, color: 'text-primary', bg: 'bg-primary/10' }
-  if (type === 'shop_created') return { icon: Store, color: 'text-primary', bg: 'bg-primary/10' }
-  if (type === 'pack_created') return { icon: Package, color: 'text-amber-400', bg: 'bg-amber-500/10' }
+  // Severidad primero: crítico/error y warning tienen color propio. Las
+  // severidades reales son info/warning/error/critical (0007:232).
+  if (severity === 'critical' || severity === 'error')
+    return { icon: XCircle, color: 'text-red-400', bg: 'bg-red-500/10' }
   if (severity === 'warning') return { icon: AlertTriangle, color: 'text-amber-400', bg: 'bg-amber-500/10' }
-  if (severity === 'danger') return { icon: XCircle, color: 'text-red-400', bg: 'bg-red-500/10' }
-  if (severity === 'success') return { icon: CheckCircle, color: 'text-green-400', bg: 'bg-green-500/10' }
+  // El resto, por tipo de objetivo (target_type real: user/shop/pack/...).
+  if (type === 'user') return { icon: UserPlus, color: 'text-secondary', bg: 'bg-secondary/10' }
+  if (type === 'shop') return { icon: Store, color: 'text-primary', bg: 'bg-primary/10' }
+  if (type === 'pack') return { icon: Package, color: 'text-amber-400', bg: 'bg-amber-500/10' }
   return { icon: ShoppingBag, color: 'text-primary', bg: 'bg-primary/10' }
 }
 
@@ -40,16 +50,28 @@ export default function RecentActivity() {
     const loadActivities = async () => {
       setLoading(true)
 
+      // La columna de fecha real es `occurred_at` (0007); con `created_at`
+      // la consulta fallaba siempre (42703) y el panel salía vacío.
       const { data, error } = await supabase
         .from('activity_logs')
         .select('*')
-        .order('created_at', { ascending: false })
+        .order('occurred_at', { ascending: false })
         .limit(showAll ? 50 : 10)
 
       if (error) {
         logger.error('Admin RecentActivity', error)
+        setActivities([])
       } else {
-        setActivities(data ?? [])
+        setActivities(
+          (data ?? []).map((log: ActivityLog) => ({
+            id: log.id,
+            type: log.target_type ?? '',
+            severity: log.severity,
+            title: log.action ?? 'Actividad',
+            description: log.actor_role ? `por ${log.actor_role}` : '',
+            created_at: log.occurred_at,
+          })),
+        )
       }
       setLoading(false)
     }
@@ -115,7 +137,9 @@ export default function RecentActivity() {
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium dark:text-white text-gray-900">{activity.title}</p>
-                  <p className="text-xs dark:text-gray-500 text-gray-400 mt-0.5">{activity.description}</p>
+                  {activity.description && (
+                    <p className="text-xs dark:text-gray-500 text-gray-400 mt-0.5">{activity.description}</p>
+                  )}
                 </div>
                 <div className="flex items-center gap-3 flex-shrink-0">
                   <span className="flex items-center gap-1 text-[10px] dark:text-gray-600 text-gray-500 whitespace-nowrap">
