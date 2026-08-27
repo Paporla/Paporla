@@ -11,14 +11,12 @@ import {
   UserPlus,
   Store,
   AlertTriangle,
-  Trash2,
 } from 'lucide-react'
 import type { Notification } from '@/hooks/useNotifications'
 
 interface NotificationCardProps {
   notification: Notification
   onMarkAsRead: (id: string) => void
-  onDelete: (id: string) => void
 }
 
 const iconMap: Record<string, { icon: React.ComponentType<{ className?: string }>; color: string; bg: string }> = {
@@ -36,20 +34,23 @@ const iconMap: Record<string, { icon: React.ComponentType<{ className?: string }
   incidence: { icon: AlertTriangle, color: 'text-red-400', bg: 'bg-red-500/10' },
 }
 
-export default function NotificationCard({ notification, onMarkAsRead, onDelete }: NotificationCardProps) {
+/**
+ * Tarjeta de una notificación (esquema real de 0006: `title` + `body`,
+ * "no leída" = `read_at IS NULL`).
+ *
+ * No hay botón de borrar: el esquema no tiene ningún camino canónico de
+ * borrado (ni RPC ni policy DELETE en el RLS). El inbox es un registro de
+ * actividad, no una papelera.
+ */
+export default function NotificationCard({ notification, onMarkAsRead }: NotificationCardProps) {
   const config = iconMap[notification.type] || iconMap.confirmation
   const Icon = config.icon
-  const isUnread = !notification.is_read
+  const isUnread = notification.read_at === null
 
   const handleClick = () => {
     if (isUnread) {
       onMarkAsRead(notification.id)
     }
-  }
-
-  const handleDelete = (e: React.MouseEvent) => {
-    e.stopPropagation()
-    onDelete(notification.id)
   }
 
   const timeAgo = (date: string) => {
@@ -81,16 +82,13 @@ export default function NotificationCard({ notification, onMarkAsRead, onDelete 
           <p
             className={`text-sm ${isUnread ? 'dark:text-white text-gray-900 font-medium' : 'dark:text-gray-400 text-gray-600'}`}
           >
-            {notification.message}
+            {notification.title}
           </p>
+          {notification.body ? (
+            <p className="text-xs dark:text-gray-500 text-gray-500 mt-0.5">{notification.body}</p>
+          ) : null}
           <p className="text-[10px] dark:text-gray-500 text-gray-400 mt-1">{timeAgo(notification.created_at)}</p>
         </div>
-        <button
-          onClick={handleDelete}
-          className="p-1 rounded-lg text-gray-500 hover:text-red-400 hover:bg-red-500/10 transition-all flex-shrink-0 opacity-0 group-hover:opacity-100"
-        >
-          <Trash2 className="w-3.5 h-3.5" />
-        </button>
       </div>
     </motion.div>
   )

@@ -10,7 +10,7 @@ interface NotificationDropdownProps {
 }
 
 export default function NotificationDropdown({ onClose }: NotificationDropdownProps) {
-  const { notifications, unreadCount, markAsRead, markAllAsRead, deleteNotification } = useNotifications()
+  const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications()
   const recentNotifications = notifications.slice(0, 5)
 
   return (
@@ -45,12 +45,7 @@ export default function NotificationDropdown({ onClose }: NotificationDropdownPr
           </div>
         ) : (
           recentNotifications.map((notification) => (
-            <NotificationCard
-              key={notification.id}
-              notification={notification}
-              onMarkAsRead={markAsRead}
-              onDelete={deleteNotification}
-            />
+            <NotificationCard key={notification.id} notification={notification} onMarkAsRead={markAsRead} />
           ))
         )}
       </div>

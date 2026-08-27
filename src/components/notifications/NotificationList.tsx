@@ -10,10 +10,11 @@ import Toast from '@/components/ui/Toast'
 
 export default function NotificationList() {
   const router = useRouter()
-  const { notifications, loading, error, markAsRead, markAllAsRead, deleteNotification } = useNotifications()
+  const { notifications, loading, error, markAsRead, markAllAsRead } = useNotifications()
   const [filter, setFilter] = useState<'all' | 'unread'>('all')
 
-  const filteredNotifications = filter === 'all' ? notifications : notifications.filter((n) => !n.is_read)
+  // "No leída" = `read_at IS NULL` (columna real de 0006; no existe `is_read`).
+  const filteredNotifications = filter === 'all' ? notifications : notifications.filter((n) => n.read_at === null)
 
   if (loading) {
     return (
@@ -88,12 +89,7 @@ export default function NotificationList() {
           </div>
         ) : (
           filteredNotifications.map((notification) => (
-            <NotificationCard
-              key={notification.id}
-              notification={notification}
-              onMarkAsRead={markAsRead}
-              onDelete={deleteNotification}
-            />
+            <NotificationCard key={notification.id} notification={notification} onMarkAsRead={markAsRead} />
           ))
         )}
       </div>

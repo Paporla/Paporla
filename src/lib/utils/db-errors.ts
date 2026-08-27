@@ -174,6 +174,9 @@ const RPC_MESSAGES: Record<string, string> = {
   INVALID_STOCK_CHANGE:
     'Cantidad no válida. El stock no puede ser negativo ni cambiarse en un pack caducado o archivado.',
 
+  // Notificaciones — mark_notification_read (0009:183)
+  NOTIFICATION_NOT_FOUND: 'Esa notificación ya no existe.',
+
   // Sesión / cuenta
   CALLER_NOT_ACTIVE: 'Tu cuenta no está activa. Inicia sesión de nuevo.',
   RATE_LIMITED: 'Demasiados intentos. Espera unos segundos e inténtalo de nuevo.',
