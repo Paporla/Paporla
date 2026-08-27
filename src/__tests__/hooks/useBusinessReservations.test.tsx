@@ -17,6 +17,15 @@ vi.mock('@/hooks/useAuth', () => ({
   useAuth: mockUseAuth,
 }))
 
+// El hook lee ?status= para arrancar ya filtrado (tarjetas del dashboard/
+// analytics, F4.4). Mock mutable para probar cada variante por separado.
+const searchParamsState = vi.hoisted(() => ({
+  params: new URLSearchParams(''),
+}))
+vi.mock('next/navigation', () => ({
+  useSearchParams: () => searchParamsState.params,
+}))
+
 // Solo se intercepta dateKeyInTimezone (el "hoy" del contador); el resto de
 // los helpers de fechas siguen siendo reales. La conversión de zona horaria
 // real se prueba en src/__tests__/utils/formatDate.test.ts.
@@ -112,6 +121,7 @@ describe('useBusinessReservations', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     mockUseAuth.mockReturnValue({ user: state.user })
+    searchParamsState.params = new URLSearchParams('')
     ;(dateKeyInTimezone as unknown as { mockImplementation: (fn: unknown) => void }).mockImplementation(
       state.realDateKey,
     )
@@ -329,5 +339,19 @@ describe('useBusinessReservations', () => {
 
     expect(result.current.confirmResult).toBeNull()
     expect(result.current.error).toBe('No tienes permiso para gestionar esta reserva.')
+  })
+
+  it('arranca con el filtro de ?status= cuando es un estado canónico', async () => {
+    searchParamsState.params = new URLSearchParams('status=payment_pending')
+    const { result } = renderHook(() => useBusinessReservations(), { wrapper: createWrapper() })
+    await waitFor(() => expect(result.current.shopId).toBe('shop-a'))
+    expect(result.current.statusFilter).toBe('payment_pending')
+  })
+
+  it('ignora ?status= legacy o desconocido: cae a "todas" (solo estados canónicos)', async () => {
+    searchParamsState.params = new URLSearchParams('status=pending')
+    const { result } = renderHook(() => useBusinessReservations(), { wrapper: createWrapper() })
+    await waitFor(() => expect(result.current.shopId).toBe('shop-a'))
+    expect(result.current.statusFilter).toBe('all')
   })
 })

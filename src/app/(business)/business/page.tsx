@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
@@ -8,7 +8,7 @@ import OnboardingBanner from '@/components/onboarding/OnboardingBanner'
 import { useBusinessDashboard } from '@/components/business/dashboard/useBusinessDashboard'
 import LoadingSkeleton from '@/components/business/LoadingSkeleton'
 import Button from '@/components/ui/Button'
-import { formatPrice } from '@/lib/utils/formatPrice'
+import { formatChilePesos } from '@/lib/utils/formatPrice'
 import BusinessWelcomeBanner from '@/components/business/dashboard/BusinessWelcomeBanner'
 import BusinessStatsGrid from '@/components/business/dashboard/BusinessStatsGrid'
 import BusinessQuickActions from '@/components/business/dashboard/BusinessQuickActions'
@@ -98,12 +98,15 @@ export default function BusinessDashboard() {
     )
   }
 
-  // Convertir reservas recientes a formato de actividad
+  // Convertir reservas recientes a formato de actividad. Los campos son los
+  // de la fila canónica de list_shop_reservations (F4.1): nombre visible del
+  // cliente (sin email ni teléfono), título snapshot del pack y importe en
+  // la unidad menor (en el MVP quantity es siempre 1: no se muestra "1x").
   const activities = (recentReservations ?? []).map((r) => ({
-    id: r.id,
+    id: r.reservation_id,
     type: 'reservation' as const,
-    title: r.pack.title,
-    description: `${r.user.name} reservó ${r.quantity}x - ${formatPrice(r.total_price_cents)}`,
+    title: r.pack_title,
+    description: `${r.customer_display_name} · ${formatChilePesos(r.total_amount_minor)}`,
     status: r.status,
     created_at: r.created_at,
     link: '/business/reservations',

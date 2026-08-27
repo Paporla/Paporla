@@ -2,8 +2,9 @@
 
 import { motion } from 'framer-motion'
 import Link from 'next/link'
-import { ShoppingBag, Eye, Clock, CheckCircle, XCircle } from 'lucide-react'
+import { ShoppingBag, Eye, Clock, CheckCircle, XCircle, AlertTriangle } from 'lucide-react'
 import { formatRelativeDate } from '@/lib/utils/formatDate'
+import { getStatusConfig } from '@/lib/constants/reservations'
 
 interface Activity {
   id: string
@@ -19,11 +20,20 @@ interface BusinessRecentActivityProps {
   activities?: Activity[]
 }
 
-const statusConfig: Record<string, { icon: React.ComponentType<{ className?: string }>; color: string }> = {
-  pending: { icon: Clock, color: 'text-yellow-400' },
-  confirmed: { icon: CheckCircle, color: 'text-blue-400' },
-  picked_up: { icon: CheckCircle, color: 'text-green-400' },
-  cancelled: { icon: XCircle, color: 'text-red-400' },
+// Icono por estado canónico (RESERVATION_STATUSES): la etiqueta y el color
+// salen de getStatusConfig (lib/constants/reservations), la única fuente de
+// verdad del módulo de reservas. Si llega un estado sin icono aquí, la
+// tarjeta se pinta sin icono pero SIEMPRE con su etiqueta real (nunca
+// "Cancelado" para un estado que no es cancelación, como ocurría antes).
+const statusIcons: Record<string, React.ComponentType<{ className?: string }>> = {
+  payment_pending: Clock,
+  confirmed: CheckCircle,
+  ready_pickup: Clock,
+  picked_up: CheckCircle,
+  completed: CheckCircle,
+  cancelled: XCircle,
+  no_show: AlertTriangle,
+  expired: XCircle,
 }
 
 export default function BusinessRecentActivity({ activities = [] }: BusinessRecentActivityProps) {
@@ -51,8 +61,8 @@ export default function BusinessRecentActivity({ activities = [] }: BusinessRece
 
       <div className="divide-y divide-dark-border">
         {activities.slice(0, 5).map((activity, idx) => {
-          const StatusIcon = activity.status ? statusConfig[activity.status]?.icon : null
-          const statusColor = activity.status ? statusConfig[activity.status]?.color : ''
+          const statusConfig = activity.status ? getStatusConfig(activity.status) : null
+          const StatusIcon = activity.status ? statusIcons[activity.status] : null
 
           return (
             <motion.div
@@ -70,18 +80,8 @@ export default function BusinessRecentActivity({ activities = [] }: BusinessRece
                   <p className="text-sm font-medium dark:text-white text-gray-900 group-hover:text-primary transition-colors">
                     {activity.title}
                   </p>
-                  {StatusIcon && <StatusIcon className={`w-3 h-3 ${statusColor}`} />}
-                  {activity.status && (
-                    <span className="text-[10px] text-gray-500">
-                      {activity.status === 'pending'
-                        ? 'Pendiente'
-                        : activity.status === 'confirmed'
-                          ? 'Confirmada'
-                          : activity.status === 'picked_up'
-                            ? 'Recogido'
-                            : 'Cancelado'}
-                    </span>
-                  )}
+                  {StatusIcon && <StatusIcon className={`w-3 h-3 ${statusConfig?.color ?? ''}`} />}
+                  {statusConfig && <span className="text-[10px] text-gray-500">{statusConfig.label}</span>}
                 </div>
                 <p className="text-xs text-gray-500 mt-0.5">{activity.description}</p>
                 <p className="text-[10px] text-gray-600 mt-1">{formatRelativeDate(activity.created_at)}</p>

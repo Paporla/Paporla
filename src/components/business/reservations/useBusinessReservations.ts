@@ -1,10 +1,11 @@
 'use client'
 
 import { useState, useMemo } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabaseBrowser } from '@/lib/supabase/client'
 import { useBusinessShop } from '@/lib/query/useBusinessShop'
-import { sortReservationsByPickupTime } from '@/lib/constants/reservations'
+import { RESERVATION_STATUSES, sortReservationsByPickupTime } from '@/lib/constants/reservations'
 import { translateDbError } from '@/lib/utils/db-errors'
 import { dateKeyInTimezone } from '@/lib/utils/formatDate'
 
@@ -92,10 +93,18 @@ const normalizeTerm = (value: string) =>
 export function useBusinessReservations() {
   const { data: shop } = useBusinessShop()
   const queryClient = useQueryClient()
+  const searchParams = useSearchParams()
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
   const [searchTerm, setSearchTerm] = useState('')
-  const [statusFilter, setStatusFilter] = useState('all')
+  // El panel se puede abrir desde las tarjetas del dashboard/analytics ya
+  // con el filtro aplicado (?status=payment_pending). Solo se aceptan
+  // estados canónicos (RESERVATION_STATUSES): valores desconocidos o
+  // legacy ('pending') caen a 'all' en vez de dejar el filtro "roto".
+  const [statusFilter, setStatusFilter] = useState<string>(() => {
+    const fromUrl = searchParams.get('status')
+    return fromUrl && (RESERVATION_STATUSES as readonly string[]).includes(fromUrl) ? fromUrl : 'all'
+  })
   const [updating, setUpdating] = useState<string | null>(null)
   const [confirmResult, setConfirmResult] = useState<ConfirmResult | null>(null)
 
