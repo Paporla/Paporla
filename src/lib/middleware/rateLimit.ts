@@ -21,7 +21,6 @@ const routeLimits: Record<string, { limit: number; windowSeconds: number }> = {
   '/api/auth': { limit: 5, windowSeconds: 60 },
   '/api/reservations': { limit: 20, windowSeconds: 60 },
   '/api/cron': { limit: 5, windowSeconds: 60 },
-  '/api/search': { limit: 60, windowSeconds: 60 },
   '/api/admin': { limit: 30, windowSeconds: 60 },
   '/api/stats': { limit: 60, windowSeconds: 60 },
   '/api/health': { limit: 120, windowSeconds: 60 },
