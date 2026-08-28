@@ -18,7 +18,6 @@ interface RateLimitRpcPayload {
 
 const routeLimits: Record<string, { limit: number; windowSeconds: number }> = {
   '/api/email': { limit: 10, windowSeconds: 60 },
-  '/api/notifications': { limit: 30, windowSeconds: 60 },
   '/api/auth': { limit: 5, windowSeconds: 60 },
   '/api/reservations': { limit: 20, windowSeconds: 60 },
   '/api/cron': { limit: 5, windowSeconds: 60 },

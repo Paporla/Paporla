@@ -118,41 +118,6 @@ export const sendEmailSchema = z.object({
 })
 
 // ============================================
-// Notifications — create & batch update
-// ============================================
-export const NOTIFICATION_TYPES = [
-  'pickup_reminder',
-  'cancellation',
-  'confirmation',
-  'new_pack',
-  'shop_verified',
-  'new_reservation',
-  'user_cancelled',
-  'pickup_completed',
-  'new_user',
-  'new_shop',
-  'incidence',
-  'reservation_expired',
-  'pack_sold_out',
-] as const
-
-export const createNotificationSchema = z.object({
-  userId: z.string({ required_error: 'userId es requerido' }).uuid('userId debe ser un UUID válido'),
-  type: z.enum(NOTIFICATION_TYPES, {
-    errorMap: () => ({ message: 'Tipo de notificación no válido' }),
-  }),
-  message: z
-    .string({ required_error: 'El mensaje es requerido' })
-    .min(1, 'El mensaje es requerido')
-    .max(500, 'El mensaje no puede exceder 500 caracteres'),
-  reservationId: z.string().uuid('reservationId debe ser un UUID válido').optional().nullable(),
-})
-
-export const batchNotificationSchema = z.object({
-  notifications: z.array(createNotificationSchema).min(1, 'Se requiere al menos una notificación'),
-})
-
-// ============================================
 // Admin — shop ban
 // ============================================
 export const banShopSchema = z.object({
