@@ -44,8 +44,8 @@ describe('GET /api/cron/cleanup-pending', () => {
     expect(response.status).toBe(401)
   })
 
-  it('calls cleanup_pending_reservations RPC with p_minutes_ago: 30 and valid secret', async () => {
-    mockRpc.mockResolvedValue({ data: { success: true, cleaned_count: 5 }, error: null })
+  it('calls service_expire_payment_holds RPC with a valid secret', async () => {
+    mockRpc.mockResolvedValue({ data: { success: true, processed: 5 }, error: null })
 
     const { GET } = await import('@/app/api/cron/cleanup-pending/route')
     const request = new Request('http://localhost/api/cron/cleanup-pending', {
@@ -56,14 +56,13 @@ describe('GET /api/cron/cleanup-pending', () => {
 
     expect(response.status).toBe(200)
     expect(body.success).toBe(true)
-    expect(body.cleaned).toBe(5)
-    expect(mockRpc).toHaveBeenCalledWith('cleanup_pending_reservations', {
-      p_minutes_ago: 30,
-    })
+    expect(body.expired).toBe(5)
+    expect(body.message).toContain('holds de pago')
+    expect(mockRpc).toHaveBeenCalledWith('service_expire_payment_holds')
   })
 
-  it('returns cleaned: 0 when no pending reservations exist', async () => {
-    mockRpc.mockResolvedValue({ data: { success: true, cleaned_count: 0 }, error: null })
+  it('returns expired: 0 when there are no pending payment holds', async () => {
+    mockRpc.mockResolvedValue({ data: { success: true, processed: 0 }, error: null })
 
     const { GET } = await import('@/app/api/cron/cleanup-pending/route')
     const request = new Request('http://localhost/api/cron/cleanup-pending', {
@@ -74,8 +73,8 @@ describe('GET /api/cron/cleanup-pending', () => {
 
     expect(response.status).toBe(200)
     expect(body.success).toBe(true)
-    expect(body.cleaned).toBe(0)
-    expect(body.message).toContain('0 reservas')
+    expect(body.expired).toBe(0)
+    expect(body.message).toContain('0 holds')
   })
 
   it('returns 500 on RPC error', async () => {
@@ -89,7 +88,7 @@ describe('GET /api/cron/cleanup-pending', () => {
     expect(response.status).toBe(500)
   })
 
-  it('handles null RPC result gracefully', async () => {
+  it('handles a null RPC result gracefully', async () => {
     mockRpc.mockResolvedValue({ data: null, error: null })
 
     const { GET } = await import('@/app/api/cron/cleanup-pending/route')
@@ -101,6 +100,6 @@ describe('GET /api/cron/cleanup-pending', () => {
 
     expect(response.status).toBe(200)
     expect(body.success).toBe(true)
-    expect(body.cleaned).toBe(0)
+    expect(body.expired).toBe(0)
   })
 })
