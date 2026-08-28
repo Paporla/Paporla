@@ -4,66 +4,52 @@ import { logger } from '@/lib/logger'
 
 export interface CommunityStats {
   packsRescued: number
-  moneySavedCents: number
+  moneySavedMinor: number
+  currencyCode: string
   co2SavedKg: number
   activeShops: number
   activePacks: number
 }
 
+/**
+ * Fase 8: las métricas de la comunidad salen de la RPC canónica
+ * community_stats (0035, SECURITY DEFINER, GRANT anon) — los .from() legacy a
+ * reservations/shops/packs los negaba el esquema 0012 (42501) y la landing
+ * vivía siempre del fallback de la FAO. La RPC solo devuelve agregados:
+ * ninguna fila de negocio viaja al cliente.
+ *
+ * CO2: 2.5 kg por pack rescatado (estimación conservadora, FAO) — se calcula
+ * aquí para no mezclar física con SQL.
+ */
 export async function GET() {
   try {
     const supabase = await createClient()
 
-    // Packs rescatados (reservas recogidas)
-    const { count: packsRescued } = await supabase
-      .from('reservations')
-      .select('*', { count: 'exact', head: true })
-      .eq('status', 'picked_up')
+    const { data, error } = await supabase.rpc('community_stats')
 
-    // Dinero ahorrado (precio original - precio pagado en packs recogidos)
-    const { data: savings } = await supabase
-      .from('reservations')
-      .select('total_price_cents, pack:packs(price_cents, original_price_cents)')
-      .eq('status', 'picked_up')
-      .limit(5000)
-
-    let moneySavedCents = 0
-    if (savings) {
-      for (const r of savings) {
-        const packArray = r.pack as { price_cents: number; original_price_cents: number | null }[] | null
-        const pack = (Array.isArray(packArray) ? packArray[0] : packArray) ?? null
-        if (pack?.original_price_cents && pack.original_price_cents > pack.price_cents) {
-          moneySavedCents +=
-            (pack.original_price_cents - pack.price_cents) * ((r as { quantity?: number }).quantity ?? 1)
-        }
-      }
+    if (error) {
+      throw error
     }
 
-    // CO2 ahorrado (~2.5 kg por pack rescatado, estimación conservadora FAO)
-    const co2SavedKg = (packsRescued ?? 0) * 2.5
+    const stats = data as {
+      packs_rescued: number
+      money_saved_minor: number
+      currency_code: string
+      active_shops: number
+      active_packs: number
+    } | null
 
-    // Comercios activos
-    const { count: activeShops } = await supabase
-      .from('shops')
-      .select('*', { count: 'exact', head: true })
-      .eq('verified', true)
-      .is('deleted_at', null)
-
-    // Packs activos
-    const { count: activePacks } = await supabase
-      .from('packs')
-      .select('*', { count: 'exact', head: true })
-      .eq('is_active', true)
-      .is('deleted_at', null)
+    const packsRescued = stats?.packs_rescued ?? 0
 
     return NextResponse.json({
       success: true,
       stats: {
-        packsRescued: packsRescued ?? 0,
-        moneySavedCents,
-        co2SavedKg,
-        activeShops: activeShops ?? 0,
-        activePacks: activePacks ?? 0,
+        packsRescued,
+        moneySavedMinor: stats?.money_saved_minor ?? 0,
+        currencyCode: stats?.currency_code ?? 'CLP',
+        co2SavedKg: packsRescued * 2.5,
+        activeShops: stats?.active_shops ?? 0,
+        activePacks: stats?.active_packs ?? 0,
       } satisfies CommunityStats,
     })
   } catch (error) {

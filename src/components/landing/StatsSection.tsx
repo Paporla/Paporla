@@ -7,7 +7,7 @@ import { Package, DollarSign, Store, Leaf } from 'lucide-react'
 import AnimatedCounter from '@/components/ui/AnimatedCounter'
 import { useQuery } from '@tanstack/react-query'
 import { apiFetch } from '@/lib/utils/api-client'
-import { formatPrice } from '@/lib/utils/formatPrice'
+import { formatChilePesos } from '@/lib/utils/formatPrice'
 import type { CommunityStats } from '@/app/api/stats/route'
 
 // Fallback: datos de la FAO si la API no responde
@@ -64,8 +64,7 @@ export default function StatsSection() {
           isMoney: false,
         },
         {
-          value: apiStats.moneySavedCents,
-          prefix: '$',
+          value: apiStats.moneySavedMinor,
           suffix: '',
           label: 'ahorrados por la comunidad',
           source: 'En tiempo real',
@@ -128,7 +127,7 @@ export default function StatsSection() {
               {isInView ? (
                 <p className="text-4xl font-bold text-white group-hover:scale-105 transition-transform duration-300">
                   {stat.isMoney ? (
-                    formatPrice(stat.value)
+                    formatChilePesos(stat.value)
                   ) : (
                     <AnimatedCounter
                       value={stat.value}
@@ -159,7 +158,7 @@ export default function StatsSection() {
           {hasRealStats ? (
             <p className="text-gray-300 text-sm max-w-2xl mx-auto">
               <span className="text-primary font-bold">{apiStats.packsRescued} packs</span> rescatados ·{' '}
-              <span className="text-primary font-bold">{formatPrice(apiStats.moneySavedCents)}</span> ahorrados ·{' '}
+              <span className="text-primary font-bold">{formatChilePesos(apiStats.moneySavedMinor)}</span> ahorrados ·{' '}
               <span className="text-primary font-bold">{apiStats.co2SavedKg.toLocaleString()} kg</span> de CO₂ evitados
               <span className="block mt-2 text-primary font-semibold">¿Te sumas?</span>
             </p>
