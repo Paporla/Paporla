@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { motion } from 'framer-motion'
 import { Activity } from 'lucide-react'
@@ -7,13 +7,24 @@ import StatsSummaryCards from '@/components/admin/StatsSummaryCards'
 import StatsUserChart from '@/components/admin/StatsUserChart'
 import StatsRolePie from '@/components/admin/StatsRolePie'
 import StatsTopShops from '@/components/admin/StatsTopShops'
+import AdminPanelError from '@/components/admin/AdminPanelError'
 import RevenueChart from '../components/RevenueChart'
 import AdminStatsLoading from '@/components/admin/AdminStatsLoading'
 
 export default function AdminStatsPage() {
-  const { loading, summary, userStats, roleDistribution, topShops, growth } = useAdminStats()
+  const { loading, error, retry, summary, userStats, roleDistribution, topShops, growth } = useAdminStats()
 
   if (loading) return <AdminStatsLoading />
+
+  if (error) {
+    return (
+      <AdminPanelError
+        title="No se pudieron cargar las estadísticas"
+        description="La conexión con la base de datos falló o tardó demasiado. Comprueba tu sesión y vuelve a intentarlo."
+        onRetry={retry}
+      />
+    )
+  }
 
   return (
     <div className="space-y-8">
