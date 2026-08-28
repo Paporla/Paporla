@@ -3,6 +3,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { supabaseBrowser } from '@/lib/supabase/client'
 import { translateDbError } from '@/lib/utils/db-errors'
+import { RpcTimeoutError, rpcWithTimeout } from '@/lib/utils/rpcWithTimeout'
 
 /**
  * Fila de tendencia diaria (RPC `admin_dashboard_trend`, 0032, Fase 6.5).
@@ -48,6 +49,10 @@ export interface AdminTrendData {
  * concede SELECT sobre `reservations` a ningún rol cliente, así que esas
  * lecturas fallaban ("permission denied for table reservations") y los
  * gráficos del dashboard salían en ceros sin que nadie lo viera.
+ *
+ * FASE 6.6: la RPC va en carrera contra un timeout de 30 s
+ * (rpcWithTimeout): si PostgREST no responde, la consulta pasa a estado de
+ * error y el panel lo muestra en vez de quedarse en el skeleton para siempre.
  */
 export function useAdminTrend() {
   const supabase = supabaseBrowser()
@@ -55,9 +60,17 @@ export function useAdminTrend() {
   return useQuery({
     queryKey: ['admin-dashboard-trend'],
     queryFn: async () => {
-      const { data, error } = await supabase.rpc('admin_dashboard_trend')
-      if (error) throw new Error(translateDbError(error))
-      return data as unknown as AdminTrendData
+      let result: { data: AdminTrendData | null; error: { message: string; code?: string } | null }
+      try {
+        result = await rpcWithTimeout(supabase.rpc('admin_dashboard_trend'), 'admin_dashboard_trend')
+      } catch (e) {
+        if (e instanceof RpcTimeoutError) {
+          throw new Error('La conexión con la base de datos tardó demasiado en responder. Vuelve a intentarlo.')
+        }
+        throw e
+      }
+      if (result.error) throw new Error(translateDbError(result.error))
+      return result.data as unknown as AdminTrendData
     },
     staleTime: 60 * 1000,
   })

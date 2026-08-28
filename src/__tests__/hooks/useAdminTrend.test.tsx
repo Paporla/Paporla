@@ -10,7 +10,21 @@ import { translateDbError } from '@/lib/utils/db-errors'
  * tres gráficos del dashboard que antes hacían .from('reservations') directo
  * (denegado por el esquema 0012). Aquí se protege el nombre exacto de la
  * RPC (sin argumentos) y el mapeo del payload jsonb.
+ *
+ * FASE 6.6: si la RPC no responde, la consulta entra en estado de error por
+ * timeout (el helper corre con 50 ms en tests) y el panel NO se queda en el
+ * skeleton de carga para siempre.
  */
+
+// El helper real corre con su timeout de 30 s; en tests se fuerza a 50 ms.
+vi.mock('@/lib/utils/rpcWithTimeout', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@/lib/utils/rpcWithTimeout')>()
+  type CallArg = Parameters<(typeof actual)['rpcWithTimeout']>[0]
+  return {
+    ...actual,
+    rpcWithTimeout: (call: CallArg, rpcName: string) => actual.rpcWithTimeout(call, rpcName, 50),
+  }
+})
 
 const mockRpc = vi.fn()
 
@@ -71,5 +85,12 @@ describe('useAdminTrend (Fase 6.5, 0032)', () => {
     const { result } = renderHook(() => useAdminTrend(), { wrapper: createWrapper() })
     await waitFor(() => expect(result.current.isError).toBe(true))
     expect(result.current.error?.message).toBe(translateDbError({ message: 'ADMIN_REQUIRED', code: '42501' }))
+  })
+
+  it('Fase 6.6: con una RPC que no responde, entra en error por timeout (no skeleton infinito)', async () => {
+    mockRpc.mockImplementation(() => new Promise(() => {}))
+    const { result } = renderHook(() => useAdminTrend(), { wrapper: createWrapper() })
+    await waitFor(() => expect(result.current.isError).toBe(true), { timeout: 2000 })
+    expect(result.current.error?.message).toContain('tardó demasiado')
   })
 })

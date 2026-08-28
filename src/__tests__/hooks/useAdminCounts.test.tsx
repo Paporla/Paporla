@@ -5,6 +5,19 @@ import { useAdminCounts } from '@/lib/query/useAdminCounts'
 import { translateDbError } from '@/lib/utils/db-errors'
 import { supabaseBrowser } from '@/lib/supabase/client'
 
+/**
+ * FASE 6.6: el helper de timeout corre con 50 ms en tests (no los 30 s
+ * reales) para probar el caso "la RPC no responde" sin esperar.
+ */
+vi.mock('@/lib/utils/rpcWithTimeout', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@/lib/utils/rpcWithTimeout')>()
+  type CallArg = Parameters<(typeof actual)['rpcWithTimeout']>[0]
+  return {
+    ...actual,
+    rpcWithTimeout: (call: CallArg, rpcName: string) => actual.rpcWithTimeout(call, rpcName, 50),
+  }
+})
+
 let rpc: ReturnType<typeof vi.fn>
 
 function setupMockClient(data: unknown, error: { message: string; code?: string } | null = null) {
@@ -83,5 +96,13 @@ describe('useAdminCounts', () => {
     const { result } = renderHook(() => useAdminCounts(), { wrapper: createWrapper() })
     await waitFor(() => expect(result.current.isError).toBe(true))
     expect(translateDbError(result.current.error)).toBe('Esta acción requiere permisos de administrador.')
+  })
+
+  it('Fase 6.6: si la RPC no responde, entra en error por timeout (no carga para siempre)', async () => {
+    setupMockClient(null)
+    rpc.mockImplementation(() => new Promise(() => {}))
+    const { result } = renderHook(() => useAdminCounts(), { wrapper: createWrapper() })
+    await waitFor(() => expect(result.current.isError).toBe(true), { timeout: 2000 })
+    expect(result.current.error?.message).toContain('tardó demasiado')
   })
 })

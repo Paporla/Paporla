@@ -2,6 +2,7 @@
 
 import { useQuery } from '@tanstack/react-query'
 import { supabaseBrowser } from '@/lib/supabase/client'
+import { RpcTimeoutError, rpcWithTimeout } from '@/lib/utils/rpcWithTimeout'
 
 /** Forma que devuelve la RPC `admin_counts` (0027, Fase 6 H2). */
 export interface AdminCountsData {
@@ -41,16 +42,28 @@ export interface AdminCounts {
  * Mapeo a la forma legacy:
  *  - bannedShops  = suspended (la suspensión ES el «ban» del modelo canónico)
  *  - pendingShops = draft + pending_review
+ *
+ * FASE 6.6: la RPC va en carrera contra un timeout de 30 s (rpcWithTimeout):
+ * si PostgREST no responde, la consulta pasa a estado de error en vez de
+ * dejar /admin y /admin/stats en el skeleton para siempre.
  */
 export function useAdminCounts() {
   return useQuery({
     queryKey: ['admin-counts'],
     queryFn: async (): Promise<AdminCounts> => {
       const supabase = supabaseBrowser()
-      const { data, error } = await supabase.rpc('admin_counts')
-      if (error) throw error
+      let result: { data: AdminCountsData | null; error: { message: string; code?: string } | null }
+      try {
+        result = await rpcWithTimeout(supabase.rpc('admin_counts'), 'admin_counts')
+      } catch (e) {
+        if (e instanceof RpcTimeoutError) {
+          throw new Error('La conexión con la base de datos tardó demasiado en responder. Vuelve a intentarlo.')
+        }
+        throw e
+      }
+      if (result.error) throw result.error
 
-      const rows = (data ?? {}) as Partial<AdminCountsData>
+      const rows = (result.data ?? {}) as Partial<AdminCountsData>
       const byStatus = rows.shops?.by_status ?? {}
       return {
         users: rows.users ?? 0,
