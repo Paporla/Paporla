@@ -1,8 +1,55 @@
 import { NextResponse } from 'next/server'
 import { getSupabaseAdmin, validateCronRequest } from '@/lib/supabase/admin'
-import { sendPickupReminderEmail } from '@/lib/email'
 import { logger } from '@/lib/logger'
 
+const TZ_SANTIAGO = 'America/Santiago'
+// Margen amplio de consulta (2 dias). El filtro EXACTO por dia de Santiago se
+// hace en JS; este limite solo evita leer historial viejo innecesario.
+const LOOKBACK_MS = 48 * 60 * 60 * 1000
+
+/** Fecha YYYY-MM-DD de un instante en horario de Santiago. */
+function santiagoDateString(d: Date): string {
+  return new Intl.DateTimeFormat('en-CA', {
+    timeZone: TZ_SANTIAGO,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).format(d)
+}
+
+/** Ventana de recogida "HH:MM–HH:MM" en hora de Chile (formato 24 h). */
+function formatPickupWindow(startIso: string, endIso: string): string {
+  const fmt = new Intl.DateTimeFormat('es-CL', {
+    timeZone: TZ_SANTIAGO,
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+  })
+  return `${fmt.format(new Date(startIso))}–${fmt.format(new Date(endIso))}`
+}
+
+/** `notifications.title` tiene tope de 160 chars (0006); acota el nombre del pack. */
+function shortTitle(title: string, max = 120): string {
+  return title.length > max ? `${title.slice(0, max - 1)}…` : title
+}
+
+/**
+ * Cron: recordatorios de recogida de HOY (fecha en horario de Santiago).
+ *
+ * Crea notificaciones in-app (tabla `notifications`, esquema canónico 0006)
+ * para el cliente (category 'pickup') y para el dueño del comercio
+ * (category 'shop_operations'), ambas deduplicadas por reserva +
+ * destinatario en las últimas 24 h (el cron puede correr 2 veces al día).
+ *
+ * Fase 7: la versión anterior leía columnas que no existen en el esquema
+ * canónico (`pickup_date`, `pickup_start_time`, join de packs/shops) e
+ * insertaba campos muerta (`message`, `is_read`, `sent_at`), así que
+ * quedaba rota al primer crón. Tampoco envía correos: en el piloto el
+ * aviso llega al inbox in-app, que el cliente ya ve al entrar a la app.
+ *
+ * Frecuencia recomendada: una vez al día, por la mañana (hora de Chile).
+ * Auth: header `Authorization: Bearer $CRON_SECRET` (validateCronRequest).
+ */
 export async function GET(request: Request) {
   if (!validateCronRequest(request)) {
     return NextResponse.json({ success: false, error: 'No autorizado' }, { status: 401 })
@@ -10,126 +57,136 @@ export async function GET(request: Request) {
 
   try {
     const supabase = getSupabaseAdmin()
-
     const now = new Date()
-    const today = now.toISOString().split('T')[0]
+    const today = santiagoDateString(now)
 
-    const { data: reservations } = await supabase
+    const { data: reservations, error } = await supabase
       .from('reservations')
       .select(
-        `
-        id,
-        user_id,
-        pickup_date,
-        pickup_start_time,
-        pickup_end_time,
-        pack_id,
-        pickup_code,
-        pack:packs(title, shop_id),
-        shop:shops(name, address, owner_id)
-      `,
+        'id, user_id, shop_id, pack_id, status, pickup_start_at, pickup_end_at, pack_title_snapshot, shop_name_snapshot',
       )
       .in('status', ['confirmed', 'ready_pickup'])
-      .eq('pickup_date', today)
-      .order('pickup_start_time', { ascending: true })
+      .gte('pickup_start_at', new Date(now.getTime() - LOOKBACK_MS).toISOString())
+      .order('pickup_start_at', { ascending: true })
+      .limit(200)
 
-    if (!reservations || reservations.length === 0) {
-      return NextResponse.json({ sent: 0, emailsSent: 0, message: 'Sin reservas para hoy' })
+    if (error) {
+      logger.error('CRON pickup-reminders query', error)
+      throw error
     }
 
-    let notificationCount = 0
-    let emailCount = 0
+    const todays = (reservations ?? []).filter(
+      (r: { pickup_start_at: string }) => santiagoDateString(new Date(r.pickup_start_at)) === today,
+    )
 
-    for (const reservation of reservations) {
-      if (!reservation.pickup_start_time) continue
+    if (todays.length === 0) {
+      return NextResponse.json({
+        success: true,
+        user_reminders: 0,
+        shop_reminders: 0,
+        message: 'Sin recogidas para hoy',
+        timestamp: now.toISOString(),
+      })
+    }
 
-      const [hours, minutes] = reservation.pickup_start_time.split(':').map(Number)
-      const pickupTime = new Date()
-      pickupTime.setHours(hours, minutes, 0, 0)
+    const shopIds = [...new Set(todays.map((r: { shop_id: string }) => r.shop_id))]
+    const { data: shops, error: shopsError } = await supabase.from('shops').select('id, owner_id').in('id', shopIds)
 
-      const diffMs = pickupTime.getTime() - now.getTime()
-      const diffMinutes = Math.round(diffMs / 60000)
+    if (shopsError) {
+      logger.error('CRON pickup-reminders shops', shopsError)
+      throw shopsError
+    }
 
-      if (diffMinutes >= 15 && diffMinutes <= 60) {
-        const packData = reservation.pack as { title?: string; shop_id?: string } | null
-        const shopData = reservation.shop as { name?: string; address?: string; owner_id?: string } | null
-        const packTitle = packData?.title ?? 'Pack'
-        const shopName = shopData?.name ?? 'Comercio'
-        const shopAddress = shopData?.address ?? null
-        const userId = reservation.user_id
-        const reservationId = reservation.id
-        const pickupTimeStr = reservation.pickup_start_time ?? '00:00'
+    const ownerByShop = new Map<string, string | null>(
+      (shops ?? []).map((s: { id: string; owner_id: string | null }) => [s.id, s.owner_id]),
+    )
 
-        const { data: existing } = await supabase
-          .from('notifications')
-          .select('id')
-          .eq('user_id', userId)
-          .eq('type', 'pickup_reminder')
-          .eq('reservation_id', reservationId)
-          .gte('created_at', `${today}T00:00:00`)
-          .maybeSingle()
+    // Dedupe: si en las últimas 24 h ya se avisó de esta reserva a este
+    // destinatario, no se repite.
+    const dedupeSince = new Date(now.getTime() - 24 * 60 * 60 * 1000).toISOString()
+    const hasRecentReminder = async (userId: string, reservationId: string): Promise<boolean> => {
+      const { data: existing, error: dedupeError } = await supabase
+        .from('notifications')
+        .select('id')
+        .eq('user_id', userId)
+        .eq('type', 'pickup_reminder')
+        .eq('reservation_id', reservationId)
+        .gte('created_at', dedupeSince)
+        .maybeSingle()
 
-        if (!existing) {
-          await supabase.from('notifications').insert({
-            user_id: userId,
-            type: 'pickup_reminder',
-            message: `Tu reserva de "${packTitle}" en ${shopName} esta proxima a recogerse (${pickupTimeStr.slice(0, 5)})`,
-            reservation_id: reservationId,
-            is_read: false,
-            sent_at: now.toISOString(),
-          })
-          notificationCount++
+      if (dedupeError) {
+        logger.error('CRON pickup-reminders dedupe', dedupeError)
+        return false
+      }
+      return existing !== null
+    }
+
+    let userReminders = 0
+    let shopReminders = 0
+
+    for (const r of todays) {
+      const window = formatPickupWindow(r.pickup_start_at, r.pickup_end_at)
+      const packTitle = r.pack_title_snapshot as string
+      const shopName = r.shop_name_snapshot as string
+      const ownerId = ownerByShop.get(r.shop_id) ?? null
+
+      // --- Recordatorio al cliente ----------------------------------------
+      if (!(await hasRecentReminder(r.user_id, r.id))) {
+        const { error: insertError } = await supabase.from('notifications').insert({
+          user_id: r.user_id,
+          category: 'pickup',
+          type: 'pickup_reminder',
+          title: `Tu recogida de hoy: ${shortTitle(packTitle)}`,
+          body: `Hoy recoges "${packTitle}" en ${shopName} (${window}, hora de Chile).`,
+          data: {
+            reservation_id: r.id,
+            pickup_start_at: r.pickup_start_at,
+            pickup_end_at: r.pickup_end_at,
+          },
+          reservation_id: r.id,
+          shop_id: r.shop_id,
+          pack_id: r.pack_id,
+        })
+
+        if (insertError) {
+          logger.error('CRON pickup-reminders insert cliente', insertError)
+        } else {
+          userReminders += 1
         }
+      }
 
-        const { data: userEmail } = await supabase
-          .from('user_profiles')
-          .select('email, name')
-          .eq('id', userId)
-          .maybeSingle()
+      // --- Recordatorio al comercio (owner de la tienda) -------------------
+      if (ownerId && !(await hasRecentReminder(ownerId, r.id))) {
+        const { error: insertError } = await supabase.from('notifications').insert({
+          user_id: ownerId,
+          category: 'shop_operations',
+          type: 'pickup_reminder',
+          title: `Recogida de hoy: ${shortTitle(packTitle)}`,
+          body: `Un cliente recogerá "${packTitle}" hoy (${window}, hora de Chile).`,
+          data: {
+            reservation_id: r.id,
+            pickup_start_at: r.pickup_start_at,
+            pickup_end_at: r.pickup_end_at,
+          },
+          reservation_id: r.id,
+          shop_id: r.shop_id,
+          pack_id: r.pack_id,
+        })
 
-        if (userEmail?.email) {
-          await sendPickupReminderEmail(userEmail.email, {
-            userName: userEmail.name ?? 'Usuario',
-            packTitle,
-            shopName,
-            shopAddress,
-            pickupCode: reservation.pickup_code ?? 'N/A',
-            pickupDate: reservation.pickup_date ?? today,
-            pickupTime: pickupTimeStr,
-          })
-          emailCount++
-        }
-
-        const ownerId = shopData?.owner_id
-        if (ownerId) {
-          const { data: existingShopNotif } = await supabase
-            .from('notifications')
-            .select('id')
-            .eq('user_id', ownerId)
-            .eq('type', 'pickup_reminder')
-            .eq('reservation_id', reservationId)
-            .gte('created_at', `${today}T00:00:00`)
-            .maybeSingle()
-
-          if (!existingShopNotif) {
-            await supabase.from('notifications').insert({
-              user_id: ownerId,
-              type: 'pickup_reminder',
-              message: `Se acerca la hora de recogida de "${packTitle}" - ${pickupTimeStr.slice(0, 5)}`,
-              reservation_id: reservationId,
-              is_read: false,
-              sent_at: now.toISOString(),
-            })
-            notificationCount++
-          }
+        if (insertError) {
+          logger.error('CRON pickup-reminders insert comercio', insertError)
+        } else {
+          shopReminders += 1
         }
       }
     }
 
     return NextResponse.json({
-      sent: notificationCount,
-      emailsSent: emailCount,
-      message: `${notificationCount} recordatorios y ${emailCount} emails enviados`,
+      success: true,
+      user_reminders: userReminders,
+      shop_reminders: shopReminders,
+      message: `Recordatorios de hoy: ${userReminders} para clientes, ${shopReminders} para comercios`,
+      timestamp: now.toISOString(),
     })
   } catch (err) {
     logger.error('CRON pickup-reminders', err)
