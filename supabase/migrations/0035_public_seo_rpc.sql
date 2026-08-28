@@ -59,8 +59,7 @@ BEGIN
   SELECT count(*)
     INTO v_packs
   FROM public.packs p
-  WHERE p.status = 'active'
-    AND p.deleted_at IS NULL;
+  WHERE p.status = 'active';
 
   RETURN jsonb_build_object(
     'packs_rescued', COALESCE(v_rescued, 0),
