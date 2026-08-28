@@ -21,6 +21,11 @@ export interface AdminDashboardStats {
  * días sobre `admin_dashboard_trend` (0032) en vez de 7 consultas head
  * `.from('reservations')` que el esquema (0012) deniega y que dejaban el
  * gráfico en ceros.
+ *
+ * FASE 6.6: expone `error` y `retry` para que la página muestre su estado de
+ * error con botón Reintentar cuando una consulta falla: antes, un fallo (o un
+ * request que no respondía) dejaba el dashboard en el skeleton para siempre,
+ * sin decir nada.
  */
 export function useAdminDashboard() {
   const countsQuery = useAdminCounts()
@@ -38,6 +43,11 @@ export function useAdminDashboard() {
 
   return {
     loading: countsQuery.isLoading || trend.isLoading,
+    error: countsQuery.isError || trend.isError,
+    retry: () => {
+      void countsQuery.refetch()
+      void trend.refetch()
+    },
     stats: {
       totalUsers: data.users,
       totalShops: data.shops,

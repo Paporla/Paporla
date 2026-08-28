@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { renderHook, waitFor } from '@testing-library/react'
+import { renderHook, waitFor, act } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { useAdminStats } from '@/components/admin/useAdminStats'
 import { supabaseBrowser } from '@/lib/supabase/client'
@@ -10,15 +10,27 @@ import { supabaseBrowser } from '@/lib/supabase/client'
  * comercios sobre la RPC admin_dashboard_trend (0032, Fase 6.5) — la versión
  * pre-6.5 hacía .from('reservations') + .from('shops') directos, que el
  * esquema deniega, y el top salía vacío sin avisar.
+ *
+ * FASE 6.6: `error` y `retry` (no más skeleton infinito) y los errores de
+ * las consultas de user_profiles se propagan en vez de tragarse con
+ * `count ?? 0` (ceros en silencio).
  */
 
+const countsMock = vi.hoisted(() => vi.fn())
+
 vi.mock('@/lib/query/useAdminCounts', () => ({
-  useAdminCounts: vi.fn(() => ({
-    data: { users: 50, shops: 10, packs: 30, reservations: 200, verifiedShops: 5, bannedShops: 2, pendingShops: 3 },
-    isLoading: false,
-    isSuccess: true,
-  })),
+  useAdminCounts: countsMock,
 }))
+
+// El helper de timeout corre con 50 ms en tests (no los 30 s reales).
+vi.mock('@/lib/utils/rpcWithTimeout', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@/lib/utils/rpcWithTimeout')>()
+  type CallArg = Parameters<(typeof actual)['rpcWithTimeout']>[0]
+  return {
+    ...actual,
+    rpcWithTimeout: (call: CallArg, rpcName: string) => actual.rpcWithTimeout(call, rpcName, 50),
+  }
+})
 
 function createWrapper() {
   const queryClient = new QueryClient({
@@ -59,10 +71,22 @@ function setupMockClient() {
   ;(supabaseBrowser as any).mockReturnValue({ from: mockFrom, rpc: mockRpc })
 }
 
+function setupCounts(overrides: Record<string, unknown> = {}) {
+  countsMock.mockReturnValue({
+    data: { users: 50, shops: 10, packs: 30, reservations: 200, verifiedShops: 5, bannedShops: 2, pendingShops: 3 },
+    isLoading: false,
+    isSuccess: true,
+    isError: false,
+    refetch: vi.fn(),
+    ...overrides,
+  })
+}
+
 describe('useAdminStats', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     setupMockClient()
+    setupCounts()
   })
 
   it('returns summary from useAdminCounts', () => {
@@ -91,5 +115,34 @@ describe('useAdminStats', () => {
     const { result } = renderHook(() => useAdminStats(), { wrapper: createWrapper() })
     await waitFor(() => {})
     expect(result.current.growth.users).toBe(0)
+  })
+
+  it('Fase 6.6: expone error=true si la RPC de tendencia falla', async () => {
+    mockRpc.mockResolvedValue({ data: null, error: { message: 'ADMIN_REQUIRED', code: '42501' } })
+    const { result } = renderHook(() => useAdminStats(), { wrapper: createWrapper() })
+    await waitFor(() => expect(result.current.error).toBe(true))
+  })
+
+  it('Fase 6.6: propaga el error de user_profiles en vez de tragarlo (ceros en silencio)', async () => {
+    mockLt.mockResolvedValue({
+      count: null,
+      error: { message: 'permission denied for table user_profiles', code: '42501' },
+    })
+    const { result } = renderHook(() => useAdminStats(), { wrapper: createWrapper() })
+    await waitFor(() => expect(result.current.error).toBe(true))
+  })
+
+  it('Fase 6.6: retry repite las consultas (contadores, tendencia y user_profiles)', async () => {
+    mockRpc.mockResolvedValue({ data: null, error: { message: 'ADMIN_REQUIRED', code: '42501' } })
+    const refetch = vi.fn()
+    setupCounts({ data: null, isSuccess: false, isError: true, refetch })
+    const { result } = renderHook(() => useAdminStats(), { wrapper: createWrapper() })
+    await waitFor(() => expect(result.current.error).toBe(true))
+    const llamadasAntes = mockRpc.mock.calls.length
+    act(() => {
+      result.current.retry()
+    })
+    expect(refetch).toHaveBeenCalledTimes(1)
+    await waitFor(() => expect(mockRpc.mock.calls.length).toBeGreaterThan(llamadasAntes))
   })
 })

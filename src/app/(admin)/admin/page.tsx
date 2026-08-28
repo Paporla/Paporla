@@ -1,10 +1,11 @@
-﻿'use client'
+'use client'
 
 import { useAuth } from '@/hooks/useAuth'
 import { Shield } from 'lucide-react'
 import { useAdminDashboard } from '@/components/admin/useAdminDashboard'
 import AdminNavCards from '@/components/admin/AdminNavCards'
 import AdminStatCards from '@/components/admin/AdminStatCards'
+import AdminPanelError from '@/components/admin/AdminPanelError'
 import AlertsPanel from './components/AlertsPanel'
 import AdminQuickActions from './components/AdminQuickActions'
 import RecentActivity from './components/RecentActivity'
@@ -14,9 +15,19 @@ import AdminDashboardLoading from '@/components/admin/AdminDashboardLoading'
 
 export default function AdminDashboard() {
   const { user } = useAuth()
-  const { loading, stats, reservationsByDay } = useAdminDashboard()
+  const { loading, error, retry, stats, reservationsByDay } = useAdminDashboard()
 
   if (loading) return <AdminDashboardLoading />
+
+  if (error) {
+    return (
+      <AdminPanelError
+        title="No se pudo cargar el panel"
+        description="La conexión con la base de datos falló o tardó demasiado. Comprueba tu sesión y vuelve a intentarlo."
+        onRetry={retry}
+      />
+    )
+  }
 
   return (
     <div className="space-y-8">

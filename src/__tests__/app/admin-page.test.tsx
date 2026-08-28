@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { render, screen, fireEvent } from '@testing-library/react'
 import AdminDashboardPage from '@/app/(admin)/admin/page'
 import { supabaseBrowser } from '@/lib/supabase/client'
 
@@ -7,6 +7,8 @@ import { supabaseBrowser } from '@/lib/supabase/client'
 // completo. Lo que SÍ se prueba aquí son AlertsPanel y RecentActivity leyendo
 // `activity_logs` con las columnas REALES (occurred_at/action/target_type,
 // 0007) y no las inventadas (created_at/title/description).
+// FASE 6.6: el mock incluye `error` y `retry` (estado de error con
+// Reintentar en vez de skeleton infinito).
 const dashboardState = vi.hoisted(() => ({
   stats: {
     totalUsers: 10,
@@ -19,6 +21,8 @@ const dashboardState = vi.hoisted(() => ({
   },
   reservationsByDay: [] as Array<{ day: string; reservations: number }>,
   loading: false,
+  error: false,
+  retry: vi.fn(),
 }))
 
 const useAdminDashboardMock = vi.hoisted(() => vi.fn())
@@ -68,8 +72,13 @@ function setupMockClient(rows: Array<Record<string, unknown>>) {
 describe('AdminDashboardPage (página)', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    dashboardState.loading = false
+    dashboardState.error = false
+    dashboardState.retry = vi.fn()
     useAdminDashboardMock.mockImplementation(() => ({
       loading: dashboardState.loading,
+      error: dashboardState.error,
+      retry: dashboardState.retry,
       stats: dashboardState.stats,
       reservationsByDay: dashboardState.reservationsByDay,
     }))
@@ -98,5 +107,13 @@ describe('AdminDashboardPage (página)', () => {
     render(<AdminDashboardPage />)
     expect(screen.getByText('Panel de Administración')).toBeTruthy()
     expect(screen.getByText('admin@paporla.test')).toBeTruthy()
+  })
+
+  it('Fase 6.6: con error de carga muestra el estado de error con Reintentar (no skeleton infinito)', async () => {
+    dashboardState.error = true
+    render(<AdminDashboardPage />)
+    expect(await screen.findByText('No se pudo cargar el panel')).toBeTruthy()
+    fireEvent.click(screen.getByRole('button', { name: 'Reintentar' }))
+    expect(dashboardState.retry).toHaveBeenCalledTimes(1)
   })
 })

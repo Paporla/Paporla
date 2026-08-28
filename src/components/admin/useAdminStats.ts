@@ -22,6 +22,12 @@ export interface AdminSummary {
  * Las consultas de `user_profiles` (registros por día y distribución de
  * roles) siguen siendo directas: esa tabla SÍ tiene GRANT SELECT a
  * authenticated (0012) y RLS de lectura propia (0011).
+ *
+ * FASE 6.6: expone `error` y `retry` para que la página muestre su estado de
+ * error con botón Reintentar cuando cualquier consulta falla: antes, un fallo
+ * (o un request que no respondía) dejaba la página en el skeleton para
+ * siempre, sin decir nada. También se propagan los errores de las consultas
+ * de user_profiles en vez de tragarlos con `count ?? 0` (ceros en silencio).
  */
 export function useAdminStats() {
   const supabase = supabaseBrowser()
@@ -29,7 +35,7 @@ export function useAdminStats() {
   const countsQuery = useAdminCounts()
   const trend = useAdminTrend()
 
-  const { data: userStats = [] } = useQuery({
+  const userStatsQuery = useQuery({
     queryKey: ['admin-user-stats'],
     queryFn: async () => {
       const lastDays = Array.from({ length: 30 }, (_, i) => {
@@ -39,11 +45,12 @@ export function useAdminStats() {
       }).reverse()
       const byDay = await Promise.all(
         lastDays.map(async (day) => {
-          const { count } = await supabase
+          const { count, error } = await supabase
             .from('user_profiles')
             .select('*', { count: 'exact', head: true })
             .gte('created_at', `${day}T00:00:00`)
             .lt('created_at', `${day}T23:59:59`)
+          if (error) throw error
           return { day: day.slice(5), registrations: count ?? 0 }
         }),
       )
@@ -52,7 +59,7 @@ export function useAdminStats() {
     staleTime: 60 * 1000,
   })
 
-  const { data: roleDistribution = [] } = useQuery({
+  const roleQuery = useQuery({
     queryKey: ['admin-role-distribution'],
     queryFn: async () => {
       const roles = ['user', 'comercio', 'admin', 'super_admin']
@@ -64,10 +71,11 @@ export function useAdminStats() {
       }
       const roleData = await Promise.all(
         roles.map(async (r) => {
-          const { count } = await supabase
+          const { count, error } = await supabase
             .from('user_profiles')
             .select('*', { count: 'exact', head: true })
             .eq('role', r)
+          if (error) throw error
           return { name: labels[r] || r, value: count ?? 0 }
         }),
       )
@@ -75,6 +83,9 @@ export function useAdminStats() {
     },
     staleTime: 60 * 1000,
   })
+
+  const userStats = userStatsQuery.data ?? []
+  const roleDistribution = roleQuery.data ?? []
 
   const topShops = (trend.data?.top_shops ?? []).map((t) => ({
     name: t.name,
@@ -103,6 +114,13 @@ export function useAdminStats() {
 
   return {
     loading: countsQuery.isLoading || trend.isLoading,
+    error: countsQuery.isError || trend.isError || userStatsQuery.isError || roleQuery.isError,
+    retry: () => {
+      void countsQuery.refetch()
+      void trend.refetch()
+      void userStatsQuery.refetch()
+      void roleQuery.refetch()
+    },
     summary,
     userStats,
     roleDistribution,
