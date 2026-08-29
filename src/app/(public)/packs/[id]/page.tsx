@@ -111,7 +111,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 }
 
-export const dynamic = 'force-dynamic'
+// Nota (f8.5 S2): esta página NO debe tener ningún boundary <Suspense> con
+// streaming por encima (loading.tsx): si el skeleton se streamea antes de que
+// notFound() se ejecute, el status HTTP queda fijado en 200 y Google puede
+// indexar packs inexistentes. (Tampoco va force-dynamic: la página ya es
+// dinámica por headers()/cookies() y la fuerza extra solo complicaba el
+// streaming.)
 
 export default async function PackDetailPage({ params }: Props) {
   const { id } = await params

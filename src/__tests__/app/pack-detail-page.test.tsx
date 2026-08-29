@@ -127,4 +127,11 @@ describe('/packs/[id] con get_pack_public (migración 0029)', () => {
     await expect(loadPage('pack-1')).rejects.toThrow('NOT_FOUND_SENTINEL')
     expect(mock.notFound).toHaveBeenCalled()
   })
+
+  it('no fuerza dinámico: un 404 debe responder HTTP 404, no 200 (f8.5)', async () => {
+    // force-dynamic abría el stream antes del notFound() y el status quedaba 200.
+    // La página ya es dinámica por headers() (nonce CSP).
+    const mod = await import('@/app/(public)/packs/[id]/page')
+    expect((mod as Record<string, unknown>).dynamic).toBeUndefined()
+  })
 })
