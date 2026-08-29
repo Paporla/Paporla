@@ -1,4 +1,11 @@
+import type { Metadata } from 'next'
 import Link from 'next/link'
+
+// Un 404 no debe indexarse: esta página heredaba `robots: index, follow` del
+// layout raíz, así que Google podía indexar URLs inexistentes. (f8.5)
+export const metadata: Metadata = {
+  robots: { index: false },
+}
 
 export default function NotFound() {
   return (
