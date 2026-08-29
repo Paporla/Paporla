@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Filter, X, ChevronUp } from 'lucide-react'
 import PriceRangeFilter from './PriceRangeFilter'
@@ -35,9 +35,30 @@ const defaultFilters: Filters = {
   sortBy: 'newest' as const,
 }
 
+/**
+ * Debounce de la busqueda (f8.5, S4): cada cambio de `search` cambia el
+ * queryKey del catalogo y dispara una RPC search_available_packs a la base.
+ * Sin esto, cada tecla = una query. El input se actualiza al instante (state
+ * local del componente); solo la notificacion al padre (y la query) espera a
+ * que el usuario pare de escribir.
+ */
+const SEARCH_DEBOUNCE_MS = 350
+
 export default function PackFiltersAdvanced({ onFilterChange, initialFilters = {}, cities = ['Santiago'] }: Props) {
   const [isOpen, setIsOpen] = useState(false)
   const [filters, setFilters] = useState<Filters>({ ...defaultFilters, ...initialFilters })
+
+  // El timer de busqueda pendiente + el estado mas reciente: cuando dispare,
+  // notifica SIEMPRE los filtros actuales (no los de hace 350 ms), asi un
+  // cambio de ciudad en el medio no se pierde. El ref se sincroniza en un
+  // efecto (no en render): la regla react-hooks/refs lo exige, y el timer
+  // dispara 350 ms despues, con el ref ya actualizado.
+  const searchTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const latestFilters = useRef(filters)
+
+  useEffect(() => {
+    latestFilters.current = filters
+  })
 
   const activeCount = [
     filters.minPrice > 0,
@@ -54,29 +75,62 @@ export default function PackFiltersAdvanced({ onFilterChange, initialFilters = {
     [onFilterChange],
   )
 
-  const update = <K extends keyof Filters>(key: K, value: Filters[K]) => {
-    const next = { ...filters, [key]: value }
+  const notifySearchDebounced = () => {
+    if (searchTimer.current) clearTimeout(searchTimer.current)
+    searchTimer.current = setTimeout(() => {
+      searchTimer.current = null
+      onFilterChange(latestFilters.current)
+    }, SEARCH_DEBOUNCE_MS)
+  }
+
+  const cancelSearchDebounce = () => {
+    if (searchTimer.current) {
+      clearTimeout(searchTimer.current)
+      searchTimer.current = null
+    }
+  }
+
+  /**
+   * Un cambio ATOMICO: varios campos a la vez en UNA sola setFilters/notify.
+   * (Antes, dos update() seguidos en el mismo evento —p.ej. elegir ciudad +
+   * limpiar ubicacion— usaban el mismo closure de `filters`: el segundo
+   * setFilters borraba el primero y la seleccion de ciudad se perdia. f8.5)
+   */
+  const update = (changes: Partial<Filters>) => {
+    const next = { ...filters, ...changes }
     setFilters(next)
-    notify(next)
+    if ('search' in changes) {
+      notifySearchDebounced()
+    } else {
+      notify(next)
+    }
   }
 
   const clearAll = () => {
+    cancelSearchDebounce()
     setFilters(defaultFilters)
     notify(defaultFilters)
   }
 
   const removeChip = (key: string) => {
-    if (key === 'minPrice') update('minPrice', 0)
-    else if (key === 'maxPrice') update('maxPrice', 100000)
-    else if (key === 'city') update('city', '')
-    else if (key === 'location') update('location', null)
-    else if (key === 'showAvailableOnly') update('showAvailableOnly', false)
+    if (key === 'minPrice') update({ minPrice: 0 })
+    else if (key === 'maxPrice') update({ maxPrice: 100000 })
+    else if (key === 'city') update({ city: '' })
+    else if (key === 'location') update({ location: null })
+    else if (key === 'showAvailableOnly') update({ showAvailableOnly: false })
   }
 
   // Notificar filtros iniciales al montar
   useEffect(() => {
     onFilterChange(filters)
     // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  // Al desmontar, no dejar un debounce pendiente que dispare una query fantasma
+  useEffect(() => {
+    return () => {
+      if (searchTimer.current) clearTimeout(searchTimer.current)
+    }
   }, [])
 
   return (
@@ -86,7 +140,7 @@ export default function PackFiltersAdvanced({ onFilterChange, initialFilters = {
           <input
             type="text"
             value={filters.search}
-            onChange={(e) => update('search', e.target.value)}
+            onChange={(e) => update({ search: e.target.value })}
             placeholder="Buscar packs por nombre o descripcion..."
             className="w-full px-4 py-3 rounded-xl dark:bg-white/5 bg-white dark:border-gray-600 border-gray-200 dark:text-white text-gray-900 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
           />
@@ -128,15 +182,14 @@ export default function PackFiltersAdvanced({ onFilterChange, initialFilters = {
                   minPrice={filters.minPrice}
                   maxPrice={filters.maxPrice}
                   onPriceChange={(min, max) => {
-                    update('minPrice', min)
-                    update('maxPrice', max)
+                    update({ minPrice: min, maxPrice: max })
                   }}
                 />
                 <div>
                   <label className="block text-sm font-medium dark:text-gray-300 text-gray-700 mb-2">Ordenar por</label>
                   <select
                     value={filters.sortBy || 'newest'}
-                    onChange={(e) => update('sortBy', e.target.value as Filters['sortBy'])}
+                    onChange={(e) => update({ sortBy: e.target.value as Filters['sortBy'] })}
                     className="w-full px-4 py-2 rounded-lg dark:bg-white/5 bg-white dark:border-gray-600 border-gray-200 dark:text-white text-gray-900 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
                   >
                     {filters.location && <option value="distance">Más cercanos</option>}
@@ -150,8 +203,10 @@ export default function PackFiltersAdvanced({ onFilterChange, initialFilters = {
                   <select
                     value={filters.city}
                     onChange={(e) => {
-                      update('city', e.target.value)
-                      if (e.target.value) update('location', null)
+                      update({
+                        city: e.target.value,
+                        ...(e.target.value ? { location: null } : {}),
+                      })
                     }}
                     className="w-full px-4 py-2 rounded-lg dark:bg-white/5 bg-white dark:border-gray-600 border-gray-200 dark:text-white text-gray-900 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
                   >
@@ -166,9 +221,11 @@ export default function PackFiltersAdvanced({ onFilterChange, initialFilters = {
                 <div className="md:col-span-2">
                   <GeolocationFilter
                     onLocationChange={(coords, radius) => {
-                      update('location', coords)
-                      update('radiusKm', radius)
-                      if (coords) update('city', '')
+                      update({
+                        location: coords,
+                        radiusKm: radius,
+                        ...(coords ? { city: '' } : {}),
+                      })
                     }}
                     defaultRadius={filters.radiusKm}
                   />
@@ -178,7 +235,7 @@ export default function PackFiltersAdvanced({ onFilterChange, initialFilters = {
                     type="checkbox"
                     id="availableOnly"
                     checked={filters.showAvailableOnly}
-                    onChange={(e) => update('showAvailableOnly', e.target.checked)}
+                    onChange={(e) => update({ showAvailableOnly: e.target.checked })}
                     className="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary/20"
                   />
                   <label htmlFor="availableOnly" className="text-sm dark:text-gray-300 text-gray-700">
