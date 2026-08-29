@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 import PackDetailClient from './PackDetailClient'
 import type { SerializedPack } from './PackDetailClient'
 import { notFound } from 'next/navigation'
+import { jsonLdToScriptContent } from '@/lib/utils/json-ld'
 
 interface Props {
   params: Promise<{ id: string }>
@@ -151,7 +152,12 @@ export default async function PackDetailPage({ params }: Props) {
 
   return (
     <>
-      <script type="application/ld+json" nonce={nonce} dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      {/* jsonLdToScriptContent: escapa '</script>' que JSON.stringify deja en crudo (f8.5, S3) */}
+      <script
+        type="application/ld+json"
+        nonce={nonce}
+        dangerouslySetInnerHTML={{ __html: jsonLdToScriptContent(jsonLd) }}
+      />
       <PackDetailClient initialPack={initialPack} />
     </>
   )
