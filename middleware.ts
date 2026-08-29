@@ -2,31 +2,9 @@ import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 import { applyRateLimit } from '@/lib/middleware/rateLimit'
 import { setCsrfCookie, validateCsrf } from '@/lib/middleware/csrf'
+import { generateNonce, buildCspHeader } from '@/lib/middleware/csp'
 import { ROLES, isAdmin } from '@/lib/constants/roles'
 import { getActiveUserRole } from '@/lib/auth/profile'
-
-// ============================================
-// CSP — Nonce-based (replaces static 'unsafe-inline')
-// ============================================
-function generateNonce(): string {
-  const bytes = new Uint8Array(16)
-  crypto.getRandomValues(bytes)
-  return btoa(String.fromCharCode(...bytes))
-}
-
-function buildCspHeader(nonce: string): string {
-  return [
-    "default-src 'self'",
-    `script-src 'self' 'nonce-${nonce}' https://*.supabase.co https://www.googletagmanager.com https://www.google-analytics.com`,
-    `style-src 'self' 'nonce-${nonce}'`,
-    "img-src 'self' data: blob: https:",
-    `connect-src 'self' https://*.supabase.co https://*.sentry.io https://www.google-analytics.com`,
-    "frame-src 'self' https://www.googletagmanager.com",
-    "frame-ancestors 'none'",
-    "base-uri 'self'",
-    "form-action 'self'",
-  ].join('; ')
-}
 
 export async function middleware(request: NextRequest) {
   const nonce = generateNonce()

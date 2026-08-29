@@ -1,12 +1,7 @@
 import { NextResponse } from 'next/server'
 import { Resend } from 'resend'
 import { createClient } from '@/lib/supabase/server'
-import {
-  welcomeTemplate,
-  reservationConfirmationTemplate,
-  passwordResetTemplate,
-  pickupReminderTemplate,
-} from '@/lib/email/templates'
+import { welcomeTemplate, reservationConfirmationTemplate, pickupReminderTemplate } from '@/lib/email/templates'
 import { sendEmailSchema } from '@/lib/utils/validations'
 import { logger } from '@/lib/logger'
 
@@ -80,11 +75,10 @@ export async function POST(request: Request) {
         text = `Tu reserva esta confirmada. Pack: ${String(safeData.packTitle ?? 'Pack')}. Comercio: ${String(safeData.shopName ?? 'Comercio')}. Codigo de recogida: ${String(safeData.pickupCode ?? 'XXXXXX')}.`
         break
 
-      case 'password_reset':
-        subject = 'Restablece tu contraseña - Paporla'
-        html = passwordResetTemplate(String(safeData.resetLink ?? ''))
-        text = `Recibimos una solicitud para restablecer tu contraseña. Haz clic en este enlace: ${safeData.resetLink ?? ''}`
-        break
+      // f8.5 (S6): 'password_reset' fue eliminado de los tipos permitidos.
+      // Aceptaba un resetLink arbitrario que se inyectaba en un href del email
+      // (phishing); el restablecimiento real lo hace Supabase Auth con sus
+      // propios links firmados, no esta API.
 
       case 'pickup_reminder':
         subject = `Recuerda recoger tu pack de ${String(safeData.packTitle ?? 'Pack')} hoy - Paporla`

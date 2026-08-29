@@ -1,0 +1,30 @@
+// ============================================
+// CSP — Nonce-based (replaces static 'unsafe-inline')
+// ============================================
+//
+// Vive en su propio módulo (no en middleware.ts) para poder probar la
+// política sin levantar el middleware completo (f8.5).
+
+export function generateNonce(): string {
+  const bytes = new Uint8Array(16)
+  crypto.getRandomValues(bytes)
+  return btoa(String.fromCharCode(...bytes))
+}
+
+export function buildCspHeader(nonce: string): string {
+  return [
+    "default-src 'self'",
+    // *.supabase.co NO va en script-src (f8.5 S7): la SDK va bundled con el
+    // bundle de Next y las redirecciones de auth son navegaciones de primer
+    // nivel (window.location), no carga de scripts. Sigue permitida en
+    // connect-src (fetch/PostgREST) e img-src (buckets públicos de storage).
+    `script-src 'self' 'nonce-${nonce}' https://www.googletagmanager.com https://www.google-analytics.com`,
+    `style-src 'self' 'nonce-${nonce}'`,
+    "img-src 'self' data: blob: https:",
+    `connect-src 'self' https://*.supabase.co https://*.sentry.io https://www.google-analytics.com`,
+    "frame-src 'self' https://www.googletagmanager.com",
+    "frame-ancestors 'none'",
+    "base-uri 'self'",
+    "form-action 'self'",
+  ].join('; ')
+}

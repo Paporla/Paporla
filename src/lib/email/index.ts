@@ -1,12 +1,7 @@
 import { Resend } from 'resend'
 import * as Sentry from '@sentry/nextjs'
 import { logger } from '@/lib/logger'
-import {
-  welcomeTemplate,
-  reservationConfirmationTemplate,
-  passwordResetTemplate,
-  pickupReminderTemplate,
-} from './templates'
+import { welcomeTemplate, reservationConfirmationTemplate, pickupReminderTemplate } from './templates'
 
 let _resend: Resend | null = null
 function getResendClient(): Resend {
@@ -94,11 +89,4 @@ export async function sendPickupReminderEmail(email: string, data: PickupReminde
   })
 }
 
-export async function sendPasswordResetEmail(email: string, resetLink: string) {
-  return sendEmail({
-    to: email,
-    subject: 'Restablece tu contraseña - Paporla',
-    html: passwordResetTemplate(resetLink),
-    text: `Recibimos una solicitud para restablecer tu contraseña. Haz clic en este enlace: ${resetLink}. Si no solicitaste este cambio, ignora este mensaje.`,
-  })
-}
+// f8.5 (S6): sendPasswordResetEmail eliminado (ver note en templates.ts).
