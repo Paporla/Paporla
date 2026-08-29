@@ -109,8 +109,11 @@ export const updateReservationSchema = z.object({
 // ============================================
 // Email
 // ============================================
+// f8.5 (S6): 'password_reset' eliminado — aceptaba un resetLink arbitrario
+// que se inyectaba en un href del email (phishing). El restablecimiento real
+// lo gestiona Supabase Auth con links firmados propios, no esta API.
 export const sendEmailSchema = z.object({
-  type: z.enum(['welcome', 'reservation', 'password_reset', 'pickup_reminder'], {
+  type: z.enum(['welcome', 'reservation', 'pickup_reminder'], {
     errorMap: () => ({ message: 'Tipo de correo no válido' }),
   }),
   email: z.string({ required_error: 'Email es requerido' }).email('Formato de email inválido'),

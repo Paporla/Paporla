@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js'
+import { constantTimeEqual } from '@/lib/middleware/csrf'
 
 export function getSupabaseAdmin() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL
@@ -20,5 +21,12 @@ export function validateCronRequest(request: Request): boolean {
     return false
   }
 
-  return authHeader === `Bearer ${cronSecret}`
+  if (!authHeader) {
+    return false
+  }
+
+  // Comparación en tiempo constante (mismo patrón que el CSRF double-submit,
+  // f8.5 S5): el === de antes cortocircuitaba en el primer byte distinto y
+  // filtraba el secreto por tiempo de respuesta.
+  return constantTimeEqual(authHeader, `Bearer ${cronSecret}`)
 }

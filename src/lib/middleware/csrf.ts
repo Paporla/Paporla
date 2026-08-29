@@ -23,6 +23,25 @@ function generateToken(): string {
 }
 
 /**
+ * Comparacion en tiempo constante para evitar timing attacks.
+ *
+ * El runtime edge no expone crypto.timingSafeEqual, asi que se recorre el
+ * string completo sin cortocircuito: el resultado no depende de en que
+ * posicion difieren los dos valores. Lo usan el CSRF (token doble) y
+ * validateCronRequest (mismo patrón, f8.5 S5).
+ */
+export function constantTimeEqual(a: string, b: string): boolean {
+  if (a.length !== b.length) {
+    return false
+  }
+  let result = 0
+  for (let i = 0; i < a.length; i++) {
+    result |= a.charCodeAt(i) ^ b.charCodeAt(i)
+  }
+  return result === 0
+}
+
+/**
  * Aplica la cookie CSRF a la respuesta si no existe.
  * Debe llamarse en middleware.ts en la respuesta next().
  */
@@ -57,17 +76,7 @@ export function validateCsrf(request: NextRequest): NextResponse | null {
   }
 
   // Comparación en tiempo constante para evitar timing attacks
-  if (cookieToken.length !== headerToken.length) {
-    return NextResponse.json({ success: false, error: 'Token CSRF inválido' }, { status: 403 })
-  }
-
-  // Comparación en tiempo constante (Web Crypto no tiene timingSafeEqual)
-  let result = 0
-  for (let i = 0; i < cookieToken.length; i++) {
-    result |= cookieToken.charCodeAt(i) ^ headerToken.charCodeAt(i)
-  }
-  const valid = result === 0
-  if (!valid) {
+  if (!constantTimeEqual(cookieToken, headerToken)) {
     return NextResponse.json({ success: false, error: 'Token CSRF inválido' }, { status: 403 })
   }
 
