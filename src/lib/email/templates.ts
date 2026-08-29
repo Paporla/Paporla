@@ -10,6 +10,7 @@ import {
   securityNote,
   EMAIL_CONFIG,
 } from './components'
+import { escapeHtml } from './escape'
 
 const baseUrl = EMAIL_CONFIG.baseUrl
 const primary = '#00ff88'
@@ -24,7 +25,7 @@ export function welcomeTemplate(name: string) {
   Bienvenido a Paporla
 </h1>
 <p style="color:#999999;font-size:14px;line-height:1.6;margin:0 0 26px;text-align:center;">
-  Hola <strong style="color:#ffffff;">${name}</strong>, gracias por unirte a la comunidad<br>que esta cambiando la forma de alimentarnos.
+  Hola <strong style="color:#ffffff;">${escapeHtml(name)}</strong>, gracias por unirte a la comunidad<br>que esta cambiando la forma de alimentarnos.
 </p>
 
 ${infoBox(`
@@ -63,19 +64,19 @@ export function reservationConfirmationTemplate(data: {
   Reserva confirmada
 </h1>
 <p style="color:#999999;font-size:14px;line-height:1.6;margin:0 0 26px;text-align:center;">
-  Hola ${data.userName}, tu pack esta <strong style="color:${primary};">asegurado</strong>.<br>Presenta este codigo al llegar al comercio.
+  Hola ${escapeHtml(data.userName)}, tu pack esta <strong style="color:${primary};">asegurado</strong>.<br>Presenta este codigo al llegar al comercio.
 </p>
 
-${glowCodeBox(data.pickupCode, 'Tu codigo de recogida')}
+${glowCodeBox(escapeHtml(data.pickupCode), 'Tu codigo de recogida')}
 
 <p style="color:#cccccc;font-size:14px;font-weight:600;margin:24px 0 12px;">Detalle de tu reserva</p>
 ${detailsCard(`
-${detailItem('Pack', data.packTitle)}
-${detailItem('Comercio', data.shopName)}
-${data.shopAddress ? detailItem('Direccion', data.shopAddress) : ''}
-${data.pickupDate ? detailItem('Recoger el', data.pickupDate, true) : ''}
-${data.pickupTime ? detailItem('Horario', data.pickupTime) : ''}
-${detailItem('Total pagado', data.price, true)}
+${detailItem('Pack', escapeHtml(data.packTitle))}
+${detailItem('Comercio', escapeHtml(data.shopName))}
+${data.shopAddress ? detailItem('Direccion', escapeHtml(data.shopAddress)) : ''}
+${data.pickupDate ? detailItem('Recoger el', escapeHtml(data.pickupDate), true) : ''}
+${data.pickupTime ? detailItem('Horario', escapeHtml(data.pickupTime)) : ''}
+${detailItem('Total pagado', escapeHtml(data.price), true)}
 `)}
 
 <p style="color:#888888;font-size:12px;line-height:1.6;text-align:center;margin:16px 0 20px;">Recuerda pasar dentro del horario indicado.<br>Si no puedes asistir, cancela desde tu panel.</p>
@@ -98,11 +99,11 @@ export function passwordResetTemplate(resetLink: string) {
   Recibimos una solicitud para restablecer<br>la contrasena de tu cuenta en <strong style="color:${primary};">Paporla</strong>.
 </p>
 
-${ctaButton(resetLink, 'Restablecer contrasena')}
+${ctaButton(escapeHtml(resetLink), 'Restablecer contrasena')}
 
 <p style="color:#777777;font-size:12px;line-height:1.6;margin:0 0 22px;text-align:center;">
   El enlace no funciona? Copia esta URL:<br>
-  <a href="${resetLink}" style="color:${primary};word-break:break-all;font-size:11px;text-decoration:underline;">${resetLink}</a>
+  <a href="${escapeHtml(resetLink)}" style="color:${primary};word-break:break-all;font-size:11px;text-decoration:underline;">${escapeHtml(resetLink)}</a>
 </p>
 
 ${separator()}
@@ -130,18 +131,18 @@ export function pickupReminderTemplate(data: {
   Recoge tu pack hoy
 </h1>
 <p style="color:#999999;font-size:14px;line-height:1.6;margin:0 0 26px;text-align:center;">
-  Hola ${data.userName}, tu pack te esta esperando.<br>No olvides pasar a recogerlo.
+  Hola ${escapeHtml(data.userName)}, tu pack te esta esperando.<br>No olvides pasar a recogerlo.
 </p>
 
-${glowCodeBox(data.pickupCode, 'Tu codigo de recogida')}
+${glowCodeBox(escapeHtml(data.pickupCode), 'Tu codigo de recogida')}
 
 <p style="color:#cccccc;font-size:14px;font-weight:600;margin:24px 0 12px;">Informacion de recogida</p>
 ${detailsCard(`
-${detailItem('Pack', data.packTitle)}
-${detailItem('Comercio', data.shopName)}
-${data.shopAddress ? detailItem('Direccion', data.shopAddress) : ''}
-${detailItem('Fecha limite', data.pickupDate, true)}
-${data.pickupTime ? detailItem('Horario', data.pickupTime) : ''}
+${detailItem('Pack', escapeHtml(data.packTitle))}
+${detailItem('Comercio', escapeHtml(data.shopName))}
+${data.shopAddress ? detailItem('Direccion', escapeHtml(data.shopAddress)) : ''}
+${detailItem('Fecha limite', escapeHtml(data.pickupDate), true)}
+${data.pickupTime ? detailItem('Horario', escapeHtml(data.pickupTime)) : ''}
 `)}
 
 <p style="color:#888888;font-size:12px;line-height:1.6;text-align:center;margin:16px 0 20px;">Si no puedes asistir, cancela desde tu panel<br>para que otro usuario pueda disfrutarlo.</p>
