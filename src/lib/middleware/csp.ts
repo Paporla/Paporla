@@ -21,7 +21,10 @@ export function buildCspHeader(nonce: string): string {
     `script-src 'self' 'nonce-${nonce}' https://www.googletagmanager.com https://www.google-analytics.com`,
     `style-src 'self' 'nonce-${nonce}'`,
     "img-src 'self' data: blob: https:",
-    `connect-src 'self' https://*.supabase.co https://*.sentry.io https://www.google-analytics.com`,
+    // *.google-analytics.com con comodin: GA4 enruta los hits a endpoints
+    // regionales (region1.google-analytics.com, etc.) que un dominio fijo
+    // www. bloqueaba y perdia mediciones (detectado en consola, 30-ago).
+    `connect-src 'self' https://*.supabase.co https://*.sentry.io https://*.google-analytics.com`,
     "frame-src 'self' https://www.googletagmanager.com",
     "frame-ancestors 'none'",
     "base-uri 'self'",
