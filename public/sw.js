@@ -1,5 +1,19 @@
-const CACHE_NAME = 'paporla-v2'
-const STATIC_CACHE = 'paporla-static-v2'
+const CACHE_NAME = 'paporla-v3'
+const STATIC_CACHE = 'paporla-static-v3'
+
+// Respuesta de emergencia cuando no hay red NI cache: evita el TypeError
+// "Failed to convert value to 'Response'" (respondWith con undefined).
+function offlineFallback(isHtml) {
+  if (isHtml) {
+    return new Response(
+      '<!doctype html><html lang="es"><meta charset="utf-8"><title>Sin conexion - Paporla</title>' +
+        '<body style="font-family:system-ui;text-align:center;padding:3rem 1rem;background:#0a0a1a;color:#fff">' +
+        '<h1>Sin conexion</h1><p>Revisa tu conexion a internet e intentalo de nuevo.</p></body></html>',
+      { status: 503, headers: { 'Content-Type': 'text/html; charset=utf-8' } },
+    )
+  }
+  return new Response('', { status: 504, statusText: 'Offline' })
+}
 
 self.addEventListener('install', () => {
   self.skipWaiting()
@@ -30,6 +44,7 @@ self.addEventListener('fetch', (event) => {
       fetch(event.request).catch(
         () =>
           new Response(JSON.stringify({ error: 'Sin conexion' }), {
+            status: 503,
             headers: { 'Content-Type': 'application/json' },
           }),
       ),
@@ -41,13 +56,15 @@ self.addEventListener('fetch', (event) => {
     event.respondWith(
       caches.match(event.request).then((cached) => {
         if (cached) return cached
-        return fetch(event.request).then((response) => {
-          if (response.ok) {
-            const clone = response.clone()
-            caches.open(STATIC_CACHE).then((cache) => cache.put(event.request, clone))
-          }
-          return response
-        })
+        return fetch(event.request)
+          .then((response) => {
+            if (response.ok) {
+              const clone = response.clone()
+              caches.open(STATIC_CACHE).then((cache) => cache.put(event.request, clone))
+            }
+            return response
+          })
+          .catch(() => offlineFallback(false))
       }),
     )
     return
@@ -62,12 +79,12 @@ self.addEventListener('fetch', (event) => {
         }
         return response
       })
-      .catch(() => {
-        if (isHtml) {
-          return caches.match(event.request).then((cached) => cached || caches.match('/'))
-        }
-        return caches.match(event.request)
-      }),
+      .catch(() =>
+        caches
+          .match(event.request)
+          .then((cached) => cached || (isHtml ? caches.match('/') : undefined))
+          .then((cached) => cached || offlineFallback(isHtml)),
+      ),
   )
 })
 
@@ -78,8 +95,8 @@ self.addEventListener('push', (event) => {
     const data = event.data.json()
     const options = {
       body: data.body || '',
-      icon: '/favicon.svg',
-      badge: '/favicon.svg',
+      icon: '/favicon/web-app-manifest-192x192.png',
+      badge: '/favicon/favicon-96x96.png',
       vibrate: [200, 100, 200],
       data: data.data || {},
       actions: data.actions || [],
