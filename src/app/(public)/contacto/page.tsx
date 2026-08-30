@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { motion } from 'framer-motion'
-import { Send, CheckCircle, AlertCircle, MapPin, Phone, Mail, Clock } from 'lucide-react'
+import { Send, CheckCircle, AlertCircle, MapPin, Mail, Clock } from 'lucide-react'
 
 export default function ContactoPage() {
   const [formData, setFormData] = useState({
@@ -72,15 +72,6 @@ export default function ContactoPage() {
                   <div>
                     <h3 className="font-semibold">Dirección</h3>
                     <p className="text-gray-600 dark:text-gray-300">Santiago, Chile</p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-4 p-3 rounded-xl dark:hover:bg-white/5 hover:bg-gray-100 transition-all">
-                  <div className="p-3 rounded-xl bg-primary/10">
-                    <Phone className="w-5 h-5 text-primary" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold">Teléfono</h3>
-                    <p className="text-gray-600 dark:text-gray-300">+56 2 555 1234</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-4 p-3 rounded-xl dark:hover:bg-white/5 hover:bg-gray-100 transition-all">

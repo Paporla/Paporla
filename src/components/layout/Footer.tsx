@@ -8,7 +8,7 @@ import { Heart, Mail, MapPin, Clock, Phone, ChevronUp, Shield, FileText, Cookie,
 
 const FOOTER_CONFIG = {
   address: process.env.NEXT_PUBLIC_COMPANY_ADDRESS ?? 'Santiago, Chile',
-  phone: process.env.NEXT_PUBLIC_COMPANY_PHONE ?? '+56 9 1234 5678',
+  phone: process.env.NEXT_PUBLIC_COMPANY_PHONE ?? '',
   email: process.env.NEXT_PUBLIC_CONTACT_EMAIL ?? 'hola@paporla.com',
   hours: 'Lun - Vie: 9am - 6pm',
 }
@@ -145,10 +145,12 @@ export default function Footer() {
                     {FOOTER_CONFIG.email}
                   </a>
                 </li>
-                <li className="flex items-center gap-3 text-gray-400 text-sm justify-center md:justify-start">
-                  <Phone className="w-4 h-4 text-primary flex-shrink-0" />
-                  <span>{FOOTER_CONFIG.phone}</span>
-                </li>
+                {FOOTER_CONFIG.phone && (
+                  <li className="flex items-center gap-3 text-gray-400 text-sm justify-center md:justify-start">
+                    <Phone className="w-4 h-4 text-primary flex-shrink-0" />
+                    <span>{FOOTER_CONFIG.phone}</span>
+                  </li>
+                )}
                 <li className="flex items-center gap-3 text-gray-400 text-sm justify-center md:justify-start">
                   <Clock className="w-4 h-4 text-primary flex-shrink-0" />
                   <span>{FOOTER_CONFIG.hours}</span>

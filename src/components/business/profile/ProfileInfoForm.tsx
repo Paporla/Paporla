@@ -138,7 +138,7 @@ export default function ProfileInfoForm({ formData, updateForm }: ProfileInfoFor
           label="Teléfono"
           value={formData.phone}
           onChange={(e) => updateForm('phone', e.target.value)}
-          placeholder="+56 9 5555 1234"
+          placeholder="+56955551234"
           icon={<Phone className="w-4 h-4 text-primary" />}
         />
 
