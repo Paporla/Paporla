@@ -2,7 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { getActiveUserRole, getSafeInternalRedirect } from '@/lib/auth/profile'
 import { logger } from '@/lib/logger'
 import { sendWelcomeEmail } from '@/lib/email'
-import { NextResponse } from 'next/server'
+import { NextResponse, after } from 'next/server'
 
 export async function GET(request: Request) {
   const requestUrl = new URL(request.url)
@@ -43,10 +43,20 @@ export async function GET(request: Request) {
   const next = getSafeInternalRedirect(requestUrl.searchParams.get('next'))
 
   // La recuperación de contraseña no debe disparar un email de bienvenida.
+  // after(): en Vercel la función se congela al responder; un void suelto
+  // moría a medias y el email nunca salía (sin log en Resend ni en Sentry,
+  // detectado en staging 30-ago). after() mantiene viva la función hasta
+  // completar el envío, sin retrasar la redirección del usuario.
   if (process.env.RESEND_API_KEY && user.email && next !== '/reset-password') {
-    void sendWelcomeEmail(user.email, profile.display_name ?? 'Usuario').catch((emailError) =>
-      logger.error('Callback Welcome Email', emailError),
-    )
+    const email = user.email
+    const displayName = profile.display_name ?? 'Usuario'
+    after(async () => {
+      try {
+        await sendWelcomeEmail(email, displayName)
+      } catch (emailError) {
+        logger.error('Callback Welcome Email', emailError)
+      }
+    })
   }
 
   if (next) {
