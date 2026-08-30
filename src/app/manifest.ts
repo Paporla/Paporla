@@ -16,19 +16,19 @@ export default function manifest(): MetadataRoute.Manifest {
     categories: ['food', 'lifestyle', 'shopping'],
     icons: [
       {
-        src: '/favicon.svg',
+        src: '/favicon/favicon.svg',
         sizes: 'any',
         type: 'image/svg+xml',
         purpose: 'any',
       },
       {
-        src: '/favicon.svg',
+        src: '/favicon/favicon.svg',
         sizes: '192x192',
         type: 'image/svg+xml',
         purpose: 'maskable',
       },
       {
-        src: '/favicon.svg',
+        src: '/favicon/favicon.svg',
         sizes: '512x512',
         type: 'image/svg+xml',
         purpose: 'maskable',
