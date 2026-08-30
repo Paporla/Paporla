@@ -24,6 +24,10 @@ describe('CSP buildCspHeader (f8.5 S7)', () => {
     expect(directive(header, 'connect-src')).toContain('https://*.supabase.co')
   })
 
+  it('connect-src permite los endpoints regionales de GA4 (region1., etc.)', () => {
+    expect(directive(header, 'connect-src')).toContain('https://*.google-analytics.com')
+  })
+
   it('img-src sigue abierto a https (buckets publicos de storage)', () => {
     expect(directive(header, 'img-src')).toContain('https:')
   })
