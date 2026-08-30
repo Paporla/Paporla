@@ -3,17 +3,36 @@ import { getActiveUserRole, getSafeInternalRedirect } from '@/lib/auth/profile'
 import { logger } from '@/lib/logger'
 import { sendWelcomeEmail } from '@/lib/email'
 import { NextResponse, after } from 'next/server'
+import type { EmailOtpType } from '@supabase/supabase-js'
+
+const OTP_TYPES: EmailOtpType[] = ['signup', 'invite', 'magiclink', 'recovery', 'email_change', 'email']
+
+function parseOtpType(raw: string | null): EmailOtpType | null {
+  return raw && (OTP_TYPES as string[]).includes(raw) ? (raw as EmailOtpType) : null
+}
 
 export async function GET(request: Request) {
   const requestUrl = new URL(request.url)
   const code = requestUrl.searchParams.get('code')
+  const tokenHash = requestUrl.searchParams.get('token_hash')
+  const otpType = parseOtpType(requestUrl.searchParams.get('type'))
 
-  if (!code) {
+  if (!code && !(tokenHash && otpType)) {
     return NextResponse.redirect(new URL('/login', request.url))
   }
 
   const supabase = await createClient()
-  const { error } = await supabase.auth.exchangeCodeForSession(code)
+
+  // Dos caminos (patron oficial de Supabase para SSR):
+  // - token_hash + type: enlaces de email (verifyOtp). No dependen del
+  //   navegador de origen: el PKCE fallaba con "code verifier not found"
+  //   si el email se abria en otro navegador/dispositivo o un antivirus
+  //   pre-visitaba el enlace (detectado en logs de Vercel, 30-ago).
+  // - code: flujo PKCE clasico (OAuth y enlaces antiguos), se mantiene.
+  const { error } =
+    tokenHash && otpType
+      ? await supabase.auth.verifyOtp({ type: otpType, token_hash: tokenHash })
+      : await supabase.auth.exchangeCodeForSession(code as string)
 
   if (error) {
     logger.error('Auth Callback', error)
