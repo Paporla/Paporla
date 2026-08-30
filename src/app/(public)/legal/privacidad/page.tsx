@@ -10,7 +10,6 @@ import {
   RefreshCw,
   Mail,
   MapPin,
-  Phone,
   CheckCircle,
   AlertCircle,
   FileText,
@@ -703,14 +702,6 @@ export default function PrivacidadPage() {
                   <div className="flex items-center gap-3 p-3 rounded-lg dark:bg-white/5 bg-gray-100">
                     <MapPin className="w-5 h-5 text-primary" />
                     📍 <strong>Dirección:</strong> Santiago, Chile (Oficina de Protección de Datos)
-                  </div>
-                  <div className="flex items-center gap-3 p-3 rounded-lg dark:bg-white/5 bg-gray-100">
-                    <Phone className="w-5 h-5 text-primary" />
-                    📞 <strong>Teléfono:</strong>{' '}
-                    <a href="tel:+582125551234" className="text-primary hover:underline">
-                      +56 2 555 1234
-                    </a>{' '}
-                    (Ext. 158)
                   </div>
                   <div className="flex items-center gap-3 p-3 rounded-lg dark:bg-white/5 bg-gray-100">
                     <Globe className="w-5 h-5 text-primary" />
