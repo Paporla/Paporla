@@ -28,6 +28,11 @@ describe('CSP buildCspHeader (f8.5 S7)', () => {
     expect(directive(header, 'connect-src')).toContain('https://*.google-analytics.com')
   })
 
+  it('style-src-attr permite atributos style (framer-motion), sin tocar style-src', () => {
+    expect(directive(header, 'style-src-attr')).toContain("'unsafe-inline'")
+    expect(directive(header, 'style-src ')).not.toContain("'unsafe-inline'")
+  })
+
   it('img-src sigue abierto a https (buckets publicos de storage)', () => {
     expect(directive(header, 'img-src')).toContain('https:')
   })
