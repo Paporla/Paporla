@@ -1,23 +1,24 @@
-// This file configures the initialization of Sentry on the client.
-// The added config here will be used whenever a users loads a page in their browser.
-// https://docs.sentry.io/platforms/javascript/guides/nextjs/
+// Inicialización de Sentry en el cliente (navegador).
+// Next.js 16 usa este archivo (instrumentation-client.ts); el antiguo
+// sentry.client.config.ts era la convención legacy y fue eliminado.
+// El DSN sale de la variable de entorno (Vercel: Production apunta al
+// proyecto Sentry viejo, Preview al de staging). Sin DSN o fuera de
+// production build, Sentry queda desactivado (dev local limpio).
 
 import * as Sentry from '@sentry/nextjs'
 
-Sentry.init({
-  dsn: 'https://b252ad6fc3ef9a3b6a28e593db00a3b4@o4511666036670465.ingest.us.sentry.io/4511666050367488',
+const dsn = process.env.NEXT_PUBLIC_SENTRY_DSN
+const isProduction = process.env.NODE_ENV === 'production'
 
-  // Define how likely traces are sampled. Adjust this value in production, or use tracesSampler for greater control.
-  tracesSampleRate: 1,
-  // Enable logs to be sent to Sentry
-  enableLogs: true,
-
-  dataCollection: {
-    // To disable sending user data and HTTP bodies, uncomment the lines below. For more info visit:
-    // https://docs.sentry.io/platforms/javascript/guides/nextjs/configuration/options/#dataCollection
-    // userInfo: false,
-    // httpBodies: [],
-  },
-})
+if (dsn && isProduction) {
+  Sentry.init({
+    dsn,
+    tracesSampleRate: 0.1,
+    replaysSessionSampleRate: 0.1,
+    replaysOnErrorSampleRate: 1.0,
+    enableLogs: true,
+    environment: process.env.NEXT_PUBLIC_VERCEL_ENV ?? 'production',
+  })
+}
 
 export const onRouterTransitionStart = Sentry.captureRouterTransitionStart
