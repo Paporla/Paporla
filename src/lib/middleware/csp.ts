@@ -20,6 +20,11 @@ export function buildCspHeader(nonce: string): string {
     // connect-src (fetch/PostgREST) e img-src (buckets públicos de storage).
     `script-src 'self' 'nonce-${nonce}' https://www.googletagmanager.com https://www.google-analytics.com`,
     `style-src 'self' 'nonce-${nonce}'`,
+    // Atributos style="..." (React SSR + framer-motion en ~109 componentes):
+    // sin esto la CSP los bloquea en la primera pintada (29 violaciones en
+    // consola, 30-ago). Los atributos no ejecutan JS: riesgo aceptado. Los
+    // <style>/<script> inline siguen exigiendo nonce.
+    "style-src-attr 'unsafe-inline'",
     "img-src 'self' data: blob: https:",
     // *.google-analytics.com con comodin: GA4 enruta los hits a endpoints
     // regionales (region1.google-analytics.com, etc.) que un dominio fijo
