@@ -108,7 +108,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               description:
                 'Rescate Alimentario - Conectamos comercios con excedentes de comida con personas que necesitan alimentarse.',
               url: process.env.NEXT_PUBLIC_SITE_URL ?? 'https://paporla.com',
-              logo: `${process.env.NEXT_PUBLIC_SITE_URL ?? 'https://paporla.com'}/favicon.svg`,
+              logo: `${process.env.NEXT_PUBLIC_SITE_URL ?? 'https://paporla.com'}/favicon/favicon.svg`,
               sameAs: ['https://instagram.com/paporla'],
               address: { '@type': 'PostalAddress', addressLocality: '', addressCountry: '' },
             }),
