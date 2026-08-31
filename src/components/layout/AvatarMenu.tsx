@@ -19,8 +19,16 @@ export default function AvatarMenu() {
         setIsOpen(false)
       }
     }
+    // Escape cierra el menu (WCAG 2.1.2: el teclado nunca queda atrapado)
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setIsOpen(false)
+    }
     document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
+    document.addEventListener('keydown', handleEscape)
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+      document.removeEventListener('keydown', handleEscape)
+    }
   }, [])
 
   const getInitials = () => {
@@ -65,6 +73,7 @@ export default function AvatarMenu() {
           const route = getPanelRoute()
           router.replace(route)
         }}
+        aria-label="Ir a mi panel"
         className="flex sm:hidden items-center justify-center w-9 h-9 rounded-lg bg-primary/10 hover:bg-primary/20 text-primary transition-all duration-300"
       >
         <LayoutDashboard className="w-4 h-4" />
@@ -72,7 +81,13 @@ export default function AvatarMenu() {
 
       {/* Avatar con menu desplegable */}
       <div className="relative" ref={menuRef}>
-        <button onClick={() => setIsOpen(!isOpen)} className="flex items-center gap-2 focus:outline-none">
+        <button
+          onClick={() => setIsOpen(!isOpen)}
+          aria-label="Menú de usuario"
+          aria-haspopup="menu"
+          aria-expanded={isOpen}
+          className="flex items-center gap-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-full"
+        >
           {user?.avatarPublicUrl ? (
             <Image
               src={user.avatarPublicUrl}
