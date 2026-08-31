@@ -59,7 +59,7 @@ export default function BusinessSidebar() {
           />
         </div>
         <div>
-          <h1 className="font-bold text-white text-lg">Paporla</h1>
+          <h1 className="font-bold text-gray-900 dark:text-white text-lg">Paporla</h1>
           <p className="text-[10px] text-gray-500">Panel de Comercio</p>
         </div>
       </div>
@@ -68,7 +68,9 @@ export default function BusinessSidebar() {
       <div className="mx-4 mt-6 p-3 rounded-xl bg-primary/5 border border-primary/20">
         <div className="flex items-center gap-2">
           <Store className="w-4 h-4 text-primary" />
-          <span className="text-sm font-medium text-white truncate">{user?.displayName ?? 'Mi Comercio'}</span>
+          <span className="text-sm font-medium text-gray-900 dark:text-white truncate">
+            {user?.displayName ?? 'Mi Comercio'}
+          </span>
         </div>
         <div className="flex items-center gap-1 mt-1">
           <span className="w-1.5 h-1.5 rounded-full bg-green-400" />

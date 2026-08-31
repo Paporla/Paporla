@@ -8,10 +8,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
   await requireAuth(['user'])
 
   return (
-    <div
-      className="min-h-screen relative"
-      style={{ background: 'linear-gradient(180deg, #0d1f14 0%, #0a0a1a 45%, #0a0a1a 55%, #0d1f14 100%)' }}
-    >
+    <div className="min-h-screen relative app-shell-bg">
       {/* Blobs decorativos al estilo landing */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-0 left-1/4 w-[600px] h-[600px] bg-primary/[0.04] rounded-full blur-3xl" />

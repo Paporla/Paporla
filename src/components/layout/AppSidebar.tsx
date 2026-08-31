@@ -28,7 +28,7 @@ export default function AppSidebar({ items, exploreItems, bottomItems, onLogout,
   }
 
   return (
-    <aside className="fixed left-0 top-0 h-screen w-72 bg-dark-card/80 backdrop-blur-xl border-r border-dark-border z-30 hidden lg:flex lg:flex-col">
+    <aside className="fixed left-0 top-0 h-screen w-72 bg-white/80 dark:bg-dark-card/80 backdrop-blur-xl border-r border-gray-200 dark:border-dark-border z-30 hidden lg:flex lg:flex-col">
       {children}
       <nav className="flex-1 px-3 py-6 space-y-1 overflow-y-auto" aria-label="Navegación principal">
         {items.map((item) => {
@@ -45,10 +45,15 @@ export default function AppSidebar({ items, exploreItems, bottomItems, onLogout,
                 'focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
                 active
                   ? 'bg-primary/10 text-primary border-l-2 border-primary'
-                  : 'text-gray-400 hover:bg-white/5 hover:text-white',
+                  : 'text-gray-600 dark:text-gray-400 hover:bg-black/5 dark:hover:bg-white/5 hover:text-gray-900 dark:hover:text-white',
               )}
             >
-              <Icon className={cn('w-5 h-5', active ? 'text-primary' : 'text-gray-500 group-hover:text-white')} />
+              <Icon
+                className={cn(
+                  'w-5 h-5',
+                  active ? 'text-primary' : 'text-gray-500 group-hover:text-gray-900 dark:group-hover:text-white',
+                )}
+              />
               <span className="flex-1 text-left">{item.label}</span>
               {item.badge && item.badge > 0 && (
                 <span className="px-1.5 py-0.5 text-[10px] font-bold bg-red-500 text-white rounded-full">
@@ -74,7 +79,7 @@ export default function AppSidebar({ items, exploreItems, bottomItems, onLogout,
                     'focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
                     active
                       ? 'bg-primary/10 text-primary border-l-2 border-primary'
-                      : 'text-gray-400 hover:bg-white/5 hover:text-white',
+                      : 'text-gray-600 dark:text-gray-400 hover:bg-black/5 dark:hover:bg-white/5 hover:text-gray-900 dark:hover:text-white',
                   )}
                 >
                   <Icon className="w-5 h-5" />
@@ -86,7 +91,7 @@ export default function AppSidebar({ items, exploreItems, bottomItems, onLogout,
         )}
       </nav>
       {bottomItems && bottomItems.length > 0 && (
-        <div className="px-3 py-4 border-t border-dark-border space-y-1">
+        <div className="px-3 py-4 border-t border-gray-200 dark:border-dark-border space-y-1">
           {bottomItems.map((item) => {
             const Icon = item.icon
             const active = isActive(item.href)
@@ -99,7 +104,9 @@ export default function AppSidebar({ items, exploreItems, bottomItems, onLogout,
                 className={cn(
                   'w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 group',
                   'focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
-                  active ? 'bg-primary/10 text-primary' : 'text-gray-400 hover:bg-white/5 hover:text-white',
+                  active
+                    ? 'bg-primary/10 text-primary'
+                    : 'text-gray-600 dark:text-gray-400 hover:bg-black/5 dark:hover:bg-white/5 hover:text-gray-900 dark:hover:text-white',
                 )}
               >
                 <Icon className="w-5 h-5" />
