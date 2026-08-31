@@ -6,9 +6,12 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        primary: '#00ff88',
-        'primary-light': '#33ffa3',
-        'primary-dark': '#00cc6e',
+        // Primario tematico (propuesta B): verde esmeralda en claro, neon en
+        // dark. Sale de variables CSS (globals.css) con canal RGB separado
+        // para que bg-primary/10, shadow-primary/20, etc. sigan funcionando.
+        primary: 'rgb(var(--color-primary-rgb) / <alpha-value>)',
+        'primary-light': 'rgb(var(--color-primary-light-rgb) / <alpha-value>)',
+        'primary-dark': 'rgb(var(--color-primary-dark-rgb) / <alpha-value>)',
         secondary: '#ff8a3c',
         'secondary-light': '#ffa666',
         'secondary-dark': '#e67320',
