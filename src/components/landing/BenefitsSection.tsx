@@ -3,13 +3,14 @@
 import { motion } from 'framer-motion'
 import { MapPin, Clock, Gift, Shield, DollarSign, Heart } from 'lucide-react'
 
+// warm: acento naranja de marca en modo claro (en dark todo sigue neon)
 const benefits = [
-  { icon: DollarSign, title: 'Ahorro', description: 'Hasta 70% de descuento en comida de calidad' },
-  { icon: MapPin, title: 'Cercanía', description: 'Recogida local. Apoyas a comercios de tu ciudad' },
-  { icon: Clock, title: 'Horarios flexibles', description: 'Recoge cuando puedas, sin prisas' },
-  { icon: Gift, title: 'Sorpresa', description: 'Varía cada día. Nunca es aburrido' },
-  { icon: Shield, title: 'Transparencia', description: 'Promesas claras. Sin letra chica' },
-  { icon: Heart, title: 'Rescate', description: 'Comida que iba a la basura ahora se salva' },
+  { icon: DollarSign, title: 'Ahorro', description: 'Hasta 70% de descuento en comida de calidad', warm: false },
+  { icon: MapPin, title: 'Cercanía', description: 'Recogida local. Apoyas a comercios de tu ciudad', warm: false },
+  { icon: Clock, title: 'Horarios flexibles', description: 'Recoge cuando puedas, sin prisas', warm: false },
+  { icon: Gift, title: 'Sorpresa', description: 'Varía cada día. Nunca es aburrido', warm: true },
+  { icon: Shield, title: 'Transparencia', description: 'Promesas claras. Sin letra chica', warm: false },
+  { icon: Heart, title: 'Rescate', description: 'Comida que iba a la basura ahora se salva', warm: true },
 ]
 
 export default function BenefitsSection() {
@@ -44,8 +45,16 @@ export default function BenefitsSection() {
               {/* Efecto glossy (como el CTA) */}
               <div className="absolute inset-0 rounded-2xl bg-gradient-to-t from-transparent via-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
-              <div className="relative w-14 h-14 mx-auto mb-4 rounded-full bg-primary/10 dark:bg-white/5 flex items-center justify-center group-hover:scale-110 group-hover:bg-primary/20 transition-all duration-300">
-                <benefit.icon className="w-7 h-7 text-primary" />
+              <div
+                className={`relative w-14 h-14 mx-auto mb-4 rounded-full flex items-center justify-center group-hover:scale-110 transition-all duration-300 ${
+                  benefit.warm
+                    ? 'bg-secondary/10 dark:bg-white/5 group-hover:bg-secondary/20 dark:group-hover:bg-primary/20'
+                    : 'bg-primary/10 dark:bg-white/5 group-hover:bg-primary/20'
+                }`}
+              >
+                <benefit.icon
+                  className={`w-7 h-7 ${benefit.warm ? 'text-secondary dark:text-primary' : 'text-primary'}`}
+                />
               </div>
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2 group-hover:text-primary transition-colors duration-300">
                 {benefit.title}

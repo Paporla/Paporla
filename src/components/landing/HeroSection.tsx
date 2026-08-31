@@ -11,7 +11,7 @@ export default function HeroSection() {
       {/* Fondo animado sutil */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-20 left-10 w-72 h-72 bg-primary/5 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute bottom-20 right-10 w-96 h-96 bg-primary/5 rounded-full blur-3xl animate-pulse delay-1000" />
+        <div className="absolute bottom-20 right-10 w-96 h-96 bg-secondary/10 dark:bg-primary/5 rounded-full blur-3xl animate-pulse delay-1000" />
       </div>
 
       <div className="relative z-10 max-w-6xl mx-auto px-4">
@@ -56,7 +56,7 @@ export default function HeroSection() {
             >
               <Link
                 href="/packs"
-                className="group relative overflow-hidden inline-flex items-center justify-center gap-2 px-8 py-3 rounded-full bg-primary text-black font-semibold transition-all shadow-lg shadow-primary/30 hover:shadow-xl text-center"
+                className="group relative overflow-hidden inline-flex items-center justify-center gap-2 px-8 py-3 rounded-full bg-primary text-white dark:text-black font-semibold transition-all shadow-lg shadow-primary/30 hover:shadow-xl hover:shadow-primary/40 text-center"
               >
                 <span className="relative z-10">Ver packs cerca de mi</span>
                 <ArrowRight className="w-4 h-4 relative z-10 group-hover:translate-x-1 transition" />
