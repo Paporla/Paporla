@@ -21,7 +21,7 @@ export default function HowItWorksSection() {
       <div className="h-full bg-gradient-to-br from-primary/[0.18] to-primary/[0.05] backdrop-blur-sm rounded-2xl p-8 border border-primary/20 group hover:border-primary/40 transition-all duration-300">
         <div className="flex items-center gap-3 mb-8">
           <div className="w-1.5 h-8 bg-gradient-to-b from-primary to-primary/40 rounded-full" />
-          <h2 className="text-white font-bold text-xl">Cómo funciona</h2>
+          <h2 className="text-gray-900 dark:text-white font-bold text-xl">Cómo funciona</h2>
         </div>
 
         <div className="relative">
@@ -62,7 +62,7 @@ export default function HowItWorksSection() {
                     <step.icon className="w-7 h-7 text-primary" />
                   </div>
                   <div>
-                    <p className="font-bold text-white text-base group-hover/item:text-primary transition-colors duration-300">
+                    <p className="font-bold text-gray-900 dark:text-white text-base group-hover/item:text-primary transition-colors duration-300">
                       {step.title}
                     </p>
                     <p className="text-sm text-gray-400 mt-1 leading-relaxed">{step.description}</p>
