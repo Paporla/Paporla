@@ -39,7 +39,7 @@ export default function Header() {
 
   if (!mounted || loading) {
     return (
-      <nav className="fixed top-0 left-0 right-0 z-[60] h-16 bg-black/80 backdrop-blur-xl border-b border-gray-800" />
+      <nav className="fixed top-0 left-0 right-0 z-[60] h-16 bg-white/80 dark:bg-black/80 backdrop-blur-xl border-b border-gray-200 dark:border-gray-800" />
     )
   }
 
@@ -58,7 +58,10 @@ export default function Header() {
               height={32}
               className="w-8 h-8 object-contain group-hover:scale-105 transition-transform duration-300"
             />
-            <span className="font-bold text-xl text-white" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+            <span
+              className="font-bold text-xl text-gray-900 dark:text-white"
+              style={{ fontFamily: "'Space Grotesk', sans-serif" }}
+            >
               Paporla
             </span>
           </Link>
@@ -69,7 +72,7 @@ export default function Header() {
               <Link
                 key={link.href}
                 href={link.href}
-                className={`text-gray-300 hover:text-primary transition-colors relative group ${pathname === link.href ? 'text-primary' : ''}`}
+                className={`text-gray-600 dark:text-gray-300 hover:text-primary transition-colors relative group ${pathname === link.href ? 'text-primary' : ''}`}
               >
                 {link.label}
                 <span
@@ -101,7 +104,11 @@ export default function Header() {
               className="md:hidden p-2 rounded-lg bg-white/5"
               aria-label="Menu"
             >
-              {isMenuOpen ? <X className="w-5 h-5 text-white" /> : <Menu className="w-5 h-5 text-white" />}
+              {isMenuOpen ? (
+                <X className="w-5 h-5 text-gray-900 dark:text-white" />
+              ) : (
+                <Menu className="w-5 h-5 text-gray-900 dark:text-white" />
+              )}
             </button>
           </div>
         </div>
@@ -114,7 +121,7 @@ export default function Header() {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
-            className="md:hidden bg-black/95 backdrop-blur-xl border-t border-gray-800"
+            className="md:hidden bg-white/95 dark:bg-black/95 backdrop-blur-xl border-t border-gray-200 dark:border-gray-800"
           >
             <div className="px-4 py-4 flex flex-col gap-3">
               {publicLinks.map((link) => (
@@ -122,7 +129,7 @@ export default function Header() {
                   key={link.href}
                   href={link.href}
                   onClick={() => setIsMenuOpen(false)}
-                  className={`px-4 py-2 text-gray-300 hover:text-primary rounded-lg ${pathname === link.href ? 'text-primary bg-primary/10' : ''}`}
+                  className={`px-4 py-2 text-gray-600 dark:text-gray-300 hover:text-primary rounded-lg ${pathname === link.href ? 'text-primary bg-primary/10' : ''}`}
                 >
                   {link.label}
                 </Link>

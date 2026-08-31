@@ -58,7 +58,7 @@ export default function Footer() {
         </motion.button>
       )}
 
-      <footer className="relative bg-gradient-to-b from-transparent via-black/20 to-black/40 border-t border-white/5">
+      <footer className="relative bg-gradient-to-b from-transparent via-black/[0.04] to-black/[0.08] dark:via-black/20 dark:to-black/40 border-t border-black/5 dark:border-white/5">
         {/* Fondos decorativos */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="absolute bottom-0 left-0 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
@@ -78,9 +78,9 @@ export default function Footer() {
                   height={32}
                   className="w-8 h-8 object-contain group-hover:scale-105 transition-transform duration-300"
                 />
-                <span className="font-bold text-xl text-white">Paporla</span>
+                <span className="font-bold text-xl text-gray-900 dark:text-white">Paporla</span>
               </Link>
-              <p className="text-gray-400 text-sm leading-relaxed text-center md:text-left">
+              <p className="text-gray-600 dark:text-gray-400 text-sm leading-relaxed text-center md:text-left">
                 Rescatando comida,
                 <br />
                 alimentando esperanzas.
@@ -89,7 +89,7 @@ export default function Footer() {
 
             {/* Legal */}
             <div>
-              <h3 className="text-white font-semibold mb-4 flex items-center gap-2 justify-center md:justify-start">
+              <h3 className="text-gray-900 dark:text-white font-semibold mb-4 flex items-center gap-2 justify-center md:justify-start">
                 <Shield className="w-4 h-4 text-primary" />
                 Legal
               </h3>
@@ -98,7 +98,7 @@ export default function Footer() {
                   <li key={link.href}>
                     <Link
                       href={link.href}
-                      className="text-gray-400 text-sm hover:text-primary transition-colors flex items-center gap-2 justify-center md:justify-start group"
+                      className="text-gray-600 dark:text-gray-400 text-sm hover:text-primary transition-colors flex items-center gap-2 justify-center md:justify-start group"
                     >
                       <link.icon className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
                       {link.label}
@@ -110,7 +110,7 @@ export default function Footer() {
 
             {/* Compañía */}
             <div>
-              <h3 className="text-white font-semibold mb-4 flex items-center gap-2 justify-center md:justify-start">
+              <h3 className="text-gray-900 dark:text-white font-semibold mb-4 flex items-center gap-2 justify-center md:justify-start">
                 <Mail className="w-4 h-4 text-primary" />
                 Compania
               </h3>
@@ -119,7 +119,7 @@ export default function Footer() {
                   <li key={link.href}>
                     <Link
                       href={link.href}
-                      className="text-gray-400 text-sm hover:text-primary transition-colors hover:translate-x-1 inline-block"
+                      className="text-gray-600 dark:text-gray-400 text-sm hover:text-primary transition-colors hover:translate-x-1 inline-block"
                     >
                       {link.label}
                     </Link>
@@ -130,28 +130,28 @@ export default function Footer() {
 
             {/* Contacto */}
             <div>
-              <h3 className="text-white font-semibold mb-4 flex items-center gap-2 justify-center md:justify-start">
+              <h3 className="text-gray-900 dark:text-white font-semibold mb-4 flex items-center gap-2 justify-center md:justify-start">
                 <Heart className="w-4 h-4 text-primary" />
                 Contacto
               </h3>
               <ul className="space-y-3 text-center md:text-left">
-                <li className="flex items-center gap-3 text-gray-400 text-sm justify-center md:justify-start">
+                <li className="flex items-center gap-3 text-gray-600 dark:text-gray-400 text-sm justify-center md:justify-start">
                   <MapPin className="w-4 h-4 text-primary flex-shrink-0" />
                   <span>{FOOTER_CONFIG.address}</span>
                 </li>
-                <li className="flex items-center gap-3 text-gray-400 text-sm justify-center md:justify-start">
+                <li className="flex items-center gap-3 text-gray-600 dark:text-gray-400 text-sm justify-center md:justify-start">
                   <Mail className="w-4 h-4 text-primary flex-shrink-0" />
                   <a href={`mailto:${FOOTER_CONFIG.email}`} className="hover:text-primary transition-colors">
                     {FOOTER_CONFIG.email}
                   </a>
                 </li>
                 {FOOTER_CONFIG.phone && (
-                  <li className="flex items-center gap-3 text-gray-400 text-sm justify-center md:justify-start">
+                  <li className="flex items-center gap-3 text-gray-600 dark:text-gray-400 text-sm justify-center md:justify-start">
                     <Phone className="w-4 h-4 text-primary flex-shrink-0" />
                     <span>{FOOTER_CONFIG.phone}</span>
                   </li>
                 )}
-                <li className="flex items-center gap-3 text-gray-400 text-sm justify-center md:justify-start">
+                <li className="flex items-center gap-3 text-gray-600 dark:text-gray-400 text-sm justify-center md:justify-start">
                   <Clock className="w-4 h-4 text-primary flex-shrink-0" />
                   <span>{FOOTER_CONFIG.hours}</span>
                 </li>
@@ -163,7 +163,7 @@ export default function Footer() {
           <div className="border-t border-white/10 my-6" />
 
           {/* Línea final — copyright + corazón */}
-          <div className="flex flex-col md:flex-row justify-between items-center gap-2 text-xs text-gray-500">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-2 text-xs text-gray-500 dark:text-gray-500">
             <p>&copy; {currentYear} Paporla. Todos los derechos reservados.</p>
             <motion.p whileHover={{ scale: 1.05 }} className="flex items-center gap-1">
               Hecho con

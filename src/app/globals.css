@@ -185,15 +185,22 @@ body::before {
   }
 
   /* --- GRADIENT TEXT --- */
+  /* Gradientes de texto tematicos: esmeralda en claro, neon en dark
+     (los hex fijos #00ff88 se veian lavados sobre crema). */
   .text-gradient {
-    background: linear-gradient(135deg, #00ff88 0%, #00cc6e 100%);
+    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
   }
 
   .text-gradient-hero {
-    background: linear-gradient(135deg, #00ff88 0%, #33ffa3 50%, #00cc6e 100%);
+    background: linear-gradient(
+      135deg,
+      var(--color-primary) 0%,
+      var(--color-primary-light) 50%,
+      var(--color-primary-dark) 100%
+    );
     background-size: 200% auto;
     -webkit-background-clip: text;
     background-clip: text;
