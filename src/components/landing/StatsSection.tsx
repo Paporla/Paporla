@@ -91,7 +91,7 @@ export default function StatsSection() {
           viewport={{ once: true }}
           className="text-center mb-12"
         >
-          <h2 className="text-3xl md:text-4xl font-bold text-white">
+          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white">
             {hasRealStats ? (
               <>
                 La comunidad ya está <span className="text-primary">marcando la diferencia</span>
@@ -125,7 +125,7 @@ export default function StatsSection() {
               </div>
 
               {isInView ? (
-                <p className="text-4xl font-bold text-white group-hover:scale-105 transition-transform duration-300">
+                <p className="text-4xl font-bold text-gray-900 dark:text-white group-hover:scale-105 transition-transform duration-300">
                   {stat.isMoney ? (
                     formatChilePesos(stat.value)
                   ) : (
@@ -138,7 +138,7 @@ export default function StatsSection() {
                   )}
                 </p>
               ) : (
-                <p className="text-4xl font-bold text-white">
+                <p className="text-4xl font-bold text-gray-900 dark:text-white">
                   {stat.prefix ?? ''}0{stat.suffix}
                 </p>
               )}

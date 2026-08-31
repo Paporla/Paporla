@@ -27,7 +27,7 @@ export default function HeroSection() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
-              className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6 leading-tight"
+              className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 dark:text-white mb-6 leading-tight"
             >
               Comida de calidad.
               <br />
@@ -64,7 +64,7 @@ export default function HeroSection() {
               </Link>
               <Link
                 href="/register"
-                className="inline-flex items-center justify-center px-8 py-3 rounded-full border border-primary/40 text-white font-semibold hover:bg-primary/10 transition text-center"
+                className="inline-flex items-center justify-center px-8 py-3 rounded-full border border-primary/40 text-gray-900 dark:text-white font-semibold hover:bg-primary/10 transition text-center"
               >
                 Registra tu comercio
               </Link>

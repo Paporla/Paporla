@@ -19,7 +19,7 @@ export default function CTASection() {
           <div className="absolute -inset-0.5 bg-gradient-to-r from-primary/20 to-primary/10 rounded-2xl blur-xl opacity-0 group-hover:opacity-40 transition duration-500" />
 
           <div className="relative bg-gradient-to-br from-primary/[0.18] to-primary/[0.05] rounded-2xl p-10 md:p-12 text-center border border-primary/20 backdrop-blur-sm">
-            <h2 className="text-2xl md:text-3xl font-bold text-white mb-3">
+            <h2 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-3">
               Listo para <span className="text-primary">rescatar comida</span>?
             </h2>
 
@@ -37,7 +37,7 @@ export default function CTASection() {
               </Link>
               <Link
                 href="/register"
-                className="inline-flex items-center justify-center px-8 py-3 rounded-full border border-primary/40 text-white font-semibold hover:bg-primary/10 transition text-center"
+                className="inline-flex items-center justify-center px-8 py-3 rounded-full border border-primary/40 text-gray-900 dark:text-white font-semibold hover:bg-primary/10 transition text-center"
               >
                 Registra tu comercio
               </Link>
@@ -55,7 +55,7 @@ export default function CTASection() {
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <Link
                 href="/register"
-                className="inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-full bg-primary/10 border border-primary/30 text-white font-medium hover:bg-primary/20 hover:border-primary/50 transition-all duration-300 shadow-lg shadow-primary/10"
+                className="inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-full bg-primary/10 border border-primary/30 text-gray-900 dark:text-white font-medium hover:bg-primary/20 hover:border-primary/50 transition-all duration-300 shadow-lg shadow-primary/10"
               >
                 <UserPlus className="w-4 h-4 text-primary" />
                 Crear cuenta gratis
