@@ -93,11 +93,21 @@ describe('ThemeProvider', () => {
     expect(screen.getByTestId('theme-value')).toHaveTextContent('dark')
   })
 
-  it('ignora el light guardado: arranque siempre dark (transitorio, paso 1-2 del light mode)', () => {
-    // getInitialTheme no lee localStorage hasta el paso 3 (toggle + barrido):
-    // durante la regresion del 31-ago se escribio 'light' en visitantes y
-    // arrancar con ese valor encenderia un modo claro a medio auditar.
+  it('respeta el light guardado: el usuario lo eligio con el toggle (paso 4 del light mode)', () => {
+    // Regla de arranque definitiva: dark por defecto; solo 'light' explicito
+    // en localStorage (puesto por el toggle) arranca en claro.
     localStorageMock.getItem.mockReturnValueOnce('light')
+
+    render(
+      <ThemeProvider>
+        <TestConsumer />
+      </ThemeProvider>,
+    )
+    expect(screen.getByTestId('theme-value')).toHaveTextContent('light')
+  })
+
+  it('un valor corrupto en localStorage arranca en dark', () => {
+    localStorageMock.getItem.mockReturnValueOnce('banana')
 
     render(
       <ThemeProvider>

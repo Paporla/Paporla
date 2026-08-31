@@ -13,15 +13,17 @@ interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined)
 
 function getInitialTheme(): Theme {
-  // Paso 1-2 del light mode: arranque SIEMPRE en dark. Este provider quitaba
-  // la clase dark segun prefers-color-scheme/localStorage y, con la base
-  // clara de globals.css, encendia un modo claro a medio auditar (regresion
-  // vista en staging 31-ago: titulares blancos ilegibles sobre fondo claro).
-  // La lectura de localStorage y del sistema vuelve en el paso 3, cuando
-  // exista el toggle y el barrido de hardcodeos este hecho. Ojo: durante la
-  // regresion se escribio 'light' en localStorage de visitantes; por eso
-  // tampoco se lee el storage todavia.
-  return 'dark'
+  // Regla de arranque (misma logica que ThemeScript, que corre antes del
+  // primer pintado): oscuro por defecto; solo se arranca en claro si el
+  // usuario lo eligio explicitamente con el toggle ('light' en localStorage).
+  // No usamos prefers-color-scheme: el oscuro es la identidad de Paporla y
+  // el claro es una eleccion consciente del usuario.
+  if (typeof window === 'undefined') return 'dark'
+  try {
+    return localStorage.getItem('paporla-theme') === 'light' ? 'light' : 'dark'
+  } catch {
+    return 'dark'
+  }
 }
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
