@@ -17,15 +17,25 @@ export default function NotificationBell() {
         setIsOpen(false)
       }
     }
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setIsOpen(false)
+    }
     document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
+    document.addEventListener('keydown', handleEscape)
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+      document.removeEventListener('keydown', handleEscape)
+    }
   }, [])
 
   return (
     <div className="relative" ref={dropdownRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="relative p-2 rounded-xl dark:bg-gray-800 bg-gray-100 dark:border-gray-700 border-gray-200 hover:border-primary/30 transition-all"
+        aria-label={unreadCount > 0 ? `Notificaciones, ${unreadCount} sin leer` : 'Notificaciones'}
+        aria-haspopup="menu"
+        aria-expanded={isOpen}
+        className="relative p-2 rounded-xl dark:bg-gray-800 bg-gray-100 dark:border-gray-700 border-gray-200 hover:border-primary/30 transition-all focus-visible:ring-2 focus-visible:ring-primary"
       >
         <Bell className="w-5 h-5 text-gray-400 hover:text-primary transition-colors" />
         {unreadCount > 0 && (
