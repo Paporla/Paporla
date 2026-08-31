@@ -3,9 +3,34 @@
 @tailwind utilities;
 
 /* ============================================
-   DISEÑO SISTEMA - CSS Variables (dark-only)
+   DISEÑO SISTEMA - CSS Variables
+   Paso 1 del light mode (Bloque B): :root define la paleta CLARA y
+   .dark la OSCURA (tailwind darkMode: 'class'). Mientras ThemeScript
+   siga forzando la clase dark, la app se ve igual que antes: este
+   cambio es invisible hasta el paso 2.
+   El primario #00ff88 se mantiene idéntico en ambas paletas; su
+   contraste en claro se ajusta en el paso 5 (WCAG AA).
    ============================================ */
 :root {
+  --color-bg: #f7f8fa;
+  --color-bg-card: #ffffff;
+  --color-bg-muted: #eef0f4;
+  --color-border: rgba(15, 23, 42, 0.1);
+  --color-hover: rgba(15, 23, 42, 0.05);
+  --color-text: #111827;
+  --color-text-secondary: #374151;
+  --color-text-muted: #6b7280;
+  --color-primary: #00ff88;
+  --color-primary-light: #33ffa3;
+  --color-primary-dark: #00cc6e;
+  --color-secondary: #ff8a3c;
+  --color-danger: #ef4444;
+  --glass-bg: rgba(255, 255, 255, 0.75);
+  --glass-border: rgba(15, 23, 42, 0.08);
+  --glass-shadow: 0 4px 24px rgba(15, 23, 42, 0.08);
+}
+
+.dark {
   --color-bg: #0a0a1a;
   --color-bg-card: #0f0f1a;
   --color-bg-muted: #1a1a2e;
@@ -14,11 +39,6 @@
   --color-text: #ffffff;
   --color-text-secondary: #cccccc;
   --color-text-muted: #999999;
-  --color-primary: #00ff88;
-  --color-primary-light: #33ffa3;
-  --color-primary-dark: #00cc6e;
-  --color-secondary: #ff8a3c;
-  --color-danger: #ef4444;
   --glass-bg: rgba(15, 15, 26, 0.7);
   --glass-border: rgba(255, 255, 255, 0.08);
   --glass-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
@@ -26,37 +46,39 @@
 
 /* ============================================
    DARK MODE OVERRIDES — Tailwind utility classes
+   Solo bajo .dark: en modo claro estas utilidades deben verse como
+   son (antes pisaban SIEMPRE las clases claras, dark-only).
    ============================================ */
-.text-gray-900,
-.text-gray-800 {
+.dark .text-gray-900,
+.dark .text-gray-800 {
   color: #ffffff !important;
 }
 
-.text-gray-700 {
+.dark .text-gray-700 {
   color: #cccccc !important;
 }
 
-.text-gray-600 {
+.dark .text-gray-600 {
   color: #999999 !important;
 }
 
-.bg-white {
+.dark .bg-white {
   background-color: #0f0f1a !important;
 }
 
-.bg-gray-50 {
+.dark .bg-gray-50 {
   background-color: #0a0a1a !important;
 }
 
-.bg-gray-100 {
+.dark .bg-gray-100 {
   background-color: #1a1a2e !important;
 }
 
-.border-gray-200 {
+.dark .border-gray-200 {
   border-color: rgba(255, 255, 255, 0.08) !important;
 }
 
-.border-gray-300 {
+.dark .border-gray-300 {
   border-color: rgba(255, 255, 255, 0.12) !important;
 }
 
@@ -64,12 +86,17 @@
    ESTILOS BASE
    ============================================ */
 body {
-  background: radial-gradient(circle at center, #1a2c21 0%, #0d1117 100%);
+  background: radial-gradient(circle at center, #eef5f0 0%, #f7f8fa 100%);
   background-attachment: fixed;
   color: var(--color-text);
   transition:
     background-color 0.3s ease,
     color 0.3s ease;
+}
+
+.dark body {
+  background: radial-gradient(circle at center, #1a2c21 0%, #0d1117 100%);
+  background-attachment: fixed;
 }
 
 /* Fondo de ruido */
