@@ -71,7 +71,7 @@ export default function OnboardingBanner({ type, level }: Props) {
               </div>
               <button
                 onClick={dismiss}
-                className="p-1.5 rounded-lg hover:bg-white/10 transition-colors flex-shrink-0"
+                className="p-1.5 rounded-lg hover:bg-black/5 dark:hover:bg-white/10 transition-colors flex-shrink-0"
                 aria-label="Cerrar onboarding"
               >
                 <X className="w-4 h-4 dark:text-gray-500 text-gray-400" />
@@ -85,7 +85,7 @@ export default function OnboardingBanner({ type, level }: Props) {
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.1 * i }}
-                  className="flex items-start gap-3 p-4 rounded-xl bg-white/5 border border-white/5 hover:border-primary/20 transition-colors"
+                  className="flex items-start gap-3 p-4 rounded-xl bg-white/70 dark:bg-white/5 border border-black/5 dark:border-white/5 hover:border-primary/20 transition-colors"
                 >
                   <div className="p-2 rounded-lg bg-primary/10 flex-shrink-0">
                     <step.icon className="w-4 h-4 text-primary" />
@@ -97,7 +97,7 @@ export default function OnboardingBanner({ type, level }: Props) {
                       </span>
                       <p className="text-sm font-medium dark:text-white text-gray-900">{step.title}</p>
                     </div>
-                    <p className="text-xs dark:text-gray-500 text-gray-400">{step.description}</p>
+                    <p className="text-xs dark:text-gray-500 text-gray-600">{step.description}</p>
                   </div>
                 </motion.div>
               ))}
