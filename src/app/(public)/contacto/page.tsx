@@ -202,31 +202,9 @@ export default function ContactoPage() {
           </motion.div>
         </div>
 
-        {/* Mapa */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.3 }}
-          className="mt-12"
-        >
-          <div className="glass-card rounded-2xl overflow-hidden backdrop-blur-sm">
-            <div className="p-6 border-b border-gray-200 dark:border-gray-700">
-              <h3 className="text-xl font-bold text-gradient">Nuestra ubicación</h3>
-              <p className="text-gray-600 dark:text-gray-400">Santiago, Chile</p>
-            </div>
-            <div className="h-[400px] w-full bg-gray-200 dark:bg-gray-800">
-              <iframe
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d212947.85738063756!2d-70.77446280531235!3d-33.44789663054944!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x9662c5410425af2f%3A0x505e1131102b91d!2sSantiago%2C%20Chile!5e0!3m2!1ses!2s!4v1700000000000!5m2!1ses!2s"
-                width="100%"
-                height="100%"
-                style={{ border: 0 }}
-                allowFullScreen
-                loading="lazy"
-                title="Mapa Paporla"
-              />
-            </div>
-          </div>
-        </motion.div>
+        {/* Sin mapa: Paporla es una plataforma 100% digital, no hay oficina
+            fisica que visitar. Ademas la CSP (frame-src) bloquea iframes de
+            Google Maps a proposito; no la abrimos para un mapa sin marcador. */}
       </div>
     </div>
   )
