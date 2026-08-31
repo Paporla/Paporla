@@ -112,7 +112,7 @@ export default function GeolocationFilter({ onLocationChange, defaultRadius = 10
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
           onClick={getLocation}
-          className="w-full py-3 rounded-xl bg-gradient-to-r from-primary to-primary/80 text-white font-medium flex items-center justify-center gap-2 hover:shadow-lg hover:shadow-primary/25 transition-all duration-300"
+          className="w-full py-3 rounded-xl bg-gradient-to-r from-primary to-primary/80 text-white dark:text-black font-medium flex items-center justify-center gap-2 hover:shadow-lg hover:shadow-primary/25 transition-all duration-300"
         >
           <Navigation className="w-4 h-4" />
           Usar mi ubicación actual

@@ -32,7 +32,9 @@ export default function RegisterRoleSelector({ role, onChange }: Props) {
             </div>
             {role === 'user' && <CheckCircle className="w-4 h-4 text-primary" />}
           </div>
-          <div className={`font-semibold ${role === 'user' ? 'text-primary' : 'text-white'}`}>Usuario</div>
+          <div className={`font-semibold ${role === 'user' ? 'text-primary' : 'text-gray-900 dark:text-white'}`}>
+            Usuario
+          </div>
           <p className="text-xs text-gray-400 mt-1">Reserva packs sorpresa</p>
         </motion.button>
 
@@ -55,7 +57,9 @@ export default function RegisterRoleSelector({ role, onChange }: Props) {
             </div>
             {role === 'comercio' && <CheckCircle className="w-4 h-4 text-primary" />}
           </div>
-          <div className={`font-semibold ${role === 'comercio' ? 'text-primary' : 'text-white'}`}>Comercio</div>
+          <div className={`font-semibold ${role === 'comercio' ? 'text-primary' : 'text-gray-900 dark:text-white'}`}>
+            Comercio
+          </div>
           <p className="text-xs text-gray-400 mt-1">Vende tus excedentes</p>
         </motion.button>
       </div>

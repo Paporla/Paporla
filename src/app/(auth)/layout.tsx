@@ -50,7 +50,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
       {/* Link volver al inicio */}
       <Link
         href="/"
-        className="fixed top-4 left-4 z-20 inline-flex items-center gap-1.5 text-xs text-gray-500 hover:text-primary transition-colors bg-black/30 backdrop-blur-sm rounded-full px-3 py-1.5 border border-white/5"
+        className="fixed top-4 left-4 z-20 inline-flex items-center gap-1.5 text-xs text-gray-600 dark:text-gray-500 hover:text-primary transition-colors bg-white/60 dark:bg-black/30 backdrop-blur-sm rounded-full px-3 py-1.5 border border-black/5 dark:border-white/5"
       >
         <ArrowLeft className="w-3 h-3" />
         Volver al inicio

@@ -58,7 +58,7 @@ export default function NotificationList() {
             className={`px-3 py-1.5 rounded-lg text-sm transition-all ${
               filter === 'all'
                 ? 'bg-primary/20 text-primary'
-                : 'dark:text-gray-500 text-gray-400 dark:hover:text-white hover:text-gray-900'
+                : 'dark:text-gray-500 text-gray-500 dark:hover:text-white hover:text-gray-900'
             }`}
           >
             Todas
@@ -68,7 +68,7 @@ export default function NotificationList() {
             className={`px-3 py-1.5 rounded-lg text-sm transition-all ${
               filter === 'unread'
                 ? 'bg-primary/20 text-primary'
-                : 'dark:text-gray-500 text-gray-400 dark:hover:text-white hover:text-gray-900'
+                : 'dark:text-gray-500 text-gray-500 dark:hover:text-white hover:text-gray-900'
             }`}
           >
             No leidas

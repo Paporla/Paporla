@@ -182,7 +182,7 @@ export default function ContactoPage() {
                   disabled={isSubmitting}
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
-                  className={`w-full py-4 rounded-xl font-semibold text-white transition-all duration-300 flex items-center justify-center gap-2
+                  className={`w-full py-4 rounded-xl font-semibold text-white dark:text-black transition-all duration-300 flex items-center justify-center gap-2
                     ${isSubmitting ? 'bg-gray-500 cursor-not-allowed' : 'bg-gradient-to-r from-primary to-primary/80 hover:shadow-lg hover:shadow-primary/25'}`}
                 >
                   {isSubmitting ? (
