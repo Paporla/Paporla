@@ -8,7 +8,7 @@ export default function AuthError({ error: _error, reset }: { error: Error & { d
     <div className="min-h-screen flex items-center justify-center p-4">
       <div className="text-center max-w-md">
         <div className="relative mb-8">
-          <div className="text-8xl font-bold text-white/10 select-none">!</div>
+          <div className="text-8xl font-bold text-black/10 dark:text-white/10 select-none">!</div>
           <div className="absolute inset-0 flex items-center justify-center">
             <div className="w-24 h-24 rounded-full bg-gradient-to-br from-red-500/20 to-red-500/10 flex items-center justify-center">
               <svg className="w-12 h-12 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -23,8 +23,8 @@ export default function AuthError({ error: _error, reset }: { error: Error & { d
           </div>
         </div>
 
-        <h1 className="text-2xl font-bold text-white mb-3">Algo salió mal</h1>
-        <p className="text-gray-400 mb-8 leading-relaxed">
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">Algo salió mal</h1>
+        <p className="text-gray-600 dark:text-gray-400 mb-8 leading-relaxed">
           Ocurrió un error inesperado. Por favor, intentá de nuevo o volvé al inicio.
         </p>
 
@@ -34,7 +34,7 @@ export default function AuthError({ error: _error, reset }: { error: Error & { d
           </Button>
           <Link
             href="/"
-            className="inline-flex items-center justify-center px-6 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white font-medium hover:bg-white/10 transition-all text-sm"
+            className="inline-flex items-center justify-center px-6 py-2.5 rounded-xl bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 text-gray-900 dark:text-white font-medium hover:bg-black/10 dark:hover:bg-white/10 transition-all text-sm"
           >
             Ir al inicio
           </Link>
