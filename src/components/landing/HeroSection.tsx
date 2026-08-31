@@ -42,7 +42,7 @@ export default function HeroSection() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.4 }}
-              className="text-gray-400 text-lg max-w-md mb-8 leading-relaxed"
+              className="text-gray-600 dark:text-gray-400 text-lg max-w-md mb-8 leading-relaxed"
             >
               Paporla conecta comercios con excedentes del dia y personas como tu. Reserva, recoge y disfruta mientras
               ayudas al planeta.
@@ -74,15 +74,15 @@ export default function HeroSection() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.6 }}
-              className="flex items-center justify-center gap-8 pt-4 border-t border-white/10"
+              className="flex items-center justify-center gap-8 pt-4 border-t border-black/10 dark:border-white/10"
             >
               <div className="flex items-center gap-2">
                 <ShieldCheck className="w-5 h-5 text-primary" />
-                <span className="text-sm text-gray-300">Comercios verificados</span>
+                <span className="text-sm text-gray-600 dark:text-gray-300">Comercios verificados</span>
               </div>
               <div className="flex items-center gap-2">
                 <RefreshCw className="w-5 h-5 text-primary" />
-                <span className="text-sm text-gray-300">Reserva inmediata</span>
+                <span className="text-sm text-gray-600 dark:text-gray-300">Reserva inmediata</span>
               </div>
             </motion.div>
           </motion.div>
