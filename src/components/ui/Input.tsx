@@ -20,7 +20,8 @@ const Input = forwardRef<HTMLInputElement, InputProps>(({ label, error, icon, cl
           ref={ref}
           className={`
               w-full px-4 py-2.5 rounded-xl
-              dark:bg-white/5 bg-white
+              border
+              dark:bg-white/5 bg-gray-50
               dark:border-white/10 border-gray-200
               dark:text-white text-gray-900
               placeholder:text-gray-400 dark:placeholder:text-gray-500
