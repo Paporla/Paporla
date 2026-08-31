@@ -184,7 +184,7 @@ export default function BusinessReservationsPage() {
           grouped.cancelled.length > 0 ||
           grouped.expired.length > 0) && (
           <div className="space-y-4">
-            <div className="flex items-center gap-2 mt-6 pt-4 border-t border-dark-border">
+            <div className="flex items-center gap-2 mt-6 pt-4 border-t border-gray-200 dark:border-dark-border">
               <div className="w-1 h-5 dark:bg-gray-600 bg-gray-300 rounded-full" />
               <h2 className="text-lg font-semibold dark:text-gray-400 text-gray-500">Historial</h2>
             </div>
