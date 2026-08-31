@@ -1,94 +1,60 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import Link from 'next/link'
-import { ArrowRight, ShieldCheck, RefreshCw } from 'lucide-react'
-import HowItWorksSection from './HowItWorksSection'
+import { MapPin, Clock, Gift, Shield, DollarSign, Heart } from 'lucide-react'
 
-export default function HeroSection() {
+const benefits = [
+  { icon: DollarSign, title: 'Ahorro', description: 'Hasta 70% de descuento en comida de calidad' },
+  { icon: MapPin, title: 'Cercanía', description: 'Recogida local. Apoyas a comercios de tu ciudad' },
+  { icon: Clock, title: 'Horarios flexibles', description: 'Recoge cuando puedas, sin prisas' },
+  { icon: Gift, title: 'Sorpresa', description: 'Varía cada día. Nunca es aburrido' },
+  { icon: Shield, title: 'Transparencia', description: 'Promesas claras. Sin letra chica' },
+  { icon: Heart, title: 'Rescate', description: 'Comida que iba a la basura ahora se salva' },
+]
+
+export default function BenefitsSection() {
   return (
-    <section className="relative flex items-center pt-8 pb-12 overflow-hidden">
-      {/* Fondo animado sutil */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-20 left-10 w-72 h-72 bg-primary/5 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute bottom-20 right-10 w-96 h-96 bg-primary/5 rounded-full blur-3xl animate-pulse delay-1000" />
-      </div>
+    <section className="py-12">
+      <div className="max-w-6xl mx-auto px-4">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="text-center mb-12"
+        >
+          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-3">
+            ¿Por qué elegir <span className="text-primary">Paporla</span>?
+          </h2>
+          <p className="text-gray-400 max-w-2xl mx-auto">
+            Beneficios para todos los que forman parte de nuestra comunidad
+          </p>
+        </motion.div>
 
-      <div className="relative z-10 max-w-6xl mx-auto px-4">
-        <div className="grid lg:grid-cols-2 gap-12 items-center">
-          {/* Columna Izquierda */}
-          <motion.div
-            initial={{ opacity: 0, x: -40 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6 }}
-            className="text-left"
-          >
-            <motion.h1
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
-              className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 dark:text-white mb-6 leading-tight"
-            >
-              Comida de calidad.
-              <br />
-              <span className="bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
-                Sin desperdiciar.
-              </span>
-              <br />
-              Sin pagar de mas.
-            </motion.h1>
-
-            <motion.p
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4 }}
-              className="text-gray-400 text-lg max-w-md mb-8 leading-relaxed"
-            >
-              Paporla conecta comercios con excedentes del dia y personas como tu. Reserva, recoge y disfruta mientras
-              ayudas al planeta.
-            </motion.p>
-
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {benefits.map((benefit, idx) => (
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.5 }}
-              className="flex flex-col sm:flex-row gap-4 mb-8"
+              key={idx}
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: idx * 0.05 }}
+              whileHover={{ y: -5 }}
+              className="group relative text-center p-6 rounded-2xl bg-gradient-to-br from-primary/[0.18] to-primary/[0.05] border border-white/10 hover:border-primary/30 transition-all duration-300"
             >
-              <Link
-                href="/packs"
-                className="group relative overflow-hidden inline-flex items-center justify-center gap-2 px-8 py-3 rounded-full bg-primary text-black font-semibold transition-all shadow-lg shadow-primary/30 hover:shadow-xl text-center"
-              >
-                <span className="relative z-10">Ver packs cerca de mi</span>
-                <ArrowRight className="w-4 h-4 relative z-10 group-hover:translate-x-1 transition" />
-                <div className="absolute inset-0 bg-white/20 translate-x-full group-hover:translate-x-0 transition-transform duration-300" />
-              </Link>
-              <Link
-                href="/register"
-                className="inline-flex items-center justify-center px-8 py-3 rounded-full border border-primary/40 text-gray-900 dark:text-white font-semibold hover:bg-primary/10 transition text-center"
-              >
-                Registra tu comercio
-              </Link>
-            </motion.div>
+              {/* Efecto glossy (como el CTA) */}
+              <div className="absolute inset-0 rounded-2xl bg-gradient-to-t from-transparent via-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.6 }}
-              className="flex items-center justify-center gap-8 pt-4 border-t border-white/10"
-            >
-              <div className="flex items-center gap-2">
-                <ShieldCheck className="w-5 h-5 text-primary" />
-                <span className="text-sm text-gray-300">Comercios verificados</span>
+              <div className="relative w-14 h-14 mx-auto mb-4 rounded-full bg-white/5 flex items-center justify-center group-hover:scale-110 group-hover:bg-primary/20 transition-all duration-300">
+                <benefit.icon className="w-7 h-7 text-primary" />
               </div>
-              <div className="flex items-center gap-2">
-                <RefreshCw className="w-5 h-5 text-primary" />
-                <span className="text-sm text-gray-300">Reserva inmediata</span>
-              </div>
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2 group-hover:text-primary transition-colors duration-300">
+                {benefit.title}
+              </h3>
+              <p className="text-sm text-gray-400 group-hover:text-gray-300 transition-colors duration-300">
+                {benefit.description}
+              </p>
             </motion.div>
-          </motion.div>
-
-          {/* Columna Derecha - How it works (ahora como componente separado) */}
-          <HowItWorksSection />
+          ))}
         </div>
       </div>
     </section>
