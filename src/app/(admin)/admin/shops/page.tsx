@@ -112,7 +112,7 @@ export default function AdminShopsPage() {
           onClick={() => setStatusFilter('all')}
           className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
             statusFilter === 'all'
-              ? 'bg-primary text-white'
+              ? 'bg-primary text-white dark:text-black'
               : 'dark:bg-white/5 bg-gray-100 dark:text-gray-300 text-gray-700 hover:bg-primary/20 dark:hover:bg-white/10'
           }`}
         >
@@ -127,7 +127,7 @@ export default function AdminShopsPage() {
               onClick={() => setStatusFilter(status)}
               className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
                 statusFilter === status
-                  ? 'bg-primary text-white'
+                  ? 'bg-primary text-white dark:text-black'
                   : 'dark:bg-white/5 bg-gray-100 dark:text-gray-300 text-gray-700 hover:bg-primary/20 dark:hover:bg-white/10'
               }`}
             >

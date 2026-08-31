@@ -36,7 +36,7 @@ export default function UserSidebar() {
   return (
     <AppSidebar items={navItems} exploreItems={exploreItems} bottomItems={bottomItems} onLogout={handleLogout}>
       {/* Logo */}
-      <div className="flex items-center gap-3 px-6 py-5 border-b border-dark-border">
+      <div className="flex items-center gap-3 px-6 py-5 border-b border-gray-200 dark:border-dark-border">
         <div className="w-9 h-9 rounded-xl bg-primary/20 flex items-center justify-center">
           <Image
             src="/images/logo-transparent.png"

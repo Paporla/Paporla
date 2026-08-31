@@ -32,7 +32,9 @@ export default function ReservationChart({ data }: ReservationChartProps) {
                   className="h-full bg-gradient-to-r from-primary to-primary/60 rounded-lg transition-all duration-500 flex items-center justify-end px-2"
                   style={{ width: `${height}%` }}
                 >
-                  {height > 20 && <span className="text-xs text-white font-medium">{item.reservations}</span>}
+                  {height > 20 && (
+                    <span className="text-xs text-white dark:text-black font-medium">{item.reservations}</span>
+                  )}
                 </div>
               </div>
             </div>

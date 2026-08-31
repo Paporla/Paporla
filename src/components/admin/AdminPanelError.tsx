@@ -28,7 +28,7 @@ export default function AdminPanelError({ title, description, onRetry }: AdminPa
         <button
           type="button"
           onClick={onRetry}
-          className="mt-6 inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-primary text-white hover:opacity-90 transition-opacity"
+          className="mt-6 inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-primary text-white dark:text-black hover:opacity-90 transition-opacity"
         >
           <RotateCw className="w-4 h-4" aria-hidden />
           Reintentar
