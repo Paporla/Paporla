@@ -124,10 +124,14 @@ export default function ContactoPage() {
               <form onSubmit={handleSubmit} className="space-y-5">
                 <div className="grid md:grid-cols-2 gap-5">
                   <div>
-                    <label className="block text-sm font-medium dark:text-gray-300 text-gray-700 mb-2">
+                    <label
+                      htmlFor="contact-name"
+                      className="block text-sm font-medium dark:text-gray-300 text-gray-700 mb-2"
+                    >
                       Nombre completo *
                     </label>
                     <input
+                      id="contact-name"
                       type="text"
                       name="name"
                       value={formData.name}
@@ -138,8 +142,14 @@ export default function ContactoPage() {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium dark:text-gray-300 text-gray-700 mb-2">Email *</label>
+                    <label
+                      htmlFor="contact-email"
+                      className="block text-sm font-medium dark:text-gray-300 text-gray-700 mb-2"
+                    >
+                      Email *
+                    </label>
                     <input
+                      id="contact-email"
                       type="email"
                       name="email"
                       value={formData.email}
@@ -152,8 +162,14 @@ export default function ContactoPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium dark:text-gray-300 text-gray-700 mb-2">Asunto *</label>
+                  <label
+                    htmlFor="contact-subject"
+                    className="block text-sm font-medium dark:text-gray-300 text-gray-700 mb-2"
+                  >
+                    Asunto *
+                  </label>
                   <input
+                    id="contact-subject"
                     type="text"
                     name="subject"
                     value={formData.subject}
@@ -165,8 +181,14 @@ export default function ContactoPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium dark:text-gray-300 text-gray-700 mb-2">Mensaje *</label>
+                  <label
+                    htmlFor="contact-message"
+                    className="block text-sm font-medium dark:text-gray-300 text-gray-700 mb-2"
+                  >
+                    Mensaje *
+                  </label>
                   <textarea
+                    id="contact-message"
                     name="message"
                     rows={6}
                     value={formData.message}

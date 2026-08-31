@@ -102,6 +102,7 @@ export default function ShareButton({
             </button>
             <button
               onClick={handleCopyLink}
+              aria-label="Copiar enlace"
               className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-white/5 transition-colors text-left"
             >
               <div className="w-9 h-9 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">

@@ -101,6 +101,7 @@ export default function ShopsPage() {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 dark:text-gray-500 text-gray-400" />
             <input
               type="text"
+              aria-label="Buscar comercios"
               placeholder="Buscar comercios..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
@@ -112,6 +113,7 @@ export default function ShopsPage() {
             <div className="relative">
               <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 dark:text-gray-500 text-gray-400" />
               <select
+                aria-label="Filtrar por ciudad"
                 value={selectedCity}
                 onChange={(e) => setSelectedCity(e.target.value)}
                 className="pl-10 pr-8 py-2.5 rounded-xl dark:bg-white/5 bg-white dark:border-white/10 border-gray-200 dark:text-white text-gray-900 text-sm focus:border-primary focus:outline-none transition-all appearance-none"
