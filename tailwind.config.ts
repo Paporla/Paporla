@@ -23,17 +23,10 @@ const config: Config = {
           hover: 'rgba(255,255,255,0.12)',
         },
       },
-      backgroundColor: {
-        dark: '#0a0a1a',
-        card: '#0f0f1a',
-        muted: '#1a1a2e',
-      },
-      borderColor: {
-        dark: {
-          DEFAULT: 'rgba(255,255,255,0.08)',
-          hover: 'rgba(255,255,255,0.12)',
-        },
-      },
+      // OJO: no redefinir backgroundColor/borderColor aqui. Los bloques que
+      // existian pisaban el color compuesto `dark` de arriba y las utilidades
+      // bg-dark-card, border-dark-border, etc. NUNCA se generaban (fallo
+      // silencioso: sobre fondo negro no se notaba). Todo sale de `colors`.
       boxShadow: {
         neon: '0 0 20px rgba(0, 255, 136, 0.3)',
         'neon-lg': '0 0 30px rgba(0, 255, 136, 0.4)',
