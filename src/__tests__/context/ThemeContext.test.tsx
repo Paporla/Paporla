@@ -93,7 +93,10 @@ describe('ThemeProvider', () => {
     expect(screen.getByTestId('theme-value')).toHaveTextContent('dark')
   })
 
-  it('uses stored light theme from localStorage', () => {
+  it('ignora el light guardado: arranque siempre dark (transitorio, paso 1-2 del light mode)', () => {
+    // getInitialTheme no lee localStorage hasta el paso 3 (toggle + barrido):
+    // durante la regresion del 31-ago se escribio 'light' en visitantes y
+    // arrancar con ese valor encenderia un modo claro a medio auditar.
     localStorageMock.getItem.mockReturnValueOnce('light')
 
     render(
@@ -101,7 +104,7 @@ describe('ThemeProvider', () => {
         <TestConsumer />
       </ThemeProvider>,
     )
-    expect(screen.getByTestId('theme-value')).toHaveTextContent('light')
+    expect(screen.getByTestId('theme-value')).toHaveTextContent('dark')
   })
 
   it('uses stored dark theme from localStorage', () => {
@@ -133,14 +136,17 @@ describe('ThemeProvider', () => {
   })
 
   it('toggles theme from light to dark', () => {
-    localStorageMock.getItem.mockReturnValueOnce('light')
-
     render(
       <ThemeProvider>
         <TestConsumer />
       </ThemeProvider>,
     )
 
+    // Arranque siempre dark (transitorio): pasar a light con setTheme y
+    // probar el toggle de vuelta.
+    act(() => {
+      screen.getByTestId('set-light-btn').click()
+    })
     expect(screen.getByTestId('theme-value')).toHaveTextContent('light')
 
     act(() => {
@@ -194,13 +200,15 @@ describe('ThemeProvider', () => {
   })
 
   it('removes dark class from document element when theme is light', () => {
-    localStorageMock.getItem.mockReturnValueOnce('light')
-
     render(
       <ThemeProvider>
         <TestConsumer />
       </ThemeProvider>,
     )
+
+    act(() => {
+      screen.getByTestId('set-light-btn').click()
+    })
 
     expect(document.documentElement.classList.contains('dark')).toBe(false)
   })
