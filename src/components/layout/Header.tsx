@@ -8,6 +8,7 @@ import { usePathname } from 'next/navigation'
 import { useAuth } from '@/hooks/useAuth'
 import { Menu, X } from 'lucide-react'
 import AvatarMenu from './AvatarMenu'
+import ThemeToggle from './ThemeToggle'
 import NotificationBell from '@/components/notifications/NotificationBell'
 
 export default function Header() {
@@ -80,6 +81,7 @@ export default function Header() {
 
           {/* Avatar / Autenticacion + Notificaciones */}
           <div className="flex items-center gap-3">
+            <ThemeToggle />
             {user ? (
               <>
                 <NotificationBell />
