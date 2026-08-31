@@ -43,7 +43,7 @@ export default function BusinessWelcomeBanner({
             </div>
             <div>
               <p className="text-2xl font-bold dark:text-white text-gray-900">{todayReservations}</p>
-              <p className="text-[10px] dark:text-gray-500 text-gray-400">Reservas hoy</p>
+              <p className="text-[10px] dark:text-gray-500 text-gray-500">Reservas hoy</p>
             </div>
           </div>
 
@@ -56,7 +56,7 @@ export default function BusinessWelcomeBanner({
                 {isPositive ? '+' : ''}
                 {weekGrowth}%
               </p>
-              <p className="text-[10px] dark:text-gray-500 text-gray-400">vs semana pasada</p>
+              <p className="text-[10px] dark:text-gray-500 text-gray-500">vs semana pasada</p>
             </div>
           </div>
         </div>

@@ -94,7 +94,7 @@ function StatusNotice({
     return (
       <div className="mt-4 flex items-start gap-3 bg-blue-500/5 border border-blue-500/20 rounded-xl px-4 py-3">
         <Store className="w-4 h-4 text-blue-400 flex-shrink-0 mt-0.5" />
-        <p className="text-xs text-blue-300">
+        <p className="text-xs text-blue-700 dark:text-blue-300">
           <span className="font-semibold">Completa tu perfil.</span> Guarda los datos de tu comercio para poder enviarlo
           a revisión.
         </p>
@@ -106,7 +106,7 @@ function StatusNotice({
     return (
       <div className="mt-4 flex items-start gap-3 bg-yellow-500/5 border border-yellow-500/20 rounded-xl px-4 py-3">
         <Shield className="w-4 h-4 text-yellow-400 flex-shrink-0 mt-0.5" />
-        <p className="text-xs text-yellow-300">
+        <p className="text-xs text-yellow-700 dark:text-yellow-300">
           <span className="font-semibold">En revisión.</span> Estamos revisando tu comercio, normalmente en 24-48 horas.
           Te avisaremos en cuanto esté aprobado.
         </p>
@@ -118,7 +118,7 @@ function StatusNotice({
     return (
       <div className="mt-4 flex items-start gap-3 bg-red-500/5 border border-red-500/20 rounded-xl px-4 py-3">
         <Ban className="w-4 h-4 text-red-400 flex-shrink-0 mt-0.5" />
-        <div className="text-xs text-red-300">
+        <div className="text-xs text-red-700 dark:text-red-300">
           <p>
             <span className="font-semibold">{status === 'suspended' ? 'Cuenta suspendida.' : 'Comercio cerrado.'}</span>{' '}
             No puedes publicar packs. Contacta con soporte para resolverlo.
@@ -161,7 +161,9 @@ function StatusNotice({
           ) : (
             <Send className="w-4 h-4 text-blue-400 flex-shrink-0 mt-0.5" />
           )}
-          <div className={`text-xs ${isRejected ? 'text-red-300' : 'text-blue-300'}`}>
+          <div
+            className={`text-xs ${isRejected ? 'text-red-700 dark:text-red-300' : 'text-blue-700 dark:text-blue-300'}`}
+          >
             {isRejected ? (
               <>
                 <p>
@@ -169,7 +171,7 @@ function StatusNotice({
                   enviarlo.
                 </p>
                 {statusReason && (
-                  <p className="mt-1.5 px-2 py-1.5 rounded-lg bg-black/20 border border-red-500/10">
+                  <p className="mt-1.5 px-2 py-1.5 rounded-lg bg-black/5 dark:bg-black/20 border border-red-500/10">
                     <span className="opacity-70">Motivo:</span> {statusReason}
                   </p>
                 )}
@@ -188,7 +190,7 @@ function StatusNotice({
           disabled={blocked || submitting}
           className={`flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all flex-shrink-0 ${
             blocked || submitting
-              ? 'bg-white/5 text-gray-500 cursor-not-allowed border border-white/10'
+              ? 'bg-black/5 dark:bg-white/5 text-gray-500 cursor-not-allowed border border-black/10 dark:border-white/10'
               : accent === 'red'
                 ? 'bg-red-500 hover:bg-red-600 text-white shadow-lg shadow-red-500/20'
                 : 'bg-primary hover:bg-primary/90 text-white shadow-lg shadow-primary/20'
@@ -211,8 +213,8 @@ function StatusNotice({
       {/* Motivo exacto por el que el botón está bloqueado. Nunca dejamos que el
           comercio pulse para que la base le responda con un error genérico. */}
       {isIncomplete && (
-        <div className="mt-3 pt-3 border-t border-white/5">
-          <p className="text-[11px] text-gray-300 mb-1.5 font-medium">
+        <div className="mt-3 pt-3 border-t border-black/5 dark:border-white/5">
+          <p className="text-[11px] text-gray-700 dark:text-gray-300 mb-1.5 font-medium">
             Toca cada dato para completarlo y poder enviar:
           </p>
           <div className="flex flex-wrap gap-1.5">
@@ -220,7 +222,7 @@ function StatusNotice({
               <button
                 key={field.label}
                 onClick={() => onGoToTab(field.tab)}
-                className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-amber-500/10 border border-amber-500/30 text-[11px] font-medium text-amber-200 hover:bg-amber-500/20 hover:border-amber-400/50 transition-all"
+                className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-amber-500/10 border border-amber-500/30 text-[11px] font-medium text-amber-700 dark:text-amber-200 hover:bg-amber-500/20 hover:border-amber-400/50 transition-all"
               >
                 {field.label}
                 <span className="opacity-40">→</span>
@@ -231,8 +233,8 @@ function StatusNotice({
       )}
 
       {!isIncomplete && hasUnsavedChanges && (
-        <div className="mt-3 pt-3 border-t border-white/5">
-          <p className="text-[11px] text-gray-400">
+        <div className="mt-3 pt-3 border-t border-black/5 dark:border-white/5">
+          <p className="text-[11px] text-gray-600 dark:text-gray-400">
             Tienes cambios sin guardar. Se guardarán automáticamente al enviar.
           </p>
         </div>
@@ -287,7 +289,7 @@ export default function BusinessProfileLayout({
                 <span className="text-xs font-bold text-primary">{completionPercentage}%</span>
               </div>
               <div>
-                <p className="text-[10px] dark:text-gray-500 text-gray-400">Perfil completado</p>
+                <p className="text-[10px] dark:text-gray-500 text-gray-500">Perfil completado</p>
                 <div className="w-20 h-1.5 dark:bg-white/10 bg-gray-200 rounded-full mt-1 overflow-hidden">
                   <div
                     className="h-full bg-primary rounded-full transition-all duration-500"

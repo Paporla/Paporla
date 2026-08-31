@@ -72,7 +72,7 @@ export default function BusinessQuickActions() {
                   <action.icon className="w-6 h-6 text-white" />
                 </div>
                 <p className="dark:text-white text-gray-900 font-medium text-sm">{action.label}</p>
-                <p className="text-xs dark:text-gray-500 text-gray-400 mt-0.5">{action.description}</p>
+                <p className="text-xs dark:text-gray-500 text-gray-500 mt-0.5">{action.description}</p>
               </div>
             </Link>
           </motion.div>

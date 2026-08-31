@@ -40,9 +40,9 @@ export default function BusinessRecentActivity({ activities = [] }: BusinessRece
   if (activities.length === 0) {
     return (
       <div className="glass-card rounded-2xl p-6 text-center">
-        <ShoppingBag className="w-12 h-12 dark:text-gray-600 text-gray-400 mx-auto mb-3" />
+        <ShoppingBag className="w-12 h-12 dark:text-gray-600 text-gray-300 mx-auto mb-3" />
         <p className="dark:text-gray-400 text-gray-600">No hay actividad reciente</p>
-        <p className="text-xs dark:text-gray-500 text-gray-400 mt-1">Las nuevas reservas apareceran aqui</p>
+        <p className="text-xs dark:text-gray-500 text-gray-500 mt-1">Las nuevas reservas apareceran aqui</p>
       </div>
     )
   }
@@ -52,7 +52,7 @@ export default function BusinessRecentActivity({ activities = [] }: BusinessRece
       <div className="flex items-center justify-between p-5 pb-3 border-b border-dark-border dark:border-gray-200">
         <div>
           <h3 className="text-lg font-semibold dark:text-white text-gray-900">Actividad reciente</h3>
-          <p className="text-xs dark:text-gray-500 text-gray-400">Ultimas reservas y movimientos</p>
+          <p className="text-xs dark:text-gray-500 text-gray-500">Ultimas reservas y movimientos</p>
         </div>
         <Link href="/business/reservations" className="text-xs text-primary hover:text-primary/80 transition-colors">
           Ver todas →
