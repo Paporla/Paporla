@@ -29,7 +29,9 @@ export function buildCspHeader(nonce: string): string {
     // *.google-analytics.com con comodin: GA4 enruta los hits a endpoints
     // regionales (region1.google-analytics.com, etc.) que un dominio fijo
     // www. bloqueaba y perdia mediciones (detectado en consola, 30-ago).
-    `connect-src 'self' https://*.supabase.co https://*.sentry.io https://*.google-analytics.com`,
+    // wss://*.supabase.co: Realtime (notificaciones en vivo) usa WebSocket;
+    // https:// no cubre el esquema wss: y la CSP lo bloqueaba (consola 31-ago).
+    `connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.sentry.io https://*.google-analytics.com`,
     "frame-src 'self' https://www.googletagmanager.com",
     "frame-ancestors 'none'",
     "base-uri 'self'",
