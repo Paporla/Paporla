@@ -11,23 +11,36 @@
    El primario #00ff88 se mantiene idéntico en ambas paletas; su
    contraste en claro se ajusta en el paso 5 (WCAG AA).
    ============================================ */
+/* Propuesta B «crema + bosque con chispa neon» (31-ago): fondo crema
+   calido, texto verde-carbon, y un primario UTILIZABLE sobre claro
+   (#0c9d61, AA sobre crema). El neon #00ff88 NO se usa suelto en claro:
+   vive dentro de las "islas oscuras" (hero, CTA), via --color-island-*. */
 :root {
-  --color-bg: #f7f8fa;
+  --color-bg: #faf8f3;
   --color-bg-card: #ffffff;
-  --color-bg-muted: #eef0f4;
-  --color-border: rgba(15, 23, 42, 0.1);
-  --color-hover: rgba(15, 23, 42, 0.05);
-  --color-text: #111827;
-  --color-text-secondary: #374151;
-  --color-text-muted: #6b7280;
-  --color-primary: #00ff88;
-  --color-primary-light: #33ffa3;
-  --color-primary-dark: #00cc6e;
+  --color-bg-muted: #f1ede3;
+  --color-border: rgba(26, 46, 36, 0.12);
+  --color-hover: rgba(26, 46, 36, 0.05);
+  --color-text: #1a2e24;
+  --color-text-secondary: #3d5044;
+  --color-text-muted: #7d8a7d;
+  --color-primary: #0c9d61;
+  --color-primary-light: #16b873;
+  --color-primary-dark: #047857;
+  --color-primary-rgb: 12 157 97;
+  --color-primary-light-rgb: 22 184 115;
+  --color-primary-dark-rgb: 4 120 87;
   --color-secondary: #ff8a3c;
   --color-danger: #ef4444;
-  --glass-bg: rgba(255, 255, 255, 0.75);
-  --glass-border: rgba(15, 23, 42, 0.08);
-  --glass-shadow: 0 4px 24px rgba(15, 23, 42, 0.08);
+  --glass-bg: rgba(255, 255, 255, 0.8);
+  --glass-border: rgba(26, 46, 36, 0.1);
+  --glass-shadow: 0 4px 24px rgba(26, 46, 36, 0.08);
+  /* Islas oscuras: bloques verde bosque donde el neon sigue brillando */
+  --island-bg: linear-gradient(135deg, #0e3b2e 0%, #123a2d 60%, #16281f 100%);
+  --island-text: #ffffff;
+  --island-text-muted: #b9d3c4;
+  --island-accent: #00ff88;
+  --island-shadow: 0 14px 34px rgba(14, 59, 46, 0.35);
 }
 
 .dark {
@@ -39,9 +52,21 @@
   --color-text: #ffffff;
   --color-text-secondary: #cccccc;
   --color-text-muted: #999999;
+  --color-primary: #00ff88;
+  --color-primary-light: #33ffa3;
+  --color-primary-dark: #00cc6e;
+  --color-primary-rgb: 0 255 136;
+  --color-primary-light-rgb: 51 255 163;
+  --color-primary-dark-rgb: 0 204 110;
   --glass-bg: rgba(15, 15, 26, 0.7);
   --glass-border: rgba(255, 255, 255, 0.08);
   --glass-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+  /* En dark las "islas" se funden con el fondo: sin caja, sin sombra */
+  --island-bg: transparent;
+  --island-text: #ffffff;
+  --island-text-muted: #999999;
+  --island-accent: #00ff88;
+  --island-shadow: none;
 }
 
 /* ============================================
@@ -86,7 +111,7 @@
    ESTILOS BASE
    ============================================ */
 body {
-  background: radial-gradient(circle at center, #eef5f0 0%, #f7f8fa 100%);
+  background: radial-gradient(circle at center, #f5f1e6 0%, #faf8f3 100%);
   background-attachment: fixed;
   color: var(--color-text);
   transition:
@@ -180,6 +205,15 @@ body::before {
     to {
       background-position: 200% center;
     }
+  }
+
+  /* --- ISLA OSCURA (propuesta B) --- */
+  /* Bloque verde bosque donde el neon sigue vivo en modo claro. En dark
+     se vuelve transparente y la seccion hereda el fondo global. */
+  .island-dark {
+    background: var(--island-bg);
+    box-shadow: var(--island-shadow);
+    color: var(--island-text);
   }
 
   /* --- GLASS CARD --- */
