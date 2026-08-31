@@ -116,7 +116,7 @@ export default function StatsSection() {
               viewport={{ once: true }}
               transition={{ delay: idx * 0.1 }}
               whileHover={{ y: -5 }}
-              className="group relative text-center p-6 rounded-2xl bg-gradient-to-br from-primary/[0.18] to-primary/[0.05] border border-white/10 hover:border-primary/30 transition-all duration-300"
+              className="group relative text-center p-6 rounded-2xl bg-white dark:bg-transparent dark:bg-gradient-to-br dark:from-primary/[0.18] dark:to-primary/[0.05] border border-black/[0.06] dark:border-white/10 shadow-sm dark:shadow-none hover:border-primary/30 transition-all duration-300"
             >
               <div className="absolute inset-0 rounded-2xl bg-gradient-to-t from-transparent via-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
@@ -142,7 +142,7 @@ export default function StatsSection() {
                   {stat.prefix ?? ''}0{stat.suffix}
                 </p>
               )}
-              <p className="text-gray-300 text-sm mt-2 font-medium">{stat.label}</p>
+              <p className="text-gray-600 dark:text-gray-300 text-sm mt-2 font-medium">{stat.label}</p>
               <p className="text-gray-500 text-xs mt-2">{stat.source}</p>
             </motion.div>
           ))}
@@ -156,14 +156,14 @@ export default function StatsSection() {
           className="mt-12 text-center"
         >
           {hasRealStats ? (
-            <p className="text-gray-300 text-sm max-w-2xl mx-auto">
+            <p className="text-gray-600 dark:text-gray-300 text-sm max-w-2xl mx-auto">
               <span className="text-primary font-bold">{apiStats.packsRescued} packs</span> rescatados ·{' '}
               <span className="text-primary font-bold">{formatChilePesos(apiStats.moneySavedMinor)}</span> ahorrados ·{' '}
               <span className="text-primary font-bold">{apiStats.co2SavedKg.toLocaleString()} kg</span> de CO₂ evitados
               <span className="block mt-2 text-primary font-semibold">¿Te sumas?</span>
             </p>
           ) : (
-            <p className="text-gray-300 text-sm max-w-2xl mx-auto">
+            <p className="text-gray-600 dark:text-gray-300 text-sm max-w-2xl mx-auto">
               Sé parte del cambio.{' '}
               <Link href="/register" className="text-primary font-semibold hover:underline">
                 Regístrate gratis

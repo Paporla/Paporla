@@ -61,10 +61,11 @@
   --glass-bg: rgba(15, 15, 26, 0.7);
   --glass-border: rgba(255, 255, 255, 0.08);
   --glass-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
-  /* En dark las "islas" se funden con el fondo: sin caja, sin sombra */
-  --island-bg: transparent;
+  /* En dark la isla replica el look original de estas cajas
+     (gradiente neon 18% -> 5%): el modo oscuro no cambia. */
+  --island-bg: linear-gradient(135deg, rgba(0, 255, 136, 0.18) 0%, rgba(0, 255, 136, 0.05) 100%);
   --island-text: #ffffff;
-  --island-text-muted: #999999;
+  --island-text-muted: #9ca3af;
   --island-accent: #00ff88;
   --island-shadow: none;
 }
@@ -221,6 +222,20 @@ body::before {
     background: var(--island-bg);
     box-shadow: var(--island-shadow);
     color: var(--island-text);
+  }
+
+  /* Texto secundario y acento dentro de una isla (el neon #00ff88
+     solo se usa aqui dentro en modo claro, nunca sobre crema). */
+  .island-muted {
+    color: var(--island-text-muted);
+  }
+
+  .island-accent {
+    color: var(--island-accent);
+  }
+
+  .bg-island-accent {
+    background-color: var(--island-accent);
   }
 
   /* --- GLASS CARD --- */
