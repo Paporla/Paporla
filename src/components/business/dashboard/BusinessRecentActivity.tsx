@@ -49,7 +49,7 @@ export default function BusinessRecentActivity({ activities = [] }: BusinessRece
 
   return (
     <div className="glass-card rounded-2xl overflow-hidden">
-      <div className="flex items-center justify-between p-5 pb-3 border-b border-dark-border dark:border-gray-200">
+      <div className="flex items-center justify-between p-5 pb-3 border-b border-gray-200 dark:border-dark-border">
         <div>
           <h3 className="text-lg font-semibold dark:text-white text-gray-900">Actividad reciente</h3>
           <p className="text-xs dark:text-gray-500 text-gray-500">Ultimas reservas y movimientos</p>

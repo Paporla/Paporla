@@ -58,7 +58,7 @@ export default function TopPacksTable({ packs }: TopPacksTableProps) {
                       ? 'bg-gray-400/20 text-gray-400'
                       : idx === 2
                         ? 'bg-orange-500/20 text-orange-400'
-                        : 'bg-dark-muted text-gray-500'
+                        : 'bg-gray-200 dark:bg-dark-muted text-gray-500'
                 }`}
               >
                 {idx + 1}
@@ -77,7 +77,7 @@ export default function TopPacksTable({ packs }: TopPacksTableProps) {
 
               {/* Barra visual */}
               <div className="hidden sm:block w-24">
-                <div className="h-1.5 bg-dark-muted rounded-full overflow-hidden">
+                <div className="h-1.5 bg-gray-200 dark:bg-dark-muted rounded-full overflow-hidden">
                   <div
                     className="h-full rounded-full bg-primary transition-all"
                     style={{ width: `${(pack.totalSold / maxSold) * 100}%` }}

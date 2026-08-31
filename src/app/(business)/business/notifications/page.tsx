@@ -167,7 +167,7 @@ export default function BusinessNotificationsPage() {
                           {formatRelativeTime(notification.created_at)}
                         </span>
                         {notification.type && (
-                          <span className="text-[10px] text-gray-600 bg-dark-muted px-2 py-0.5 rounded-full">
+                          <span className="text-[10px] text-gray-600 dark:text-gray-400 bg-gray-200 dark:bg-dark-muted px-2 py-0.5 rounded-full">
                             {notification.type.replace(/_/g, ' ')}
                           </span>
                         )}

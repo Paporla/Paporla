@@ -27,7 +27,7 @@ const CustomTooltip = ({
 }) => {
   if (active && payload && payload.length) {
     return (
-      <div className="bg-dark-card border border-dark-border rounded-xl p-3 shadow-xl">
+      <div className="bg-white dark:bg-dark-card border border-gray-200 dark:border-dark-border rounded-xl p-3 shadow-xl">
         <p className="text-xs text-gray-500 mb-1">{label}</p>
         <p className="text-lg font-bold text-green-400">{formatChilePesos(payload[0].value)}</p>
       </div>
