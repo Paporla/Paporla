@@ -61,6 +61,8 @@ export default function Button({
         variants[variant],
         sizes[size],
         'font-medium transition-all duration-300 flex items-center justify-center gap-2',
+        // Anillo de foco solo con teclado (focus-visible): WCAG 2.4.7
+        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-dark',
         isDisabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer',
         className,
       )}

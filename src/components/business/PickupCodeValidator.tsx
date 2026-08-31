@@ -98,6 +98,7 @@ export default function PickupCodeValidator({ shopId }: { shopId: string }) {
               onKeyDown={handleKeyDown}
               placeholder="P4P-XXXXXXXX"
               maxLength={12}
+              aria-label="Código de recogida"
               className="w-full pl-11 pr-4 py-3 dark:bg-dark-muted bg-gray-50 border dark:border-dark-border border-gray-200 rounded-xl dark:text-white text-gray-900 font-mono text-lg tracking-widest dark:placeholder-gray-600 placeholder-gray-400 focus:border-primary focus:ring-1 focus:ring-primary/20 focus:outline-none transition-all"
               autoComplete="off"
             />
@@ -105,6 +106,7 @@ export default function PickupCodeValidator({ shopId }: { shopId: string }) {
           <button
             onClick={handleValidate}
             disabled={code.trim().length < MIN_CODE_LENGTH || busy}
+            aria-label="Validar código de recogida"
             className="flex items-center gap-2 bg-primary hover:bg-primary-light disabled:opacity-50 disabled:cursor-not-allowed text-dark font-bold px-6 py-3 rounded-xl transition-all text-sm"
           >
             {busy ? (

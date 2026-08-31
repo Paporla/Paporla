@@ -57,6 +57,7 @@ export default function ProfileLocationForm({
         <button
           onClick={detectLocation}
           disabled={locating}
+          aria-label="Detectar mi ubicación actual"
           className="flex items-center gap-1.5 text-xs text-primary hover:text-primary/80 transition-colors disabled:opacity-50"
         >
           <MapPin className="w-3.5 h-3.5" />
