@@ -47,7 +47,7 @@ export default function UserSidebar() {
           />
         </div>
         <div>
-          <h1 className="font-bold text-white text-lg">Paporla</h1>
+          <h1 className="font-bold text-gray-900 dark:text-white text-lg">Paporla</h1>
           <p className="text-[10px] text-gray-500">Panel de Usuario</p>
         </div>
       </div>
@@ -59,7 +59,9 @@ export default function UserSidebar() {
             <span className="text-primary text-sm font-bold">{user?.displayName?.charAt(0) || 'U'}</span>
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-white truncate">{user?.displayName ?? 'Usuario'}</p>
+            <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+              {user?.displayName ?? 'Usuario'}
+            </p>
             <p className="text-[10px] text-gray-500">{user?.email}</p>
           </div>
         </div>
