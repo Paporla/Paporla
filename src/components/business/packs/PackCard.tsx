@@ -100,8 +100,15 @@ export default function PackCard({
   archivingPackId,
   onRequestDelete,
 }: Props) {
-  const stock = getStockStatus(pack.remaining_stock, pack.total_stock)
-  const StockIcon = stock.icon
+  /*
+   * El badge de disponibilidad solo se muestra cuando el pack está a la venta
+   * (active): describe si queda stock AHORA. En cualquier otro estado miente
+   * («Caducado» + «Disponible» a la vez) o duplica el badge de estado
+   * («Agotado» dos veces en un sold_out). La línea "Stock: x/y" de abajo
+   * conserva el dato numérico en todos los estados.
+   */
+  const stock = pack.status === 'active' ? getStockStatus(pack.remaining_stock, pack.total_stock) : null
+  const StockIcon = stock?.icon ?? null
   const pct = pack.total_stock > 0 ? Math.round((pack.remaining_stock / pack.total_stock) * 100) : 0
 
   const badge = STATUS_BADGES[pack.status as PackStatus] ?? FALLBACK_BADGE
@@ -129,9 +136,11 @@ export default function PackCard({
               >
                 <BadgeIcon className="w-3 h-3" /> {badge.label}
               </span>
-              <span className={`text-xs ${stock.color} px-2 py-0.5 rounded-full flex items-center gap-1`}>
-                <StockIcon className="w-3 h-3" /> {stock.label}
-              </span>
+              {stock && StockIcon && (
+                <span className={`text-xs ${stock.color} px-2 py-0.5 rounded-full flex items-center gap-1`}>
+                  <StockIcon className="w-3 h-3" /> {stock.label}
+                </span>
+              )}
             </div>
 
             {pack.description && (
