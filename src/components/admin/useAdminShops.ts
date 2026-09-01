@@ -23,6 +23,10 @@ export interface AdminShop {
   address_line1: string | null
   phone_e164: string | null
   logo_path: string | null
+  /** RUT declarado por el comercio, normalizado NNNNNNNN-D (0038/0039). */
+  tax_id: string | null
+  /** Nº de resolución sanitaria SEREMI declarado (0038/0039). */
+  sanitary_resolution: string | null
   reviewed_at: string | null
   created_at: string
   updated_at: string
