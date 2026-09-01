@@ -26,9 +26,19 @@ describe('getReserveBlockReason', () => {
     expect(getReserveBlockReason({ remainingStock: 5, pickupEndAt: '2026-08-24T11:00:00Z', now })).toBe('window-passed')
   })
 
-  it('no bloquea si la ventana termina en el futuro (aunque sea por poco)', () => {
+  it('bloquea cuando quedan menos de 15 minutos para el cierre (espejo de 0037)', () => {
     const now = new Date('2026-08-24T12:00:00Z')
-    expect(getReserveBlockReason({ remainingStock: 5, pickupEndAt: '2026-08-24T12:00:01Z', now })).toBeNull()
+    expect(getReserveBlockReason({ remainingStock: 5, pickupEndAt: '2026-08-24T12:10:00Z', now })).toBe('window-passed')
+  })
+
+  it('bloquea exactamente en el corte de 15 minutos', () => {
+    const now = new Date('2026-08-24T12:00:00Z')
+    expect(getReserveBlockReason({ remainingStock: 5, pickupEndAt: '2026-08-24T12:15:00Z', now })).toBe('window-passed')
+  })
+
+  it('no bloquea si falta más de 15 minutos para el cierre (venta durante la ventana)', () => {
+    const now = new Date('2026-08-24T12:00:00Z')
+    expect(getReserveBlockReason({ remainingStock: 5, pickupEndAt: '2026-08-24T12:15:01Z', now })).toBeNull()
   })
 
   it('no bloquea con pickupEndAt null: la RPC es la que decide', () => {
