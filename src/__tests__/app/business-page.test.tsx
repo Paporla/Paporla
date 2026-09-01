@@ -182,6 +182,19 @@ describe('BusinessDashboard (página)', () => {
     expect(screen.getByText('Reservas hoy')).toBeInTheDocument()
   })
 
+  it('packs anteriores sin ninguno activo: el panel ofrece repetir el último (Lote C)', () => {
+    renderDashboard({ packs: [{ id: 'pk-1', title: 'Pack de ayer', status: 'expired' }] })
+    expect(screen.getByRole('link', { name: /Repetir mi último pack/ })).toHaveAttribute(
+      'href',
+      '/business/packs/pk-1/duplicate',
+    )
+  })
+
+  it('con un pack activo: el atajo de repetir no aparece (ya está vendiendo)', () => {
+    renderDashboard({ packs: [{ id: 'pk-1', title: 'Pack', status: 'active' }] })
+    expect(screen.queryByText(/Repetir mi último pack/)).not.toBeInTheDocument()
+  })
+
   it('fallo de la RPC: tarjeta de error con el motivo en español y reintentar', () => {
     renderDashboard({
       error: 'Esta cuenta no gestiona ese comercio. Inicia sesión con la cuenta que lo administra.',

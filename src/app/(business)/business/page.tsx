@@ -13,6 +13,7 @@ import BusinessStatsGrid from '@/components/business/dashboard/BusinessStatsGrid
 import BusinessQuickActions from '@/components/business/dashboard/BusinessQuickActions'
 import BusinessRecentActivity from '@/components/business/dashboard/BusinessRecentActivity'
 import FirstStepsChecklist from '@/components/business/dashboard/FirstStepsChecklist'
+import RepeatLastPackCard from '@/components/business/dashboard/RepeatLastPackCard'
 import TodayPickups from '@/components/business/TodayPickups'
 import PickupCodeValidator from '@/components/business/PickupCodeValidator'
 
@@ -96,6 +97,10 @@ export default function BusinessDashboard() {
       {/* Verificado pero sin packs: el último paso del camino guiado.
           Se oculta solo en cuanto exista el primer pack. */}
       <FirstStepsChecklist shop={checklistShop} hasPacks={packs.length > 0} />
+
+      {/* Atajo del hábito diario: repetir el pack de ayer en dos toques.
+          Solo aparece si hay packs anteriores y ninguno activo (Lote C). */}
+      <RepeatLastPackCard packs={packs} />
 
       <OnboardingBanner type="commerce" />
       <BusinessWelcomeBanner
