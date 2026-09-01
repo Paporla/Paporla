@@ -270,7 +270,8 @@ export default function ReserveModal({ isOpen, onClose, pack }: ReserveModalProp
                     <AlertCircle className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
                     <p className="text-[11px] leading-relaxed text-amber-800 dark:text-amber-200">
                       Por tratarse de alimentos perecederos, esta reserva no admite derecho a retracto (art. 3 bis, Ley
-                      19.496). Puedes cancelarla gratis desde Mis Reservas antes de la hora de retiro.
+                      19.496). Puedes cancelarla gratis desde Mis Reservas hasta 2 horas antes del inicio de la ventana
+                      de retiro.
                     </p>
                   </div>
 
