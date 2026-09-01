@@ -33,7 +33,8 @@ export function canSubmitForReview(status: ShopStatus): boolean {
 }
 
 /**
- * Los 8 campos que la RPC exige NOT NULL, con la etiqueta que ve el comercio y
+ * Los campos que la RPC exige NOT NULL (incluye RUT y resolución sanitaria
+ * desde 0038), con la etiqueta que ve el comercio y
  * la pestaña donde se rellenan (para poder llevarle allí de un clic).
  *
  * `locality_id` no aparece: el perfil lo fija siempre a Santiago
@@ -44,6 +45,8 @@ export const REQUIRED_FIELDS = [
   { key: 'category', label: 'Categoría', tab: 'info' },
   { key: 'phone', label: 'Teléfono', tab: 'info' },
   { key: 'address', label: 'Dirección', tab: 'info' },
+  { key: 'taxId', label: 'RUT de la empresa', tab: 'info' },
+  { key: 'sanitaryResolution', label: 'Resolución sanitaria', tab: 'info' },
   { key: 'latitude', label: 'Latitud', tab: 'location' },
   { key: 'longitude', label: 'Longitud', tab: 'location' },
   { key: 'logoUrl', label: 'Logo', tab: 'images' },

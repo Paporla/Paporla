@@ -25,6 +25,7 @@ import {
   type ShopHourRow,
 } from '@/lib/utils/shopHours'
 import { parseCoordinate, validateCoordinatePair } from '@/lib/utils/coordinates'
+import { getChileRutError, normalizeChileRut } from '@/lib/utils/chileRut'
 
 const CHILE_MARKET_ID = '10000000-0000-4000-8000-000000000001'
 const SANTIAGO_LOCALITY_ID = '10000000-0000-4000-8000-000000000101'
@@ -42,6 +43,10 @@ interface ShopData {
   phone: string | null
   website: string | null
   instagram: string | null
+  /** RUT de la empresa, normalizado NNNNNNNN-D (0038). */
+  tax_id: string | null
+  /** Nº de resolución sanitaria SEREMI de Salud (0038). */
+  sanitary_resolution: string | null
   logo_url: string | null
   cover_url: string | null
   logo_path: string | null
@@ -122,6 +127,8 @@ export default function BusinessProfilePage() {
     phone: '',
     website: '',
     instagram: '',
+    taxId: '',
+    sanitaryResolution: '',
     logoUrl: '',
     coverUrl: '',
     packImageUrl: '',
@@ -161,6 +168,8 @@ export default function BusinessProfilePage() {
           phone: (row.phone_e164 as string | null) ?? null,
           website: (row.website_url as string | null) ?? null,
           instagram: (row.instagram_handle as string | null) ?? null,
+          tax_id: (row.tax_id as string | null) ?? null,
+          sanitary_resolution: (row.sanitary_resolution as string | null) ?? null,
           logo_url: null,
           cover_url: null,
           logo_path: (row.logo_path as string | null) ?? null,
@@ -184,6 +193,8 @@ export default function BusinessProfilePage() {
           phone: mapped.phone ?? '',
           website: mapped.website ?? '',
           instagram: mapped.instagram ?? '',
+          taxId: mapped.tax_id ?? '',
+          sanitaryResolution: mapped.sanitary_resolution ?? '',
           logoUrl: mapped.logo_path ?? '',
           coverUrl: mapped.cover_path ?? '',
           packImageUrl: mapped.default_pack_image_path ?? '',
@@ -252,6 +263,17 @@ export default function BusinessProfilePage() {
         return false
       }
 
+      // Validar el RUT ANTES de tocar la base: espejo de
+      // app_private.normalize_chile_rut (0038). Vacío se permite guardar
+      // (el aviso de campos faltantes ya lo reclama para enviar a revisión);
+      // mal escrito, no.
+      const rutError = getChileRutError(formData.taxId)
+      if (rutError) {
+        setToast({ message: rutError, type: 'error' })
+        setActiveTab('info')
+        return false
+      }
+
       if (shop?.id) {
         const logoPath = storagePath(formData.logoUrl, shop.logo_path)
         const coverPath = storagePath(formData.coverUrl, shop.cover_path)
@@ -274,6 +296,10 @@ export default function BusinessProfilePage() {
           p_cover_path: coverPath,
           // Cadena vacia = borrar. La RPC distingue '' de null a proposito.
           p_default_pack_image_path: packImagePath,
+          // Normalizado aqui para que el comercio vea el formato canonico
+          // (12345678-K) al recargar, escriba como escriba.
+          p_tax_id: formData.taxId.trim() === '' ? '' : (normalizeChileRut(formData.taxId) ?? ''),
+          p_sanitary_resolution: formData.sanitaryResolution,
         })
         if (error) throw error
 
@@ -288,6 +314,8 @@ export default function BusinessProfilePage() {
           phone: formData.phone || null,
           website: formData.website || null,
           instagram: formData.instagram || null,
+          tax_id: normalizeChileRut(formData.taxId),
+          sanitary_resolution: formData.sanitaryResolution.trim() || null,
           latitude: parseCoordinate(formData.latitude),
           longitude: parseCoordinate(formData.longitude),
           logo_path: logoPath || null,
@@ -346,6 +374,10 @@ export default function BusinessProfilePage() {
         phone: formData.phone || null,
         website: formData.website || null,
         instagram: formData.instagram || null,
+        // create_own_shop no acepta estos campos: se guardan en el siguiente
+        // "Guardar cambios" vía update_own_shop (0038).
+        tax_id: null,
+        sanitary_resolution: null,
         logo_url: null,
         cover_url: null,
         logo_path: null,
@@ -440,6 +472,8 @@ export default function BusinessProfilePage() {
         phone: shop.phone ?? '',
         website: shop.website ?? '',
         instagram: shop.instagram ?? '',
+        taxId: shop.tax_id ?? '',
+        sanitaryResolution: shop.sanitary_resolution ?? '',
         logoUrl: shop.logo_path ?? '',
         coverUrl: shop.cover_path ?? '',
         packImageUrl: shop.default_pack_image_path ?? '',

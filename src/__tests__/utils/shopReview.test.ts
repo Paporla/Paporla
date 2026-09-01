@@ -14,6 +14,8 @@ const completo = {
   category: 'bakery',
   phone: '+56912345678',
   address: 'Av. Providencia 1234',
+  taxId: '76543210-3',
+  sanitaryResolution: 'RS N° 12345/2026 SEREMI RM',
   latitude: '-33.4372',
   longitude: '-70.6506',
   logoUrl: 'shop-id/logo.jpg',
