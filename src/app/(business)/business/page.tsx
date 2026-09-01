@@ -14,6 +14,7 @@ import BusinessQuickActions from '@/components/business/dashboard/BusinessQuickA
 import BusinessRecentActivity from '@/components/business/dashboard/BusinessRecentActivity'
 import FirstStepsChecklist from '@/components/business/dashboard/FirstStepsChecklist'
 import TodayPickups from '@/components/business/TodayPickups'
+import PickupCodeValidator from '@/components/business/PickupCodeValidator'
 
 export default function BusinessDashboard() {
   const { loading: authLoading } = useAuth()
@@ -116,7 +117,13 @@ export default function BusinessDashboard() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <BusinessQuickActions />
-        <TodayPickups shopId={shop.id} />
+        {/* En la hora pico el comercio valida recogidas SIN navegar: el
+            validador vive también aquí, junto a las recogidas de hoy
+            (Lote B simplificación UX). */}
+        <div className="space-y-6">
+          <PickupCodeValidator shopId={shop.id} />
+          <TodayPickups shopId={shop.id} />
+        </div>
       </div>
 
       <BusinessRecentActivity activities={activities} />

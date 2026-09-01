@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { QrCode, CheckCircle, XCircle, Loader2, Search, ArrowRight } from 'lucide-react'
 import { supabaseBrowser } from '@/lib/supabase/client'
 import { translateDbError } from '@/lib/utils/db-errors'
+import { normalizePickupCredential } from '@/lib/utils/pickupCode'
 
 type ValidationState = 'idle' | 'validating' | 'success' | 'error'
 
@@ -16,9 +17,6 @@ interface ValidationResult {
   quantity?: number
 }
 
-/** Longitud mínima de p_credential en validate_pickup (8..512, 0009:503). */
-const MIN_CODE_LENGTH = 8
-
 /**
  * Validador de códigos del piloto.
  *
@@ -28,6 +26,13 @@ const MIN_CODE_LENGTH = 8
  * la reserva esté ready_pickup + paid y que estemos dentro de la ventana (con
  * 30 min de gracia). Al validar, la reserva pasa a picked_up y se refrescan
  * las listas. El nombre del parámetro importa: es `p_credential`.
+ *
+ * Entrada INDULGENTE (Lote B simplificación UX): el cliente dicta el código
+ * en voz alta, así que aceptamos lo que el comercio escriba —con o sin el
+ * prefijo P4P-, con espacios o guiones de más, en minúsculas— y
+ * normalizePickupCredential reconstruye la credencial canónica antes de
+ * llamar a la RPC. La seguridad no cambia: el servidor sigue comparando la
+ * huella exacta.
  */
 export default function PickupCodeValidator({ shopId }: { shopId: string }) {
   const queryClient = useQueryClient()
@@ -35,15 +40,16 @@ export default function PickupCodeValidator({ shopId }: { shopId: string }) {
   const [busy, setBusy] = useState(false)
   const [result, setResult] = useState<ValidationResult | null>(null)
 
+  const credential = normalizePickupCredential(code)
+
   const handleValidate = async () => {
-    const cleanCode = code.trim().toUpperCase()
-    if (cleanCode.length < MIN_CODE_LENGTH || busy) return
+    if (!credential || busy) return
 
     setBusy(true)
     setResult({ state: 'validating', message: 'Validando código...' })
     try {
       const supabase = supabaseBrowser()
-      const { data, error } = await supabase.rpc('validate_pickup', { p_credential: cleanCode })
+      const { data, error } = await supabase.rpc('validate_pickup', { p_credential: credential })
 
       if (error) {
         setResult({ state: 'error', message: translateDbError(error) })
@@ -81,7 +87,7 @@ export default function PickupCodeValidator({ shopId }: { shopId: string }) {
           <div>
             <h3 className="font-bold dark:text-white text-gray-900">Validar código de recogida</h3>
             <p className="text-xs dark:text-gray-500 text-gray-400">
-              Pídele el código a tu cliente (se genera al confirmar la reserva) y escríbelo aquí.
+              Pídele el código a tu cliente y escríbelo aquí. Da igual con mayúsculas, espacios o sin el P4P.
             </p>
           </div>
         </div>
@@ -97,7 +103,7 @@ export default function PickupCodeValidator({ shopId }: { shopId: string }) {
               onChange={(e) => setCode(e.target.value.toUpperCase())}
               onKeyDown={handleKeyDown}
               placeholder="P4P-XXXXXXXX"
-              maxLength={12}
+              maxLength={20}
               aria-label="Código de recogida"
               className="w-full pl-11 pr-4 py-3 dark:bg-dark-muted bg-gray-50 border dark:border-dark-border border-gray-200 rounded-xl dark:text-white text-gray-900 font-mono text-lg tracking-widest dark:placeholder-gray-600 placeholder-gray-400 focus:border-primary focus:ring-1 focus:ring-primary/20 focus:outline-none transition-all"
               autoComplete="off"
@@ -105,7 +111,7 @@ export default function PickupCodeValidator({ shopId }: { shopId: string }) {
           </div>
           <button
             onClick={handleValidate}
-            disabled={code.trim().length < MIN_CODE_LENGTH || busy}
+            disabled={!credential || busy}
             aria-label="Validar código de recogida"
             className="flex items-center gap-2 bg-primary hover:bg-primary-light disabled:opacity-50 disabled:cursor-not-allowed text-dark font-bold px-6 py-3 rounded-xl transition-all text-sm"
           >
