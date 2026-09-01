@@ -3,16 +3,20 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Search, ShoppingBag, MapPin, X } from 'lucide-react'
+import { isUserOnboardingDismissed, dismissUserOnboarding } from '@/lib/utils/onboarding'
 
-const STORAGE_KEY = 'paporla_onboarding_seen'
-
+/*
+ * La historia "explora → reserva → recoge" en el catálogo. Comparte estado
+ * de descarte con OnboardingBanner del dashboard (lib/utils/onboarding,
+ * Lote E): cerrarla aquí la cierra en todas partes y viceversa. Antes cada
+ * cartel usaba su propia clave de localStorage y la explicación perseguía
+ * al usuario de página en página.
+ */
 export default function OnboardingSteps() {
   const [visible, setVisible] = useState(false)
 
   useEffect(() => {
-    // Solo mostrar si no se vio antes
-    const seen = localStorage.getItem(STORAGE_KEY)
-    if (!seen) {
+    if (!isUserOnboardingDismissed()) {
       // Pequeño delay para que no compita con la carga de página
       const timer = setTimeout(() => setVisible(true), 800)
       return () => clearTimeout(timer)
@@ -21,7 +25,7 @@ export default function OnboardingSteps() {
 
   const dismiss = () => {
     setVisible(false)
-    localStorage.setItem(STORAGE_KEY, 'true')
+    dismissUserOnboarding()
   }
 
   return (

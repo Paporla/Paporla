@@ -3,7 +3,6 @@
 import { useSearchParams } from 'next/navigation'
 import { Store, CheckCircle } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
-import OnboardingBanner from '@/components/onboarding/OnboardingBanner'
 import { useBusinessDashboard } from '@/components/business/dashboard/useBusinessDashboard'
 import LoadingSkeleton from '@/components/business/LoadingSkeleton'
 import Button from '@/components/ui/Button'
@@ -102,7 +101,6 @@ export default function BusinessDashboard() {
           Solo aparece si hay packs anteriores y ninguno activo (Lote C). */}
       <RepeatLastPackCard packs={packs} />
 
-      <OnboardingBanner type="commerce" />
       <BusinessWelcomeBanner
         shopName={shop.name}
         todayReservations={stats.todayReservations}
