@@ -55,6 +55,16 @@ interface BusinessProfileLayoutProps {
   submitting: boolean
   /** El comercio todavía no existe en la base: no hay nada que enviar. */
   shopExists: boolean
+  /**
+   * Hay que aceptar los Términos para Comercios antes de enviar (0040 exige
+   * la aceptación en la base; aquí se pide ANTES para no recibir un
+   * MERCHANT_TERMS_NOT_ACCEPTED después de pulsar). `false` cuando ya los
+   * aceptó, cuando no hay documento publicado o mientras se carga.
+   */
+  termsRequired: boolean
+  /** Estado del checkbox de términos (vive en la página, como el resto). */
+  termsChecked: boolean
+  onTermsCheckedChange: (checked: boolean) => void
 }
 
 /**
@@ -76,6 +86,9 @@ function StatusNotice({
   onGoToTab,
   submitting,
   shopExists,
+  termsRequired,
+  termsChecked,
+  onTermsCheckedChange,
 }: Pick<
   BusinessProfileLayoutProps,
   | 'status'
@@ -86,6 +99,9 @@ function StatusNotice({
   | 'onGoToTab'
   | 'submitting'
   | 'shopExists'
+  | 'termsRequired'
+  | 'termsChecked'
+  | 'onTermsCheckedChange'
 >) {
   if (status === 'verified') return null
 
@@ -132,9 +148,12 @@ function StatusNotice({
   // A partir de aquí: draft o rejected. Ambos permiten enviar a revisión.
   const isRejected = status === 'rejected'
   const isIncomplete = missingFields.length > 0
+  // Los términos pendientes también bloquean: la RPC los exige (0040) y el
+  // checkbox de abajo es la forma de cumplirlos sin salir de la pantalla.
+  const termsPending = termsRequired && !termsChecked
   // Los cambios sin guardar YA NO bloquean: el boton guarda y envia de una.
-  // Solo la falta de datos obligatorios impide llamar a la RPC.
-  const blocked = isIncomplete
+  // Solo la falta de datos obligatorios (o de aceptación) impide llamar.
+  const blocked = isIncomplete || termsPending
   const accent = isRejected ? 'red' : 'blue'
 
   // El boton dice por que no se puede pulsar. Antes ponia siempre "Enviar a
@@ -142,11 +161,13 @@ function StatusNotice({
   // el comercio miraba el boton gris y no entendia que le faltaba.
   const label = isIncomplete
     ? `Faltan ${missingFields.length} ${missingFields.length === 1 ? 'campo' : 'campos'}`
-    : hasUnsavedChanges
-      ? 'Guardar y enviar'
-      : isRejected
-        ? 'Volver a enviar'
-        : 'Enviar a revision'
+    : termsPending
+      ? 'Acepta los términos'
+      : hasUnsavedChanges
+        ? 'Guardar y enviar'
+        : isRejected
+          ? 'Volver a enviar'
+          : 'Enviar a revision'
 
   return (
     <div
@@ -232,6 +253,36 @@ function StatusNotice({
         </div>
       )}
 
+      {/* Aceptación de los Términos para Comercios. Solo aparece si hay un
+          documento publicado que este dueño aún no aceptó. La aceptación real
+          se registra al enviar (accept_legal_document); el checkbox captura
+          la voluntad y habilita el botón. */}
+      {!isIncomplete && termsRequired && (
+        <div className="mt-3 pt-3 border-t border-black/5 dark:border-white/5">
+          <label className="flex items-start gap-2.5 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={termsChecked}
+              onChange={(e) => onTermsCheckedChange(e.target.checked)}
+              className="mt-0.5 w-4 h-4 rounded border-gray-300 dark:border-white/20 text-primary focus:ring-primary/50 cursor-pointer"
+            />
+            <span className="text-[11px] text-gray-700 dark:text-gray-300 leading-relaxed">
+              He leído y acepto los{' '}
+              <a
+                href="/legal/terminos-comercios"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-primary font-medium underline underline-offset-2"
+              >
+                Términos y Condiciones para Comercios
+              </a>
+              , incluida mi responsabilidad sobre la inocuidad de los alimentos y la vigencia de mis autorizaciones
+              sanitarias.
+            </span>
+          </label>
+        </div>
+      )}
+
       {!isIncomplete && hasUnsavedChanges && (
         <div className="mt-3 pt-3 border-t border-black/5 dark:border-white/5">
           <p className="text-[11px] text-gray-600 dark:text-gray-400">
@@ -258,6 +309,9 @@ export default function BusinessProfileLayout({
   onGoToTab,
   submitting,
   shopExists,
+  termsRequired,
+  termsChecked,
+  onTermsCheckedChange,
 }: BusinessProfileLayoutProps) {
   return (
     <div className="space-y-6">
@@ -317,6 +371,9 @@ export default function BusinessProfileLayout({
           onGoToTab={onGoToTab}
           submitting={submitting}
           shopExists={shopExists}
+          termsRequired={termsRequired}
+          termsChecked={termsChecked}
+          onTermsCheckedChange={onTermsCheckedChange}
         />
       </div>
 

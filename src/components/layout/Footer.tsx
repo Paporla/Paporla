@@ -31,6 +31,7 @@ export default function Footer() {
 
   const legalLinks = [
     { href: '/legal/terminos', label: 'Terminos y Condiciones', icon: FileText },
+    { href: '/legal/terminos-comercios', label: 'Terminos para Comercios', icon: FileText },
     { href: '/legal/privacidad', label: 'Politica de Privacidad', icon: Shield },
     { href: '/legal/cookies', label: 'Politica de Cookies', icon: Cookie },
     { href: '/legal/legal-bases', label: 'Bases Legales', icon: Scale },

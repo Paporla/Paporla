@@ -395,6 +395,9 @@ describe('translateDbError', () => {
  * Se declara fuera del describe para que el test anterior quede legible.
  */
 const MENSAJES_ESPERADOS: Record<string, string> = {
+  // Términos para Comercios — submit_own_shop_for_review / accept_legal_document (0040)
+  MERCHANT_TERMS_NOT_ACCEPTED: 'Debes aceptar los Términos y Condiciones para Comercios antes de enviar a revisión.',
+  LEGAL_DOCUMENT_NOT_APPLICABLE: 'Este documento legal no aplica a tu cuenta. Recarga la página e inténtalo de nuevo.',
   PACK_NOT_OWNED: 'Este pack no pertenece a tu comercio.',
   PACK_NOT_OWNED_OR_INACTIVE: 'Este pack ya no está disponible para editar. Comprueba que tu comercio siga activo.',
   PACK_NOT_FOUND: 'No se encontró el pack.',

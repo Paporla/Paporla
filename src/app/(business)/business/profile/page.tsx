@@ -26,6 +26,7 @@ import {
 } from '@/lib/utils/shopHours'
 import { parseCoordinate, validateCoordinatePair } from '@/lib/utils/coordinates'
 import { getChileRutError, normalizeChileRut } from '@/lib/utils/chileRut'
+import { useMerchantTerms } from '@/hooks/useMerchantTerms'
 
 const CHILE_MARKET_ID = '10000000-0000-4000-8000-000000000001'
 const SANTIAGO_LOCALITY_ID = '10000000-0000-4000-8000-000000000101'
@@ -114,6 +115,13 @@ export default function BusinessProfilePage() {
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null)
   const [isSaving, setIsSaving] = useState(false)
   const [submittingReview, setSubmittingReview] = useState(false)
+
+  // Términos para Comercios (0040): si hay documento publicado y este dueño
+  // aún no lo aceptó, el envío a revisión exige marcar el checkbox. La
+  // aceptación real se registra en la base justo antes de enviar.
+  const merchantTerms = useMerchantTerms()
+  const [termsChecked, setTermsChecked] = useState(false)
+  const termsRequired = !merchantTerms.loading && merchantTerms.documentId !== null && !merchantTerms.accepted
 
   const [formData, setFormData] = useState({
     name: '',
@@ -433,6 +441,14 @@ export default function BusinessProfilePage() {
       return
     }
 
+    // La RPC exigirá la aceptación de los términos (0040): si hace falta y el
+    // checkbox no está marcado, se avisa aquí en lugar de dejar que la base
+    // responda con un MERCHANT_TERMS_NOT_ACCEPTED tras el clic.
+    if (termsRequired && !termsChecked) {
+      setToast({ message: 'Debes aceptar los Términos y Condiciones para Comercios antes de enviar.', type: 'error' })
+      return
+    }
+
     setSubmittingReview(true)
     try {
       // Hay cambios sin guardar: se guardan primero. Obligar al comercio a
@@ -442,6 +458,13 @@ export default function BusinessProfilePage() {
       if (isDirty) {
         const saved = await handleSave('Cambios guardados. Enviando a revision...')
         if (!saved) return
+      }
+
+      // La aceptación se registra ANTES del envío: la RPC de envío la valida.
+      // accept_legal_document es idempotente (ON CONFLICT DO NOTHING), así que
+      // reintentar tras un fallo posterior no duplica nada.
+      if (termsRequired) {
+        await merchantTerms.accept()
       }
 
       const { error } = await supabase.rpc('submit_own_shop_for_review', { p_shop_id: shop.id })
@@ -519,6 +542,9 @@ export default function BusinessProfilePage() {
         onGoToTab={setActiveTab}
         submitting={submittingReview}
         shopExists={Boolean(shop?.id)}
+        termsRequired={termsRequired}
+        termsChecked={termsChecked}
+        onTermsCheckedChange={setTermsChecked}
       >
         <UnsavedChangesBar isDirty={isDirty} onSave={handleSave} onDiscard={handleDiscard} saving={saving} />
         {isSaving && (

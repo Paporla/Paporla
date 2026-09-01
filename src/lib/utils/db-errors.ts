@@ -87,6 +87,8 @@ const RPC_MESSAGES: Record<string, string> = {
   SHOP_NOT_SUBMITTABLE: 'Este comercio no se puede enviar a revisión en su estado actual.',
   SHOP_TAX_ID_REQUIRED: 'Falta el RUT de la empresa. Complétalo en la pestaña Información.',
   SHOP_SANITARY_RESOLUTION_REQUIRED: 'Falta el número de resolución sanitaria. Complétalo en la pestaña Información.',
+  MERCHANT_TERMS_NOT_ACCEPTED: 'Debes aceptar los Términos y Condiciones para Comercios antes de enviar a revisión.',
+  LEGAL_DOCUMENT_NOT_APPLICABLE: 'Este documento legal no aplica a tu cuenta. Recarga la página e inténtalo de nuevo.',
   INVALID_TAX_ID: 'RUT inválido. Revisa el número y el dígito verificador (ej: 76543210-3).',
   SHOP_NOT_FOUND: 'No se encontró el comercio.',
 
