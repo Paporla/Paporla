@@ -1,8 +1,9 @@
 'use client'
 
 import { useState, useMemo, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { usePublicPacks } from '@/hooks/usePublicPacks'
-import { trackViewPackList } from '@/lib/analytics/events'
+import { trackViewPackList, trackClickReserve } from '@/lib/analytics/events'
 import PackFiltersAdvanced from '@/components/packs/PackFiltersAdvanced'
 import PackCardPublic from '@/components/packs/PackCardPublic'
 import Pagination from '@/components/ui/Pagination'
@@ -17,6 +18,7 @@ const ITEMS_PER_PAGE = 9
 export default function PacksPage() {
   const { packs, filters, loading, error: hookError, setError, setFilters } = usePublicPacks()
   const [currentPage, setCurrentPage] = useState(1)
+  const router = useRouter()
 
   const totalPages = Math.ceil(packs.length / ITEMS_PER_PAGE)
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE
@@ -27,8 +29,17 @@ export default function PacksPage() {
     setCurrentPage(1)
   }
 
-  const handleReserve = () => {
-    setError('Las reservas online se activarán cuando integremos el proveedor de pagos de Chile.')
+  /**
+   * La reserva SÍ funciona: vive en el modal de la página de detalle
+   * (/packs/[id] → ReserveModal). Este botón lleva allí, registrando el clic
+   * en el funnel. Antes mostraba «se activarán cuando integremos pagos» y
+   * desactivaba la CTA — mensaje falso que mataba la conversión del catálogo
+   * (hallazgo 4.2 de la auditoría 2026-09-01).
+   */
+  const handleReserve = (packId: string) => {
+    const pack = packs.find((p) => p.id === packId)
+    if (pack) trackClickReserve(pack.id, pack.title, pack.price_minor, pack.currency_code)
+    router.push(`/packs/${packId}`)
   }
 
   useEffect(() => {
@@ -87,7 +98,7 @@ export default function PacksPage() {
                   onReserve={handleReserve}
                   index={index}
                   reserving={null}
-                  reservationsEnabled={false}
+                  reservationsEnabled
                 />
               ))}
             </div>
