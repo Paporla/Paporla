@@ -211,6 +211,34 @@ export default function PackFormSimplified({
   }
 
   /*
+   * La foto por defecto del comercio vive en el bucket shop-images
+   * (`{shopId}/pack-default/...`), pero TODAS las pantallas resuelven
+   * pack.image_path contra el bucket pack-images. Guardar esa ruta ajena tal
+   * cual dejaba el pack con la imagen rota (enlace a un bucket equivocado).
+   *
+   * La solución es copiarla: al crear un pack sin foto propia, el archivo se
+   * duplica en la carpeta del pack dentro de pack-images, igual que si el
+   * comercio lo hubiera subido a mano. Así el pack queda autocontenido y, si
+   * el comercio cambia su foto por defecto mañana, los packs ya publicados
+   * conservan la suya (mismo criterio que la galería no heredada).
+   */
+  const isShopDefaultPath = (path: string) => path.split('/')[1] === 'pack-default'
+
+  const copyShopDefaultImage = async (packId: string, sourcePath: string) => {
+    const { data: blob, error: downErr } = await supabase.storage.from('shop-images').download(sourcePath)
+    if (downErr) throw downErr
+    const ext = sourcePath.split('.').pop() || 'jpg'
+    const objectPath = `${shopId}/${packId}/${crypto.randomUUID()}.${ext}`
+    const { error: upErr } = await supabase.storage.from('pack-images').upload(objectPath, blob, {
+      cacheControl: '3600',
+      upsert: false,
+      contentType: blob.type || undefined,
+    })
+    if (upErr) throw upErr
+    return objectPath
+  }
+
+  /*
    * Campos que este formulario no muestra pero que las RPC exigen. Se arrastran
    * desde el pack original para que guardar una edicion no los borre por
    * omision: update_pack_content escribe SIEMPRE los 14 parametros, no hace
@@ -301,6 +329,14 @@ export default function PackFormSimplified({
     let imagePath = current.image_path ?? shopImagePath ?? ''
     if (packFile) {
       imagePath = await uploadPackImage(current.id, packFile)
+    } else if (imagePath && isShopDefaultPath(imagePath)) {
+      /*
+       * Ruta heredada de shop-images (foto por defecto del comercio, o un pack
+       * guardado con el bug anterior): se copia a pack-images para que las
+       * pantallas la resuelvan bien. Guardar una edicion tambien repara packs
+       * que quedaron con el enlace roto.
+       */
+      imagePath = await copyShopDefaultImage(current.id, imagePath)
     }
 
     const { error: updErr } = await supabase.rpc('update_pack_content', {
@@ -345,7 +381,15 @@ export default function PackFormSimplified({
       fallbackPath = shopRow?.default_pack_image_path ?? ''
     }
 
-    const params = buildPackContentParams(formData, buildExtras(fallbackPath))
+    /*
+     * El borrador se crea SIN image_path cuando la imagen final aun no existe
+     * en pack-images: la ruta definitiva necesita el pack_id (para su carpeta),
+     * asi que primero se crea el borrador y despues se sube/copia el archivo y
+     * se fija la ruta con update_pack_content. Antes se guardaba aqui la ruta
+     * de shop-images tal cual y el pack nacia con la imagen rota (todas las
+     * pantallas resuelven image_path contra pack-images).
+     */
+    const params = buildPackContentParams(formData, buildExtras(''))
 
     const { data, error: err } = await supabase.rpc('create_pack_draft', {
       p_shop_id: shopId,
@@ -357,10 +401,14 @@ export default function PackFormSimplified({
     const created = data as { pack_id?: string }
     if (!created?.pack_id) throw new Error('No se pudo crear el pack')
 
-    let imagePath = fallbackPath
+    let imagePath = ''
     if (packFile) {
       imagePath = await uploadPackImage(created.pack_id, packFile)
+    } else if (fallbackPath) {
+      imagePath = await copyShopDefaultImage(created.pack_id, fallbackPath)
+    }
 
+    if (imagePath) {
       const { error: updErr } = await supabase.rpc('update_pack_content', {
         p_pack_id: created.pack_id,
         ...buildPackContentParams(formData, buildExtras(imagePath)),
