@@ -34,6 +34,10 @@ const routeLabels: Record<string, string> = {
   'legal-bases': 'Bases Legales',
 }
 
+// Segmentos que agrupan rutas pero NO tienen pagina propia: se muestran como
+// texto sin enlace (enlazarlos daba 404 y prefetches rotos en consola).
+const NON_LINKABLE_SEGMENTS = new Set(['legal'])
+
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 const ID_REGEX = /^[0-9a-f]{20,}$/i
 
@@ -51,7 +55,7 @@ export default function Breadcrumbs() {
 
   const pathSegments = pathname.split('/').filter((segment) => segment !== '')
 
-  const breadcrumbs = [{ href: '/', label: 'Inicio' }]
+  const breadcrumbs: { href: string; label: string; linkable?: boolean }[] = [{ href: '/', label: 'Inicio' }]
 
   let currentPath = ''
   for (const segment of pathSegments) {
@@ -61,7 +65,7 @@ export default function Breadcrumbs() {
       breadcrumbs.push({ href: currentPath, label: 'Detalle' })
     } else {
       const label = routeLabels[segment] || segment.charAt(0).toUpperCase() + segment.slice(1)
-      breadcrumbs.push({ href: currentPath, label })
+      breadcrumbs.push({ href: currentPath, label, linkable: !NON_LINKABLE_SEGMENTS.has(segment) })
     }
   }
 
@@ -78,7 +82,7 @@ export default function Breadcrumbs() {
 
               return (
                 <div key={item.href} className="flex items-center">
-                  {!isLast ? (
+                  {!isLast && item.linkable !== false ? (
                     <Link
                       href={item.href}
                       className="flex items-center gap-1 dark:text-gray-400 text-gray-500 hover:text-primary transition-colors"
@@ -86,6 +90,10 @@ export default function Breadcrumbs() {
                       {index === 0 && <Home className="w-3 h-3" />}
                       <span>{item.label}</span>
                     </Link>
+                  ) : !isLast ? (
+                    <span className="flex items-center gap-1 dark:text-gray-400 text-gray-500">
+                      <span>{item.label}</span>
+                    </span>
                   ) : (
                     <span className="flex items-center gap-1 text-primary font-medium">
                       {index === 0 && <Home className="w-3 h-3" />}
