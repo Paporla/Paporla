@@ -29,7 +29,7 @@ function listed(title: string, status = 'active', packId?: string) {
     currency_code: 'CLP',
     total_stock: 10,
     remaining_stock: 5,
-    pickup_end_at: null,
+    pickup_end_at: null as string | null,
   }
 }
 
@@ -101,6 +101,27 @@ describe('useBusinessPacks', () => {
       p_limit: 50,
     })
     expect(result.current.packs.map((p) => p.title)).toEqual(['Pack 1', 'Pack 2'])
+  })
+
+  it('derives expired status when the pickup window is over', async () => {
+    const past = new Date(Date.now() - 60 * 60 * 1000).toISOString()
+    const future = new Date(Date.now() + 60 * 60 * 1000).toISOString()
+    setupMockClient([
+      { ...listed('Vencido activo'), pickup_end_at: past },
+      { ...listed('Vencido pausado', 'paused'), pickup_end_at: past },
+      { ...listed('Vigente'), pickup_end_at: future },
+      { ...listed('Borrador viejo', 'draft'), pickup_end_at: past },
+    ])
+    const { result } = renderHook(() => useBusinessPacks(), { wrapper: createWrapper() })
+    await waitFor(() => expect(result.current.loading).toBe(false))
+
+    const byTitle = Object.fromEntries(result.current.packs.map((p) => [p.title, p]))
+    expect(byTitle['Vencido activo'].status).toBe('expired')
+    expect(byTitle['Vencido activo'].is_active).toBe(false)
+    expect(byTitle['Vencido pausado'].status).toBe('expired')
+    expect(byTitle['Vigente'].status).toBe('active')
+    // Un borrador nunca se muestra como expired: no llegó a publicarse.
+    expect(byTitle['Borrador viejo'].status).toBe('draft')
   })
 
   it('filters packs by search term', async () => {

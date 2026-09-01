@@ -1909,6 +1909,7 @@ export type Database = {
         Args: { p_after?: string; p_limit?: number }
         Returns: Json
       }
+      service_expire_packs: { Args: { p_limit?: number }; Returns: Json }
       service_expire_payment_holds: {
         Args: { p_limit?: number }
         Returns: Json
