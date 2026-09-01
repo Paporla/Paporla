@@ -67,8 +67,8 @@ const BLOCK_TEXT: Record<string, { label: string; reason: string }> = {
     reason: 'Se agotó el stock de este pack. Los comercios publican nuevos packs todos los días.',
   },
   'window-passed': {
-    label: 'Recogida finalizada',
-    reason: 'La ventana de recogida de este pack ya terminó.',
+    label: 'Reservas cerradas',
+    reason: 'La ventana de retiro de este pack ya terminó o está a punto de cerrar.',
   },
 }
 

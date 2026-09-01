@@ -7,6 +7,15 @@
 /** Motivo por el que el botón "Reservar" queda deshabilitado. */
 export type ReserveBlockReason = 'sold-out' | 'window-passed'
 
+/**
+ * Margen antes del fin de la ventana en el que ya no se acepta una reserva
+ * nueva. Espejo del `interval '15 minutes'` de la base de datos (0037):
+ * da tiempo al comercio a preparar el pack y al cliente a llegar. La venta
+ * durante la ventana SÍ está permitida (0037); lo que corta es acercarse
+ * demasiado al cierre.
+ */
+export const RESERVE_CLOSES_BEFORE_END_MS = 15 * 60 * 1000
+
 export interface ReserveButtonInput {
   /** Stock restante del pack (search_available_packs). */
   remainingStock: number
@@ -30,7 +39,9 @@ export function getReserveBlockReason(input: ReserveButtonInput): ReserveBlockRe
 
   if (input.pickupEndAt) {
     const end = new Date(input.pickupEndAt)
-    if (!Number.isNaN(end.getTime()) && end.getTime() <= now.getTime()) return 'window-passed'
+    if (!Number.isNaN(end.getTime()) && end.getTime() <= now.getTime() + RESERVE_CLOSES_BEFORE_END_MS) {
+      return 'window-passed'
+    }
   }
 
   return null
