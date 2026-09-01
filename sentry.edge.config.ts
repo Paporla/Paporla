@@ -11,8 +11,9 @@ if (dsn) {
   Sentry.init({
     dsn,
 
-    // Define how likely traces are sampled. Adjust this value in production, or use tracesSampler for greater control.
-    tracesSampleRate: 1,
+    // 10% de trazas en producción (coste y ruido controlados); 100% fuera de
+    // producción para depurar con detalle. El cliente ya usaba 0.1.
+    tracesSampleRate: process.env.NODE_ENV === 'production' ? 0.1 : 1,
 
     // Enable logs to be sent to Sentry
     enableLogs: true,

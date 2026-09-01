@@ -30,11 +30,5 @@
       "destination": "/",
       "permanent": true
     }
-  ],
-  "rewrites": [
-    {
-      "source": "/monitoring",
-      "destination": "https://o4509365467611136.ingest.us.sentry.io/api/450936547ennes"
-    }
   ]
 }

@@ -51,8 +51,20 @@ describe('getClientIp', () => {
     expect(getClientIp(request)).toBe('203.0.113.5')
   })
 
-  it('returns unknown when proxy headers are absent', () => {
-    expect(getClientIp(createRequest('/api/auth'))).toBe('unknown')
+  it('sin cabeceras de proxy, cada petición recibe su propio identificador anónimo (no un cubo global)', () => {
+    // Antes devolvía 'unknown' para TODOS: un atacante podía agotar ese cubo
+    // compartido y denegar el servicio al resto (S1, auditoría 2026-09-01).
+    const first = getClientIp(createRequest('/api/auth'))
+    const second = getClientIp(createRequest('/api/auth'))
+
+    expect(first).toMatch(/^anon:/)
+    expect(second).toMatch(/^anon:/)
+    expect(first).not.toBe(second)
+  })
+
+  it('usa x-vercel-id como identificador anónimo cuando existe', () => {
+    const request = createRequest('/api/auth', { 'x-vercel-id': 'iad1::abc123' })
+    expect(getClientIp(request)).toBe('anon:iad1::abc123')
   })
 })
 

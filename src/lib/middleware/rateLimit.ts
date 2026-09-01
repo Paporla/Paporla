@@ -26,14 +26,31 @@ const routeLimits: Record<string, { limit: number; windowSeconds: number }> = {
   '/api/health': { limit: 120, windowSeconds: 60 },
 }
 
+/**
+ * IP del cliente para el rate limit.
+ *
+ * Modelo de confianza (auditoría 2026-09-01, S1): este código corre en el
+ * edge de Vercel, donde la plataforma SOBREESCRIBE `x-real-ip` con la IP real
+ * de la conexión — un cliente no puede falsificarla. `x-forwarded-for` es el
+ * respaldo (el primer salto lo fija también el proxy de Vercel).
+ *
+ * Si no hay ninguna cabecera (tests, entornos raros), antes se devolvía
+ * 'unknown': UN SOLO cubo compartido por todos los clientes sin cabecera, de
+ * modo que un atacante podía agotar el límite y denegar el servicio a los
+ * demás (denegación colateral). Ahora cada petición sin cabecera recibe un
+ * identificador propio derivado de `x-vercel-id` (único por request) o un
+ * UUID: el limitador simplemente no agrupa lo que no puede identificar.
+ */
 export function getClientIp(request: NextRequest): string {
   const realIp = request.headers.get('x-real-ip')
-  const forwarded = request.headers.get('x-forwarded-for')
-
   if (realIp) return realIp.trim()
-  if (forwarded) return forwarded.split(',')[0].trim()
 
-  return 'unknown'
+  const forwarded = request.headers.get('x-forwarded-for')
+  const firstHop = forwarded?.split(',')[0]?.trim()
+  if (firstHop) return firstHop
+
+  const anonId = request.headers.get('x-vercel-id') ?? crypto.randomUUID()
+  return `anon:${anonId}`
 }
 
 async function sha256Bytea(value: string): Promise<string> {
