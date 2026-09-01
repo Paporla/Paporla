@@ -12,6 +12,7 @@ import BusinessDashboard from '@/app/(business)/business/page'
 const hookState = vi.hoisted(() => ({
   shop: null as Record<string, unknown> | null,
   stats: null as Record<string, number> | null,
+  packs: [] as Record<string, unknown>[],
   recentReservations: [] as Record<string, unknown>[],
   loading: false,
   error: null as string | null,
@@ -30,7 +31,7 @@ vi.mock('next/navigation', () => ({
 vi.mock('@/components/business/dashboard/useBusinessDashboard', () => ({
   useBusinessDashboard: () => ({
     shop: hookState.shop,
-    packs: [] as Record<string, unknown>[],
+    packs: hookState.packs,
     recentReservations: hookState.recentReservations,
     loading: hookState.loading,
     error: hookState.error,
@@ -86,6 +87,9 @@ function renderDashboard(overrides: Partial<typeof hookState> = {}) {
   Object.assign(hookState, {
     shop: verifiedShop,
     stats: baseStats,
+    // Por defecto el comercio ya tiene un pack: el checklist «Primeros
+    // pasos» no aparece y los tests históricos del panel siguen valiendo.
+    packs: [{ id: 'pk-1', title: 'Pack Panadería Artesanal', status: 'active' }],
     recentReservations: [
       resRow({ reservation_id: 'r-d' }),
       resRow({
@@ -142,16 +146,33 @@ describe('BusinessDashboard (página)', () => {
     expect(links.some((href) => href?.includes('status=pending'))).toBe(false)
   })
 
-  it('sin comercio: invita a completar el perfil', () => {
+  it('sin comercio: checklist «Primeros pasos» con el paso 1 activo (completar perfil)', () => {
     renderDashboard({ shop: null })
-    expect(screen.getByText('Bienvenido a Paporla!')).toBeInTheDocument()
-    expect(screen.getByText('Completar mi perfil de comercio')).toBeInTheDocument()
+    expect(screen.getByText('¡Bienvenido a Paporla!')).toBeInTheDocument()
+    expect(screen.getByText('Primeros pasos')).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Completar mi perfil' })).toHaveAttribute('href', '/business/profile')
+    expect(screen.queryByText('Reservas hoy')).not.toBeInTheDocument()
   })
 
-  it('comercio no verificado: estado de revisión (no el panel)', () => {
+  it('comercio no verificado: checklist en el paso 2 (revisión), no el panel', () => {
     renderDashboard({ shop: { ...verifiedShop, status: 'pending_review', verified: false } })
-    expect(screen.getByText('Comercio en revision')).toBeInTheDocument()
+    expect(screen.getByText('Primeros pasos')).toBeInTheDocument()
+    expect(screen.getByText(/Estamos revisando tus datos/)).toBeInTheDocument()
     expect(screen.queryByText('Reservas hoy')).not.toBeInTheDocument()
+  })
+
+  it('verificado SIN packs: el panel completo incluye el checklist con «Crear mi primer pack»', () => {
+    renderDashboard({ packs: [] })
+    expect(screen.getByText('Primeros pasos')).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Crear mi primer pack' })).toHaveAttribute('href', '/business/packs/new')
+    // El panel normal también está: el checklist convive con él.
+    expect(screen.getByText('Reservas hoy')).toBeInTheDocument()
+  })
+
+  it('verificado CON packs: el checklist desaparece (camino completado)', () => {
+    renderDashboard({ packs: [{ id: 'pk-1', title: 'Pack', status: 'active' }] })
+    expect(screen.queryByText('Primeros pasos')).not.toBeInTheDocument()
+    expect(screen.getByText('Reservas hoy')).toBeInTheDocument()
   })
 
   it('fallo de la RPC: tarjeta de error con el motivo en español y reintentar', () => {

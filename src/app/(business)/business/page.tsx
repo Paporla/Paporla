@@ -1,8 +1,7 @@
 'use client'
 
-import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
-import { Store, ShieldAlert, CheckCircle } from 'lucide-react'
+import { Store, CheckCircle } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
 import OnboardingBanner from '@/components/onboarding/OnboardingBanner'
 import { useBusinessDashboard } from '@/components/business/dashboard/useBusinessDashboard'
@@ -13,13 +12,17 @@ import BusinessWelcomeBanner from '@/components/business/dashboard/BusinessWelco
 import BusinessStatsGrid from '@/components/business/dashboard/BusinessStatsGrid'
 import BusinessQuickActions from '@/components/business/dashboard/BusinessQuickActions'
 import BusinessRecentActivity from '@/components/business/dashboard/BusinessRecentActivity'
+import FirstStepsChecklist from '@/components/business/dashboard/FirstStepsChecklist'
 import TodayPickups from '@/components/business/TodayPickups'
 
 export default function BusinessDashboard() {
   const { loading: authLoading } = useAuth()
-  const { shop, stats, recentReservations, loading, error: dashError } = useBusinessDashboard()
+  const { shop, packs, stats, recentReservations, loading, error: dashError } = useBusinessDashboard()
   const searchParams = useSearchParams()
   const isNewShop = searchParams.get('new') === 'true'
+  // useQuery entrega undefined mientras no hay dato: para el checklist,
+  // "sin dato" y "sin comercio" son el mismo caso (paso 1).
+  const checklistShop = shop ?? null
 
   // Evitar flash: mientras se resuelve la autenticación, mostrar skeleton
   if (authLoading || loading) return <LoadingSkeleton />
@@ -41,59 +44,24 @@ export default function BusinessDashboard() {
     )
   }
 
-  if (!shop) {
+  // Comercio sin perfil o pendiente de verificación: en lugar de dos
+  // pantallas distintas, UN solo camino guiado. El checklist «Primeros
+  // pasos» muestra dónde está el comercio y qué toca hacer ahora, con un
+  // único botón para el paso actual (diseño: cero decisiones que tomar).
+  if (!shop || !shop.verified) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
-        <div className="glass-card rounded-2xl p-8 max-w-md">
-          <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-primary/10 flex items-center justify-center">
-            <Store className="w-8 h-8 text-primary" />
+      <div className="flex flex-col items-center justify-center min-h-[60vh]">
+        <div className="w-full max-w-md space-y-4">
+          <div className="text-center">
+            <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-primary/10 flex items-center justify-center">
+              <Store className="w-8 h-8 text-primary" />
+            </div>
+            <h1 className="text-2xl font-bold dark:text-white text-gray-900">
+              {shop ? `¡Hola, ${shop.name}!` : '¡Bienvenido a Paporla!'}
+            </h1>
           </div>
-          <h2 className="text-2xl font-bold dark:text-white text-gray-900 mb-2">Bienvenido a Paporla!</h2>
-          <p className="dark:text-gray-400 text-gray-600 mb-6">
-            Para comenzar a vender packs, primero debes registrar tu comercio.
-          </p>
-          <Link href="/business/profile" className="block w-full">
-            <Button className="w-full">Completar mi perfil de comercio</Button>
-          </Link>
+          <FirstStepsChecklist shop={checklistShop} hasPacks={packs.length > 0} />
         </div>
-      </div>
-    )
-  }
-
-  // Mostrar aviso si el comercio no esta verificado
-  if (!shop.verified) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
-        <div className="glass-card rounded-2xl p-8 max-w-md">
-          <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-amber-500/10 flex items-center justify-center">
-            <ShieldAlert className="w-8 h-8 text-amber-400" />
-          </div>
-          <h2 className="text-xl font-bold dark:text-white text-gray-900 mb-2">Comercio en revision</h2>
-          <p className="dark:text-gray-400 text-gray-600 text-sm mb-6">
-            Tu comercio <strong className="text-primary">{shop.name}</strong> esta pendiente de verificacion por nuestro
-            equipo. Te notificaremos cuando este aprobado.
-          </p>
-          <p className="text-xs dark:text-gray-600 text-gray-500 mb-6">
-            Mientras tanto, asegurate de completar todos los datos de tu perfil para acelerar el proceso.
-          </p>
-          <Link href="/business/profile" className="block w-full">
-            <Button className="w-full" variant="outline">
-              Completar perfil
-            </Button>
-          </Link>
-        </div>
-      </div>
-    )
-  }
-
-  // Banner de bienvenida para comercio nuevo recien verificado
-  {
-    isNewShop && (
-      <div className="mb-4 p-4 rounded-xl bg-primary/10 border border-primary/20 flex items-center gap-3">
-        <CheckCircle className="w-5 h-5 text-primary flex-shrink-0" />
-        <p className="text-sm dark:text-gray-300 text-gray-700">
-          Perfil completado! Ya puedes empezar a publicar packs.
-        </p>
       </div>
     )
   }
@@ -114,6 +82,20 @@ export default function BusinessDashboard() {
 
   return (
     <div className="space-y-8 pb-8">
+      {/* Aviso de perfil recién completado (llega desde /callback?new=true). */}
+      {isNewShop && (
+        <div className="p-4 rounded-xl bg-primary/10 border border-primary/20 flex items-center gap-3">
+          <CheckCircle className="w-5 h-5 text-primary flex-shrink-0" />
+          <p className="text-sm dark:text-gray-300 text-gray-700">
+            ¡Perfil completado! Ya puedes empezar a publicar packs.
+          </p>
+        </div>
+      )}
+
+      {/* Verificado pero sin packs: el último paso del camino guiado.
+          Se oculta solo en cuanto exista el primer pack. */}
+      <FirstStepsChecklist shop={checklistShop} hasPacks={packs.length > 0} />
+
       <OnboardingBanner type="commerce" />
       <BusinessWelcomeBanner
         shopName={shop.name}
