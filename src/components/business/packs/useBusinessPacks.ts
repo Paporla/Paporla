@@ -58,20 +58,37 @@ export function useBusinessPacks() {
       if (err) throw err
 
       const rows = (data ?? []) as ListedPack[]
+      const now = Date.now()
       return rows
         .filter((p) => p.status !== 'archived')
-        .map((p): BusinessPack => ({
-          id: p.pack_id,
-          title: p.title,
-          description: null,
-          status: p.status as PackStatus,
-          is_active: p.status === 'active',
-          remaining_stock: p.remaining_stock,
-          total_stock: p.total_stock,
-          price_minor: Number(p.price_minor),
-          currency_code: p.currency_code ?? 'CLP',
-          ends_at: p.pickup_end_at,
-        }))
+        .map((p): BusinessPack => {
+          /*
+           * Red de seguridad visual: un pack cuya ventana de retiro ya terminó
+           * se muestra como 'expired' aunque la base aún diga active/paused/
+           * sold_out. El cron de ciclo de vida (service_expire_packs) corre
+           * cada 15 minutos, así que entre el fin de la ventana y su próxima
+           * pasada la etiqueta «Publicado / Disponible» sería mentira.
+           * Solo se deriva la VISTA; el estado canónico lo escribe el cron.
+           */
+          const windowOver = p.pickup_end_at !== null && new Date(p.pickup_end_at).getTime() < now
+          const status =
+            windowOver && (p.status === 'active' || p.status === 'paused' || p.status === 'sold_out')
+              ? 'expired'
+              : (p.status as PackStatus)
+
+          return {
+            id: p.pack_id,
+            title: p.title,
+            description: null,
+            status,
+            is_active: status === 'active',
+            remaining_stock: p.remaining_stock,
+            total_stock: p.total_stock,
+            price_minor: Number(p.price_minor),
+            currency_code: p.currency_code ?? 'CLP',
+            ends_at: p.pickup_end_at,
+          }
+        })
     },
     enabled: !!user,
     staleTime: 30 * 1000,
