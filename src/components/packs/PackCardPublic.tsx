@@ -41,14 +41,30 @@ function formatDistance(meters: number | null | undefined): string | null {
   return `${(meters / 1000).toFixed(1)} km`
 }
 
-function formatPickupTime(value: string, timezone: string): string {
+/*
+ * Ventana de recogida COMPLETA y compacta: "vie, 18:00–20:00".
+ *
+ * Antes se mostraba solo la hora de inicio y el usuario no sabía hasta
+ * cuándo podía pasar a recoger: la hora de fin es la mitad de la decisión
+ * ("¿me da tiempo después del trabajo?"). El detalle del pack ya muestra la
+ * ventana entera (formatPickupWindow); la tarjeta cuenta lo mismo en corto.
+ */
+function formatPickupTime(startAt: string, endAt: string, timezone: string): string {
   try {
-    return new Intl.DateTimeFormat('es-CL', {
-      weekday: 'short',
+    const time = new Intl.DateTimeFormat('es-CL', {
       hour: '2-digit',
       minute: '2-digit',
+      // 24h explícito (estándar comercial en Chile, igual que formatDate.ts):
+      // sin esto el resultado depende de la versión de ICU de cada máquina.
+      hourCycle: 'h23',
       timeZone: timezone,
-    }).format(new Date(value))
+    })
+    const weekday = new Intl.DateTimeFormat('es-CL', { weekday: 'short', timeZone: timezone })
+    const start = new Date(startAt)
+    const end = new Date(endAt)
+    if (Number.isNaN(start.getTime())) return 'Horario por confirmar'
+    if (Number.isNaN(end.getTime())) return `${weekday.format(start)}, ${time.format(start)}`
+    return `${weekday.format(start)}, ${time.format(start)}–${time.format(end)}`
   } catch {
     return 'Horario por confirmar'
   }
@@ -146,7 +162,7 @@ export default function PackCardPublic({ pack, onReserve, index, reserving, rese
               )}
               <div className="flex items-center gap-1">
                 <Clock className="w-3 h-3 text-primary" />
-                <span>{formatPickupTime(pack.pickup_start_at, pack.timezone)}</span>
+                <span>{formatPickupTime(pack.pickup_start_at, pack.pickup_end_at, pack.timezone)}</span>
               </div>
             </div>
           </div>

@@ -185,8 +185,8 @@ export default function LegalBasesPage() {
             </div>
             <div className="mt-4 p-4 rounded-lg bg-green-500/10 border border-green-500/20">
               <p className="text-sm dark:text-gray-300 text-gray-700">
-                📄 <strong>Nota:</strong> Este documento está en cumplimiento con el marco legal venezolano. Para
-                operaciones internacionales, se aplicarán las leyes locales correspondientes.
+                📄 <strong>Nota:</strong> Este documento está redactado conforme al marco legal chileno. Al operar en
+                otros países de Latinoamérica, se aplicarán las leyes locales correspondientes.
               </p>
             </div>
           </section>
