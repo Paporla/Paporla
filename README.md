@@ -17,7 +17,9 @@ cp .env.example .env.local   # edita con tus claves de Supabase y Resend
 npm run dev
 ```
 
-Luego ejecuta `sql/00_master_schema.sql` en Supabase Dashboard → SQL Editor.
+El esquema de base de datos vive en `supabase/migrations/` (única fuente de
+verdad). En un proyecto Supabase nuevo, aplica las migraciones en orden
+(0001 → última) desde el SQL Editor, o con `supabase db push` si usas la CLI.
 
 Abre [http://localhost:3000](http://localhost:3000).
 
@@ -27,7 +29,7 @@ Abre [http://localhost:3000](http://localhost:3000).
 
 | Capa            | Tecnología                                        |
 | --------------- | ------------------------------------------------- |
-| Framework       | Next.js 14 (App Router)                           |
+| Framework       | Next.js 16 (App Router)                           |
 | Lenguaje        | TypeScript 5 (strict)                             |
 | Backend         | Supabase (PostgreSQL + Auth + RLS)                |
 | Estilos         | Tailwind CSS 3 — dark-first, neón verde `#00ff88` |
