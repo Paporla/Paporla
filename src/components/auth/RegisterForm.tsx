@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import { useSearchParams } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { useAuth } from '@/hooks/useAuth'
 import Button from '@/components/ui/Button'
@@ -11,13 +12,20 @@ import { ArrowRight } from 'lucide-react'
 import { registerSchema } from '@/lib/utils/validations'
 
 export default function RegisterForm() {
+  // Los botones «Registra tu comercio» (landing, about) enlazan con
+  // ?role=comercio. Antes el formulario ignoraba el parámetro y llegaban con
+  // «Cliente» preseleccionado: el comercio tenía que darse cuenta y cambiarlo
+  // a mano — fricción justo en el primer paso de su onboarding.
+  const searchParams = useSearchParams()
+  const initialRole = searchParams.get('role') === 'comercio' ? ('comercio' as const) : ('user' as const)
+
   const [formData, setFormData] = useState({
     email: '',
     password: '',
     confirmPassword: '',
     name: '',
     phone: '',
-    role: 'user' as 'user' | 'comercio',
+    role: initialRole as 'user' | 'comercio',
     shopName: '',
   })
   const [loading, setLoading] = useState(false)

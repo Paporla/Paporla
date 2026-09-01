@@ -20,11 +20,11 @@ export default function CTASection() {
 
           <div className="relative island-dark rounded-2xl p-10 md:p-12 text-center border border-white/10 dark:border-primary/20 backdrop-blur-sm">
             <h2 className="text-2xl md:text-3xl font-bold text-white mb-3">
-              Listo para <span className="island-accent">rescatar comida</span>?
+              ¿Listo para <span className="island-accent">rescatar comida</span>?
             </h2>
 
             <p className="island-muted mb-6 max-w-md mx-auto">
-              Unete a miles de personas que ya estan ahorrando mientras ayudan al planeta.
+              Únete a la comunidad que ahorra mientras ayuda al planeta.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
@@ -36,7 +36,7 @@ export default function CTASection() {
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition" />
               </Link>
               <Link
-                href="/register"
+                href="/register?role=comercio"
                 className="inline-flex items-center justify-center px-8 py-3 rounded-full border border-white/25 dark:border-primary/40 text-white font-semibold hover:bg-white/10 dark:hover:bg-primary/10 transition text-center"
               >
                 Registra tu comercio
