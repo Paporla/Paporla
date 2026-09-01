@@ -87,6 +87,33 @@ function ModerationBody({
         </div>
       )}
 
+      {/* Datos legales declarados (0038/0039). El cotejo es la base de la
+          verificación: RUT contra el SII (consulta de situación tributaria de
+          terceros), resolución contra la SEREMI. "No declarado" en ámbar avisa
+          de que aún no se puede verificar. */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label className="block text-sm font-medium dark:text-gray-400 text-gray-600 mb-1">
+            RUT declarado (cotejar en SII)
+          </label>
+          {shop.tax_id ? (
+            <p className="dark:text-gray-300 text-gray-700 text-sm font-mono">{shop.tax_id}</p>
+          ) : (
+            <p className="text-sm dark:text-amber-400 text-amber-600">No declarado</p>
+          )}
+        </div>
+        <div>
+          <label className="block text-sm font-medium dark:text-gray-400 text-gray-600 mb-1">
+            Resolución sanitaria (cotejar en SEREMI)
+          </label>
+          {shop.sanitary_resolution ? (
+            <p className="dark:text-gray-300 text-gray-700 text-sm">{shop.sanitary_resolution}</p>
+          ) : (
+            <p className="text-sm dark:text-amber-400 text-amber-600">No declarada</p>
+          )}
+        </div>
+      </div>
+
       <div className="flex items-center gap-2">
         <span className="text-sm dark:text-gray-400 text-gray-600">Estado actual:</span>
         <span className={`text-xs px-2 py-1 rounded-full ${statusConfig.className}`}>{statusConfig.label}</span>

@@ -19,6 +19,8 @@ function adminShopRow(overrides: Partial<AdminShop> = {}): AdminShop {
     address_line1: 'Av. Siempre Viva 742',
     phone_e164: '+56912345678',
     logo_path: null,
+    tax_id: '12345678-5',
+    sanitary_resolution: 'RS N° 12345/2026 SEREMI RM',
     reviewed_at: null,
     created_at: '2026-08-26T12:00:00Z',
     updated_at: '2026-08-26T12:00:00Z',
