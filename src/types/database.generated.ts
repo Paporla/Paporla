@@ -1323,8 +1323,10 @@ export type Database = {
           postal_code: string | null
           reviewed_at: string | null
           reviewed_by: string | null
+          sanitary_resolution: string | null
           status: string
           status_reason: string | null
+          tax_id: string | null
           timezone: string
           updated_at: string
           website_url: string | null
@@ -1351,8 +1353,10 @@ export type Database = {
           postal_code?: string | null
           reviewed_at?: string | null
           reviewed_by?: string | null
+          sanitary_resolution?: string | null
           status?: string
           status_reason?: string | null
+          tax_id?: string | null
           timezone: string
           updated_at?: string
           website_url?: string | null
@@ -1379,8 +1383,10 @@ export type Database = {
           postal_code?: string | null
           reviewed_at?: string | null
           reviewed_by?: string | null
+          sanitary_resolution?: string | null
           status?: string
           status_reason?: string | null
+          tax_id?: string | null
           timezone?: string
           updated_at?: string
           website_url?: string | null
@@ -2017,6 +2023,7 @@ export type Database = {
           p_address_line2: string
           p_category: string
           p_cover_path: string
+          p_default_pack_image_path?: string | null
           p_description: string
           p_instagram_handle: string
           p_latitude: number
@@ -2026,7 +2033,9 @@ export type Database = {
           p_name: string
           p_phone_e164: string
           p_postal_code: string
+          p_sanitary_resolution?: string | null
           p_shop_id: string
+          p_tax_id?: string | null
           p_website_url: string
         }
         Returns: Json

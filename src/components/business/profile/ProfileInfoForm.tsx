@@ -1,7 +1,8 @@
 'use client'
 
-import { Building2, Store, Globe, MapPin, Phone, Link } from 'lucide-react'
+import { Building2, Store, Globe, MapPin, Phone, Link, FileCheck, ShieldCheck } from 'lucide-react'
 import Input from '@/components/ui/Input'
+import { getChileRutError } from '@/lib/utils/chileRut'
 
 const CATEGORIES = [
   { id: 'bakery', name: 'Panadería' },
@@ -35,6 +36,8 @@ interface ProfileInfoFormProps {
     phone: string
     website: string
     instagram: string
+    taxId: string
+    sanitaryResolution: string
   }
   updateForm: (field: string, value: string) => void
 }
@@ -157,6 +160,43 @@ export default function ProfileInfoForm({ formData, updateForm }: ProfileInfoFor
         onChange={(e) => updateForm('instagram', e.target.value)}
         placeholder="@tu_negocio"
       />
+
+      {/* Datos legales (0038): obligatorios para enviar a revisión. El RUT se
+          valida al escribir (espejo de la base); la resolución sanitaria es
+          texto libre porque cada SEREMI numera distinto y la coteja el admin. */}
+      <div className="border-t dark:border-white/10 border-gray-200 pt-6 space-y-6">
+        <h3 className="text-sm font-bold dark:text-white text-gray-900 flex items-center gap-2">
+          <ShieldCheck className="w-4 h-4 text-primary" />
+          Datos legales del negocio
+        </h3>
+        <p className="text-xs dark:text-gray-400 text-gray-600 -mt-3">
+          Los pedimos una sola vez para verificar tu comercio. No se muestran a los clientes.
+        </p>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <Input
+            label="RUT de la empresa *"
+            value={formData.taxId}
+            onChange={(e) => updateForm('taxId', e.target.value)}
+            placeholder="76543210-3"
+            icon={<FileCheck className="w-4 h-4 text-primary" />}
+            error={getChileRutError(formData.taxId) ?? undefined}
+          />
+
+          <Input
+            label="Resolución sanitaria *"
+            value={formData.sanitaryResolution}
+            onChange={(e) => updateForm('sanitaryResolution', e.target.value)}
+            placeholder="Ej: RS N° 12345/2026 SEREMI RM"
+            icon={<ShieldCheck className="w-4 h-4 text-primary" />}
+          />
+        </div>
+
+        <p className="text-xs dark:text-gray-500 text-gray-400">
+          La resolución sanitaria la emite la SEREMI de Salud (trámite en linea con ClaveÚnica). Si aún no la tienes,
+          puedes guardar el resto del perfil y completarla antes de enviar a revisión.
+        </p>
+      </div>
     </div>
   )
 }

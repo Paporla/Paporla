@@ -85,6 +85,9 @@ const RPC_MESSAGES: Record<string, string> = {
   SHOP_PROFILE_INCOMPLETE:
     'Faltan datos obligatorios para enviar el comercio a revisión: nombre, categoría, teléfono, dirección, ubicación y logo.',
   SHOP_NOT_SUBMITTABLE: 'Este comercio no se puede enviar a revisión en su estado actual.',
+  SHOP_TAX_ID_REQUIRED: 'Falta el RUT de la empresa. Complétalo en la pestaña Información.',
+  SHOP_SANITARY_RESOLUTION_REQUIRED: 'Falta el número de resolución sanitaria. Complétalo en la pestaña Información.',
+  INVALID_TAX_ID: 'RUT inválido. Revisa el número y el dígito verificador (ej: 76543210-3).',
   SHOP_NOT_FOUND: 'No se encontró el comercio.',
 
   // Permisos
