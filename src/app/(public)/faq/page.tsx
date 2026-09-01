@@ -54,7 +54,7 @@ const faqs: FaqItem[] = [
   {
     question: '¿Puedo cancelar una reserva?',
     answer:
-      'Sí, puedes cancelar tu reserva desde tu panel de usuario. Si la cancelas dentro de las primeras 2 horas, no tendrás ningún problema. Después de ese tiempo, no se podrá cancelar para garantizar la operación del comercio.',
+      'Sí, puedes cancelar tu reserva gratis desde Mis Reservas hasta 2 horas antes de que empiece la ventana de retiro. Pasado ese momento ya no se puede cancelar, para que el comercio pueda preparar tu pack con seguridad.',
     icon: Clock,
     category: 'client',
   },

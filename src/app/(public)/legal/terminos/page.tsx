@@ -301,7 +301,8 @@ export default function TerminosPage() {
                   </li>
                   <li className="flex items-start gap-2">
                     <CheckCircle className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
-                    Cancelar la reserva con al menos 2 horas de anticipación si no puede recogerla.
+                    Cancelar la reserva con al menos 2 horas de anticipación al inicio de la ventana de retiro si no
+                    puede recogerla.
                   </li>
                 </ul>
                 <div className="mt-4 p-4 rounded-lg bg-secondary/10 border border-secondary/20">
@@ -350,9 +351,9 @@ export default function TerminosPage() {
                   7. Cancelaciones
                 </h2>
                 <p className="dark:text-gray-300 text-gray-700">
-                  Los usuarios pueden cancelar sus reservas hasta 2 horas antes del horario límite de recogida. Las
-                  cancelaciones tardías o no presentarse sin cancelar afectarán la reputación del usuario y pueden
-                  resultar en la suspensión temporal o permanente de la cuenta.
+                  Los usuarios pueden cancelar sus reservas sin costo hasta 2 horas antes del inicio de la ventana de
+                  retiro. Las cancelaciones tardías o no presentarse sin cancelar afectarán la reputación del usuario y
+                  pueden resultar en la suspensión temporal o permanente de la cuenta.
                 </p>
                 <p className="dark:text-gray-300 text-gray-700 mt-3">
                   Los comercios pueden cancelar reservas por causas de fuerza mayor, debiendo notificar inmediatamente a
