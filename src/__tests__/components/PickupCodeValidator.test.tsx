@@ -83,6 +83,18 @@ describe('PickupCodeValidator', () => {
     expect(rpc).not.toHaveBeenCalled()
   })
 
+  it('entrada indulgente (Lote B): sin prefijo, con espacios o en minúsculas, la RPC recibe la credencial canónica', async () => {
+    render(<PickupCodeValidator shopId="shop-a" />, { wrapper: createWrapper(createClient()) })
+
+    // El input fuerza mayúsculas al teclear (onChange hace toUpperCase),
+    // así que simulamos lo que llega tras escribir "abcd 1234" sin prefijo.
+    fireEvent.change(screen.getByPlaceholderText('P4P-XXXXXXXX'), { target: { value: 'abcd 1234' } })
+    fireEvent.click(screen.getByRole('button', { name: /Validar/ }))
+
+    expect(rpc).toHaveBeenCalledWith('validate_pickup', { p_credential: 'P4P-ABCD1234' })
+    expect(await screen.findByText('Recogida validada con éxito.')).toBeTruthy()
+  })
+
   it('no inventa datos de contacto del cliente en el panel de éxito', async () => {
     const { container } = render(<PickupCodeValidator shopId="shop-a" />, {
       wrapper: createWrapper(createClient()),

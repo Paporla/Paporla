@@ -43,6 +43,10 @@ vi.mock('@/components/business/TodayPickups', () => ({
   default: () => <div data-testid="today-pickups">Recogidas de hoy (stub)</div>,
 }))
 
+vi.mock('@/components/business/PickupCodeValidator', () => ({
+  default: () => <div data-testid="pickup-validator">Validar código (stub)</div>,
+}))
+
 vi.mock('@/components/onboarding/OnboardingBanner', () => ({
   default: () => null,
 }))
@@ -118,6 +122,9 @@ describe('BusinessDashboard (página)', () => {
     renderDashboard()
 
     expect(screen.getByText(/Panadería Staging A/)).toBeInTheDocument()
+    // El validador de recogidas vive TAMBIÉN en el panel (Lote B): en la
+    // hora pico el comercio valida sin navegar a Reservas.
+    expect(screen.getByTestId('pickup-validator')).toBeInTheDocument()
     // Ingresos: importe en la unidad menor (CLP: pesos), formato
     // DETERMINISTA de formatChilePesos: "$5.490" en cualquier máquina.
     expect(screen.getByText('$5.490')).toBeInTheDocument()
