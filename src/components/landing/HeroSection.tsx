@@ -35,7 +35,7 @@ export default function HeroSection() {
                 Sin desperdiciar.
               </span>
               <br />
-              Sin pagar de mas.
+              Sin pagar de más.
             </motion.h1>
 
             <motion.p
@@ -44,7 +44,7 @@ export default function HeroSection() {
               transition={{ delay: 0.4 }}
               className="text-gray-600 dark:text-gray-400 text-lg max-w-md mb-8 leading-relaxed"
             >
-              Paporla conecta comercios con excedentes del dia y personas como tu. Reserva, recoge y disfruta mientras
+              Paporla conecta comercios con excedentes del día y personas como tú. Reserva, recoge y disfruta mientras
               ayudas al planeta.
             </motion.p>
 
@@ -58,12 +58,12 @@ export default function HeroSection() {
                 href="/packs"
                 className="group relative overflow-hidden inline-flex items-center justify-center gap-2 px-8 py-3 rounded-full bg-primary text-white dark:text-black font-semibold transition-all shadow-lg shadow-primary/30 hover:shadow-xl hover:shadow-primary/40 text-center"
               >
-                <span className="relative z-10">Ver packs cerca de mi</span>
+                <span className="relative z-10">Ver packs cerca de mí</span>
                 <ArrowRight className="w-4 h-4 relative z-10 group-hover:translate-x-1 transition" />
                 <div className="absolute inset-0 bg-white/20 translate-x-full group-hover:translate-x-0 transition-transform duration-300" />
               </Link>
               <Link
-                href="/register"
+                href="/register?role=comercio"
                 className="inline-flex items-center justify-center px-8 py-3 rounded-full border border-primary/40 text-gray-900 dark:text-white font-semibold hover:bg-primary/10 transition text-center"
               >
                 Registra tu comercio
