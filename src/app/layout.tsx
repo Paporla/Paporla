@@ -6,6 +6,7 @@ import RouteLoader from '@/components/RouteLoader'
 import Providers from './providers'
 import GoogleAnalytics from '@/components/GoogleAnalytics'
 import GoogleTagManager from '@/components/GoogleTagManager'
+import CookieConsentBanner from '@/components/CookieConsentBanner'
 import { PWAProvider } from '@/components/ui/PWAProvider'
 import ThemeScript from '@/components/layout/ThemeScript'
 
@@ -128,6 +129,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           <PWAProvider />
           {children}
           <GoogleAnalytics />
+          <CookieConsentBanner />
         </Providers>
       </body>
     </html>

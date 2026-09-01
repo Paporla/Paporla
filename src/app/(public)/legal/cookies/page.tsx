@@ -13,6 +13,7 @@ import {
   Calendar,
   ChevronRight,
 } from 'lucide-react'
+import CookieConsentManager from '@/components/CookieConsentManager'
 
 export default function CookiesPage() {
   const cookieTypes = [
@@ -282,7 +283,14 @@ export default function CookiesPage() {
                   Gestión de cookies
                 </h2>
                 <p className="dark:text-gray-300 text-gray-700 mb-4">
-                  Puedes gestionar las cookies de las siguientes maneras:
+                  Las cookies de analítica (Google Analytics) solo se cargan si las aceptas en el aviso de cookies.
+                  Puedes cambiar tu decisión aquí mismo:
+                </p>
+
+                <CookieConsentManager />
+
+                <p className="dark:text-gray-300 text-gray-700 mb-4 mt-6">
+                  Además, puedes gestionar todas las cookies desde tu navegador:
                 </p>
 
                 <div className="grid md:grid-cols-2 gap-4">
