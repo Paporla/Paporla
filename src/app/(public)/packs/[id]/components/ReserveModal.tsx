@@ -263,6 +263,17 @@ export default function ReserveModal({ isOpen, onClose, pack }: ReserveModalProp
                     </div>
                   )}
 
+                  {/* Exclusion del derecho a retracto (art. 3 bis Ley 19.496):
+                      obligatorio informarla de forma destacada ANTES del pago.
+                      Sin este aviso, el retracto se extiende hasta 90 dias. */}
+                  <div className="flex items-start gap-2 rounded-lg bg-amber-500/10 border border-amber-500/25 px-3 py-2">
+                    <AlertCircle className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
+                    <p className="text-[11px] leading-relaxed text-amber-800 dark:text-amber-200">
+                      Por tratarse de alimentos perecederos, esta reserva no admite derecho a retracto (art. 3 bis, Ley
+                      19.496). Puedes cancelarla gratis desde Mis Reservas antes de la hora de retiro.
+                    </p>
+                  </div>
+
                   <label className="flex items-start gap-2 text-xs dark:text-gray-300 text-gray-700">
                     <input
                       type="checkbox"
@@ -274,8 +285,8 @@ export default function ReserveModal({ isOpen, onClose, pack }: ReserveModalProp
                       Acepto las{' '}
                       <Link href="/legal/politicas-retiro" target="_blank" className="text-primary underline">
                         políticas de retiro y cancelación
-                      </Link>
-                      .
+                      </Link>{' '}
+                      y entiendo que no aplica derecho a retracto.
                     </span>
                   </label>
                 </div>
