@@ -7,7 +7,7 @@ import BusinessDashboard from '@/app/(business)/business/page'
  * datos se mockea completo (su lógica vive en useBusinessDashboard.test);
  * aquí se comprueba lo que el comercio VE: banner, cifras, actividad
  * reciente con etiquetas canónicas y los enlaces a Reservas.
- * TodayPickups y OnboardingBanner se stubean (lógica de datos ajena).
+ * TodayPickups y el validador se stubean (lógica de datos ajena).
  */
 const hookState = vi.hoisted(() => ({
   shop: null as Record<string, unknown> | null,
@@ -45,10 +45,6 @@ vi.mock('@/components/business/TodayPickups', () => ({
 
 vi.mock('@/components/business/PickupCodeValidator', () => ({
   default: () => <div data-testid="pickup-validator">Validar código (stub)</div>,
-}))
-
-vi.mock('@/components/onboarding/OnboardingBanner', () => ({
-  default: () => null,
 }))
 
 const verifiedShop = {

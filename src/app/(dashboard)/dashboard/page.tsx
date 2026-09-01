@@ -109,7 +109,7 @@ export default function UserDashboardPage() {
         />
       )}
 
-      <OnboardingBanner type="user" level={stats.level} />
+      <OnboardingBanner level={stats.level} />
 
       {/* Bloqueo funcional (F2b): sin mercado, create_payment_reservation
           (0009:285) rechaza la reserva con MARKET_MISMATCH. El banner se

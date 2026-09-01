@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Search, ShoppingBag, MapPin, Store, Package, Users, X } from 'lucide-react'
+import { Search, ShoppingBag, MapPin, X } from 'lucide-react'
+import { isUserOnboardingDismissed, dismissUserOnboarding } from '@/lib/utils/onboarding'
 
 interface Step {
   icon: React.ComponentType<{ className?: string }>
@@ -13,34 +14,41 @@ interface Step {
 const userSteps: Step[] = [
   { icon: Search, title: 'Explora packs', description: 'Busca packs cerca de ti con descuentos de hasta 70%' },
   { icon: ShoppingBag, title: 'Reserva', description: 'Elige tu pack favorito y reserva en segundos' },
-  { icon: MapPin, title: 'Recoge y disfruta', description: 'Ve al comercio, muestra tu codigo y recoge' },
-]
-
-const commerceSteps: Step[] = [
-  { icon: Store, title: 'Completa tu perfil', description: 'Añade fotos, horarios y descripcion de tu comercio' },
-  { icon: Package, title: 'Crea packs', description: 'Publica packs con los excedentes del dia a buen precio' },
-  { icon: Users, title: 'Recibe reservas', description: 'Los usuarios reservan y recogen en tu horario' },
+  { icon: MapPin, title: 'Recoge y disfruta', description: 'Ve al comercio, muestra tu código y recoge' },
 ]
 
 interface Props {
-  type: 'user' | 'commerce'
   /** Nivel real del usuario ("Aprendiz", "Rescatador"...). Si no se pasa, se usa la palabra genérica. */
   level?: string
 }
 
-const STORAGE_KEY = 'paporla_onboarding_dismissed'
-
-export default function OnboardingBanner({ type, level }: Props) {
+/**
+ * Cartel informativo del USUARIO: la historia "explora → reserva → recoge".
+ *
+ * Desde el Lote E de simplificación este banner es solo de usuario: el
+ * onboarding del comercio es el checklist «Primeros pasos» del panel, que
+ * se deriva de datos vivos (la variante 'commerce' de aquí repetía esos
+ * mismos pasos en genérico y competía con él).
+ *
+ * El descarte vive en un estado único compartido con OnboardingSteps del
+ * catálogo (lib/utils/onboarding): entendida la historia en un sitio,
+ * entendida en todos. Eso cierra el bug de la auditoría de las claves de
+ * localStorage descoordinadas.
+ */
+export default function OnboardingBanner({ level }: Props) {
   const [visible, setVisible] = useState(false)
-  const steps = type === 'user' ? userSteps : commerceSteps
 
   useEffect(() => {
-    const dismissed = localStorage.getItem(STORAGE_KEY)
-    if (!dismissed) setVisible(true)
+    if (!isUserOnboardingDismissed()) {
+      // Timer a 0: saca el setState del cuerpo del efecto (regla
+      // react-hooks/set-state-in-effect) y deja pasar el primer pintado.
+      const timer = setTimeout(() => setVisible(true), 0)
+      return () => clearTimeout(timer)
+    }
   }, [])
 
   const dismiss = () => {
-    localStorage.setItem(STORAGE_KEY, 'true')
+    dismissUserOnboarding()
     setVisible(false)
   }
 
@@ -60,13 +68,10 @@ export default function OnboardingBanner({ type, level }: Props) {
             <div className="flex items-start justify-between mb-5">
               <div>
                 <h2 className="text-lg font-bold dark:text-white text-gray-900">
-                  Bienvenido a Paporla!{' '}
-                  <span className="text-primary">{type === 'user' ? (level ?? 'Rescatador') : 'Comercio'}</span>
+                  ¡Bienvenido a Paporla! <span className="text-primary">{level ?? 'Rescatador'}</span>
                 </h2>
                 <p className="text-sm dark:text-gray-400 text-gray-600 mt-1">
-                  {type === 'user'
-                    ? 'Asi funciona. En 3 pasos empiezas a rescatar comida y ahorrar.'
-                    : 'Sigue estos pasos para empezar a vender tus excedentes.'}
+                  Así funciona. En 3 pasos empiezas a rescatar comida y ahorrar.
                 </p>
               </div>
               <button
@@ -79,7 +84,7 @@ export default function OnboardingBanner({ type, level }: Props) {
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              {steps.map((step, i) => (
+              {userSteps.map((step, i) => (
                 <motion.div
                   key={step.title}
                   initial={{ opacity: 0, y: 10 }}
