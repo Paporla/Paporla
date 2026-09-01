@@ -11,6 +11,7 @@ import { translateDbError } from '@/lib/utils/db-errors'
 import PackCategoryTemplates from './packs/PackCategoryTemplates'
 import PackFormBasicInfo from './packs/PackFormBasicInfo'
 import PackFormPickupTime from './packs/PackFormPickupTime'
+import { rememberPickupTimes, getRememberedPickupTimes } from '@/lib/utils/pickupMemory'
 import {
   PackFormData,
   PackContentExtras,
@@ -115,7 +116,15 @@ export default function PackFormSimplified({
   const [pendingAction, setPendingAction] = useState<'save' | 'publish' | null>(null)
   const [formData, setFormData] = useState<PackFormData>(() => {
     if (!pack) {
-      return getDefaultPackData(shopId)
+      /*
+       * Pack NUEVO: nace con la última ventana de recogida que este
+       * navegador guardó (Lote D). El comercio habitual publica casi
+       * siempre "de 19 a 21": así solo revisa y publica. Sin memoria
+       * (primerizo, otro equipo), el formulario nace como siempre.
+       */
+      const defaults = getDefaultPackData(shopId)
+      const remembered = getRememberedPickupTimes()
+      return remembered ? { ...defaults, ...remembered } : defaults
     }
 
     const base = packToFormData({ ...pack })
@@ -282,6 +291,11 @@ export default function PackFormSimplified({
       } else {
         await createNewPack()
       }
+      /*
+       * Guardado sin excepción = la ventana ya está escrita en la base:
+       * se recuerda para que el próximo pack nuevo nazca con ella (Lote D).
+       */
+      rememberPickupTimes(formData.pickup_start_time, formData.pickup_end_time)
     } catch (err: unknown) {
       logger.error('PackFormSimplified savePack', err)
       setError(translateDbError(err, 'No se pudo guardar el pack.'))
