@@ -1,8 +1,17 @@
 -- ============================================================================
--- PAPORLA — STAGING-ONLY SEED
--- Never run automatically in production.
--- Provides one Chile region/locality so development from Spain can select Chile
--- and simulate GPS in Santiago. Verify official catalogues before production.
+-- PAPORLA — seed.sql
+-- Seed canonico: se aplica despues de las migraciones en cada
+-- `supabase db reset` (local y en cualquier reconstruccion).
+--
+-- Contiene el catalogo geografico minimo con el que el mercado Chile puede
+-- operar: Region Metropolitana y comuna de Santiago. Sin estos dos registros
+-- no se puede elegir ciudad en la app y por tanto no se puede publicar ni
+-- reservar: son datos de produccion, no de prueba.
+--
+-- Antes de abrir al publico, confrontar con los catalogos oficiales
+-- (INE / SUBDERE) y completar las comunas que falten.
+--
+-- Idempotente: ON CONFLICT ... DO UPDATE.
 -- ============================================================================
 
 BEGIN;
@@ -35,7 +44,8 @@ VALUES (
   'Santiago',
   'America/Santiago',
   extensions.ST_SetSRID(
-    extensions.ST_MakePoint(-70.6693, -33.4489), 4326
+    extensions.ST_MakePoint(-70.6693, -33.4489),
+    4326
   )::extensions.geography,
   1,
   true
