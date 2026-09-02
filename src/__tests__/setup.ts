@@ -39,3 +39,18 @@ class ResizeObserverStub {
 if (typeof globalThis.ResizeObserver === 'undefined') {
   globalThis.ResizeObserver = ResizeObserverStub as unknown as typeof globalThis.ResizeObserver
 }
+
+// jsdom tampoco implementa IntersectionObserver (lo usa framer-motion para
+// whileInView/useInView). Mismo criterio que ResizeObserver: stub inerte,
+// las animaciones no corren y los tests asientan los textos.
+class IntersectionObserverStub {
+  observe() {}
+  unobserve() {}
+  disconnect() {}
+  takeRecords() {
+    return []
+  }
+}
+if (typeof globalThis.IntersectionObserver === 'undefined') {
+  globalThis.IntersectionObserver = IntersectionObserverStub as unknown as typeof globalThis.IntersectionObserver
+}
