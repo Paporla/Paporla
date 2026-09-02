@@ -301,8 +301,8 @@ export default function TerminosPage() {
                   </li>
                   <li className="flex items-start gap-2">
                     <CheckCircle className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
-                    Cancelar la reserva con al menos 2 horas de anticipación al inicio de la ventana de retiro si no
-                    puede recogerla.
+                    Cancelar la reserva con la anticipación indicada en la sección 7 (Cancelaciones) si no puede
+                    recogerla.
                   </li>
                 </ul>
                 <div className="mt-4 p-4 rounded-lg bg-secondary/10 border border-secondary/20">
