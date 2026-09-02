@@ -18,10 +18,7 @@
     },
     {
       "source": "/api/(.*)",
-      "headers": [
-        { "key": "Cache-Control", "value": "no-store, must-revalidate" },
-        { "key": "Access-Control-Allow-Origin", "value": "https://paporla.com" }
-      ]
+      "headers": [{ "key": "Cache-Control", "value": "no-store, must-revalidate" }]
     }
   ],
   "redirects": [
