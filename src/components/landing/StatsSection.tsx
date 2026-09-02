@@ -10,7 +10,17 @@ import { apiFetch } from '@/lib/utils/api-client'
 import { formatChilePesos } from '@/lib/utils/formatPrice'
 import type { CommunityStats } from '@/app/api/stats/route'
 
-// Fallback: datos de la FAO si la API no responde
+/*
+ * Los datos reales de la comunidad solo se muestran con al menos este
+ * número de comercios verificados: con 1 comercio y 4 packs la cifra
+ * real transmite lo contrario de lo que debe ("aquí no hay nadie").
+ * Hasta entonces, la sección cuenta el PROBLEMA con datos de la FAO,
+ * Banco Mundial y ONU, que son verdad siempre. Decidido por el fundador
+ * el 2026-09-02.
+ */
+const MIN_VERIFIED_SHOPS_FOR_REAL_STATS = 10
+
+// Fallback: datos de la FAO si la API no responde o la comunidad es pequeña
 const fallbackStats = [
   {
     value: 1300,
@@ -50,8 +60,10 @@ export default function StatsSection() {
     retry: 1,
   })
 
-  // Si hay datos reales, los usamos. Si no, mostramos el fallback.
-  const hasRealStats = apiStats && apiStats.packsRescued > 0
+  // Datos reales solo cuando la comunidad ya se ve como comunidad;
+  // si no, el fallback (el problema global, siempre cierto).
+  const hasRealStats =
+    !!apiStats && apiStats.activeShops >= MIN_VERIFIED_SHOPS_FOR_REAL_STATS && apiStats.packsRescued > 0
 
   const communityStats = hasRealStats
     ? [

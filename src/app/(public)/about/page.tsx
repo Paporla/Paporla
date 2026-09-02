@@ -137,37 +137,6 @@ export default function AboutPage() {
             </div>
           </motion.div>
 
-          {/* Impacto */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.3 }}
-            className="mt-16"
-          >
-            <div className="glass-card rounded-2xl p-8">
-              <h2 className="text-2xl font-bold dark:text-white text-gray-900 text-center mb-8">Nuestro Impacto</h2>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
-                <div>
-                  <div className="text-3xl font-bold text-primary">50+</div>
-                  <div className="text-xs dark:text-gray-400 text-gray-600 mt-1">Comercios aliados</div>
-                </div>
-                <div>
-                  <div className="text-3xl font-bold text-primary">1,200+</div>
-                  <div className="text-xs dark:text-gray-400 text-gray-600 mt-1">Packs vendidos</div>
-                </div>
-                <div>
-                  <div className="text-3xl font-bold text-primary">2,500kg</div>
-                  <div className="text-xs dark:text-gray-400 text-gray-600 mt-1">Comida rescatada</div>
-                </div>
-                <div>
-                  <div className="text-3xl font-bold text-primary">800+</div>
-                  <div className="text-xs dark:text-gray-400 text-gray-600 mt-1">Usuarios activos</div>
-                </div>
-              </div>
-            </div>
-          </motion.div>
-
           {/* CTA */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
