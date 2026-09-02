@@ -118,16 +118,17 @@ export default function BusinessDashboard() {
         }}
       />
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <BusinessQuickActions />
-        {/* En la hora pico el comercio valida recogidas SIN navegar: el
-            validador vive también aquí, junto a las recogidas de hoy
-            (Lote B simplificación UX). */}
-        <div className="space-y-6">
-          <PickupCodeValidator shopId={shop.id} />
-          <TodayPickups shopId={shop.id} />
-        </div>
+      {/* Zona operativa del día, en dos mitades simétricas: validar la
+          recogida (Lote B: sin navegar en la hora pico) y ver quién viene
+          hoy. items-start evita que una tarjeta estire a la otra. */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+        <PickupCodeValidator shopId={shop.id} />
+        <TodayPickups shopId={shop.id} />
       </div>
+
+      {/* A ancho completo, como pide su rejilla de 5 columnas (lg): en
+          media columna quedaba apretado y descompensaba el panel. */}
+      <BusinessQuickActions />
 
       <BusinessRecentActivity activities={activities} />
     </div>
