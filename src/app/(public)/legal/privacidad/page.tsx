@@ -103,7 +103,7 @@ export default function PrivacidadPage() {
               </div>
               <div>
                 <p className="font-semibold">Tus datos están seguros</p>
-                <p className="text-sm text-gray-500">Cumplimos con la normativa venezolana e internacional</p>
+                <p className="text-sm text-gray-500">Cumplimos con la normativa chilena e internacional</p>
               </div>
             </div>
             <div className="flex items-center gap-3">
