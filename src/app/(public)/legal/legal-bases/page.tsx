@@ -44,8 +44,8 @@ export default function LegalBasesPage() {
           <section>
             <h2 className="text-2xl font-bold text-gradient mb-4">2. Ley de Protección al Consumidor</h2>
             <p className="dark:text-gray-300 text-gray-700 leading-relaxed">
-              Nos regimos por la <strong>Ley 19.496 de Protección de los Derechos de los Consumidores</strong>
-              de Chile, que establece:
+              Nos regimos por la <strong>Ley 19.496 de Protección de los Derechos de los Consumidores</strong> de Chile,
+              que establece:
             </p>
             <div className="mt-4 space-y-4">
               <div>
@@ -69,7 +69,7 @@ export default function LegalBasesPage() {
             <div className="mt-4 p-4 rounded-lg bg-primary/5 border border-primary/20">
               <p className="text-sm dark:text-gray-300 text-gray-700">
                 📞 <strong>Para denuncias:</strong> Puedes contactar al
-                <strong> SERNAC (Servicio Nacional del Consumidor)</strong>o a nuestro equipo de soporte en{' '}
+                <strong> SERNAC (Servicio Nacional del Consumidor)</strong> o a nuestro equipo de soporte en{' '}
                 <strong>soporte@paporla.com</strong>
               </p>
             </div>
@@ -78,8 +78,7 @@ export default function LegalBasesPage() {
           <section>
             <h2 className="text-2xl font-bold text-gradient mb-4">3. Ley de Protección de Datos</h2>
             <p className="dark:text-gray-300 text-gray-700 leading-relaxed">
-              En cumplimiento de la <strong>Ley 19.628 de Protección de la Vida Privada</strong>
-              de Chile, Paporla:
+              En cumplimiento de la <strong>Ley 19.628 de Protección de la Vida Privada</strong> de Chile, Paporla:
             </p>
             <ul className="list-disc pl-6 mt-3 space-y-2 dark:text-gray-300 text-gray-700">
               <li>Solo recopila datos con consentimiento explícito y para fines legítimos.</li>
@@ -99,8 +98,8 @@ export default function LegalBasesPage() {
           <section>
             <h2 className="text-2xl font-bold text-gradient mb-4">4. Ley de Comercio Electrónico</h2>
             <p className="dark:text-gray-300 text-gray-700 leading-relaxed">
-              Nos regimos por la <strong>Ley 19.799 de Documentos Electrónicos y Firma Electrónica</strong>
-              de Chile, que otorga:
+              Nos regimos por la <strong>Ley 19.799 de Documentos Electrónicos y Firma Electrónica</strong> de Chile,
+              que otorga:
             </p>
             <ul className="list-disc pl-6 mt-3 space-y-2 dark:text-gray-300 text-gray-700">
               <li>

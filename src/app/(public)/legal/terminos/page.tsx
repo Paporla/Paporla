@@ -326,10 +326,12 @@ export default function TerminosPage() {
                   6. Pagos y Reembolsos
                 </h2>
                 <p className="dark:text-gray-300 text-gray-700">
-                  Paporla no procesa pagos directamente. El pago del pack se realiza en efectivo directamente al
-                  comercio al momento de la recogida. En caso de que un pack no esté disponible o no cumpla con lo
-                  ofrecido, el usuario no está obligado a realizar el pago y debe reportar la situación a Paporla para
-                  la correspondiente sanción al comercio.
+                  Durante la etapa actual, Paporla no procesa pagos: el pack se paga directamente al comercio al momento
+                  de la recogida (en efectivo o en los medios que el comercio acepte en su local). En caso de que un
+                  pack no esté disponible o no cumpla con lo ofrecido, el usuario no está obligado a realizar el pago y
+                  debe reportar la situación a Paporla para la correspondiente sanción al comercio. Cuando Paporla
+                  habilite el pago en línea a través de la Plataforma, estos términos se actualizarán y el cambio se
+                  comunicará con anticipación por los canales oficiales.
                 </p>
                 <div className="mt-4 p-4 rounded-lg bg-green-500/10 border border-green-500/20">
                   <p className="text-sm">
