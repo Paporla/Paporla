@@ -90,8 +90,10 @@ export default function TodayPickups({ shopId }: { shopId: string }) {
               <span className="text-sm bg-primary/20 text-primary px-2 py-0.5 rounded-full">{pickups.length}</span>
             )}
           </h2>
+          {/* Sin "abajo/al lado": la posición del validador cambia entre el
+              panel (al lado en escritorio, encima en móvil) y Reservas. */}
           <p className="text-xs dark:text-gray-500 text-gray-400">
-            Se validan con el código que te dé tu cliente, en el validador de abajo.
+            Se validan en «Validar código de recogida» con el código que te dé tu cliente.
           </p>
         </div>
       </div>
