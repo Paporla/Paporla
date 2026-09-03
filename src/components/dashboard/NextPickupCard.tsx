@@ -20,30 +20,6 @@ interface NextPickupCardProps {
 }
 
 /**
- * HH:mm del fin de la ventana EN LA ZONA HORARIA DEL MERCADO (no la del
- * navegador). CountdownTimer combina esa hora con la fecha en hora local,
- * así que en el piloto (Chile: navegador y mercado en America/Santiago) el
- * instante coincide exactamente.
- */
-function marketEndTimeHHmm(iso: string, timezone: string): string | null {
-  try {
-    const parts = new Intl.DateTimeFormat('es-CL', {
-      hour: '2-digit',
-      minute: '2-digit',
-      hourCycle: 'h23',
-      timeZone: timezone,
-    }).formatToParts(new Date(iso))
-    const hour = parts.find((p) => p.type === 'hour')?.value
-    const minute = parts.find((p) => p.type === 'minute')?.value
-    if (!hour || !minute) return null
-    return `${hour}:${minute}`
-  } catch {
-    // Zona horaria inválida: mejor sin cuenta atrás que una hora mentirosa.
-    return null
-  }
-}
-
-/**
  * Tarjeta "Próxima recogida" del dashboard.
  *
  * Layout SIEMPRE de una columna (aunque haya ancho): vive en la columna
@@ -98,7 +74,6 @@ export default function NextPickupCard({ reservation, loading, error }: NextPick
 
   const config = getStatusConfig(reservation.status)
   const windowLabel = formatPickupWindow(reservation.pickup_start_at, reservation.pickup_end_at, reservation.timezone)
-  const endHHmm = marketEndTimeHHmm(reservation.pickup_end_at, reservation.timezone)
   const totalLabel = formatMinorPrice(reservation.total_amount_minor, reservation.currency_code, 'es-CL')
 
   // "Cómo llegar": si el comercio tiene coordenadas (0028) se usan — Google
@@ -184,13 +159,9 @@ export default function NextPickupCard({ reservation, loading, error }: NextPick
           {/* Fila 4: cuenta atrás (izquierda, nunca partida) + estado
               (derecha, nunca partido). */}
           <div className="flex items-center justify-between gap-2 min-w-0">
-            {endHHmm ? (
-              <span className="whitespace-nowrap">
-                <CountdownTimer targetDate={reservation.pickup_end_at} targetEndTime={endHHmm} />
-              </span>
-            ) : (
-              <span />
-            )}
+            <span className="whitespace-nowrap">
+              <CountdownTimer targetDate={reservation.pickup_end_at} />
+            </span>
             <span
               className={`text-[11px] px-2 py-0.5 rounded-full whitespace-nowrap shrink-0 ${config.bg} ${config.color}`}
             >

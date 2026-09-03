@@ -4,23 +4,33 @@ import { useState, useEffect, useRef } from 'react'
 import { motion } from 'framer-motion'
 
 interface CountdownTimerProps {
-  targetDate: string // Fecha ISO
-  targetEndTime: string // HH:mm
+  /** Instante ISO completo contra el que se cuenta (p. ej. `pickup_end_at`). */
+  targetDate: string
   onExpired?: () => void
 }
 
-export default function CountdownTimer({ targetDate, targetEndTime, onExpired }: CountdownTimerProps) {
+/**
+ * Cuenta atrás hasta un instante absoluto.
+ *
+ * Antes recibía también un HH:mm (`targetEndTime`, hora del mercado) y lo
+ * recomponía sobre la fecha con `setHours`, que opera en la zona horaria del
+ * NAVEGADOR: solo acertaba cuando ambas zonas coincidían (piloto chileno).
+ * Visto desde otra zona desplazaba el límite horas y mostraba "Tiempo de
+ * recogida vencido" con la ventana aún vigente (detectado en el ensayo local
+ * del 2026-09-03 probando desde España). Ahora usa el ISO de la base
+ * directamente: los instantes absolutos no dependen de quién los mire.
+ */
+export default function CountdownTimer({ targetDate, onExpired }: CountdownTimerProps) {
   const [timeLeft, setTimeLeft] = useState<string>('')
   const expiredRef = useRef(false)
 
   useEffect(() => {
     const calculateTimeLeft = () => {
       const now = new Date()
-
-      // Combinar fecha + hora
-      const [hours, minutes] = targetEndTime.split(':').map(Number)
       const deadline = new Date(targetDate)
-      deadline.setHours(hours, minutes, 0, 0)
+
+      // Fecha inválida: sin cuenta atrás, mejor vacío que "NaN m".
+      if (Number.isNaN(deadline.getTime())) return
 
       const diff = deadline.getTime() - now.getTime()
 
@@ -50,7 +60,7 @@ export default function CountdownTimer({ targetDate, targetEndTime, onExpired }:
     calculateTimeLeft()
     const timer = setInterval(calculateTimeLeft, 1000)
     return () => clearInterval(timer)
-  }, [targetDate, targetEndTime, onExpired])
+  }, [targetDate, onExpired])
 
   // eslint-disable-next-line
   if (expiredRef.current) {
