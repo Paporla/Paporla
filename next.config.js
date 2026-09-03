@@ -5,6 +5,11 @@ const nextConfig = {
   images: {
     formats: ['image/avif', 'image/webp'],
     deviceSizes: [640, 750, 828, 1080, 1200, 1920],
+    // Solo en desarrollo: el Supabase local sirve las imágenes desde
+    // 127.0.0.1, y Next 16 bloquea la optimización de IPs privadas (SSRF).
+    // En producción esta bandera NUNCA debe activarse: las imágenes reales
+    // vienen de **.supabase.co, que resuelve a IPs públicas.
+    ...(process.env.NODE_ENV === 'development' ? { dangerouslyAllowLocalIP: true } : {}),
     remotePatterns: [
       // Solo en desarrollo: el Supabase local sirve las imágenes por
       // http://127.0.0.1:54321. En producción la lista queda intacta
