@@ -1,72 +1,69 @@
+### 2. `C:\Users\nvarg\Desktop\Paporla\ESTADO_DEL_PROYECTO.md` (sustituir completo)
+
+````md
 # Paporla — Estado del Proyecto
 
-# Última actualización: 2026-08-04
+**Última actualización: 2026-09-03** (tras el ensayo general local del flujo de reserva)
 
-## 🟢 Fases completadas
+Este documento es la foto estable del repo. El estado operativo del día a día
+(qué se está ejecutando, pendientes inmediatos) vive en el workspace del
+asistente: `ESTADO_SESION_BLOQUE_E.md` y `entregas/PLAN_BLOQUE_E_CUTOVER.md`.
 
-### Fase 1 — Flujo Core + Reparaciones
+## Arquitectura y fuente de verdad
 
-- Vista SQL `available_packs` (01_available_packs_view.sql)
-- Hook unificado `useCreateReservation`
-- Modal de pre-confirmación en listado y detalle de packs
-- Dashboard responde a `?reserved=true` con toast verde
-- Empty states contextuales por ciudad/búsqueda
+- **Esquema de base de datos:** `supabase/migrations/` (42 migraciones,
+  0001–0042). No existe `sql/00_master_schema.sql` ni ficheros `01_*.sql`
+  sueltos: cualquier cambio de esquema entra como migración nueva con su
+  `REVOKE ... FROM PUBLIC` + `GRANT` correspondiente.
+- **Seed canónico:** `supabase/seed.sql` (mercado Chile, Región Metropolitana,
+  comuna Santiago), activado en `config.toml` con `[db.seed] enabled = true`.
+  Toda base nueva (local, CI o producción) nace con geografía operativa.
+- **Tipos generados:** `src/types/database.generated.ts` (canónico).
+- **Seguridad:** 24 tablas con RLS, ~42 funciones para `authenticated`,
+  funciones `service_*` para el servidor, helpers en `app_private`.
+  Tests pgTAP en `supabase/tests/` (27 tests) — pasan en local
+  (`supabase test db --local`) y en CI (workflow `pgtap.yml`, se dispara al
+  cambiar `supabase/**`).
+- **Tests de aplicación:** 97 archivos / 727 tests con Vitest + React Testing
+  Library; umbral de cobertura 60 %; lint ESLint + Prettier obligatorios.
+- **CSP y cabeceras:** dinámicas con nonces en `src/middleware.ts`
+  (`src/lib/middleware/csp.ts`); CSRF en `src/lib/middleware/csrf.ts`.
+- **Emails:** Resend (`src/lib/email/`); los correos de Supabase Auth en local
+  caen en Mailpit (127.0.0.1:54324), los de la app van al buzón real.
 
-### Fase 2 — Geolocalización + Onboarding
+## Qué está terminado
 
-- PostGIS + columna `geog` + función `search_packs_nearby` (02_postgis_geolocation.sql)
-- Filtro server-side en /packs con coordenadas del navegador
-- Onboarding visual "¿Cómo funciona?" en 3 pasos (Explora → Reserva → Recoge)
-- Distancia en km/m en las cards de packs
+- Bloques A–D del rebuild: flujo core, geolocalización, robustez, imágenes y
+  storage, panel admin, permisos y auditoría de seguridad cerrada
+  (hallazgo de `EXECUTE` a PUBLIC resuelto en 0041).
+- Infraestructura de producción lista: dominio `www.paporla.com` canónico
+  (apex 308), DNS en los CNAME recomendados de Vercel, certificado gestionado
+  por Vercel, correo por Resend/SES con SPF/DKIM/DMARC configurados.
+- CI completo en GitHub Actions: lint+typecheck, tests con cobertura,
+  security audit, build y job pgTAP sobre base efímera con Docker.
+- **Ensayo general del flujo de reserva APROBADO (2026-09-03)** en local de
+  punta a punta: registro → comercio → términos → aprobación admin → pack →
+  reserva → confirmación → código `P4P-`. Cinco bugs reales cazados y
+  corregidos en el camino (0042 coordenadas, id de localidad del seed,
+  imágenes locales en dev, IP privada en next/image, cuenta atrás horaria).
 
-### Fase 3 — Robustez + Analytics
+## Qué queda por delante
 
-- 3 hooks migrados a React Query (useShops, useShop, useFavorites)
-- Error Boundaries en secciones del dashboard (no se cae todo si falla una card)
-- Eventos GA4 en todo el funnel: view_pack_list → click_reserve → begin_checkout → purchase
+- **Bloque E (en curso):** pasos 1.2 y 1.6 de la Fase 1 (documentación y
+  ensayo de fusión), versión final del plan de cutover y ejecución del día D
+  (fusión fast-forward a `master` + reconstrucción de la base de producción).
+- **Bloque F:** MercadoPago (pagos reales), emails de reserva y entrega del
+  código de recogida al cliente, notificaciones al comercio (la tabla existe
+  pero aún no la alimenta ningún consumidor), liquidaciones. Requiere empresa
+  constituida, cuenta de MercadoPago y Vercel Pro (ToS del plan Hobby).
+- **Bloque G:** app móvil con Capacitor + lector/validador de códigos QR.
+- **Lanzamiento público:** solo con Supabase Pro contratado (decisión D1).
 
-### Fase 4 — Datos + Tests
+## Cómo retomar el trabajo local
 
-- Exportación CSV de reservas para comercios (botón "Exportar CSV")
-- Índices SQL adicionales (03_performance_indexes.sql)
-- 24 tests de integración para RPCs críticas (rpc-reservations.test.ts)
-
-### Fix Extra — Imágenes
-
-- ImageUpload re-agregado a PackFormBasicInfo (fotos de packs)
-- ProfileImagesForm creado (estaba importado pero no existía)
-- Paths de subida estables (shopId fijo, no Date.now())
-- 3 buckets de storage con políticas RLS (shop-images, pack-images, avatars)
-
-## 🔜 Pendiente
-
-### Fase 5 — MercadoPago (para cuando tengas la cuenta)
-
-- Integrar API de MercadoPago (checkout, webhook)
-- Reemplazar payment_method: 'demo' por flujo real
-- Manejo de reembolsos
-
-### Auditoría en curso (sin completar)
-
-- Módulo Auth: 4 hallazgos encontrados, sin arreglar aún
-- Módulo Público: sin auditar
-- Dashboard Usuario: sin auditar
-- Dashboard Comercio: sin auditar
-- Dashboard Admin: sin auditar
-- API Routes: sin auditar
-
-## 📂 SQL pendiente en Supabase
-
-- 01_available_packs_view.sql ✅
-- 02_postgis_geolocation.sql ✅
-- 03_performance_indexes.sql ✅
-- 04_storage_buckets.sql ✅ (solo buckets, políticas se crearon manualmente)
-
-## 🧪 Tests
-
-- 24/24 tests pasan: `npx vitest run src/__tests__/api/rpc-reservations.test.ts`
-
-## ▶️ Cómo retomar
-
-Al volver a abrir el programa, decime:
-"Continuá con la auditoría del módulo Auth" o "Resumen de dónde quedamos"
+```bash
+# 1. Docker Desktop encendido
+npx supabase start        # base local + Mailpit + Studio
+npm run dev               # web en http://localhost:3000
+```
+````
