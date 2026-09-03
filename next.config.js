@@ -6,6 +6,23 @@ const nextConfig = {
     formats: ['image/avif', 'image/webp'],
     deviceSizes: [640, 750, 828, 1080, 1200, 1920],
     remotePatterns: [
+      // Solo en desarrollo: el Supabase local sirve las imágenes por
+      // http://127.0.0.1:54321. En producción la lista queda intacta
+      // (permitir 127.0.0.1 allí sería un riesgo de SSRF del optimizador).
+      ...(process.env.NODE_ENV === 'development'
+        ? [
+            {
+              protocol: 'http',
+              hostname: '127.0.0.1',
+              port: '54321',
+            },
+            {
+              protocol: 'http',
+              hostname: 'localhost',
+              port: '54321',
+            },
+          ]
+        : []),
       {
         protocol: 'https',
         hostname: 'images.unsplash.com',
