@@ -1,0 +1,47 @@
+# PAPORLA — Tests de seguridad pgTAP contra una base efimera.
+#
+# Levanta el stack local de Supabase con Docker (como en el ordenador del
+# fundador), aplica las migraciones + seed desde cero y corre los 27 tests de
+# seguridad de supabase/tests/. Solo se dispara cuando cambia algo bajo
+# supabase/ (migraciones, config.toml, seed, tests) o este propio archivo,
+# para no gastar minutos de Actions en commits que no tocan la base.
+#
+# CLI fijado en 2.115.0, igual que package.json (decision del Bloque E:
+# no subir a 2.116.0 hasta el cutover).
+name: pgTAP
+
+on:
+  push:
+    branches: [master, main, 'feat/**']
+    paths:
+      - 'supabase/**'
+      - '.github/workflows/pgtap.yml'
+  # Permite lanzarlo a mano desde la pestana Actions de GitHub.
+  workflow_dispatch:
+
+# Si haces varios push seguidos, se cancela la comprobacion anterior y solo
+# corre la ultima.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  pgtap:
+    name: pgTAP (27 tests de seguridad)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Instalar Supabase CLI (fijada en 2.115.0)
+        uses: supabase/setup-cli@v1
+        with:
+          version: 2.115.0
+
+      # Primera ejecucion: descarga imagenes y inicializa la base aplicando
+      # todas las migraciones + el seed (volumen virgen, como un db reset).
+      - name: Arrancar Supabase local (migraciones + seed desde cero)
+        run: supabase start
+
+      - name: Correr los tests pgTAP
+        run: supabase test db
