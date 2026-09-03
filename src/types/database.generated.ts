@@ -1689,7 +1689,9 @@ export type Database = {
           p_address_line2: string
           p_category: string
           p_description: string
+          p_latitude?: number | null
           p_locality_id: string
+          p_longitude?: number | null
           p_market_id: string
           p_name: string
           p_phone_e164: string
