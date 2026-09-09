@@ -74,8 +74,18 @@ self.addEventListener('fetch', (event) => {
     fetch(event.request)
       .then((response) => {
         if (response.ok && isHtml) {
-          const clone = response.clone()
-          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone))
+          // Hardening: NUNCA cachear HTML de zonas privadas. En un dispositivo
+          // compartido, el cache offline podría servir el panel de una sesión
+          // anterior (hallazgo auditoría sw.js).
+          const url = new URL(event.request.url)
+          const isPrivate =
+            /^\/(dashboard|admin|business|profile|reservations|favorites|notifications|settings)(\/|$)/.test(
+              url.pathname,
+            )
+          if (!isPrivate) {
+            const clone = response.clone()
+            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone))
+          }
         }
         return response
       })
