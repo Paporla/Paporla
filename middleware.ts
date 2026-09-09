@@ -43,6 +43,15 @@ export async function middleware(request: NextRequest) {
   }
 
   // ============================================
+  // HSTS header — SIEMPRE antes del modo mantenimiento:
+  // si el bloque de mantenimiento retornara antes, las respuestas de
+  // mantenimiento saldrían sin HSTS en producción (hallazgo S2 auditoría).
+  // ============================================
+  if (process.env.NODE_ENV === 'production') {
+    response.headers.set('Strict-Transport-Security', 'max-age=63072000; includeSubDomains; preload')
+  }
+
+  // ============================================
   // MODO MANTENIMIENTO
   // ============================================
   if (process.env.NEXT_PUBLIC_MAINTENANCE_MODE === 'true') {
@@ -56,13 +65,6 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(new URL('/mantenimiento', request.url))
     }
     return response
-  }
-
-  // ============================================
-  // HSTS header
-  // ============================================
-  if (process.env.NODE_ENV === 'production') {
-    response.headers.set('Strict-Transport-Security', 'max-age=63072000; includeSubDomains; preload')
   }
 
   const supabase = createServerClient(
@@ -79,8 +81,15 @@ export async function middleware(request: NextRequest) {
         setAll(cookiesToSet: { name: string; value: string; [key: string]: unknown }[]) {
           cookiesToSet.forEach(
             ({ name, value, ...options }: { name: string; value: string; [key: string]: unknown }) => {
-              request.cookies.set({ name, value, ...options })
-              response.cookies.set({ name, value, ...options })
+              // Hardening S1: @supabase/ssr no incluye `secure` en sus opciones
+              // por defecto; sin esto, la cookie de sesión viajaría sin flag
+              // Secure en producción. En dev/local se deja como viene.
+              const safeOptions = {
+                ...options,
+                ...(process.env.NODE_ENV === 'production' ? { secure: true } : {}),
+              }
+              request.cookies.set({ name, value, ...safeOptions })
+              response.cookies.set({ name, value, ...safeOptions })
             },
           )
         },
