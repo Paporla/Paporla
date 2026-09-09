@@ -4,6 +4,14 @@ import { createClient } from '@supabase/supabase-js'
 const MAX_PACKS_PER_MARKET = 50
 const MAX_SHOPS = 100
 
+// Regeneración horaria: sin esto, cada request de un buscador disparaba las
+// queries vivas del catálogo (hallazgo auditoría sitemap).
+export const revalidate = 3600
+
+// Fecha fija para páginas estáticas: `new Date()` en cada generación rompía
+// If-Modified-Since de los crawlers al decir siempre "hoy".
+const LAST_MODIFIED = new Date('2026-09-09T00:00:00.000Z')
+
 /**
  * Fase 8: las páginas dinámicas salen de las RPCs canónicas de 0035
  * (list_public_packs + list_public_shops, GRANT anon) en vez del .from()
@@ -19,49 +27,49 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticPages = [
     {
       url: siteUrl,
-      lastModified: new Date(),
+      lastModified: LAST_MODIFIED,
       changeFrequency: 'daily' as const,
       priority: 1,
     },
     {
       url: `${siteUrl}/packs`,
-      lastModified: new Date(),
+      lastModified: LAST_MODIFIED,
       changeFrequency: 'daily' as const,
       priority: 0.9,
     },
     {
       url: `${siteUrl}/about`,
-      lastModified: new Date(),
+      lastModified: LAST_MODIFIED,
       changeFrequency: 'monthly' as const,
       priority: 0.5,
     },
     {
       url: `${siteUrl}/faq`,
-      lastModified: new Date(),
+      lastModified: LAST_MODIFIED,
       changeFrequency: 'monthly' as const,
       priority: 0.6,
     },
     {
       url: `${siteUrl}/contacto`,
-      lastModified: new Date(),
+      lastModified: LAST_MODIFIED,
       changeFrequency: 'monthly' as const,
       priority: 0.4,
     },
     {
       url: `${siteUrl}/legal/terminos`,
-      lastModified: new Date(),
+      lastModified: LAST_MODIFIED,
       changeFrequency: 'yearly' as const,
       priority: 0.3,
     },
     {
       url: `${siteUrl}/legal/privacidad`,
-      lastModified: new Date(),
+      lastModified: LAST_MODIFIED,
       changeFrequency: 'yearly' as const,
       priority: 0.3,
     },
     {
       url: `${siteUrl}/legal/cookies`,
-      lastModified: new Date(),
+      lastModified: LAST_MODIFIED,
       changeFrequency: 'yearly' as const,
       priority: 0.2,
     },
@@ -89,7 +97,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       for (const pack of (packs ?? []) as { pack_id: string; updated_at: string | null }[]) {
         packPages.push({
           url: `${siteUrl}/packs/${pack.pack_id}`,
-          lastModified: pack.updated_at ? new Date(pack.updated_at) : new Date(),
+          lastModified: pack.updated_at ? new Date(pack.updated_at) : LAST_MODIFIED,
           changeFrequency: 'hourly' as const,
           priority: 0.8,
         })
@@ -101,7 +109,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const shopPages: MetadataRoute.Sitemap = ((shops ?? []) as { shop_id: string; updated_at: string | null }[]).map(
       (shop) => ({
         url: `${siteUrl}/shops/${shop.shop_id}`,
-        lastModified: shop.updated_at ? new Date(shop.updated_at) : new Date(),
+        lastModified: shop.updated_at ? new Date(shop.updated_at) : LAST_MODIFIED,
         changeFrequency: 'weekly' as const,
         priority: 0.7,
       }),
