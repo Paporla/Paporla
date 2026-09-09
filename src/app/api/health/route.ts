@@ -6,7 +6,10 @@ export async function GET() {
 
   try {
     const supabase = await createClient()
-    const { error } = await supabase.from('user_profiles').select('id').limit(1).maybeSingle()
+    // La sonda usa la clave anon, y anon SOLO puede leer el catalogo publico
+    // (markets/regions/localities, ver 0012_permissions): user_profiles esta
+    // correctamente vetada para anon y consultarla aqui daba 503 permanente.
+    const { error } = await supabase.from('markets').select('id').limit(1).maybeSingle()
 
     if (error) {
       return NextResponse.json(
