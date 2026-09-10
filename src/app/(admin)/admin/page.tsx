@@ -7,7 +7,6 @@ import AdminNavCards from '@/components/admin/AdminNavCards'
 import AdminStatCards from '@/components/admin/AdminStatCards'
 import AdminPanelError from '@/components/admin/AdminPanelError'
 import AlertsPanel from './components/AlertsPanel'
-import AdminQuickActions from './components/AdminQuickActions'
 import RecentActivity from './components/RecentActivity'
 import ReservationChart from './components/ReservationChart'
 import ShopsPieChart from './components/ShopsPieChart'
@@ -53,10 +52,7 @@ export default function AdminDashboard() {
       <AdminNavCards stats={stats} />
       <AdminStatCards stats={stats} />
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <AdminQuickActions />
-        <AlertsPanel />
-      </div>
+      <AlertsPanel />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <ReservationChart data={reservationsByDay} />
