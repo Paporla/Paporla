@@ -1,6 +1,6 @@
 'use client'
 
-import { Navigation, MapPin, Compass } from 'lucide-react'
+import { Navigation, MapPin } from 'lucide-react'
 import Input from '@/components/ui/Input'
 import { useState } from 'react'
 import { parseCoordinate, validateCoordinatePair } from '@/lib/utils/coordinates'
@@ -66,47 +66,36 @@ export default function ProfileLocationForm({
       </div>
 
       {isValid ? (
-        <div className="relative rounded-2xl overflow-hidden border dark:border-white/10 border-gray-200 h-40 dark:bg-black/40 bg-gray-50">
-          <div
-            className="absolute inset-0 opacity-40 dark:opacity-30"
-            style={{
-              backgroundImage:
-                'linear-gradient(rgba(39,211,184,0.3) 1px, transparent 1px), linear-gradient(90deg, rgba(39,211,184,0.3) 1px, transparent 1px)',
-              backgroundSize: '30px 30px',
-            }}
-          />
-          {/* L-16: sin este aviso la caja oscura con rejilla parecía un mapa
-              roto; ahora se lee como lo que es: una vista ilustrativa. */}
-          <div className="absolute top-3 left-3 flex items-center gap-1 dark:bg-black/60 bg-white/80 backdrop-blur-sm border dark:border-white/10 border-gray-200 rounded-lg px-2 py-1">
-            <Compass className="w-3 h-3 dark:text-gray-400 text-gray-600" />
-            <p className="text-[10px] dark:text-gray-400 text-gray-600">Vista ilustrativa</p>
+        /* L-16: mapa REAL embebido de OpenStreetMap (gratis, sin clave): el
+           placeholder con rejilla se leía como "ni mapa ni nada". El embed es
+           interactivo (pan/zoom) y trae su propio aviso de copyright. */
+        <div className="space-y-2">
+          <div className="relative rounded-2xl overflow-hidden border dark:border-white/10 border-gray-200 h-64 bg-gray-100">
+            <iframe
+              title="Mapa de ubicacion del comercio"
+              src={`https://www.openstreetmap.org/export/embed.html?bbox=${(lng - 0.02).toFixed(4)},${(lat - 0.01).toFixed(4)},${(lng + 0.02).toFixed(4)},${(lat + 0.01).toFixed(4)}&layer=mapnik&marker=${lat},${lng}`}
+              className="w-full h-full border-0"
+              loading="lazy"
+            />
           </div>
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-full">
-            <div className="relative">
-              <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center shadow-lg shadow-primary/30 animate-bounce">
-                <MapPin className="w-4 h-4 text-black" />
-              </div>
-              <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-3 h-1.5 bg-primary/30 rounded-full blur-[2px]" />
-            </div>
-          </div>
-          <div className="absolute bottom-3 left-3 dark:bg-black/60 bg-white/80 backdrop-blur-sm border dark:border-white/10 border-gray-200 rounded-lg px-3 py-1.5">
-            <p className="text-[10px] dark:text-gray-400 text-gray-600 font-mono">
+          <div className="flex items-center justify-between gap-2">
+            <p className="text-[10px] dark:text-gray-500 text-gray-500 font-mono">
               {lat.toFixed(4)}, {lng.toFixed(4)}
             </p>
+            <a
+              href={`https://www.google.com/maps?q=${lat},${lng}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-[10px] text-primary hover:text-primary/80 transition-colors"
+            >
+              Abrir en Maps →
+            </a>
           </div>
-          <a
-            href={`https://www.google.com/maps?q=${lat},${lng}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="absolute bottom-3 right-3 dark:bg-black/60 bg-white/80 backdrop-blur-sm border dark:border-white/10 border-gray-200 rounded-lg px-3 py-1.5 text-[10px] text-primary hover:text-primary/80 transition-colors"
-          >
-            Abrir en Maps →
-          </a>
         </div>
       ) : (
         <div className="rounded-2xl border border-dashed dark:border-white/10 border-gray-200 h-40 dark:bg-black/40 bg-gray-50 flex flex-col items-center justify-center gap-2">
           <MapPin className="w-6 h-6 dark:text-gray-600 text-gray-400" />
-          <p className="text-xs dark:text-gray-500 text-gray-400">Ingresa coordenadas para ver la vista ilustrativa</p>
+          <p className="text-xs dark:text-gray-500 text-gray-400">Ingresa coordenadas para ver el mapa</p>
         </div>
       )}
 
