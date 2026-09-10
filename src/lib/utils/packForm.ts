@@ -35,18 +35,81 @@ export interface PackFormErrors {
 }
 
 /**
- * Desfase fijo de Chile. Los packs se crean y se leen con este offset.
- * DEUDA: cuando haya mas de un mercado debe salir de shops.timezone /
- * packs.timezone_snapshot en lugar de estar aqui fijado.
+ * Huso horario de Chile segun el calendario IANA, NO un offset fijo.
+ *
+ * HISTORIA (bug +1 h, fichado el dia del cutover 2026-09-09): antes esto era
+ * `CHILE_UTC_OFFSET = '-04:00'` a fuego. Chile cambia de huso dos veces al
+ * ano (invierno UTC-4, verano UTC-3), asi que entre el cambio de septiembre
+ * y el de abril cada hora escrita por un comercio se guardaba una hora tarde:
+ * escribia 22:00 y el pack salia 23:00. La lectura ya usaba IANA
+ * (formatDate.ts); la escritura era la unica que adivinaba.
+ *
+ * Con `America/Santiago` el propio runtime resuelve si la fecha cae en
+ * horario de verano o de invierno, incluidos los dias de transicion.
+ * DEUDA: cuando haya mas de un mercado, el huso debe salir de
+ * shops.timezone / packs.timezone_snapshot en lugar de estar aqui fijado.
  */
-export const CHILE_UTC_OFFSET = '-04:00'
+const CHILE_TZ = 'America/Santiago'
 
-/** Convierte fecha + hora del formulario en un timestamptz con zona explicita. */
-export function toChileTimestamp(date: string, time: string): string {
-  return `${date}T${time}:00${CHILE_UTC_OFFSET}`
+/** Desglosa un instante en las partes de calendario que se ven en un huso. */
+function partsInTimezone(instant: Date, timeZone: string): Record<string, number> {
+  const dtf = new Intl.DateTimeFormat('en-US', {
+    timeZone,
+    hour12: false,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+  })
+  const parts: Record<string, number> = {}
+  for (const part of dtf.formatToParts(instant)) {
+    if (part.type !== 'literal') parts[part.type] = Number(part.value)
+  }
+  return parts
 }
 
-const CHILE_OFFSET_MINUTES = -240
+/** Minutos de desfase entre UTC y el huso en un instante dado (p.ej. -180 en verano chileno). */
+function timezoneOffsetMinutes(instant: Date, timeZone: string): number {
+  const p = partsInTimezone(instant, timeZone)
+  const asUtc = Date.UTC(p.year, p.month - 1, p.day, p.hour % 24, p.minute, p.second)
+  return Math.round((asUtc - Math.floor(instant.getTime() / 1000) * 1000) / 60000)
+}
+
+/**
+ * Convierte fecha + hora del formulario (hora de pared en Chile) en un
+ * instante UTC sin ambiguedad. Devuelve ISO con Z, que Postgres acepta
+ * como timestamptz.
+ *
+ * El algoritmo tantea el offset dos veces: la primera aproximacion puede
+ * caer al otro lado de un cambio de horario (p.ej. 23:30 de invierno que en
+ * verano ya es el dia siguiente), y el segundo tanteo corrige el instante.
+ * Si la entrada no tiene forma de fecha/hora validas, devuelve el centinela
+ * 'INVALID_DATE' (NaN en cualquier motor) y el validador del formulario la
+ * rechaza antes de que nada viaje a la base.
+ */
+export function toChileTimestamp(date: string, time: string): string {
+  // Validación de formato ANTES de parsear: el parser legado de V8 se traga
+  // basuras como 'T:00Z' (las convierte en 2000-01-01) y un NaN-check solo
+  // no basta. 'INVALID_DATE' es NaN en cualquier motor, y el validador del
+  // formulario la caza antes de que nada viaje a la RPC.
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || !/^\d{2}:\d{2}$/.test(time)) {
+    return 'INVALID_DATE'
+  }
+  const wallClockAsUtc = new Date(`${date}T${time}:00Z`)
+  if (Number.isNaN(wallClockAsUtc.getTime())) {
+    return 'INVALID_DATE'
+  }
+  let offset = timezoneOffsetMinutes(wallClockAsUtc, CHILE_TZ)
+  let utc = new Date(wallClockAsUtc.getTime() - offset * 60000)
+  const offsetAtUtc = timezoneOffsetMinutes(utc, CHILE_TZ)
+  if (offsetAtUtc !== offset) {
+    offset = offsetAtUtc
+    utc = new Date(wallClockAsUtc.getTime() - offset * 60000)
+  }
+  return utc.toISOString()
+}
 
 /**
  * Fecha (YYYY-MM-DD) en el calendario de Chile, no en UTC.
@@ -57,14 +120,15 @@ const CHILE_OFFSET_MINUTES = -240
  * que es justo cuando un comercio publica los packs del dia.
  */
 export function chileDateIn(days: number, from: number = Date.now()): string {
-  const shifted = new Date(from + CHILE_OFFSET_MINUTES * 60000 + days * 86400000)
-  return shifted.toISOString().slice(0, 10)
+  const p = partsInTimezone(new Date(from), CHILE_TZ)
+  // Date.UTC normaliza el desbordo de dias (31 + 3 -> mes siguiente) solo.
+  return new Date(Date.UTC(p.year, p.month - 1, p.day + days)).toISOString().slice(0, 10)
 }
 
 /** Hora (HH:MM) actual en Chile. */
 export function chileTimeNow(from: number = Date.now()): string {
-  const shifted = new Date(from + CHILE_OFFSET_MINUTES * 60000)
-  return shifted.toISOString().slice(11, 16)
+  const p = partsInTimezone(new Date(from), CHILE_TZ)
+  return `${String(p.hour % 24).padStart(2, '0')}:${String(p.minute).padStart(2, '0')}`
 }
 
 /**
@@ -283,8 +347,10 @@ export interface PackContentParams {
  *    en la practica para el calculo de descuento, y un 0 daria un -infinito%.
  *  - image_path viaja como RUTA del bucket, nunca como URL publica. Guardar la
  *    URL corromperia la referencia y la imagen dejaria de resolverse.
- *  - Las horas se envian con el offset de Chile explicito, no en hora local del
- *    navegador: el comercio y su cliente pueden estar en husos distintos.
+ *  - Las horas se convierten a instantes UTC con el calendario real de Chile
+ *    (verano UTC-3 / invierno UTC-4, resuelto por IANA): el comercio y su
+ *    cliente pueden estar en husos distintos, y la hora escrita es la hora
+ *    de pared chilena, no la del navegador.
  */
 export function buildPackContentParams(data: PackFormData, extras: PackContentExtras): PackContentParams {
   return {

@@ -4,6 +4,8 @@ import {
   getDefaultPackData,
   packToFormData,
   toChileTimestamp,
+  chileDateIn,
+  chileTimeNow,
   buildPackContentParams,
   type PackFormData,
   type PackContentExtras,
@@ -79,12 +81,56 @@ describe('validatePackForm', () => {
 })
 
 describe('toChileTimestamp', () => {
-  it('appends the Chile offset so the server does not guess the timezone', () => {
-    expect(toChileTimestamp('2026-08-25', '18:30')).toBe('2026-08-25T18:30:00-04:00')
+  it('invierno (UTC-4): las 18:30 chilenas son 22:30 UTC', () => {
+    expect(toChileTimestamp('2026-08-25', '18:30')).toBe('2026-08-25T22:30:00.000Z')
   })
 
-  it('produces a timestamp the Date constructor understands', () => {
-    expect(new Date(toChileTimestamp('2026-08-25', '18:30')).toISOString()).toBe('2026-08-25T22:30:00.000Z')
+  it('verano (UTC-3 desde el 2026-09-06): las 22:00 chilenas son 01:00 UTC del dia siguiente', () => {
+    // El bug del dia D: con offset fijo -04:00 esto guardaba 02:00Z y el pack
+    // se mostraba a las 23:00. El fundador escribio 22:00 y vio 23:00.
+    expect(toChileTimestamp('2026-09-10', '22:00')).toBe('2026-09-11T01:00:00.000Z')
+  })
+
+  it('la hora guardada se lee igual en el calendario de Chile (ida y vuelta)', () => {
+    const iso = toChileTimestamp('2026-09-10', '22:00')
+    const leida = new Intl.DateTimeFormat('es-CL', {
+      timeZone: 'America/Santiago',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false,
+    }).format(new Date(iso))
+    expect(leida).toBe('22:00')
+  })
+
+  it('entrada invalida: devuelve algo que el Date constructor rechaza (NaN) para que el validador la cace', () => {
+    expect(Number.isNaN(new Date(toChileTimestamp('', '')).getTime())).toBe(true)
+    expect(Number.isNaN(new Date(toChileTimestamp('no-fecha', '99:99')).getTime())).toBe(true)
+  })
+})
+
+describe('chileDateIn / chileTimeNow con horario real', () => {
+  // 2026-09-10 03:30 UTC = 00:30 del 10-sep en Chile (verano, UTC-3).
+  // Con el offset fijo de invierno (-240 min) salian las 23:30 del 09-sep:
+  // la fecha "hoy" y la hora quedaban una hora atras.
+  const instante = Date.UTC(2026, 8, 10, 3, 30)
+
+  it('chileDateIn(0) devuelve el dia correcto justo despues de medianoche de verano', () => {
+    expect(chileDateIn(0, instante)).toBe('2026-09-10')
+  })
+
+  it('chileDateIn(1) suma dias en el calendario chileno', () => {
+    expect(chileDateIn(1, instante)).toBe('2026-09-11')
+  })
+
+  it('chileTimeNow devuelve la hora de pared chilena', () => {
+    expect(chileTimeNow(instante)).toBe('00:30')
+  })
+
+  it('en invierno las mismas funciones usan UTC-4', () => {
+    // 2026-06-10 03:30 UTC = 23:30 del 09-jun en Chile (invierno, UTC-4).
+    const invierno = Date.UTC(2026, 5, 10, 3, 30)
+    expect(chileDateIn(0, invierno)).toBe('2026-06-09')
+    expect(chileTimeNow(invierno)).toBe('23:30')
   })
 })
 
@@ -134,8 +180,10 @@ describe('buildPackContentParams', () => {
     const params = buildPackContentParams(makeForm(), extras)
     expect(params.p_price_minor).toBe(1500)
     expect(params.p_original_price_minor).toBe(3000)
-    expect(params.p_pickup_start_at).toBe(`${futureDate}T14:00:00-04:00`)
-    expect(params.p_pickup_end_at).toBe(`${futureDate}T16:00:00-04:00`)
+    // La conversion de huso la cubre el describe de toChileTimestamp; aqui se
+    // verifica el MAPEO de nombres de formulario -> parametros de la RPC.
+    expect(params.p_pickup_start_at).toBe(toChileTimestamp(futureDate, '14:00'))
+    expect(params.p_pickup_end_at).toBe(toChileTimestamp(futureDate, '16:00'))
   })
 
   // Sin esto, un pack sin precio original mostraria un descuento absurdo.
