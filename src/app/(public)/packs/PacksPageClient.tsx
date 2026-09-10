@@ -46,8 +46,16 @@ export default function PacksPage() {
     if (!loading) trackViewPackList(packs.length)
   }, [loading, packs.length])
 
-  if (loading) return <PacksLoadingGrid />
-
+  /**
+   * BUG DEL BUSCADOR QUE SE REINICIA (L-05, reportado por el fundador el
+   * 2026-09-10): antes, `if (loading) return <PacksLoadingGrid />` sustituía
+   * la página ENTERA por el esqueleto en cada carga. El texto del buscador
+   * vive en el estado local del panel de filtros, así que al teclear:
+   * letra → debounce → nueva query → loading → se desmonta el panel → al
+   * volver a montarse, la caja llegaba vacía ("salto de página y vuelve a
+   * aparecer como estaba"). Ahora el esqueleto ocupa SOLO el área de
+   * resultados: héroe, onboarding y filtros siguen montados mientras carga.
+   */
   return (
     <div className="min-h-screen">
       <PacksHeroSection count={packs.length} />
@@ -56,7 +64,9 @@ export default function PacksPage() {
         <OnboardingSteps />
         <PackFiltersAdvanced onFilterChange={handleFilterChange} />
 
-        {packs.length === 0 ? (
+        {loading ? (
+          <PacksLoadingGrid />
+        ) : packs.length === 0 ? (
           <EmptyState
             type={filters.city || filters.search ? 'search' : 'packs'}
             title={
