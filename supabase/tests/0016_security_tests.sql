@@ -18,7 +18,7 @@ SELECT set_config(
   ), 'extensions') || ',public,pg_catalog',
   true
 );
-SELECT plan(27);
+SELECT plan(31);
 
 SELECT ok(
   EXISTS (SELECT 1 FROM pg_extension WHERE extname = 'postgis'),
@@ -264,6 +264,48 @@ SELECT ok(
       AND policyname = 'reservations_shop_owner_read'
   ),
   'merchant reservation RLS policy exists'
+);
+
+-- Favoritos (Lote F1, 0043): la lectura oficial es list_my_favorites y la
+-- tabla sigue siendo RPC-only — el bug L-06 fue precisamente hablar directo.
+SELECT ok(
+  EXISTS (
+    SELECT 1 FROM pg_proc p
+    JOIN pg_namespace n ON n.oid = p.pronamespace
+    WHERE n.nspname = 'public'
+      AND p.proname = 'list_my_favorites'
+      AND p.prosecdef = true
+      AND p.provolatile = 's'
+  ),
+  'list_my_favorites exists as SECURITY DEFINER STABLE'
+);
+
+SELECT ok(
+  has_function_privilege(
+    'authenticated',
+    'public.list_my_favorites()',
+    'EXECUTE'
+  ),
+  'authenticated can execute list_my_favorites'
+);
+
+SELECT ok(
+  has_function_privilege(
+    'authenticated',
+    'public.set_favorite(uuid, boolean)',
+    'EXECUTE'
+  ),
+  'authenticated can execute set_favorite'
+);
+
+SELECT ok(
+  NOT EXISTS (
+    SELECT 1 FROM information_schema.role_table_grants
+    WHERE table_schema = 'public'
+      AND table_name = 'favorites'
+      AND grantee IN ('anon', 'authenticated')
+  ),
+  'favorites table stays RPC-only: no direct grants to anon/authenticated'
 );
 
 SELECT * FROM finish();

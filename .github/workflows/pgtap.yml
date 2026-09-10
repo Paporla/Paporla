@@ -1,7 +1,7 @@
 # PAPORLA — Tests de seguridad pgTAP contra una base efimera.
 #
 # Levanta el stack local de Supabase con Docker (como en el ordenador del
-# fundador), aplica las migraciones + seed desde cero y corre los 27 tests de
+# fundador), aplica las migraciones + seed desde cero y corre los 31 tests de
 # seguridad de supabase/tests/. Solo se dispara cuando cambia algo bajo
 # supabase/ (migraciones, config.toml, seed, tests) o este propio archivo,
 # para no gastar minutos de Actions en commits que no tocan la base.
@@ -27,7 +27,7 @@ concurrency:
 
 jobs:
   pgtap:
-    name: pgTAP (27 tests de seguridad)
+    name: pgTAP (31 tests de seguridad)
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -38,7 +38,7 @@ jobs:
         with:
           version: 2.115.0
 
-      # Primera ejecucion: descarga imagenes y inicializa la base aplicando
+      # Primera ejecucion: descarga imagenes e inicializa la base aplicando
       # todas las migraciones + el seed (volumen virgen, como un db reset).
       - name: Arrancar Supabase local (migraciones + seed desde cero)
         run: supabase start
