@@ -77,3 +77,26 @@ describe('PackCardPublic', () => {
     expect(screen.getByText('Horario por confirmar')).toBeInTheDocument()
   })
 })
+
+/**
+ * Fix F1 (datos fabricados): la placa superior decía SIEMPRE "Disponible",
+ * incluso con el stock a cero y el botón diciendo "Agotado" — la tarjeta se
+ * contradecía sola. Ahora placa y botón cuentan la misma verdad.
+ */
+describe('PackCardPublic — placa honesta de disponibilidad', () => {
+  it('con stock dice Disponible', () => {
+    render(<PackCardPublic pack={pack({ remaining_stock: 3 })} onReserve={vi.fn()} index={0} reserving={null} />)
+
+    expect(screen.getByText('Disponible')).toBeInTheDocument()
+    expect(screen.queryByText('Agotado')).not.toBeInTheDocument()
+  })
+
+  it('con stock a cero dice Agotado (placa Y botón) y no deja reservar', () => {
+    render(<PackCardPublic pack={pack({ remaining_stock: 0 })} onReserve={vi.fn()} index={0} reserving={null} />)
+
+    expect(screen.queryByText('Disponible')).not.toBeInTheDocument()
+    expect(screen.getAllByText('Agotado').length).toBe(2) // placa + botón de acuerdo
+    const boton = screen.getByRole('button')
+    expect(boton).toBeDisabled()
+  })
+})

@@ -99,9 +99,17 @@ export default function PackCardPublic({ pack, onReserve, index, reserving, rese
             <div className="px-2 py-1 bg-red-500 text-white text-xs font-bold rounded-lg shadow-lg">-{discount}%</div>
           )}
         </div>
+        {/* Fix F1 (datos fabricados): la placa no contradice al botón — con el
+            stock a cero dice Agotado, igual que él. Hoy el catálogo solo trae
+            packs con stock (search_available_packs), pero la tarjeta no debe
+            mentir si algún día se reutiliza en otra lista. */}
         <div className="absolute top-3 left-3 z-10">
-          <div className="px-2.5 py-1 bg-emerald-600 text-white text-xs font-semibold rounded-lg shadow-md">
-            Disponible
+          <div
+            className={`px-2.5 py-1 text-white text-xs font-semibold rounded-lg shadow-md ${
+              isAvailable ? 'bg-emerald-600' : 'bg-gray-600'
+            }`}
+          >
+            {isAvailable ? 'Disponible' : 'Agotado'}
           </div>
         </div>
 
