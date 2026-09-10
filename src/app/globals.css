@@ -434,3 +434,18 @@ body::before {
     opacity: 0;
   }
 }
+
+/* ============================================
+   CONTRASTE MODO CLARO (Lote UX, 2026-09-10): los grises de Tailwind están
+   pensados para fondo oscuro. Sobre el crema (#faf8f3), text-gray-300
+   (~1.9:1) y text-gray-400 (~2.5:1) no pasan WCAG AA (4.5:1 en texto
+   pequeño), y hay más de 450 microtextos así repartidos en 132 archivos:
+   arreglarlos clase a clase es una receta para dejarse la mitad. Esta regla
+   los sube a gray-600 (~7:1) SOLO en modo claro; el modo oscuro no se toca
+   (html:not(.dark) no aplica, y las variantes dark:text-* tienen otro
+   nombre de clase). Los hover:text-gray-* tampoco se ven afectados.
+   ============================================ */
+html:not(.dark) .text-gray-300,
+html:not(.dark) .text-gray-400 {
+  color: #4b5563;
+}
