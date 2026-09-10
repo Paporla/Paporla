@@ -30,6 +30,17 @@ export default function Header() {
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
+  // Lote UX (a11y, WCAG 2.1.2): Escape cierra el menú móvil, igual que la
+  // campana y el menú de avatar ya hacían. El teclado nunca queda atrapado.
+  useEffect(() => {
+    if (!isMenuOpen) return
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setIsMenuOpen(false)
+    }
+    document.addEventListener('keydown', handleEscape)
+    return () => document.removeEventListener('keydown', handleEscape)
+  }, [isMenuOpen])
+
   const publicLinks = [
     { href: '/packs', label: 'Packs' },
     { href: '/shops', label: 'Comercios' },
@@ -101,8 +112,10 @@ export default function Header() {
 
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="md:hidden p-2 rounded-lg bg-white/5"
-              aria-label="Menu"
+              className="md:hidden p-2 min-w-[44px] min-h-[44px] inline-flex items-center justify-center rounded-lg bg-white/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+              aria-label={isMenuOpen ? 'Cerrar menú' : 'Abrir menú'}
+              aria-expanded={isMenuOpen}
+              aria-controls="menu-movil"
             >
               {isMenuOpen ? (
                 <X className="w-5 h-5 text-gray-900 dark:text-white" />
@@ -121,6 +134,7 @@ export default function Header() {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
+            id="menu-movil"
             className="md:hidden bg-white/95 dark:bg-black/95 backdrop-blur-xl border-t border-gray-200 dark:border-gray-800"
           >
             <div className="px-4 py-4 flex flex-col gap-3">

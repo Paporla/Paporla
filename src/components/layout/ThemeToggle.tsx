@@ -25,7 +25,7 @@ export default function ThemeToggle() {
       aria-label={isDark ? 'Activar modo claro' : 'Activar modo oscuro'}
       aria-pressed={!isDark}
       title={isDark ? 'Modo claro' : 'Modo oscuro'}
-      className="p-2 rounded-lg bg-black/5 hover:bg-black/10 dark:bg-white/5 dark:hover:bg-white/10 text-gray-700 dark:text-gray-300 hover:text-primary dark:hover:text-primary transition-colors"
+      className="p-2 min-w-[44px] min-h-[44px] inline-flex items-center justify-center rounded-lg bg-black/5 hover:bg-black/10 dark:bg-white/5 dark:hover:bg-white/10 text-gray-700 dark:text-gray-300 hover:text-primary dark:hover:text-primary transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
     >
       {isDark ? <Sun className="w-5 h-5" aria-hidden="true" /> : <Moon className="w-5 h-5" aria-hidden="true" />}
     </button>
