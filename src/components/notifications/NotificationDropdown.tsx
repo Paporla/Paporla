@@ -10,7 +10,7 @@ interface NotificationDropdownProps {
 }
 
 export default function NotificationDropdown({ onClose }: NotificationDropdownProps) {
-  const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications()
+  const { notifications, unreadCount, markAsRead, markAllAsRead, loading, error } = useNotifications()
   const recentNotifications = notifications.slice(0, 5)
 
   return (
@@ -37,7 +37,24 @@ export default function NotificationDropdown({ onClose }: NotificationDropdownPr
 
       {/* Lista */}
       <div className="max-h-96 overflow-y-auto divide-y divide-gray-200 dark:divide-gray-700">
-        {recentNotifications.length === 0 ? (
+        {loading ? (
+          /*
+           * Lote UX: mientras la consulta está en vuelo, el dropdown decía
+           * "No hay notificaciones" — una mentira temporal que hacía dudar
+           * del buzón. Esqueleto honesto, mismo estilo que la página de
+           * notificaciones (NotificationList).
+           */
+          <div className="p-4 space-y-3" aria-busy="true" aria-label="Cargando notificaciones">
+            {[0, 1, 2].map((i) => (
+              <div key={i} className="h-14 animate-pulse rounded-xl dark:bg-white/5 bg-gray-100" />
+            ))}
+          </div>
+        ) : error ? (
+          <div className="p-8 text-center">
+            <Bell className="w-8 h-8 text-gray-600 mx-auto mb-2" />
+            <p className="text-sm text-gray-500">{error}</p>
+          </div>
+        ) : recentNotifications.length === 0 ? (
           <div className="p-8 text-center">
             <Bell className="w-8 h-8 text-gray-600 mx-auto mb-2" />
             <p className="text-sm text-gray-500">No hay notificaciones</p>
