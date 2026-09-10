@@ -18,8 +18,15 @@ interface ButtonProps extends MotionProps {
 }
 
 const variants = {
-  primary:
-    'bg-gradient-to-r from-primary to-primary/80 dark:text-dark text-white font-bold hover:shadow-lg hover:shadow-primary/25',
+  /*
+   * Lote UX (contraste AA): el texto del botón primario es oscuro en AMBOS
+   * modos. En oscuro siempre lo fue (near-black sobre neón #00ff88, ~15:1);
+   * en claro era blanco sobre #0c9d61 (~3.1:1, suspende AA para texto de
+   * botón) — ahora es near-black sobre esmeralda (~6.7:1). Además unifica
+   * con las otras CTAs (tarjeta de pack, EmptyState), que ya usaban
+   * text-black sobre primary.
+   */
+  primary: 'bg-gradient-to-r from-primary to-primary/80 text-dark font-bold hover:shadow-lg hover:shadow-primary/25',
   secondary: 'dark:bg-gray-800 bg-gray-200 dark:text-white text-gray-800 dark:hover:bg-gray-700 hover:bg-gray-300',
   outline: 'border border-primary/30 text-primary hover:bg-primary/10 hover:border-primary/60',
   ghost:

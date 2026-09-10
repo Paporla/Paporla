@@ -46,4 +46,17 @@ describe('Button', () => {
     await user.click(screen.getByRole('button'))
     expect(handleClick).toHaveBeenCalled()
   })
+
+  /**
+   * Lote UX (WCAG AA): el texto del botón primario es oscuro en ambos modos.
+   * Blanco sobre el esmeralda del modo claro (#0c9d61) daba ~3.1:1 — no
+   * llega a los 4.5:1 que pide el texto de un botón. Sobre el neón del modo
+   * oscuro ya era oscuro (~15:1). Este test fija la decisión.
+   */
+  it('botón primario: texto oscuro sobre verde (contraste AA en ambos modos)', () => {
+    render(<Button>Reservar</Button>)
+    const btn = screen.getByRole('button')
+    expect(btn).toHaveClass('text-dark')
+    expect(btn).not.toHaveClass('text-white')
+  })
 })
