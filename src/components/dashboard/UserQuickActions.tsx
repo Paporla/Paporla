@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { motion } from 'framer-motion'
-import { ShoppingBag, Heart, User, Bell, Store, Sparkles } from 'lucide-react'
+import { ShoppingBag, Heart, User, Bell, Store } from 'lucide-react'
 
 const actions = [
   {
@@ -34,13 +34,6 @@ const actions = [
     description: 'Notificaciones',
   },
   { icon: Store, label: 'Comercios', href: '/shops', color: 'from-green-500 to-emerald-500', description: 'Descubrir' },
-  {
-    icon: Sparkles,
-    label: 'Recomendados',
-    href: '/packs',
-    color: 'from-primary to-primary-dark',
-    description: 'Para ti',
-  },
 ]
 
 export default function UserQuickActions() {
@@ -51,7 +44,7 @@ export default function UserQuickActions() {
         <h2 className="text-lg font-semibold dark:text-white text-gray-900">Acciones rápidas</h2>
       </div>
 
-      <div className="grid grid-cols-3 sm:grid-cols-6 gap-3">
+      <div className="grid grid-cols-3 sm:grid-cols-5 gap-3">
         {actions.map((action, idx) => (
           <motion.div
             key={idx}
