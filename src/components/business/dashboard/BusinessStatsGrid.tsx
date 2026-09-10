@@ -4,6 +4,7 @@ import { motion } from 'framer-motion'
 import Link from 'next/link'
 import { Package, Calendar, ShoppingBag, DollarSign, Users } from 'lucide-react'
 import { formatChilePesos } from '@/lib/utils/formatPrice'
+import RevenueSplitNote from '@/components/business/RevenueSplitNote'
 
 interface DashboardStats {
   activePacks: number
@@ -110,6 +111,10 @@ export default function BusinessStatsGrid({ stats }: BusinessStatsGridProps) {
               </div>
               <p className={`text-2xl font-bold ${item.color}`}>{getValue(item.key, item.isPrice)}</p>
               <p className="text-xs text-gray-500 mt-1">{item.label}</p>
+              {/* L-11: el comercio ve su neto sin restar comisiones de cabeza. */}
+              {item.key === 'totalRevenue' && stats.totalRevenue > 0 && (
+                <RevenueSplitNote grossMinor={stats.totalRevenue} />
+              )}
               <div className="mt-2 text-[10px] text-primary/50 opacity-0 group-hover:opacity-100 transition-opacity">
                 Ver detalles →
               </div>

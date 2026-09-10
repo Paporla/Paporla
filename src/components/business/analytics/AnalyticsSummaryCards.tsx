@@ -4,6 +4,7 @@ import { motion } from 'framer-motion'
 import Link from 'next/link'
 import { DollarSign, ShoppingBag, Package, CheckCircle, XCircle } from 'lucide-react'
 import { formatChilePesos } from '@/lib/utils/formatPrice'
+import RevenueSplitNote from '@/components/business/RevenueSplitNote'
 
 interface AnalyticsSummary {
   /** Importe en la unidad menor de la moneda (piloto CLP: pesos). */
@@ -102,6 +103,10 @@ export default function AnalyticsSummaryCards({ summary }: AnalyticsSummaryCards
               </div>
               <p className={`text-xl font-bold ${card.color}`}>{getValue(card.key)}</p>
               <p className="text-xs text-gray-500 mt-1">{card.label}</p>
+              {/* L-11: el comercio ve su neto sin restar comisiones de cabeza. */}
+              {card.key === 'totalRevenue' && summary.totalRevenue > 0 && (
+                <RevenueSplitNote grossMinor={summary.totalRevenue} />
+              )}
             </div>
           </Link>
         </motion.div>
