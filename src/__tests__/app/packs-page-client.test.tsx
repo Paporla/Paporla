@@ -67,7 +67,7 @@ describe('Explorar packs — el buscador sobrevive a la carga (L-05)', () => {
     renderPage()
 
     // Catálogo inicial cargado (vacío): aparece el empty state y el buscador.
-    await waitFor(() => expect(screen.getByText(/preparando sus primeros packs/i)).toBeInTheDocument())
+    await waitFor(() => expect(screen.getByText(/no hay packs a la venta/i)).toBeInTheDocument())
     const input = screen.getByPlaceholderText(PLACEHOLDER) as HTMLInputElement
 
     // Teclear dispara la query tras el debounce de 350 ms (timers reales).
@@ -93,11 +93,49 @@ describe('Explorar packs — el buscador sobrevive a la carga (L-05)', () => {
 
   it('la búsqueda viaja a la RPC con el texto recortado', async () => {
     renderPage()
-    await waitFor(() => expect(screen.getByText(/preparando sus primeros packs/i)).toBeInTheDocument())
+    await waitFor(() => expect(screen.getByText(/no hay packs a la venta/i)).toBeInTheDocument())
 
     fireEvent.change(screen.getByPlaceholderText(PLACEHOLDER), { target: { value: '  sushi  ' } })
     await waitFor(() => expect(rpc).toHaveBeenCalledTimes(2), { timeout: 3000 })
 
     expect(rpc).toHaveBeenLastCalledWith('search_available_packs', expect.objectContaining({ p_query: 'sushi' }))
+  })
+})
+
+/**
+ * L-22 (empty states honestos): el catálogo vacío debe distinguir tres
+ * verdades — "no hay nada", "no hay nada CON TUS FILTROS" y "está roto" —
+ * en vez de dejar al usuario sospechando del buscador o, peor, vendiéndole
+ * un fallo de red como "aún no hay packs".
+ */
+describe('Explorar packs — empty states honestos (L-22)', () => {
+  beforeEach(() => {
+    setupSupabase()
+  })
+
+  it('catálogo vacío SIN filtros: mensaje honesto y nada que limpiar', async () => {
+    renderPage()
+
+    await waitFor(() => expect(screen.getByText(/no hay packs a la venta ahora mismo/i)).toBeInTheDocument())
+    expect(screen.getByText(/vuelve pronto/i)).toBeInTheDocument()
+    // Sin filtros activos no se ofrece "Limpiar filtros": no habría nada que limpiar.
+    expect(screen.queryByRole('button', { name: /limpiar filtros/i })).not.toBeInTheDocument()
+  })
+
+  it('fallo de red: la página admite que está rota y ofrece reintentar', async () => {
+    rpc
+      .mockReset()
+      .mockResolvedValueOnce({ data: null, error: { message: 'se cayó la red' } })
+      .mockResolvedValueOnce({ data: [], error: null })
+
+    renderPage()
+
+    await waitFor(() => expect(screen.getByText(/no pudimos cargar el catálogo/i)).toBeInTheDocument())
+    expect(screen.getByText(/no es que no haya nada/i)).toBeInTheDocument()
+    // El fallo NO se disfraza de catálogo vacío.
+    expect(screen.queryByText(/no hay packs a la venta/i)).not.toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole('button', { name: /reintentar/i }))
+    await waitFor(() => expect(screen.getByText(/no hay packs a la venta/i)).toBeInTheDocument())
   })
 })

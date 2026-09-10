@@ -148,5 +148,10 @@ export function usePublicPacks() {
     error: localError || query.error?.message || '',
     setError,
     setFilters,
+    // L-22: la página necesita una vía para reintentar tras un fallo de red;
+    // sin esto el estado de error honesto sería un callejón sin salida.
+    retry: () => {
+      void query.refetch()
+    },
   }
 }
