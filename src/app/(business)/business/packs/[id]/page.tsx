@@ -1,9 +1,10 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect, notFound } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowLeft, Copy, Package, ShieldAlert, AlertTriangle, Lock } from 'lucide-react'
+import { ArrowLeft, Copy, Package, ShieldAlert, Lock } from 'lucide-react'
 import Button from '@/components/ui/Button'
 import PackFormSimplified from '@/components/business/PackFormSimplified'
+import PackFinalSummary from '@/components/business/packs/PackFinalSummary'
 import { logger } from '@/lib/logger'
 import { toFormPack, type PackRow } from '@/lib/utils/packRow'
 
@@ -273,23 +274,6 @@ export default async function EditPackPage({ params }: EditPackPageProps) {
         </div>
       </div>
 
-      {isFinalStatus && (
-        <div className="max-w-4xl mx-auto">
-          <div className="rounded-2xl border border-yellow-500/20 bg-yellow-500/10 p-4 flex gap-3">
-            <AlertTriangle className="w-5 h-5 text-yellow-400 shrink-0 mt-0.5" />
-
-            <div>
-              <h2 className="text-sm font-semibold text-yellow-200">Este pack tiene un estado final</h2>
-
-              <p className="text-sm text-yellow-100/70 mt-1">
-                Este pack esta marcado como <span className="font-medium">{row.status}</span>. Puedes revisar o duplicar
-                la informacion, pero para nuevas ventas lo mas recomendable es duplicarlo y publicar un pack nuevo.
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
-
       {isEditable ? (
         <div className="max-w-4xl mx-auto">
           <PackFormSimplified
@@ -297,6 +281,24 @@ export default async function EditPackPage({ params }: EditPackPageProps) {
             pack={pack}
             shopStatus={shop.status}
             shopImagePath={shop.default_pack_image_path}
+          />
+        </div>
+      ) : isFinalStatus ? (
+        /*
+         * L-14 (spec del fundador): en vez del muro de texto, una ficha de
+         * resumen read-only con lo que logro el pack — vendidos, ingresos
+         * brutos, cuanto recibe el comercio y cuando fue la recogida — y el
+         * camino obvio por delante: duplicar y republicar.
+         */
+        <div className="max-w-4xl mx-auto">
+          <PackFinalSummary
+            packId={id}
+            status={row.status}
+            totalStock={row.total_stock}
+            remainingStock={row.remaining_stock}
+            priceMinor={row.price_minor}
+            pickupStartAt={row.pickup_start_at}
+            pickupEndAt={row.pickup_end_at}
           />
         </div>
       ) : (
