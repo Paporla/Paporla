@@ -16,7 +16,7 @@ function renderForm(latitude: string, longitude: string) {
 describe('ProfileLocationForm (ubicación)', () => {
   it('sin coordenadas no muestra mapa ni error: la ubicación es opcional', () => {
     renderForm('', '')
-    expect(screen.getByText('Ingresa coordenadas para ver la vista ilustrativa')).toBeDefined()
+    expect(screen.getByText('Ingresa coordenadas para ver el mapa')).toBeDefined()
     expect(screen.queryByText(/van juntas/)).toBeNull()
   })
 
@@ -24,8 +24,11 @@ describe('ProfileLocationForm (ubicación)', () => {
     renderForm('-33.4489', '-70.6693')
     expect(screen.getByText('-33.4489, -70.6693')).toBeDefined()
     expect(screen.getByText(/Abrir en Maps/)).toBeDefined()
-    // L-16: la vista previa se anuncia como ilustrativa (no parece un mapa roto).
-    expect(screen.getByText('Vista ilustrativa')).toBeDefined()
+    // L-16: mapa REAL embebido (OpenStreetMap), con el marker en el punto.
+    const mapa = screen.getByTitle('Mapa de ubicacion del comercio')
+    expect(mapa.tagName).toBe('IFRAME')
+    expect(mapa.getAttribute('src')).toContain('openstreetmap.org/export/embed.html')
+    expect(mapa.getAttribute('src')).toContain('marker=-33.4489,-70.6693')
   })
 
   it('F2b: una coordenada vacía y la otra llena dice por qué, sin vista previa', () => {

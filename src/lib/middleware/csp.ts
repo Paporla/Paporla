@@ -32,7 +32,7 @@ export function buildCspHeader(nonce: string): string {
     // wss://*.supabase.co: Realtime (notificaciones en vivo) usa WebSocket;
     // https:// no cubre el esquema wss: y la CSP lo bloqueaba (consola 31-ago).
     `connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.sentry.io https://*.google-analytics.com`,
-    "frame-src 'self' https://www.googletagmanager.com",
+    "frame-src 'self' https://www.googletagmanager.com https://www.openstreetmap.org",
     "frame-ancestors 'none'",
     "base-uri 'self'",
     "form-action 'self'",
