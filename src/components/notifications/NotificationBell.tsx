@@ -35,7 +35,7 @@ export default function NotificationBell() {
         aria-label={unreadCount > 0 ? `Notificaciones, ${unreadCount} sin leer` : 'Notificaciones'}
         aria-haspopup="menu"
         aria-expanded={isOpen}
-        className="relative p-2 rounded-xl dark:bg-gray-800 bg-gray-100 dark:border-gray-700 border-gray-200 hover:border-primary/30 transition-all focus-visible:ring-2 focus-visible:ring-primary"
+        className="relative p-2 min-w-[44px] min-h-[44px] inline-flex items-center justify-center rounded-xl dark:bg-gray-800 bg-gray-100 dark:border-gray-700 border-gray-200 hover:border-primary/30 transition-all focus-visible:ring-2 focus-visible:ring-primary"
       >
         <Bell className="w-5 h-5 text-gray-400 hover:text-primary transition-colors" />
         {unreadCount > 0 && (

@@ -74,7 +74,7 @@ export default function AvatarMenu() {
           router.replace(route)
         }}
         aria-label="Ir a mi panel"
-        className="flex sm:hidden items-center justify-center w-9 h-9 rounded-lg bg-primary/10 hover:bg-primary/20 text-primary transition-all duration-300"
+        className="flex sm:hidden items-center justify-center w-11 h-11 rounded-lg bg-primary/10 hover:bg-primary/20 text-primary transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
       >
         <LayoutDashboard className="w-4 h-4" />
       </button>
@@ -86,7 +86,7 @@ export default function AvatarMenu() {
           aria-label="Menú de usuario"
           aria-haspopup="menu"
           aria-expanded={isOpen}
-          className="flex items-center gap-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-full"
+          className="flex items-center gap-2 p-1 -m-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-full"
         >
           {user?.avatarPublicUrl ? (
             <Image
