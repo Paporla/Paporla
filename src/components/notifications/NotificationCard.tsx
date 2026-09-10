@@ -64,13 +64,22 @@ export default function NotificationCard({ notification, onMarkAsRead }: Notific
     return `Hace ${days} d`
   }
 
+  /*
+   * Lote UX (a11y, WCAG 2.1.1): antes era un motion.div con onClick — para
+   * un teclado no existía (sin foco, sin role, sin Enter/Espacio). Ahora es
+   * un botón nativo: se llega con Tab, se activa con Enter/Espacio y los
+   * lectores de pantalla anuncian su contenido. El estado "sin leer" era
+   * solo visual (borde verde): se añade texto sr-only para que también se
+   * anuncie.
+   */
   return (
-    <motion.div
+    <motion.button
+      type="button"
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -10 }}
       onClick={handleClick}
-      className={`p-4 rounded-xl cursor-pointer transition-all duration-200 ${
+      className={`w-full text-left p-4 rounded-xl cursor-pointer transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${
         isUnread ? 'bg-primary/5 border-l-2 border-primary' : 'dark:hover:bg-white/5 hover:bg-gray-100'
       }`}
     >
@@ -83,6 +92,7 @@ export default function NotificationCard({ notification, onMarkAsRead }: Notific
             className={`text-sm ${isUnread ? 'dark:text-white text-gray-900 font-medium' : 'dark:text-gray-400 text-gray-600'}`}
           >
             {notification.title}
+            {isUnread && <span className="sr-only"> (sin leer)</span>}
           </p>
           {notification.body ? (
             <p className="text-xs dark:text-gray-500 text-gray-500 mt-0.5">{notification.body}</p>
@@ -90,6 +100,6 @@ export default function NotificationCard({ notification, onMarkAsRead }: Notific
           <p className="text-[10px] dark:text-gray-500 text-gray-400 mt-1">{timeAgo(notification.created_at)}</p>
         </div>
       </div>
-    </motion.div>
+    </motion.button>
   )
 }
