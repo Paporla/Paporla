@@ -45,6 +45,14 @@ async function fetchShop(shopId: string): Promise<ShopWithPacks> {
     cover_url: coverUrl,
     verified: true,
     rating: row.rating != null ? Number(row.rating) : null,
+    // L-23: la ficha pública (ShopDetailInfo) ya sabe pintar la web, el
+    // Instagram y el botón de Google Maps como enlaces, pero este mapeo
+    // tiraba los datos que devuelve get_public_shop. Sin estas cuatro
+    // líneas el comercio rellena sus redes en su perfil y nadie las ve.
+    website: (row.website_url as string | null) ?? null,
+    instagram: (row.instagram_handle as string | null) ?? null,
+    latitude: row.latitude != null ? Number(row.latitude) : null,
+    longitude: row.longitude != null ? Number(row.longitude) : null,
   } as Shop
 
   const { data: packRows, error: packsError } = await supabase.rpc('search_available_packs', {
