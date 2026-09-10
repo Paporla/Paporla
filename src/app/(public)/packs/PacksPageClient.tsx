@@ -2,13 +2,13 @@
 
 import { useState, useMemo, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import { AlertCircle } from 'lucide-react'
 import { usePublicPacks } from '@/hooks/usePublicPacks'
 import { trackViewPackList, trackClickReserve } from '@/lib/analytics/events'
 import PackFiltersAdvanced from '@/components/packs/PackFiltersAdvanced'
 import PackCardPublic from '@/components/packs/PackCardPublic'
 import Pagination from '@/components/ui/Pagination'
 import EmptyState from '@/components/ui/EmptyState'
-import Toast from '@/components/ui/Toast'
 import PacksHeroSection from '@/components/packs/PacksHeroSection'
 import OnboardingSteps from '@/components/packs/OnboardingSteps'
 import PacksLoadingGrid from '@/components/packs/PacksLoadingGrid'
@@ -16,9 +16,24 @@ import PacksLoadingGrid from '@/components/packs/PacksLoadingGrid'
 const ITEMS_PER_PAGE = 9
 
 export default function PacksPage() {
-  const { packs, filters, loading, error: hookError, setError, setFilters } = usePublicPacks()
+  const { packs, filters, loading, error: hookError, setFilters, retry } = usePublicPacks()
   const [currentPage, setCurrentPage] = useState(1)
   const router = useRouter()
+
+  /*
+   * L-22 (empty states honestos): "no hay nada" no es lo mismo que "está
+   * roto", y "no hay nada con TUS filtros" tampoco. Tres verdades distintas,
+   * tres mensajes distintos — antes cualquier catálogo vacío caía en el
+   * mensaje de lanzamiento y un fallo de red se veía como "aún no hay packs".
+   */
+  const hasActiveFilters = Boolean(
+    filters.city ||
+    filters.search ||
+    filters.showAvailableOnly ||
+    filters.minPrice > 0 ||
+    filters.maxPrice < 100000 ||
+    filters.location,
+  )
 
   const totalPages = Math.ceil(packs.length / ITEMS_PER_PAGE)
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE
@@ -66,38 +81,53 @@ export default function PacksPage() {
 
         {loading ? (
           <PacksLoadingGrid />
-        ) : packs.length === 0 ? (
+        ) : hookError ? (
           <EmptyState
-            type={filters.city || filters.search ? 'search' : 'packs'}
-            title={
-              filters.city
-                ? `No hay packs en ${filters.city}`
-                : filters.search
-                  ? `No encontramos "${filters.search}"`
-                  : 'Paporla está preparando sus primeros packs en Chile'
-            }
-            description={
-              filters.city
-                ? 'Prueba buscando en otra localidad o explora todos los packs.'
-                : filters.search
-                  ? 'Prueba con otra búsqueda o limpia los filtros.'
-                  : 'Estamos incorporando comercios piloto. Pronto podrás activar avisos para tu localidad.'
-            }
-            action={{
-              label: 'Limpiar filtros',
-              onClick: () =>
-                handleFilterChange({
-                  search: '',
-                  minPrice: 0,
-                  maxPrice: 100000,
-                  showAvailableOnly: false,
-                  city: '',
-                  location: null,
-                  radiusKm: 10,
-                  sortBy: 'newest' as const,
-                }),
-            }}
+            icon={AlertCircle}
+            title="No pudimos cargar el catálogo"
+            description="Algo falló al consultar los packs disponibles. No es que no haya nada: es que no pudimos mirarlo. Inténtalo otra vez."
+            action={{ label: 'Reintentar', onClick: retry }}
           />
+        ) : packs.length === 0 ? (
+          hasActiveFilters ? (
+            <EmptyState
+              type={filters.city || filters.search ? 'search' : 'filters'}
+              title={
+                filters.city
+                  ? `No hay packs en ${filters.city}`
+                  : filters.search
+                    ? `No encontramos "${filters.search}"`
+                    : undefined
+              }
+              description={
+                filters.city
+                  ? 'Prueba buscando en otra localidad o explora todos los packs.'
+                  : filters.search
+                    ? 'Prueba con otra búsqueda o limpia los filtros.'
+                    : undefined
+              }
+              action={{
+                label: 'Limpiar filtros',
+                onClick: () =>
+                  handleFilterChange({
+                    search: '',
+                    minPrice: 0,
+                    maxPrice: 100000,
+                    showAvailableOnly: false,
+                    city: '',
+                    location: null,
+                    radiusKm: 10,
+                    sortBy: 'newest' as const,
+                  }),
+              }}
+            />
+          ) : (
+            <EmptyState
+              type="packs"
+              title="No hay packs a la venta ahora mismo"
+              description="Los comercios publican sus packs sorpresa por tiempo limitado y se agotan rápido. Vuelve pronto: el catálogo se renueva cada día."
+            />
+          )
         ) : (
           <>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -118,8 +148,6 @@ export default function PacksPage() {
           </>
         )}
       </div>
-
-      {hookError && <Toast message={hookError} type="error" onClose={() => setError('')} />}
     </div>
   )
 }
