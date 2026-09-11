@@ -12,7 +12,7 @@ import type { UserProfile } from '@/types/user'
 import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
 import Input from '@/components/ui/Input'
-import Toast from '@/components/ui/Toast'
+import { useToast } from '@/components/ui/ToastProvider'
 import PageLoadingSpinner from '@/components/ui/PageLoadingSpinner'
 import MarketSelect from '@/components/dashboard/MarketSelect'
 
@@ -27,8 +27,11 @@ function ProfileForm({ profile, refreshProfile, signOut }: ProfileFormProps) {
   const [displayName, setDisplayName] = useState(profile.displayName ?? '')
   const [phone, setPhone] = useState(profile.phoneE164 ?? '')
   const [savingMarket, setSavingMarket] = useState(false)
-  const [error, setError] = useState('')
-  const [success, setSuccess] = useState('')
+  // Lote UX punto 4: los avisos de guardado viajan al ToastProvider global
+  // (role="alert", 4 s) en vez de dos <Toast> locales con estado propio. El
+  // cartel viejo también se cerraba solo a los 4 s: mismo comportamiento, un
+  // solo camarero de avisos en toda la app.
+  const { addToast } = useToast()
 
   const updateMutation = useMutation({
     mutationFn: async () => {
@@ -44,14 +47,12 @@ function ProfileForm({ profile, refreshProfile, signOut }: ProfileFormProps) {
     },
     onSuccess: async () => {
       await refreshProfile()
-      setSuccess('Perfil actualizado correctamente')
+      addToast('Perfil actualizado correctamente', 'success')
     },
-    onError: (mutationError: Error) => setError(mutationError.message),
+    onError: (mutationError: Error) => addToast(mutationError.message, 'error'),
   })
 
   const handleSave = async () => {
-    setError('')
-    setSuccess('')
     await updateMutation.mutateAsync().catch(() => {})
   }
 
@@ -64,8 +65,6 @@ function ProfileForm({ profile, refreshProfile, signOut }: ProfileFormProps) {
    * cambia el mercado, no el nombre ni el teléfono.
    */
   const saveMarket = async (marketId: string) => {
-    setError('')
-    setSuccess('')
     setSavingMarket(true)
     try {
       await updateProfile({
@@ -77,10 +76,11 @@ function ProfileForm({ profile, refreshProfile, signOut }: ProfileFormProps) {
         locale: profile.locale,
       })
       await refreshProfile()
-      setSuccess('Mercado actualizado. Ya puedes reservar packs de este mercado.')
+      addToast('Mercado actualizado. Ya puedes reservar packs de este mercado.', 'success')
     } catch (marketError) {
-      setError(
+      addToast(
         marketError instanceof Error ? marketError.message : 'No se pudo actualizar tu mercado. Inténtalo de nuevo.',
+        'error',
       )
     } finally {
       setSavingMarket(false)
@@ -171,9 +171,6 @@ function ProfileForm({ profile, refreshProfile, signOut }: ProfileFormProps) {
           </Button>
         </div>
       </Card>
-
-      {error && <Toast message={error} type="error" onClose={() => setError('')} />}
-      {success && <Toast message={success} type="success" onClose={() => setSuccess('')} />}
     </motion.div>
   )
 }
