@@ -63,7 +63,11 @@ describe('NextPickupCard', () => {
     expect(screen.queryByText(/Presenta este código/i)).toBeNull()
 
     rerender(<NextPickupCard reservation={makeReservation({ status: 'ready_pickup' })} />)
-    expect(screen.getByText(/Tu código de recogida aparecerá aquí cuando la reserva quede lista/)).toBeDefined()
+    // L-26: la nota ya no promete que el código "aparecerá aquí" (no puede:
+    // el crudo solo lo vio el comercio una vez, 0031) — cuenta la verdad del
+    // piloto: te lo comparte el comercio.
+    expect(screen.getByText(/te lo compartirá/)).toBeDefined()
+    expect(screen.queryByText(/aparecerá aquí/i)).toBeNull()
   })
 
   it('la cuenta atrás y el chip nunca se parten: whitespace-nowrap y una sola columna', () => {

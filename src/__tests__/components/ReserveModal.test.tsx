@@ -199,7 +199,7 @@ describe('ReserveModal', () => {
     })
   })
 
-  it('éxito sin código de recogida: promete el código "en Mis reservas" y da el enlace', async () => {
+  it('éxito sin código inventado: la copia cuenta la verdad del piloto (el comercio comparte el código)', async () => {
     nextResult = { details: makeDetails(), error: '' }
     renderOpen()
     fireEvent.click(screen.getByRole('checkbox'))
@@ -208,7 +208,11 @@ describe('ReserveModal', () => {
     })
     await screen.findByText('¡Pack reservado!')
 
-    expect(screen.getByText(/código de recogida aparecerá en Mis reservas/)).toBeDefined()
+    // L-26: la promesa rota ("tu código aparecerá en Mis reservas") ya no
+    // está: el código solo se muestra al comercio (una vez, 0031) y la copia
+    // lo cuenta como es.
+    expect(screen.getByText(/el comercio recibirá tu código de recogida/i)).toBeDefined()
+    expect(screen.queryByText(/aparecerá en Mis reservas/i)).toBeNull()
     expect(screen.getByRole('link', { name: /mis reservas/i })).toBeDefined()
     // La UI vieja mostraba un código inventado ("Presenta este código…"): eso no puede volver.
     expect(screen.queryByText(/Presenta este código/i)).toBeNull()

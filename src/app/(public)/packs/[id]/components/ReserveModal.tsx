@@ -29,8 +29,10 @@ type Phase = 'confirm' | 'success'
  *  - Cantidad siempre 1: la RPC `create_payment_reservation` (0009:209)
  *    no tiene parámetro de cantidad.
  *  - No hay selector de método de pago: no existe todavía.
- *  - No muestra código de recogida: la RPC no lo devuelve; el código se
- *    emite más adelante en el flujo y aparecerá en "Mis reservas".
+ *  - No muestra código de recogida: la RPC no lo devuelve y el usuario no
+ *    llega a verlo en la app (L-26 / 0031: el crudo se muestra al comercio
+ *    UNA sola vez al confirmar y en la base solo vive su huella sha256). La
+ *    copia cuenta esa verdad: el comercio te lo comparte.
  *  - El botón confirmación deshabilitado SIEMPRE explica por qué.
  *
  * Caso MARKET_MISMATCH (0009:285): la base rechaza la reserva porque el
@@ -224,11 +226,12 @@ export default function ReserveModal({ isOpen, onClose, pack }: ReserveModalProp
                   <div className="rounded-lg bg-primary/10 border border-primary/20 p-3 text-xs space-y-1 dark:text-gray-300 text-gray-700">
                     <p>El pack queda apartado mientras el comercio confirma. La reserva no genera ningún cobro.</p>
                     <p>
-                      El código de recogida aparecerá en{' '}
+                      Cuando el comercio confirme, verá tu código de recogida una sola vez y te lo compartirá (WhatsApp
+                      u otro medio). Puedes seguir la reserva en{' '}
                       <Link href="/reservations" className="text-primary underline">
                         Mis reservas
-                      </Link>{' '}
-                      cuando la reserva quede confirmada.
+                      </Link>
+                      .
                     </p>
                   </div>
 
@@ -299,8 +302,8 @@ export default function ReserveModal({ isOpen, onClose, pack }: ReserveModalProp
                   <div>
                     <h3 className="text-xl font-bold dark:text-white text-gray-900">¡Pack reservado!</h3>
                     <p className="text-sm dark:text-gray-400 text-gray-600 mt-1">
-                      {pack.shop.name} recibió tu reserva. Cuando la confirmen, tu código de recogida aparecerá en Mis
-                      reservas.
+                      {pack.shop.name} recibió tu reserva. Cuando la confirmen, el comercio recibirá tu código de
+                      recogida (una sola vez) para compartírtelo.
                     </p>
                   </div>
 
