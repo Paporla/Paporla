@@ -7,6 +7,8 @@ import { motion } from 'framer-motion'
 import { pageVariants } from '@/lib/utils/motion'
 import { useAuth } from '@/hooks/useAuth'
 import { useReservations } from '@/hooks/useReservations'
+import { useNowTick } from '@/hooks/useNowTick'
+import { effectiveReservationStatus } from '@/lib/utils/reservationDisplay'
 import UserWelcomeBanner from '@/components/dashboard/UserWelcomeBanner'
 import OnboardingBanner from '@/components/onboarding/OnboardingBanner'
 import MarketSelectionBanner from '@/components/dashboard/MarketSelectionBanner'
@@ -36,6 +38,8 @@ export default function UserDashboardPage() {
     }
   }, [searchParams])
 
+  // L-02: la actividad reciente también mira el reloj.
+  const now = useNowTick(30_000)
   const { activeReservations, stats, activities } = useMemo(() => {
     // La API ya devuelve las filas en orden más reciente primero
     // (created_at DESC en list_my_reservations), con todos los campos
@@ -67,7 +71,7 @@ export default function UserDashboardPage() {
       type: 'reservation' as const,
       title: r.pack_title,
       description: r.shop_name,
-      status: r.status,
+      status: effectiveReservationStatus(r.status, r.pickup_start_at, r.pickup_end_at, now),
       created_at: r.updated_at || r.created_at,
       link: '/reservations',
     }))
@@ -84,7 +88,7 @@ export default function UserDashboardPage() {
       },
       activities: recentActivities,
     }
-  }, [reservations])
+  }, [reservations, now])
 
   if (loading) return <DashboardSkeleton />
 
@@ -95,7 +99,7 @@ export default function UserDashboardPage() {
       {/* Decorative blobs — mismo estilo que landing/auth */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-32 right-10 w-72 h-72 bg-primary/5 rounded-full blur-3xl" />
-        <div className="absolute bottom-32 left-10 w-96 h-96 bg-primary/3 rounded-full blur-3xl" />
+        <div className="absolute bottom-32 left-10 w-96 w-96 bg-primary/3 rounded-full blur-3xl" />
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-primary/[0.02] rounded-full blur-3xl" />
       </div>
 

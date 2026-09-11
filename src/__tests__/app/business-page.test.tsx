@@ -75,8 +75,10 @@ function resRow(overrides: Record<string, unknown> = {}) {
     payment_status: 'paid',
     total_amount_minor: 3990,
     currency_code: 'CLP',
-    pickup_start_at: '2026-09-30T15:00:00-03:00',
-    pickup_end_at: '2026-09-30T18:00:00-03:00',
+    // Ventana SIEMPRE abierta: con L-02 la etiqueta mira el reloj, y una
+    // ventana futura volvería honestamente a "Confirmada".
+    pickup_start_at: '2020-01-01T00:00:00-03:00',
+    pickup_end_at: '2099-01-01T00:00:00-03:00',
     timezone: 'America/Santiago',
     created_at: '2026-09-30T10:00:00Z',
     ...overrides,
