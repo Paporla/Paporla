@@ -23,10 +23,11 @@ export default function ShopCard({ shop, index = 0 }: ShopCardProps) {
   return (
     // L-28: la tarjeta YA NO envuelve todo con <Link>. Antes el corazón de
     // favoritos quedaba DENTRO del enlace y `stopPropagation()` no basta para
-    // frenar un <a>: el navegador se iba a la ficha del comercio y el favorito
-    // no se guardaba. Ahora el enlace es una capa estirada por encima del
-    // contenido (z-20) y el corazón vive por encima de ella (z-30), así toda
-    // la tarjeta sigue siendo clicable pero los dos mandos no se pisan.
+    // frenar un <a>: en cuanto tocabas el corazón el navegador se iba a la
+    // ficha del comercio (el favorito sí llegaba a guardarse, pero perdías el
+    // sitio donde estabas). Ahora el enlace es una capa estirada por encima del
+    // contenido (z-20) y el corazón es HERMANO suyo, por encima (z-30): toda la
+    // tarjeta sigue siendo clicable, pero los dos mandos ya no se pisan.
     <motion.div
       initial={{ opacity: 0, y: 30 }}
       animate={{ opacity: 1, y: 0 }}
@@ -63,11 +64,6 @@ export default function ShopCard({ shop, index = 0 }: ShopCardProps) {
               </div>
             </div>
           )}
-
-          {/* Botón favorito — por encima del enlace estirado (L-28) */}
-          <div className="absolute top-3 right-3 z-30">
-            <FavoriteButton shopId={shop.id} size="sm" />
-          </div>
         </div>
 
         {/* Contenido */}
@@ -103,6 +99,17 @@ export default function ShopCard({ shop, index = 0 }: ShopCardProps) {
         aria-label={`Ver ${shop.name}`}
         className="absolute inset-0 z-20 rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
       />
+
+      {/*
+        Botón favorito (L-28, pasada 2). Tiene que ser HERMANO del enlace, no
+        estar dentro de la caja del contenido: esa caja lleva `backdrop-blur`,
+        y el blur crea una CAPA APILADA independiente que deja a sus hijos por
+        debajo del enlace aunque tengan un z-index mayor. Con el corazón como
+        hermano y z-30 (encima del z-20 del enlace) el clic ya llega al botón.
+      */}
+      <div className="absolute top-3 right-3 z-30">
+        <FavoriteButton shopId={shop.id} size="sm" />
+      </div>
     </motion.div>
   )
 }
