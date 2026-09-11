@@ -9,6 +9,9 @@ import { ToastProvider } from '@/components/ui/ToastProvider'
  * Dos comportamientos que el cambio mejora y estos tests fijan:
  *  - sin sesión el aviso es 'info' (antes salía pintado de 'success');
  *  - como el provider vive en la raíz, el aviso sobrevive al salto a /login.
+ *
+ * L-29: ese salto al login lleva la dirección de vuelta (`?redirect=`), que
+ * `useAuth.signIn` valida con `getSafeInternalRedirect` antes de usarla.
  */
 const authState = vi.hoisted(() => ({
   user: { id: 'user-a' } as { id: string } | null,
@@ -52,6 +55,8 @@ describe('FavoriteButton (toasts globales)', () => {
     authState.user = { id: 'user-a' }
     favState.favorites = []
     favState.toggleFavorite = vi.fn(async () => true)
+    // Algunos tests mueven la URL de jsdom para comprobar la vuelta al login.
+    window.history.replaceState({}, '', '/')
   })
 
   it('sin sesión: aviso GLOBAL (role=alert) y no llama a toggleFavorite', async () => {
@@ -63,6 +68,20 @@ describe('FavoriteButton (toasts globales)', () => {
     const alert = await screen.findByRole('alert')
     expect(alert).toHaveTextContent('Inicia sesión para guardar favoritos')
     expect(favState.toggleFavorite).not.toHaveBeenCalled()
+  })
+
+  it('L-29 · sin sesión te manda al login con la dirección de vuelta', async () => {
+    authState.user = null
+    window.history.replaceState({}, '', '/shops/shop-a')
+    renderButton()
+
+    fireEvent.click(screen.getByRole('button'))
+
+    expect(await screen.findByRole('alert')).toHaveTextContent('Inicia sesión para guardar favoritos')
+    // El salto va con 1,5 s de retardo para que dé tiempo a leer el aviso.
+    await waitFor(() => expect(push).toHaveBeenCalledWith('/login?redirect=%2Fshops%2Fshop-a'), {
+      timeout: 3000,
+    })
   })
 
   it('guardar un comercio que no era favorito: toast de éxito', async () => {
