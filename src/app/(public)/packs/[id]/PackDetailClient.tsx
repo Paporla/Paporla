@@ -23,6 +23,10 @@ import Button from '@/components/ui/Button'
 import ShareButton from '@/components/ui/ShareButton'
 import ReserveModal from './components/ReserveModal'
 import { useAuth } from '@/hooks/useAuth'
+import { useReservations } from '@/hooks/useReservations'
+import { useNowTick } from '@/hooks/useNowTick'
+import { effectiveReservationStatus, isActiveOwnReservation } from '@/lib/utils/reservationDisplay'
+import { getStatusConfig } from '@/lib/constants/reservations'
 import { formatMinorPrice } from '@/lib/utils/formatPrice'
 import { getReserveBlockReason, formatPickupWindow } from '@/lib/utils/reserve'
 import { trackClickReserve } from '@/lib/analytics/events'
@@ -75,9 +79,16 @@ const BLOCK_TEXT: Record<string, { label: string; reason: string }> = {
 export default function PackDetailClient({ initialPack }: Props) {
   const router = useRouter()
   const { user, loading: authLoading } = useAuth()
+  const { reservations, loading: reservationsLoading } = useReservations()
+  const now = useNowTick(30_000)
   const [reserveOpen, setReserveOpen] = useState(false)
 
   const pack = initialPack
+
+  // L-10: si el usuario ya tiene una reserva ACTIVA de este pack, la ficha
+  // debe mostrar SU estado, no invitarle a una segunda compra imposible.
+  const myReservation = reservations.find((r) => r.pack_id === pack.id && isActiveOwnReservation(r.status)) ?? null
+
   const priceLabel = (n: number) => formatMinorPrice(n, pack.currency_code, 'es-CL')
   const hasDiscount = pack.original_price_minor != null && pack.original_price_minor > pack.price_minor
   const discount = hasDiscount ? Math.round((1 - pack.price_minor / pack.original_price_minor!) * 100) : null
@@ -200,21 +211,48 @@ export default function PackDetailClient({ initialPack }: Props) {
               </div>
             )}
 
-            <div>
-              <Button
-                onClick={handleReserve}
-                disabled={!!blockReason}
-                loading={authLoading}
-                className="w-full py-6 text-lg"
-              >
-                {blockReason ? BLOCK_TEXT[blockReason].label : 'Reservar'}
-              </Button>
-              {blockReason && (
-                <p className="text-xs text-center dark:text-gray-500 text-gray-400 mt-2">
-                  {BLOCK_TEXT[blockReason].reason}
+            {myReservation ? (
+              /* L-10: el estado propio del usuario toma el mando del CTA. */
+              <div className="p-4 rounded-xl border border-primary/30 bg-primary/10 space-y-2">
+                <p className="text-sm font-semibold text-primary flex items-center gap-2">
+                  <CheckCircle className="w-4 h-4" />
+                  Ya tienes este pack
                 </p>
-              )}
-            </div>
+                <p className="text-xs dark:text-gray-300 text-gray-700">
+                  Estado:{' '}
+                  {
+                    getStatusConfig(
+                      effectiveReservationStatus(
+                        myReservation.status,
+                        myReservation.pickup_start_at,
+                        myReservation.pickup_end_at,
+                        now,
+                      ),
+                    ).label
+                  }
+                  . Tu código de recogida y el seguimiento viven en Mis reservas.
+                </p>
+                <Link href="/reservations" className="inline-block text-xs text-primary underline">
+                  Ver en Mis reservas
+                </Link>
+              </div>
+            ) : (
+              <div>
+                <Button
+                  onClick={handleReserve}
+                  disabled={!!blockReason}
+                  loading={authLoading || (!!user && reservationsLoading)}
+                  className="w-full py-6 text-lg"
+                >
+                  {blockReason ? BLOCK_TEXT[blockReason].label : 'Reservar'}
+                </Button>
+                {blockReason && (
+                  <p className="text-xs text-center dark:text-gray-500 text-gray-400 mt-2">
+                    {BLOCK_TEXT[blockReason].reason}
+                  </p>
+                )}
+              </div>
+            )}
 
             <Link href={`/shops/${pack.shop.id}`}>
               <div className="p-4 glass-card rounded-xl hover:border-primary/50 transition-all">
