@@ -92,4 +92,35 @@ describe('ReservationCard (lado business)', () => {
     render(<ReservationCard reservation={item()} index={0} updating={null} />)
     expect(screen.queryByRole('button', { name: /^Confirmar$/ })).toBeNull()
   })
+
+  it('L-02: ready_pickup con ventana AÚN CERRADA se muestra Confirmada y sin badge mentiroso', () => {
+    render(
+      <ReservationCard
+        reservation={item({
+          status: 'ready_pickup',
+          pickup_start_at: '2099-07-15T15:00:00-04:00',
+          pickup_end_at: '2099-07-15T18:00:00-04:00',
+        })}
+        index={0}
+        updating={null}
+      />,
+    )
+    expect(screen.getByText('Confirmada')).toBeTruthy()
+    expect(screen.queryByText('Listo para recoger!')).toBeNull()
+  })
+
+  it('L-02: ready_pickup con ventana ABIERTA sí muestra el badge de listo', () => {
+    render(
+      <ReservationCard
+        reservation={item({
+          status: 'ready_pickup',
+          pickup_start_at: '2020-07-15T15:00:00-04:00',
+          pickup_end_at: '2099-07-15T18:00:00-04:00',
+        })}
+        index={0}
+        updating={null}
+      />,
+    )
+    expect(screen.getByText('Listo para recoger!')).toBeTruthy()
+  })
 })

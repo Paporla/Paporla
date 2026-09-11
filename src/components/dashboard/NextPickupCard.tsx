@@ -9,6 +9,8 @@ import { supabaseBrowser } from '@/lib/supabase/client'
 import Button from '@/components/ui/Button'
 import CountdownTimer from '@/components/ui/CountdownTimer'
 import { getStatusConfig } from '@/lib/constants/reservations'
+import { useNowTick } from '@/hooks/useNowTick'
+import { effectiveReservationStatus } from '@/lib/utils/reservationDisplay'
 import { formatMinorPrice } from '@/lib/utils/formatPrice'
 import { formatPickupWindow } from '@/lib/utils/reserve'
 import type { MyReservation } from '@/types/reservation'
@@ -38,6 +40,8 @@ interface NextPickupCardProps {
  * confirmar). En lugar de un código inventado, la carta dice la verdad.
  */
 export default function NextPickupCard({ reservation, loading, error }: NextPickupCardProps) {
+  // L-02: la etiqueta mira el reloj: lista con ventana cerrada = Confirmada.
+  const now = useNowTick(30_000)
   if (error) {
     return (
       <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}>
@@ -58,7 +62,7 @@ export default function NextPickupCard({ reservation, loading, error }: NextPick
               <div className="w-14 h-14 rounded-xl bg-gray-200 dark:bg-gray-700 flex-shrink-0" />
               <div className="flex-1 space-y-2">
                 <div className="h-3 w-28 bg-gray-200 dark:bg-gray-700 rounded" />
-                <div className="h-5 w-44 bg-gray-200 dark:bg-gray-700 rounded" />
+                <div className="h-5 w-144 bg-gray-200 dark:bg-gray-700 rounded" />
                 <div className="h-4 w-36 bg-gray-100 dark:bg-gray-600 rounded" />
               </div>
               <div className="w-16 h-6 bg-gray-200 dark:bg-gray-700 rounded" />
@@ -72,7 +76,9 @@ export default function NextPickupCard({ reservation, loading, error }: NextPick
     )
   }
 
-  const config = getStatusConfig(reservation.status)
+  const config = getStatusConfig(
+    effectiveReservationStatus(reservation.status, reservation.pickup_start_at, reservation.pickup_end_at, now),
+  )
   const windowLabel = formatPickupWindow(reservation.pickup_start_at, reservation.pickup_end_at, reservation.timezone)
   const totalLabel = formatMinorPrice(reservation.total_amount_minor, reservation.currency_code, 'es-CL')
 

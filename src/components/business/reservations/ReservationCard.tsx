@@ -7,6 +7,8 @@ import Button from '@/components/ui/Button'
 import { formatMinorPrice } from '@/lib/utils/formatPrice'
 import { formatPickupWindow } from '@/lib/utils/formatDate'
 import { getStatusConfig, canCancelStatus, canConfirmStatus } from '@/lib/constants/reservations'
+import { useNowTick } from '@/hooks/useNowTick'
+import { effectiveReservationStatus } from '@/lib/utils/reservationDisplay'
 import type { ReservationItem } from './useBusinessReservations'
 
 interface ReservationCardProps {
@@ -57,11 +59,21 @@ export default function ReservationCard({
   onConfirmClick,
   onCancelClick,
 }: ReservationCardProps) {
-  const config = getStatusConfig(reservation.status)
-  const StatusIcon = iconMap[reservation.status] ?? Clock
+  // L-02: lo que se MUESTRA mira el reloj (ready con ventana cerrada aún es
+  // "Confirmada"); lo que se PUEDE HACER (confirmar/cancelar) sigue al estado
+  // crudo de la base.
+  const now = useNowTick(30_000)
+  const displayStatus = effectiveReservationStatus(
+    reservation.status,
+    reservation.pickup_start_at,
+    reservation.pickup_end_at,
+    now,
+  )
+  const config = getStatusConfig(displayStatus)
+  const StatusIcon = iconMap[displayStatus] ?? Clock
   const cancellable = canCancelStatus(reservation.status)
   const confirmable = canConfirmStatus(reservation.status)
-  const isReady = reservation.status === 'ready_pickup'
+  const isReady = displayStatus === 'ready_pickup'
 
   return (
     <motion.div
@@ -69,7 +81,7 @@ export default function ReservationCard({
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.03 }}
       className={`glass-card border ${
-        borderColorMap[reservation.status] ?? 'border-l-gray-500/50'
+        borderColorMap[displayStatus] ?? 'border-l-gray-500/50'
       } border-l-4 rounded-xl p-3 dark:hover:bg-white/5 hover:bg-gray-50 transition-colors`}
     >
       <div className="flex items-center justify-between gap-3">
