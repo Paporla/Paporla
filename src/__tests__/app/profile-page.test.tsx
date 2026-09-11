@@ -9,6 +9,10 @@ import { ToastProvider } from '@/components/ui/ToastProvider'
  * estado propio (error y success); los avisos de guardado viajan al
  * ToastProvider global (role="alert"). Cubre las dos acciones que avisan:
  * "Guardar cambios" (mutación) y el cambio de mercado (guardado inmediato).
+ *
+ * L-32: al guardar, el refresco del perfil debe ser silencioso. Antes se
+ * llamaba a `getUser()` sin argumentos, que enciende la pantalla de carga y
+ * desmonta el formulario entero: de ahí el "salto" con esqueleto que se veía.
  */
 const fixtures = vi.hoisted(() => ({
   profile: {
@@ -82,7 +86,10 @@ describe('profile page (usuario · toasts globales)', () => {
 
     const alert = await screen.findByRole('alert')
     expect(alert).toHaveTextContent('Perfil actualizado correctamente')
-    expect(fixtures.getUser).toHaveBeenCalled()
+    // L-32: el refresco tiene que pedir los datos EN SILENCIO (`skipLoading`).
+    // Si alguien vuelve a pasar `getUser` a secas, la página entera se
+    // sustituye por el spinner al guardar y este test falla.
+    expect(fixtures.getUser).toHaveBeenCalledWith(true)
   })
 
   it('Guardar cambios con fallo: el mensaje del error sale como aviso GLOBAL', async () => {
@@ -105,6 +112,7 @@ describe('profile page (usuario · toasts globales)', () => {
     const alert = await screen.findByRole('alert')
     expect(alert).toHaveTextContent('Mercado actualizado. Ya puedes reservar packs de este mercado.')
     expect(fixtures.updateProfile).toHaveBeenCalledWith(expect.objectContaining({ marketId: 'mkt-2' }))
+    expect(fixtures.getUser).toHaveBeenCalledWith(true)
   })
 
   it('cambiar el mercado con fallo: aviso GLOBAL de error, no de éxito', async () => {
