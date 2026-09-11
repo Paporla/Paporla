@@ -120,6 +120,26 @@ describe('NextPickupCard', () => {
     expect(href).not.toContain(encodeURIComponent('Calle Los Aromos 123, Providencia, Santiago'))
   })
 
+  it('L-25: reloj honesto — "Abre en" con la ventana aún cerrada, "Cierra en" con la ventana abierta', () => {
+    const { rerender } = render(<NextPickupCard reservation={makeReservation()} />)
+    // Fixture: ventana futura → la cuenta atrás va hasta la APERTURA y lo dice.
+    expect(screen.getByText('Abre en')).toBeDefined()
+    expect(screen.queryByText('Cierra en')).toBeNull()
+
+    rerender(
+      <NextPickupCard
+        reservation={makeReservation({
+          status: 'ready_pickup',
+          // Ventana SIEMPRE abierta: ahora lo urgente es el cierre.
+          pickup_start_at: '2020-01-01T00:00:00Z',
+          pickup_end_at: '2099-01-01T00:00:00Z',
+        })}
+      />,
+    )
+    expect(screen.getByText('Cierra en')).toBeDefined()
+    expect(screen.queryByText('Abre en')).toBeNull()
+  })
+
   it('loading muestra skeleton sin datos y error muestra el mensaje', () => {
     const { rerender } = render(<NextPickupCard reservation={makeReservation()} loading />)
     expect(screen.queryByText('Pack Sushi Sorpresa')).toBeNull()
