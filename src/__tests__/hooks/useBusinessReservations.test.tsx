@@ -210,6 +210,42 @@ describe('useBusinessReservations', () => {
     expect(result.current.reservations).toHaveLength(2)
   })
 
+  it('L-24: filtro y stats usan el estado EFECTIVO (ready_pickup con ventana cerrada = confirmada)', async () => {
+    setupMockClient([
+      shopRow({
+        reservation_id: 'r-far',
+        status: 'ready_pickup',
+        pickup_start_at: '2099-01-01T00:00:00-03:00',
+        pickup_end_at: '2099-01-02T00:00:00-03:00',
+      }),
+      shopRow({
+        reservation_id: 'r-open',
+        status: 'ready_pickup',
+        // Ventana SIEMPRE abierta: cuenta como "lista" de verdad.
+        pickup_start_at: '2020-01-01T00:00:00-03:00',
+        pickup_end_at: '2099-01-01T00:00:00-03:00',
+      }),
+    ])
+    const { result } = renderHook(() => useBusinessReservations(), { wrapper: createWrapper() })
+    await waitFor(() => expect(result.current.shopId).toBe('shop-a'))
+    await waitFor(() => expect(result.current.loading).toBe(false))
+
+    // La barra de estadísticas no miente: 1 confirmada (ventana cerrada) y
+    // 1 lista (ventana abierta), aunque ambas tengan el mismo estado crudo.
+    expect(result.current.stats.confirmed).toBe(1)
+    expect(result.current.stats.ready).toBe(1)
+
+    act(() => {
+      result.current.setStatusFilter('confirmed')
+    })
+    expect(result.current.reservations.map((r) => r.reservation_id)).toEqual(['r-far'])
+
+    act(() => {
+      result.current.setStatusFilter('ready_pickup')
+    })
+    expect(result.current.reservations.map((r) => r.reservation_id)).toEqual(['r-open'])
+  })
+
   it('busca por cliente o por pack', async () => {
     setupMockClient([
       shopRow({ reservation_id: 'r-1', customer_display_name: 'María', pack_title: 'Pack Panadería' }),

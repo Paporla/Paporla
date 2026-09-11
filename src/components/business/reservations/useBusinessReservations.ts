@@ -8,6 +8,8 @@ import { useBusinessShop } from '@/lib/query/useBusinessShop'
 import { RESERVATION_STATUSES, sortReservationsByPickupTime } from '@/lib/constants/reservations'
 import { translateDbError } from '@/lib/utils/db-errors'
 import { dateKeyInTimezone } from '@/lib/utils/formatDate'
+import { effectiveReservationStatus } from '@/lib/utils/reservationDisplay'
+import { useNowTick } from '@/hooks/useNowTick'
 
 /**
  * Fila canónica de `list_shop_reservations` (migración 0014:333). Son
@@ -91,6 +93,12 @@ const normalizeTerm = (value: string) =>
  *    la RPC no acepta `p_cancel_reason`).
  */
 export function useBusinessReservations() {
+  // L-24 (familia L-02): el filtro y las estadísticas MIRAN EL RELOJ. En el
+  // piloto la confirmación salta directo a 'ready_pickup', así que una
+  // reserva confirmada con la ventana aún cerrada es 'confirmed' a efectos
+  // visuales: el panel debe filtrarla y contarla como tal (las tarjetas ya
+  // lo hacían; los números y el desplegable, no).
+  const now = useNowTick(30_000)
   const { data: shop } = useBusinessShop()
   const queryClient = useQueryClient()
   const searchParams = useSearchParams()
@@ -182,7 +190,12 @@ export function useBusinessReservations() {
   const filteredReservations = useMemo(() => {
     let filtered = reservations
     if (statusFilter !== 'all') {
-      filtered = filtered.filter((r) => r.status === statusFilter)
+      // L-24: el desplegable filtra por estado EFECTIVO, el mismo que pinta
+      // la tarjeta. Si no, "Confirmadas" sale vacío y esas reservas aparecen
+      // bajo "Listas para recoger" con una etiqueta que las contradice.
+      filtered = filtered.filter(
+        (r) => effectiveReservationStatus(r.status, r.pickup_start_at, r.pickup_end_at, now) === statusFilter,
+      )
     }
     if (searchTerm.trim()) {
       // Insensible a acentos: buscar "maria" debe encontrar "María".
@@ -193,7 +206,7 @@ export function useBusinessReservations() {
     }
     // Activas primero (recogida más cercana al frente), historial después.
     return sortReservationsByPickupTime(filtered)
-  }, [reservations, statusFilter, searchTerm])
+  }, [reservations, statusFilter, searchTerm, now])
 
   // Las estadísticas se calculan SIEMPRE sobre la lista completa (sin el
   // filtro de estado ni la búsqueda), para que la barra no mienta.
@@ -202,8 +215,14 @@ export function useBusinessReservations() {
     return {
       total: reservations.length,
       pending: reservations.filter((r) => r.status === 'payment_pending').length,
-      confirmed: reservations.filter((r) => r.status === 'confirmed').length,
-      ready: reservations.filter((r) => r.status === 'ready_pickup').length,
+      // L-24: "Confirmadas" y "Listas" cuentan el estado EFECTIVO (mirando
+      // el reloj), igual que los grupos y las tarjetas de más abajo.
+      confirmed: reservations.filter(
+        (r) => effectiveReservationStatus(r.status, r.pickup_start_at, r.pickup_end_at, now) === 'confirmed',
+      ).length,
+      ready: reservations.filter(
+        (r) => effectiveReservationStatus(r.status, r.pickup_start_at, r.pickup_end_at, now) === 'ready_pickup',
+      ).length,
       completed: reservations.filter((r) => r.status === 'picked_up' || r.status === 'completed').length,
       noShow: reservations.filter((r) => r.status === 'no_show').length,
       cancelled: reservations.filter((r) => r.status === 'cancelled').length,
@@ -221,7 +240,7 @@ export function useBusinessReservations() {
           dateKeyInTimezone(r.pickup_start_at, r.timezone || MARKET_TIMEZONE) === todayKey,
       ).length,
     }
-  }, [reservations])
+  }, [reservations, now])
 
   /**
    * Cancela una reserva. Éxitos y errores los gestiona la mutation (toast +
