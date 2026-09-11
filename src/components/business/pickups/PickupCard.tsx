@@ -2,22 +2,9 @@
 
 import { motion } from 'framer-motion'
 import { CheckCircle, Clock, Package, User } from 'lucide-react'
-import { useEffect, useState } from 'react'
 import { formatPickupWindow } from '@/lib/utils/formatDate'
-
-/**
- * "Ahora" para el badge "En horario": se calcula una vez al montar y se
- * refresca cada 30 s (el estado nunca se calcula durante el render, lo que
- * mantiene el componente puro).
- */
-function useNow(intervalMs: number): number {
-  const [now, setNow] = useState(() => Date.now())
-  useEffect(() => {
-    const id = setInterval(() => setNow(Date.now()), intervalMs)
-    return () => clearInterval(id)
-  }, [intervalMs])
-  return now
-}
+import { useNowTick } from '@/hooks/useNowTick'
+import { effectiveReservationStatus } from '@/lib/utils/reservationDisplay'
 
 /**
  * Fila de recogida para "Recogidas de hoy". Subconjunto de la fila canónica
@@ -42,11 +29,14 @@ interface Props {
 }
 
 export default function PickupCard({ pickup, index }: Props) {
-  const now = useNow(30_000)
+  const now = useNowTick(30_000)
   const start = pickup.pickup_start_at ? new Date(pickup.pickup_start_at).getTime() : null
   const end = pickup.pickup_end_at ? new Date(pickup.pickup_end_at).getTime() : null
   const inWindow = start !== null && end !== null && now >= start && now <= end
-  const isReady = pickup.status === 'ready_pickup'
+  // L-02: el estado efectivo mira el reloj: ready_pickup con ventana
+  // cerrada aún es "confirmada"; confirmada con ventana abierta ya está lista.
+  const isReady =
+    effectiveReservationStatus(pickup.status, pickup.pickup_start_at, pickup.pickup_end_at, now) === 'ready_pickup'
 
   return (
     <motion.div

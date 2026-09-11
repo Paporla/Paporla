@@ -26,6 +26,8 @@ import { formatMinorPrice } from '@/lib/utils/formatPrice'
 import { formatDate } from '@/lib/utils/formatDate'
 import { canCancelReservation } from '@/lib/utils/canCancelReservation'
 import { getStatusConfig, isActiveStatus, sortReservationsByPickupTime } from '@/lib/constants/reservations'
+import { useNowTick } from '@/hooks/useNowTick'
+import { effectiveReservationStatus } from '@/lib/utils/reservationDisplay'
 import { formatPickupWindow } from '@/lib/utils/reserve'
 import type { MyReservation } from '@/types/reservation'
 
@@ -40,10 +42,21 @@ const statusIcons: Record<string, React.ComponentType<{ className?: string }>> =
   expired: Ban,
 }
 
-/** Chip de estado seguro: si la base manda un valor nuevo, se ve crudo en gris. */
-function StatusChip({ status }: { status: string }) {
-  const config = getStatusConfig(status)
-  const StatusIcon = statusIcons[status] ?? Clock
+/** Chip de estado seguro: si la base manda un valor nuevo, se ve crudo en gris.
+ *  L-02: etiqueta E icono siguen el estado efectivo (el que mira el reloj). */
+function StatusChip({
+  status,
+  pickupStartAt,
+  pickupEndAt,
+}: {
+  status: string
+  pickupStartAt: string
+  pickupEndAt: string
+}) {
+  const now = useNowTick(30_000)
+  const displayStatus = effectiveReservationStatus(status, pickupStartAt, pickupEndAt, now)
+  const config = getStatusConfig(displayStatus)
+  const StatusIcon = statusIcons[displayStatus] ?? Clock
   return (
     <span
       className={`inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full shrink-0 ${config.bg} ${config.color}`}
@@ -388,7 +401,11 @@ export default function UserReservationsPage() {
                               <h3 className="text-lg font-semibold dark:text-white text-gray-900 group-hover:text-primary transition-colors">
                                 {reservation.pack_title}
                               </h3>
-                              <StatusChip status={reservation.status} />
+                              <StatusChip
+                                status={reservation.status}
+                                pickupStartAt={reservation.pickup_start_at}
+                                pickupEndAt={reservation.pickup_end_at}
+                              />
                             </div>
 
                             <Link href={`/shops/${reservation.shop_id}`}>
@@ -487,7 +504,11 @@ export default function UserReservationsPage() {
                             <p className="text-xs text-red-400 mt-1">Motivo: {reservation.cancel_reason}</p>
                           )}
                         </div>
-                        <StatusChip status={reservation.status} />
+                        <StatusChip
+                          status={reservation.status}
+                          pickupStartAt={reservation.pickup_start_at}
+                          pickupEndAt={reservation.pickup_end_at}
+                        />
                       </div>
                     </Card>
                   ))}
