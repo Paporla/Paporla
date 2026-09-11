@@ -16,7 +16,9 @@ interface ToastMessage {
 
 interface ToastContextValue {
   toasts: ToastMessage[]
-  addToast: (message: string, type?: ToastType) => void
+  // durationMs opcional: por defecto 4 s, pero un mensaje largo puede pedir
+  // más tiempo de lectura sin obligar a montar un cartel local.
+  addToast: (message: string, type?: ToastType, durationMs?: number) => void
   removeToast: (id: string) => void
 }
 
@@ -29,13 +31,13 @@ let toastCounter = 0
 export function ToastProvider({ children }: { children: ReactNode }) {
   const [toasts, setToasts] = useState<ToastMessage[]>([])
 
-  const addToast = useCallback((message: string, type: ToastType = 'info') => {
+  const addToast = useCallback((message: string, type: ToastType = 'info', durationMs = 4000) => {
     const id = `toast-${++toastCounter}-${Date.now()}`
     setToasts((prev) => [...prev, { id, message, type }])
 
     setTimeout(() => {
       setToasts((prev) => prev.filter((t) => t.id !== id))
-    }, 4000)
+    }, durationMs)
   }, [])
 
   const removeToast = useCallback((id: string) => {
