@@ -11,7 +11,7 @@ import { formatRelativeTime } from '@/lib/utils/formatTime'
 import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
 import EmptyState from '@/components/ui/EmptyState'
-import Toast from '@/components/ui/Toast'
+import { useToast } from '@/components/ui/ToastProvider'
 
 const iconMap: Record<string, { icon: React.ComponentType<{ className?: string }>; color: string; bg: string }> = {
   pickup_reminder: { icon: Clock, color: 'text-amber-400', bg: 'bg-amber-500/10' },
@@ -32,7 +32,10 @@ export default function NotificationsPage() {
   const { notifications, unreadCount, loading: notifLoading, markAsRead, markAllAsRead } = useNotifications()
   const { loading: authLoading } = useAuth()
   const [filter, setFilter] = useState<'all' | 'unread'>('all')
-  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null)
+  // Lote UX punto 4: el aviso de "Marcar todas" viaja al ToastProvider global
+  // (role="alert", auto-dismiss 4 s) en vez de un <Toast> local con estado y
+  // temporizador propios.
+  const { addToast } = useToast()
 
   // "No leída" = `read_at IS NULL` (columna real de 0006; no existe `is_read`).
   const filteredNotifications = filter === 'all' ? notifications : notifications.filter((n) => n.read_at === null)
@@ -99,12 +102,11 @@ export default function NotificationsPage() {
               size="sm"
               onClick={async () => {
                 const ok = await markAllAsRead()
-                setToast(
-                  ok
-                    ? { message: 'Todas marcadas como leidas', type: 'success' }
-                    : { message: 'No se pudieron marcar todas como leídas. Inténtalo de nuevo.', type: 'error' },
-                )
-                setTimeout(() => setToast(null), 2000)
+                if (ok) {
+                  addToast('Todas marcadas como leídas', 'success')
+                } else {
+                  addToast('No se pudieron marcar todas como leídas. Inténtalo de nuevo.', 'error')
+                }
               }}
               className="flex items-center gap-1"
             >
@@ -186,8 +188,6 @@ export default function NotificationsPage() {
           })}
         </div>
       )}
-
-      {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
     </motion.div>
   )
 }
