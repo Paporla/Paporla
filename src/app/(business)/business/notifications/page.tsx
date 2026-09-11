@@ -9,7 +9,7 @@ import { useNotifications } from '@/hooks/useNotifications'
 import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
 import EmptyState from '@/components/ui/EmptyState'
-import Toast from '@/components/ui/Toast'
+import { useToast } from '@/components/ui/ToastProvider'
 
 const iconMap: Record<string, { icon: React.ComponentType<{ className?: string }>; color: string; bg: string }> = {
   new_reservation: { icon: Package, color: 'text-primary', bg: 'bg-primary/10' },
@@ -29,19 +29,21 @@ export default function BusinessNotificationsPage() {
   const router = useRouter()
   const { notifications, unreadCount, markAsRead, markAllAsRead, loading } = useNotifications()
   const [filter, setFilter] = useState<'all' | 'unread'>('all')
-  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null)
+  // Lote UX punto 4: el aviso de "Marcar todas" viaja al ToastProvider global
+  // (role="alert", auto-dismiss 4 s) en vez de un <Toast> local con estado y
+  // temporizador propios.
+  const { addToast } = useToast()
 
   // "No leída" = `read_at IS NULL` (columna real de 0006; no existe `is_read`).
   const filteredNotifications = filter === 'all' ? notifications : notifications.filter((n) => n.read_at === null)
 
   const handleMarkAll = async () => {
     const ok = await markAllAsRead()
-    setToast(
-      ok
-        ? { message: 'Todas las notificaciones marcadas como leídas', type: 'success' }
-        : { message: 'No se pudieron marcar todas como leídas. Inténtalo de nuevo.', type: 'error' },
-    )
-    setTimeout(() => setToast(null), 2000)
+    if (ok) {
+      addToast('Todas las notificaciones marcadas como leídas', 'success')
+    } else {
+      addToast('No se pudieron marcar todas como leídas. Inténtalo de nuevo.', 'error')
+    }
   }
 
   if (loading) {
@@ -180,8 +182,6 @@ export default function BusinessNotificationsPage() {
           })}
         </div>
       )}
-
-      {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
     </div>
   )
 }

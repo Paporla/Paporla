@@ -1,6 +1,19 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
 import BusinessNotificationsPage from '@/app/(business)/business/notifications/page'
+import { ToastProvider } from '@/components/ui/ToastProvider'
+
+// Lote UX punto 4: la página ya no fabrica su <Toast> local; el aviso de
+// "Marcar todas" viaja al ToastProvider (role="alert"), que es el único
+// camarero de avisos de la app. Los tests envuelven la página en el provider
+// igual que hace providers.tsx en producción.
+function renderPage() {
+  return render(
+    <ToastProvider>
+      <BusinessNotificationsPage />
+    </ToastProvider>,
+  )
+}
 
 // El hook es el contrato de la página: se mockea por completo.
 const notifState = vi.hoisted(() => ({
@@ -65,7 +78,7 @@ describe('BusinessNotificationsPage (página)', () => {
   })
 
   it('muestra title y body (los campos del esquema real 0006), no el mensaje viejo', () => {
-    render(<BusinessNotificationsPage />)
+    renderPage()
     expect(screen.getByText('Nueva reserva')).toBeTruthy()
     expect(screen.getByText('Cliente A reservó Pack Panadería Artesanal.')).toBeTruthy()
     expect(screen.getByText('Recogida completada')).toBeTruthy()
@@ -73,19 +86,19 @@ describe('BusinessNotificationsPage (página)', () => {
   })
 
   it('muestra el contador de nuevas por read_at', () => {
-    render(<BusinessNotificationsPage />)
+    renderPage()
     expect(screen.getByText('1 nuevas')).toBeTruthy()
   })
 
   it('el filtro No leídas solo muestra las de read_at NULL', () => {
-    render(<BusinessNotificationsPage />)
+    renderPage()
     fireEvent.click(screen.getByRole('button', { name: /No leidas/ }))
     expect(screen.getByText('Nueva reserva')).toBeTruthy()
     expect(screen.queryByText('Recogida completada')).toBeNull()
   })
 
   it('no existe botón de borrar: el esquema no tiene camino canónico de borrado', () => {
-    render(<BusinessNotificationsPage />)
+    renderPage()
     // Con 1 no leída los únicos botones de la página son estos tres: si
     // reaparece cualquier otro (p. ej. la papelera), el conteo falla.
     expect(screen.getAllByRole('button')).toHaveLength(3)
@@ -95,7 +108,7 @@ describe('BusinessNotificationsPage (página)', () => {
   })
 
   it('clic en una no leída la marca como leída; clic en una leída no hace nada', () => {
-    render(<BusinessNotificationsPage />)
+    renderPage()
     fireEvent.click(screen.getByText('Nueva reserva'))
     expect(notifState.value.markAsRead).toHaveBeenCalledTimes(1)
     expect(notifState.value.markAsRead).toHaveBeenCalledWith('n-1')
@@ -106,7 +119,7 @@ describe('BusinessNotificationsPage (página)', () => {
   it('con todo leído desaparecen el badge y el botón de marcar todas', () => {
     notifState.value.notifications = [readRow()]
     notifState.value.unreadCount = 0
-    render(<BusinessNotificationsPage />)
+    renderPage()
     expect(screen.queryByText('0 nuevas')).toBeNull()
     expect(screen.queryByRole('button', { name: /Marcar todas/ })).toBeNull()
     // Botones restantes: solo los dos de filtro.
@@ -116,21 +129,23 @@ describe('BusinessNotificationsPage (página)', () => {
   it('sin notificaciones muestra el estado vacío', () => {
     notifState.value.notifications = []
     notifState.value.unreadCount = 0
-    render(<BusinessNotificationsPage />)
+    renderPage()
     expect(screen.getByText('Sin notificaciones')).toBeTruthy()
     expect(screen.getByRole('button', { name: 'Explorar packs' })).toBeTruthy()
   })
 
-  it('Marcar todas avisa con toast cuando el hook lo logra', async () => {
-    render(<BusinessNotificationsPage />)
+  it('Marcar todas avisa con toast GLOBAL (role=alert) cuando el hook lo logra', async () => {
+    renderPage()
     fireEvent.click(screen.getByRole('button', { name: /Marcar todas/ }))
-    expect(await screen.findByText('Todas las notificaciones marcadas como leídas')).toBeTruthy()
+    const alert = await screen.findByRole('alert')
+    expect(alert).toHaveTextContent('Todas las notificaciones marcadas como leídas')
   })
 
-  it('Marcar todas avisa con toast de error cuando el hook falla', async () => {
+  it('Marcar todas avisa con toast GLOBAL de error cuando el hook falla', async () => {
     notifState.value.markAllAsRead = vi.fn(async () => false)
-    render(<BusinessNotificationsPage />)
+    renderPage()
     fireEvent.click(screen.getByRole('button', { name: /Marcar todas/ }))
-    expect(await screen.findByText('No se pudieron marcar todas como leídas. Inténtalo de nuevo.')).toBeTruthy()
+    const alert = await screen.findByRole('alert')
+    expect(alert).toHaveTextContent('No se pudieron marcar todas como leídas. Inténtalo de nuevo.')
   })
 })
