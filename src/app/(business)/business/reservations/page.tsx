@@ -19,11 +19,20 @@ import ReservationFilters from '@/components/business/reservations/ReservationFi
 import ReservationGroup from '@/components/business/reservations/ReservationGroup'
 import { STATUS_LABELS } from '@/lib/constants/reservations'
 import { formatDate, formatPickupWindow } from '@/lib/utils/formatDate'
+import { effectiveReservationStatus } from '@/lib/utils/reservationDisplay'
+import { useNowTick } from '@/hooks/useNowTick'
 
-// Agrupa las reservas por estado canónico. "recogidas" une picked_up +
+// Agrupa las reservas por estado EFECTIVO (L-24, familia L-02): la misma
+// regla que pinta la etiqueta de la tarjeta decide en qué grupo cae. En el
+// piloto la confirmación salta directo a 'ready_pickup'; sin mirar el reloj,
+// una reserva con la ventana cerrada aparecía bajo "Listas para recoger"
+// mientras su tarjeta decía "Confirmada". "recogidas" une picked_up +
 // completed (ambas significan que el pack ya salió del local).
-const groupReservations = (reservations: ReservationItem[]) => {
-  const byStatus = (status: string) => reservations.filter((r) => r.status === status)
+const groupReservations = (reservations: ReservationItem[], nowMs: number) => {
+  const byStatus = (status: string) =>
+    reservations.filter(
+      (r) => effectiveReservationStatus(r.status, r.pickup_start_at, r.pickup_end_at, nowMs) === status,
+    )
   return {
     payment_pending: byStatus('payment_pending'),
     confirmed: byStatus('confirmed'),
@@ -61,7 +70,10 @@ export default function BusinessReservationsPage() {
   const [confirmModalOpen, setConfirmModalOpen] = useState(false)
   const [reservationToConfirm, setReservationToConfirm] = useState<string | null>(null)
 
-  const grouped = groupReservations(reservations)
+  // Los grupos miran el reloj (L-24): cuando la ventana de recogida se abre,
+  // la reserva pasa SOLA de "Confirmadas" a "Listas para recoger" sin recargar.
+  const now = useNowTick(30_000)
+  const grouped = groupReservations(reservations, now)
 
   const requestCancel = (id: string) => {
     setReservationToCancel(id)
@@ -135,6 +147,8 @@ export default function BusinessReservationsPage() {
               Pack: r.pack_title,
               Cliente: r.customer_display_name,
               'Precio (CLP)': r.total_amount_minor,
+              // El CSV exporta el estado CRUDO de la base (es un volcado de
+              // datos, no una etiqueta para humanos): L-24 no aplica aquí.
               Estado: STATUS_LABELS[r.status] ?? r.status,
               Recogida: formatPickupWindow(r.pickup_start_at, r.pickup_end_at, r.timezone),
             }))}

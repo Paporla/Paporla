@@ -192,4 +192,33 @@ describe('business/reservations page', () => {
     expect(screen.getByText('No hay reservas')).toBeTruthy()
     expect(screen.queryByText('Exportar CSV')).toBeNull()
   })
+
+  it('L-24: agrupa por estado EFECTIVO — ready_pickup con ventana aún cerrada cae en "Confirmadas"', () => {
+    hookState.reservations = [
+      row({
+        reservation_id: 'r-far',
+        status: 'ready_pickup',
+        pickup_start_at: '2099-01-01T00:00:00-03:00',
+        pickup_end_at: '2099-01-02T00:00:00-03:00',
+      }),
+    ]
+    render(<BusinessReservationsPage />)
+    expect(screen.getByRole('heading', { name: 'Confirmadas' })).toBeTruthy()
+    expect(screen.queryByRole('heading', { name: 'Listas para recoger' })).toBeNull()
+  })
+
+  it('L-24: con la ventana abierta, la misma reserva cae en "Listas para recoger"', () => {
+    hookState.reservations = [
+      row({
+        reservation_id: 'r-open',
+        status: 'ready_pickup',
+        // Ventana SIEMPRE abierta: la etiqueta y el grupo miran el reloj.
+        pickup_start_at: '2020-01-01T00:00:00-03:00',
+        pickup_end_at: '2099-01-01T00:00:00-03:00',
+      }),
+    ]
+    render(<BusinessReservationsPage />)
+    expect(screen.getByRole('heading', { name: 'Listas para recoger' })).toBeTruthy()
+    expect(screen.queryByRole('heading', { name: 'Confirmadas' })).toBeNull()
+  })
 })
