@@ -51,7 +51,17 @@ export default function FavoriteButton({
     if (!user) {
       // 'info', no 'success': no es un logro, es un aviso de que falta sesión.
       addToast('Inicia sesión para guardar favoritos', 'info')
-      setTimeout(() => router.push('/login'), 1500)
+      /*
+        L-29: al login con la dirección de vuelta. `useAuth.signIn` ya sabe leer
+        `?redirect=` y lo pasa por `getSafeInternalRedirect` (solo admite rutas
+        internas que empiezan por una sola barra), así que al iniciar sesión la
+        persona aterriza en la ficha del comercio que quería guardar, no en su
+        panel. El favorito NO se guarda solo: hace falta un segundo toque en el
+        corazón. El retardo de 1,5 s es para que dé tiempo a leer el aviso.
+      */
+      const volver = `${window.location.pathname}${window.location.search}`
+      const params = new URLSearchParams({ redirect: volver })
+      setTimeout(() => router.push(`/login?${params.toString()}`), 1500)
       return
     }
 
