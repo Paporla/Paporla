@@ -11,6 +11,8 @@ import BusinessWelcomeBanner from '@/components/business/dashboard/BusinessWelco
 import BusinessStatsGrid from '@/components/business/dashboard/BusinessStatsGrid'
 import BusinessQuickActions from '@/components/business/dashboard/BusinessQuickActions'
 import BusinessRecentActivity from '@/components/business/dashboard/BusinessRecentActivity'
+import { useNowTick } from '@/hooks/useNowTick'
+import { effectiveReservationStatus } from '@/lib/utils/reservationDisplay'
 import FirstStepsChecklist from '@/components/business/dashboard/FirstStepsChecklist'
 import RepeatLastPackCard from '@/components/business/dashboard/RepeatLastPackCard'
 import TodayPickups from '@/components/business/TodayPickups'
@@ -24,6 +26,9 @@ export default function BusinessDashboard() {
   // useQuery entrega undefined mientras no hay dato: para el checklist,
   // "sin dato" y "sin comercio" son el mismo caso (paso 1).
   const checklistShop = shop ?? null
+  // L-02: la actividad reciente también mira el reloj (arriba de los
+  // early returns: las reglas de hooks no perdonan).
+  const now = useNowTick(30_000)
 
   // Evitar flash: mientras se resuelve la autenticación, mostrar skeleton
   if (authLoading || loading) return <LoadingSkeleton />
@@ -32,7 +37,7 @@ export default function BusinessDashboard() {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
         <div className="glass-card rounded-2xl p-8 max-w-md">
-          <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-red-500/10 flex items-center justify-center">
+          <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-primary/10 flex items-center justify-center">
             <Store className="w-8 h-8 text-red-400" />
           </div>
           <h2 className="text-xl font-bold dark:text-white text-gray-900 mb-2">Error al cargar</h2>
@@ -47,8 +52,8 @@ export default function BusinessDashboard() {
 
   // Comercio sin perfil o pendiente de verificación: en lugar de dos
   // pantallas distintas, UN solo camino guiado. El checklist «Primeros
-  // pasos» muestra dónde está el comercio y qué toca hacer ahora, con un
-  // único botón para el paso actual (diseño: cero decisiones que tomar).
+  // pasos» muestra dónde está el comercio y qué toca hacer ahora, con
+  // un único botón para el paso actual (diseño: cero decisiones que tomar).
   if (!shop || !shop.verified) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh]">
@@ -76,7 +81,7 @@ export default function BusinessDashboard() {
     type: 'reservation' as const,
     title: r.pack_title,
     description: `${r.customer_display_name} · ${formatChilePesos(r.total_amount_minor)}`,
-    status: r.status,
+    status: effectiveReservationStatus(r.status, r.pickup_start_at, r.pickup_end_at, now),
     created_at: r.created_at,
     link: '/business/reservations',
   }))
