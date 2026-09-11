@@ -12,9 +12,12 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
   const titles: Record<string, { title: string; subtitle: string }> = {
     '/login': { title: 'Bienvenido de vuelta', subtitle: 'Inicia sesión para continuar rescatando comida' },
     '/register': { title: 'Crea tu cuenta', subtitle: 'Únete a la comunidad que rescata comida' },
+    // L-27: el subtítulo se ve TAMBIÉN en la pantalla de éxito, así que no
+    // puede afirmar que ya se envió nada (Supabase no revela si el correo
+    // existe). Describe la pantalla, no el resultado.
     '/forgot-password': {
       title: 'Recupera tu acceso',
-      subtitle: 'Te enviamos un enlace para restablecer tu contraseña',
+      subtitle: 'Restablece tu contraseña con un enlace por correo',
     },
     '/reset-password': { title: 'Nueva contraseña', subtitle: 'Elige una contraseña segura para tu cuenta' },
   }
