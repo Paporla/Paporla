@@ -62,7 +62,7 @@ export default function NextPickupCard({ reservation, loading, error }: NextPick
               <div className="w-14 h-14 rounded-xl bg-gray-200 dark:bg-gray-700 flex-shrink-0" />
               <div className="flex-1 space-y-2">
                 <div className="h-3 w-28 bg-gray-200 dark:bg-gray-700 rounded" />
-                <div className="h-5 w-144 bg-gray-200 dark:bg-gray-700 rounded" />
+                <div className="h-5 w-44 bg-gray-200 dark:bg-gray-700 rounded" />
                 <div className="h-4 w-36 bg-gray-100 dark:bg-gray-600 rounded" />
               </div>
               <div className="w-16 h-6 bg-gray-200 dark:bg-gray-700 rounded" />
@@ -81,6 +81,19 @@ export default function NextPickupCard({ reservation, loading, error }: NextPick
   )
   const windowLabel = formatPickupWindow(reservation.pickup_start_at, reservation.pickup_end_at, reservation.timezone)
   const totalLabel = formatMinorPrice(reservation.total_amount_minor, reservation.currency_code, 'es-CL')
+
+  // L-25: reloj honesto. La cuenta atrás contaba SIEMPRE hasta el CIERRE de
+  // la ventana y no lo decía: una reserva con ventana que abre a las 13:25
+  // mostraba "faltan 36m" cuando faltaban 7m para poder recoger. Ahora el
+  // reloj cuenta hasta el instante que toca: cuánto falta para que ABRA
+  // antes de abrir, cuánto para que CIERRE una vez abierta. Y lo dice con
+  // todas las letras ("Abre en" / "Cierra en"). Si la ventana ya pasó, el
+  // propio CountdownTimer pinta el vencido y la etiqueta sobra.
+  const startMs = reservation.pickup_start_at ? new Date(reservation.pickup_start_at).getTime() : NaN
+  const endMs = reservation.pickup_end_at ? new Date(reservation.pickup_end_at).getTime() : NaN
+  const windowNotOpenYet = !Number.isNaN(startMs) && now < startMs
+  const windowExpired = !Number.isNaN(endMs) && now > endMs
+  const countdownTarget = windowNotOpenYet ? reservation.pickup_start_at! : reservation.pickup_end_at
 
   // "Cómo llegar": si el comercio tiene coordenadas (0028) se usan — Google
   // lleva al punto exacto. Sin ellas, respaldo al texto de la dirección
@@ -162,11 +175,16 @@ export default function NextPickupCard({ reservation, loading, error }: NextPick
             </p>
           )}
 
-          {/* Fila 4: cuenta atrás (izquierda, nunca partida) + estado
-              (derecha, nunca partido). */}
+          {/* Fila 4: cuenta atrás con su intención dicha (L-25) a la
+              izquierda, nunca partida + estado (derecha, nunca partido). */}
           <div className="flex items-center justify-between gap-2 min-w-0">
-            <span className="whitespace-nowrap">
-              <CountdownTimer targetDate={reservation.pickup_end_at} />
+            <span className="whitespace-nowrap flex items-baseline gap-1.5 min-w-0">
+              {!windowExpired && (
+                <span className="text-[10px] text-gray-500 uppercase tracking-wide shrink-0">
+                  {windowNotOpenYet ? 'Abre en' : 'Cierra en'}
+                </span>
+              )}
+              <CountdownTimer targetDate={countdownTarget} />
             </span>
             <span
               className={`text-[11px] px-2 py-0.5 rounded-full whitespace-nowrap shrink-0 ${config.bg} ${config.color}`}
