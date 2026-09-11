@@ -230,7 +230,7 @@ export default function PackDetailClient({ initialPack }: Props) {
                       ),
                     ).label
                   }
-                  . Tu código de recogida y el seguimiento viven en Mis reservas.
+                  . El seguimiento vive en Mis reservas y el comercio te compartirá el código de recogida al confirmar.
                 </p>
                 <Link href="/reservations" className="inline-block text-xs text-primary underline">
                   Ver en Mis reservas

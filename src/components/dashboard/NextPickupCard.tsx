@@ -112,12 +112,16 @@ export default function NextPickupCard({ reservation, loading, error }: NextPick
     ? supabaseBrowser().storage.from('pack-images').getPublicUrl(reservation.image_path).data.publicUrl
     : null
 
-  // El código de recogida NO existe hasta la fase 4 (lo emite el comercio al
-  // confirmar). En lugar de un código inventado, la nota dice la verdad.
+  // L-26: el código de recogida NO puede "aparecer aquí": el código crudo se
+  // mostró al comercio UNA sola vez al confirmar y en la base solo vive su
+  // huella sha256 (0031). La nota anterior era una promesa rota (el fundador
+  // la pilló en vivo: reserva confirmada, ventana abierta y código que nunca
+  // apareció). La nota cuenta la verdad del piloto: el comercio te lo
+  // comparte. La función "ver tu código en la app" es del Bloque F.
   const codeNote =
     reservation.status === 'payment_pending'
-      ? 'El comercio recibirá tu reserva y la confirmará. Tu código de recogida aparecerá aquí cuando quede lista.'
-      : 'Tu código de recogida aparecerá aquí cuando la reserva quede lista.'
+      ? 'El comercio recibirá tu reserva y la confirmará. Al confirmar verá tu código de recogida una sola vez para compartírtelo (WhatsApp u otro medio).'
+      : 'El comercio vio tu código de recogida una sola vez al confirmar y te lo compartirá (WhatsApp u otro medio). ¿No te llega? Escríbele: no se puede volver a ver.'
 
   return (
     <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.1 }}>
