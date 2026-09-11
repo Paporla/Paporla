@@ -9,7 +9,7 @@ import { Lock, ArrowLeft, CheckCircle, Eye, EyeOff, Check, X } from 'lucide-reac
 import { getPasswordChecks } from '@/lib/utils/validations'
 import Button from '@/components/ui/Button'
 import Input from '@/components/ui/Input'
-import Toast from '@/components/ui/Toast'
+import { useToast } from '@/components/ui/ToastProvider'
 
 export default function ResetPasswordPage() {
   const supabase = supabaseBrowser()
@@ -18,8 +18,12 @@ export default function ResetPasswordPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
-  const [error, setError] = useState('')
   const router = useRouter()
+  // Lote UX punto 4: los fallos viajan al ToastProvider global (role="alert",
+  // 4 s) en vez de un <Toast> local con estado propio. El cartel viejo también
+  // se cerraba solo a los 4 s, así que el comportamiento no cambia: solo se
+  // unifica el sitio donde sale y se quita un temporizador duplicado.
+  const { addToast } = useToast()
 
   // Requisitos de contraseña en tiempo real (compartido)
   const passwordChecks = useMemo(() => getPasswordChecks(password), [password])
@@ -30,16 +34,15 @@ export default function ResetPasswordPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
-    setError('')
 
     if (password !== confirmPassword) {
-      setError('Las contraseñas no coinciden')
+      addToast('Las contraseñas no coinciden', 'error')
       setLoading(false)
       return
     }
 
     if (!allPasswordChecksPassed) {
-      setError('La contraseña no cumple todos los requisitos de seguridad')
+      addToast('La contraseña no cumple todos los requisitos de seguridad', 'error')
       setLoading(false)
       return
     }
@@ -47,7 +50,7 @@ export default function ResetPasswordPage() {
     const { error: updateError } = await supabase.auth.updateUser({ password })
 
     if (updateError) {
-      setError('El enlace no es válido o ha expirado. Solicita uno nuevo.')
+      addToast('El enlace no es válido o ha expirado. Solicita uno nuevo.', 'error')
     } else {
       await supabase.auth.signOut()
       setSuccess(true)
@@ -145,8 +148,6 @@ export default function ResetPasswordPage() {
           </Link>
         </div>
       </form>
-
-      {error && <Toast message={error} type="error" onClose={() => setError('')} />}
     </motion.div>
   )
 }
