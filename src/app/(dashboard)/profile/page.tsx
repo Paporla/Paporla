@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useCallback, useState } from 'react'
 import { motion } from 'framer-motion'
 import { CalendarDays, CheckCircle2, LogOut, Mail, Phone, User } from 'lucide-react'
 import { useMutation } from '@tanstack/react-query'
@@ -178,9 +178,20 @@ function ProfileForm({ profile, refreshProfile, signOut }: ProfileFormProps) {
 export default function ProfilePage() {
   const { user, loading, signOut, getUser } = useAuth()
 
+  /*
+   * L-32: refrescar el perfil tras guardar NO debe encender la pantalla de
+   * carga. `getUser()` a secas arranca con `skipLoading = false`, pone
+   * `loading = true` y esta página sustituye TODO el formulario por el spinner:
+   * el formulario se desmonta y se remonta, que es el "salto" que se veía al
+   * guardar (y de paso se perdía el foco). Con `skipLoading = true` los datos
+   * nuevos se recogen en silencio, igual que hace el listener de cambios de
+   * sesión en useAuth.
+   */
+  const refreshProfile = useCallback(() => getUser(true), [getUser])
+
   if (loading || !user) {
     return <PageLoadingSpinner message="Cargando tu perfil..." />
   }
 
-  return <ProfileForm key={user.id} profile={user} refreshProfile={getUser} signOut={signOut} />
+  return <ProfileForm key={user.id} profile={user} refreshProfile={refreshProfile} signOut={signOut} />
 }
