@@ -9,23 +9,24 @@ import { useAuth } from '@/hooks/useAuth'
 import { useFavorites } from '@/hooks/useFavorites'
 import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
-import Toast from '@/components/ui/Toast'
+import { useToast } from '@/components/ui/ToastProvider'
 import { useState } from 'react'
 
 export default function FavoritesPage() {
   const router = useRouter()
   useAuth()
   const { favorites, loading, removeFavorite } = useFavorites()
+  // Lote UX punto 4 (piloto): el aviso de fallo viaja al ToastProvider
+  // global; la página se queda sin estado de error propio.
+  const { addToast } = useToast()
   const [removing, setRemoving] = useState<string | null>(null)
-  const [error, setError] = useState('')
 
   const handleRemove = async (shopId: string) => {
     setRemoving(shopId)
-    setError('')
     try {
       await removeFavorite(shopId)
     } catch {
-      setError('Error al eliminar de favoritos')
+      addToast('Error al eliminar de favoritos', 'error')
     }
     setRemoving(null)
   }
@@ -147,8 +148,6 @@ export default function FavoritesPage() {
           </motion.div>
         ))}
       </div>
-
-      {error && <Toast message={error} type="error" onClose={() => setError('')} />}
     </motion.div>
   )
 }

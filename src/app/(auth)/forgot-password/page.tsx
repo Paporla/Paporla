@@ -1,34 +1,36 @@
 'use client'
 
 import { useState } from 'react'
-import { supabaseBrowser } from '@/lib/supabase/client' // ← CAMBIADO
+import { supabaseBrowser } from '@/lib/supabase/client'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
 import { Mail, ArrowLeft, CheckCircle } from 'lucide-react'
 import Button from '@/components/ui/Button'
 import Input from '@/components/ui/Input'
-import Toast from '@/components/ui/Toast'
+import { useToast } from '@/components/ui/ToastProvider'
 
 export default function ForgotPasswordPage() {
-  const supabase = supabaseBrowser() // ← AGREGADO
+  const supabase = supabaseBrowser()
+  // Lote UX punto 4 (piloto): los avisos viajan al ToastProvider global en
+  // vez de un <Toast> local con estado propio. Mismo mensaje, una sola
+  // apariencia y un solo temporizador en toda la app.
+  const { addToast } = useToast()
   const [email, setEmail] = useState('')
   const [loading, setLoading] = useState(false)
   const [sent, setSent] = useState(false)
-  const [error, setError] = useState('')
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!email) return
 
     setLoading(true)
-    setError('')
 
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: `${window.location.origin}/callback?next=/reset-password`,
     })
 
     if (error) {
-      setError(error.message)
+      addToast(error.message, 'error')
     } else {
       setSent(true)
     }
@@ -83,8 +85,6 @@ export default function ForgotPasswordPage() {
           </Link>
         </div>
       </form>
-
-      {error && <Toast message={error} type="error" onClose={() => setError('')} />}
     </motion.div>
   )
 }
