@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, fireEvent } from '@testing-library/react'
+import { ToastProvider } from '@/components/ui/ToastProvider'
 
 /**
  * Dashboard de usuario: el banner "elige tu mercado" (red F2b del bloqueo
@@ -15,9 +16,12 @@ const authState = vi.hoisted(() => ({
   user: { id: 'user-a', displayName: 'User A Staging', marketId: null as string | null },
 }))
 
+const invalidate = vi.hoisted(() => vi.fn())
+
 const reservationsState = vi.hoisted(() => ({
   reservations: [] as unknown[],
   loading: false,
+  error: null as string | null,
 }))
 
 const searchParamsState = vi.hoisted(() => ({
@@ -44,10 +48,10 @@ vi.mock('@/hooks/useReservations', () => ({
   useReservations: () => ({
     reservations: reservationsState.reservations,
     loading: reservationsState.loading,
-    error: null,
+    error: reservationsState.error,
     cancelReservation: vi.fn(),
     cancelling: false,
-    invalidate: vi.fn(),
+    invalidate,
   }),
 }))
 
@@ -70,12 +74,24 @@ beforeEach(() => {
   authState.user = { id: 'user-a', displayName: 'User A Staging', marketId: null }
   reservationsState.reservations = []
   reservationsState.loading = false
+  reservationsState.error = null
+  invalidate.mockClear()
   searchParamsState.params = new URLSearchParams()
 })
 
+// Lote UX punto 4: el aviso de "reserva creada" lo sirve el ToastProvider
+// global, así que los tests envuelven la página igual que providers.tsx.
+function renderPage() {
+  return render(
+    <ToastProvider>
+      <UserDashboardPage />
+    </ToastProvider>,
+  )
+}
+
 describe('UserDashboardPage (banner de mercado)', () => {
   it('perfil sin mercado: muestra el banner con enlace a /profile', async () => {
-    render(<UserDashboardPage />)
+    renderPage()
     expect(await screen.findByText('Para reservar packs, elige tu mercado')).toBeDefined()
     expect(screen.getByRole('link', { name: /Elegir mi mercado/ })).toHaveAttribute('href', '/profile')
   })
@@ -86,7 +102,7 @@ describe('UserDashboardPage (banner de mercado)', () => {
       displayName: 'User A Staging',
       marketId: '10000000-0000-4000-8000-000000000001',
     }
-    render(<UserDashboardPage />)
+    renderPage()
     // El dashboard sí carga (banner de bienvenida visible)…
     expect(await screen.findByText(/User A Staging/)).toBeDefined()
     // …y el banner de mercado no está.
@@ -123,7 +139,7 @@ describe('UserDashboardPage (banner de mercado)', () => {
         shop_longitude: null,
       },
     ]
-    render(<UserDashboardPage />)
+    renderPage()
 
     // La reserva activa aparece en la actividad reciente (también en la
     // tarjeta "Próxima recogida": por eso findAllByText).
@@ -135,19 +151,49 @@ describe('UserDashboardPage (banner de mercado)', () => {
     expect(allLinks.some((l) => l.getAttribute('href') === '/dashboard/reservations')).toBe(false)
   })
 
-  it('llegada con ?reserved=true: muestra el toast de reserva y limpia el parámetro de la URL', async () => {
+  it('llegada con ?reserved=true: aviso GLOBAL de reserva y limpia el parámetro de la URL', async () => {
     searchParamsState.params = new URLSearchParams('reserved=true')
     authState.user = {
       id: 'user-a',
       displayName: 'User A Staging',
       marketId: '10000000-0000-4000-8000-000000000001',
     }
-    render(<UserDashboardPage />)
+    renderPage()
 
-    expect(
-      await screen.findByText('¡Reserva creada! El comercio la confirma pronto. Podrás seguirla en Mis reservas.'),
-    ).toBeTruthy()
+    const alert = await screen.findByRole('alert')
+    expect(alert).toHaveTextContent('¡Reserva creada! El comercio la confirma pronto.')
     // El parámetro se limpia de la URL sin recargar.
     await waitFor(() => expect(window.location.search).not.toContain('reserved='))
+  })
+
+  it('L-33 · fallo de carga: aviso PERMANENTE en la página con botón de reintentar', async () => {
+    reservationsState.error = 'No se pudo conectar con el servidor'
+    authState.user = {
+      id: 'user-a',
+      displayName: 'User A Staging',
+      marketId: '10000000-0000-4000-8000-000000000001',
+    }
+    renderPage()
+
+    const alert = await screen.findByRole('alert')
+    expect(alert).toHaveTextContent('No pudimos cargar tus reservas')
+    expect(alert).toHaveTextContent('No se pudo conectar con el servidor')
+
+    // El reintento reutiliza el invalidado del hook, no una recarga a ciegas.
+    fireEvent.click(screen.getByRole('button', { name: 'Reintentar' }))
+    expect(invalidate).toHaveBeenCalledTimes(1)
+  })
+
+  it('sin fallo de carga no hay ningún aviso en la página', async () => {
+    authState.user = {
+      id: 'user-a',
+      displayName: 'User A Staging',
+      marketId: '10000000-0000-4000-8000-000000000001',
+    }
+    renderPage()
+
+    expect(await screen.findByText(/User A Staging/)).toBeDefined()
+    expect(screen.queryByRole('alert')).toBeNull()
+    expect(screen.queryByRole('button', { name: 'Reintentar' })).toBeNull()
   })
 })

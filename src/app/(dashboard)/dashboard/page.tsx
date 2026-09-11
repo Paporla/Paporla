@@ -1,8 +1,9 @@
 'use client'
 
-import { useMemo, useState, useEffect } from 'react'
+import { useMemo, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
+import { AlertCircle } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { pageVariants } from '@/lib/utils/motion'
 import { useAuth } from '@/hooks/useAuth'
@@ -17,26 +18,39 @@ import UserQuickActions from '@/components/dashboard/UserQuickActions'
 import NextPickupCard from '@/components/dashboard/NextPickupCard'
 import RecentActivity from '@/components/dashboard/RecentActivity'
 import DashboardSkeleton from '@/components/dashboard/DashboardSkeleton'
-import Toast from '@/components/ui/Toast'
+import Button from '@/components/ui/Button'
+import { useToast } from '@/components/ui/ToastProvider'
 import ErrorBoundary from '@/components/ErrorBoundary'
 import { isActiveStatus, sortReservationsByPickupTime } from '@/lib/constants/reservations'
 
 export default function UserDashboardPage() {
   const { user } = useAuth()
   const searchParams = useSearchParams()
-  const { reservations, loading, error: hookError } = useReservations()
-  // El toast se deriva del parámetro de la URL en el primer render (llegada
-  // tras una reserva exitosa): así no hay setState dentro del efecto.
-  const [showReservedToast, setShowReservedToast] = useState(() => searchParams.get('reserved') === 'true')
+  const { reservations, loading, error: hookError, invalidate } = useReservations()
+  /*
+   * Lote UX punto 4: el aviso de "reserva creada" ya no es un <Toast> local con
+   * estado propio; lo sirve el provider global en cuanto se llega con
+   * ?reserved=true, y el parámetro se limpia de la URL sin recargar. El ref
+   * garantiza que salga UNA sola vez aunque el efecto se repita (en desarrollo
+   * React monta los efectos dos veces con StrictMode).
+   */
+  const { addToast } = useToast()
+  const reservedToastFired = useRef(false)
 
-  // Limpiar el parámetro de la URL sin recargar (el estado ya se derivó arriba).
   useEffect(() => {
-    if (searchParams.get('reserved') === 'true') {
-      const url = new URL(window.location.href)
-      url.searchParams.delete('reserved')
-      window.history.replaceState({}, '', url.toString())
+    if (searchParams.get('reserved') !== 'true') return
+
+    if (!reservedToastFired.current) {
+      reservedToastFired.current = true
+      // 6 s en vez de los 4 s por defecto: el mensaje es largo y da tiempo a
+      // leerlo entero. Es la misma duración que tenía el cartel local.
+      addToast('¡Reserva creada! El comercio la confirma pronto. Podrás seguirla en Mis reservas.', 'success', 6000)
     }
-  }, [searchParams])
+
+    const url = new URL(window.location.href)
+    url.searchParams.delete('reserved')
+    window.history.replaceState({}, '', url.toString())
+  }, [searchParams, addToast])
 
   // L-02: la actividad reciente también mira el reloj.
   const now = useNowTick(30_000)
@@ -99,18 +113,31 @@ export default function UserDashboardPage() {
       {/* Decorative blobs — mismo estilo que landing/auth */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-32 right-10 w-72 h-72 bg-primary/5 rounded-full blur-3xl" />
-        <div className="absolute bottom-32 left-10 w-96 w-96 bg-primary/3 rounded-full blur-3xl" />
+        <div className="absolute bottom-32 left-10 w-96 h-96 bg-primary/3 rounded-full blur-3xl" />
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-primary/[0.02] rounded-full blur-3xl" />
       </div>
 
-      {/* Toast de reserva exitosa (mensaje honesto: el código llega en la fase 4) */}
-      {showReservedToast && (
-        <Toast
-          message="¡Reserva creada! El comercio la confirma pronto. Podrás seguirla en Mis reservas."
-          type="success"
-          onClose={() => setShowReservedToast(false)}
-          duration={6000}
-        />
+      {/*
+        L-33: el fallo de carga ya NO es un cartel flotante que se autodestruye
+        a los 4 s (dejaba el panel vacío sin ninguna explicación). Se queda
+        escrito arriba, dice qué puede estar incompleto y ofrece reintentar.
+      */}
+      {hookError && (
+        <div
+          role="alert"
+          className="glass-card dark:border-red-500/30 border-red-300 rounded-2xl p-5 flex flex-col sm:flex-row items-start gap-3"
+        >
+          <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
+          <div className="flex-1 min-w-0">
+            <p className="dark:text-white text-gray-900 font-medium text-sm">No pudimos cargar tus reservas</p>
+            <p className="dark:text-gray-400 text-gray-600 text-xs mt-1">
+              Lo que ves debajo puede estar incompleto. Detalle: {hookError}
+            </p>
+          </div>
+          <Button variant="outline" size="sm" onClick={() => invalidate()}>
+            Reintentar
+          </Button>
+        </div>
       )}
 
       <OnboardingBanner level={stats.level} />
@@ -162,8 +189,6 @@ export default function UserDashboardPage() {
       <ErrorBoundary fallback={<div className="p-4 text-sm text-gray-500">Error al cargar actividad reciente</div>}>
         <RecentActivity activities={activities} />
       </ErrorBoundary>
-
-      {hookError && <Toast message={hookError} type="error" onClose={() => {}} />}
     </motion.div>
   )
 }
