@@ -1,12 +1,12 @@
 ﻿'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { motion } from 'framer-motion'
 import { pageVariants } from '@/lib/utils/motion'
 import Link from 'next/link'
-import { Package, Plus } from 'lucide-react'
+import { AlertCircle, Package, Plus } from 'lucide-react'
 import Button from '@/components/ui/Button'
-import Toast from '@/components/ui/Toast'
+import { useToast } from '@/components/ui/ToastProvider'
 import LoadingSkeleton from '@/components/business/LoadingSkeleton'
 import { useBusinessPacks } from '@/components/business/packs/useBusinessPacks'
 import PacksStatsGrid from '@/components/business/packs/PacksStatsGrid'
@@ -19,9 +19,11 @@ export default function BusinessPacksPage() {
   const {
     loading,
     error,
+    loadError,
     success,
     setError,
     setSuccess,
+    reload,
     searchTerm,
     setSearchTerm,
     packs,
@@ -33,6 +35,43 @@ export default function BusinessPacksPage() {
   } = useBusinessPacks()
 
   const [filterStatus, setFilterStatus] = useState<'all' | 'active' | 'inactive'>('all')
+
+  /*
+   * Patrón puente (lote 5 de avisos globales): el resultado de una ACCIÓN vive
+   * en el hook (`setError`/`setSuccess`), pero el que sirve los avisos es el
+   * provider global, que solo sabe de `addToast`. Estos dos efectos hacen de
+   * traductores: en cuanto el hook publica un mensaje nuevo, se sirve el aviso
+   * y se limpia el estado.
+   *
+   * El `useRef` evita que el aviso salga dos veces (en desarrollo React remonta
+   * los efectos con StrictMode) y limpiar el estado permite que un MISMO
+   * mensaje vuelva a avisar más tarde: si dos acciones seguidas fallan con el
+   * mismo texto, el comerciante ve los dos avisos, no uno.
+   */
+  const { addToast } = useToast()
+  const notified = useRef({ error: '', success: '' })
+
+  useEffect(() => {
+    if (!error) {
+      notified.current.error = ''
+      return
+    }
+    if (notified.current.error === error) return
+    notified.current.error = error
+    addToast(error, 'error')
+    setError('')
+  }, [error, addToast, setError])
+
+  useEffect(() => {
+    if (!success) {
+      notified.current.success = ''
+      return
+    }
+    if (notified.current.success === success) return
+    notified.current.success = success
+    addToast(success, 'success')
+    setSuccess('')
+  }, [success, addToast, setSuccess])
 
   /*
    * Pack pendiente de confirmar su eliminación, o `null` si el modal está cerrado.
@@ -96,8 +135,34 @@ export default function BusinessPacksPage() {
         </div>
       </div>
 
-      {/* Stats */}
-      <PacksStatsGrid stats={stats} />
+      {/*
+        L-34: el fallo de carga del listado NO es un aviso pasajero. Antes salía
+        como cartel flotante que se autodestruía a los 4 s y detrás quedaba un
+        «No tienes packs creados» que era mentira: los packs existen, lo que
+        falló fue leerlos. Ahora el fallo se queda escrito, se callan las cifras
+        y los vacíos, y se puede reintentar sin recargar la página.
+      */}
+      {loadError && (
+        <div
+          role="alert"
+          className="glass-card dark:border-red-500/30 border-red-300 rounded-2xl p-5 flex flex-col sm:flex-row items-start gap-3"
+        >
+          <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
+          <div className="flex-1 min-w-0">
+            <p className="dark:text-white text-gray-900 font-medium text-sm">No pudimos cargar tus packs</p>
+            <p className="dark:text-gray-400 text-gray-600 text-xs mt-1">
+              Tus packs siguen ahí, pero no pudimos leerlos: lo que se muestra debajo no es fiable hasta que se carguen.
+              Detalle: {loadError}
+            </p>
+          </div>
+          <Button variant="outline" size="sm" onClick={() => reload()}>
+            Reintentar
+          </Button>
+        </div>
+      )}
+
+      {/* Stats: con la carga fallida, las cifras serían ceros de mentira */}
+      {!loadError && <PacksStatsGrid stats={stats} />}
 
       {/* Filtros */}
       <PackFilters
@@ -141,7 +206,7 @@ export default function BusinessPacksPage() {
       )}
 
       {/* Sin resultados para la búsqueda o el filtro actuales */}
-      {!hasVisiblePacks && packs.length === 0 && searchTerm.trim() !== '' && (
+      {!loadError && !hasVisiblePacks && packs.length === 0 && searchTerm.trim() !== '' && (
         <div className="glass-card rounded-2xl p-12 text-center">
           <p className="dark:text-gray-400 text-gray-600">Ningún pack coincide con &laquo;{searchTerm}&raquo;</p>
           <Button variant="outline" className="mt-4" onClick={() => setSearchTerm('')}>
@@ -150,7 +215,7 @@ export default function BusinessPacksPage() {
         </div>
       )}
 
-      {!hasVisiblePacks && packs.length > 0 && (
+      {!loadError && !hasVisiblePacks && packs.length > 0 && (
         <div className="glass-card rounded-2xl p-12 text-center">
           <p className="dark:text-gray-400 text-gray-600">
             No hay packs {filterStatus === 'active' ? 'publicados' : 'en el historial'}
@@ -162,7 +227,7 @@ export default function BusinessPacksPage() {
       )}
 
       {/* Sin packs en absoluto */}
-      {packs.length === 0 && searchTerm.trim() === '' && (
+      {!loadError && packs.length === 0 && searchTerm.trim() === '' && (
         <div className="glass-card rounded-2xl p-12 text-center">
           <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-primary/10 flex items-center justify-center">
             <Package className="w-10 h-10 text-primary" />
@@ -195,9 +260,6 @@ export default function BusinessPacksPage() {
         confirmText="Eliminar pack"
         cancelText="Conservar"
       />
-
-      {error && <Toast message={error} type="error" onClose={() => setError('')} />}
-      {success && <Toast message={success} type="success" onClose={() => setSuccess('')} />}
     </motion.div>
   )
 }

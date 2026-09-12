@@ -335,4 +335,44 @@ describe('useBusinessPacks', () => {
       expect(result.current.error).toMatch(/no se encontró/i)
     })
   })
+
+  /*
+   * L-34: el hook solía mezclar el fallo de CARGA del listado con el de una
+   * ACCIÓN en el mismo campo `error`. La página no podía distinguirlos, así que
+   * los dos se pintaban igual. Ahora van separados: `loadError` para el listado
+   * (estado permanente con reintento) y `error` para las acciones (aviso).
+   */
+  describe('error de carga separado del error de acción (L-34)', () => {
+    it('el fallo del listado sale por loadError y deja error limpio', async () => {
+      setupMockClient([], { list_my_packs: { message: 'connection terminated unexpectedly', code: '53300' } })
+      const { result } = renderHook(() => useBusinessPacks(), { wrapper: createWrapper() })
+
+      await waitFor(() => expect(result.current.loadError).not.toBe(''))
+      expect(result.current.error).toBe('')
+      expect(result.current.loadError).not.toContain('[object Object]')
+      expect(result.current.packs).toEqual([])
+    })
+
+    it('con la carga sana, loadError queda vacío', async () => {
+      setupMockClient([listed('Pack 1')])
+      const { result } = renderHook(() => useBusinessPacks(), { wrapper: createWrapper() })
+
+      await waitFor(() => expect(result.current.packs).toHaveLength(1))
+      expect(result.current.loadError).toBe('')
+      expect(result.current.error).toBe('')
+    })
+
+    it('un fallo de acción no ensucia loadError', async () => {
+      setupMockClient([listed('Pack 1', 'draft')], { publish_pack: { message: 'SHOP_NOT_VERIFIED', code: 'P0001' } })
+      const { result } = renderHook(() => useBusinessPacks(), { wrapper: createWrapper() })
+      await waitFor(() => expect(result.current.packs).toHaveLength(1))
+
+      await act(async () => {
+        await result.current.changePackState('p-pack-1')
+      })
+
+      expect(result.current.error).not.toBe('')
+      expect(result.current.loadError).toBe('')
+    })
+  })
 })
