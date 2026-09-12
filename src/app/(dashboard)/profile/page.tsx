@@ -1,8 +1,9 @@
 'use client'
 
 import { useCallback, useState } from 'react'
+import Image from 'next/image'
 import { motion } from 'framer-motion'
-import { CalendarDays, CheckCircle2, LogOut, Mail, Phone, User } from 'lucide-react'
+import { CalendarDays, CheckCircle2, LogOut, Mail, Phone, Upload, User } from 'lucide-react'
 import { useMutation } from '@tanstack/react-query'
 import { useAuth } from '@/hooks/useAuth'
 import { useProfile } from '@/hooks/useProfile'
@@ -23,7 +24,7 @@ interface ProfileFormProps {
 }
 
 function ProfileForm({ profile, refreshProfile, signOut }: ProfileFormProps) {
-  const { updateProfile } = useProfile()
+  const { updateProfile, uploadAvatar, uploading } = useProfile()
   const [displayName, setDisplayName] = useState(profile.displayName ?? '')
   const [phone, setPhone] = useState(profile.phoneE164 ?? '')
   const [savingMarket, setSavingMarket] = useState(false)
@@ -54,6 +55,29 @@ function ProfileForm({ profile, refreshProfile, signOut }: ProfileFormProps) {
 
   const handleSave = async () => {
     await updateMutation.mutateAsync().catch(() => {})
+  }
+
+  /*
+   * L-07: la subida de la foto ya estaba hecha entera en `useProfile`
+   * (`uploadAvatar` valida tipo y tamaño, sube al bucket `avatars` de 0013,
+   * escribe `avatar_path` con la RPC, borra el archivo anterior y revierte la
+   * subida si la RPC falla). Lo que no existía era ningún camino visible para
+   * usarla: la página solo llamaba a `updateProfile`. Aquí está el camino.
+   */
+  const handleAvatarFile = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    // Se vacía el input para que elegir DOS VECES el mismo archivo vuelva a
+    // disparar el cambio: si no, el navegador no avisa.
+    event.target.value = ''
+    if (!file) return
+
+    try {
+      await uploadAvatar(profile, file)
+      await refreshProfile()
+      addToast('Foto de perfil actualizada', 'success')
+    } catch (error) {
+      addToast(error instanceof Error ? error.message : 'No se pudo subir la foto. Inténtalo de nuevo.', 'error', 8000)
+    }
   }
 
   /*
@@ -127,6 +151,46 @@ function ProfileForm({ profile, refreshProfile, signOut }: ProfileFormProps) {
 
       <Card glass className="p-6 space-y-4">
         <h2 className="text-lg font-semibold dark:text-white text-gray-900">Información personal</h2>
+
+        <div className="flex items-center gap-4">
+          <div className="w-16 h-16 rounded-full overflow-hidden dark:bg-black/40 bg-gray-100 border dark:border-white/10 border-gray-200 flex items-center justify-center flex-shrink-0">
+            {profile.avatarPublicUrl ? (
+              <Image
+                src={profile.avatarPublicUrl}
+                alt={profile.displayName ? `Foto de perfil de ${profile.displayName}` : 'Foto de perfil'}
+                width={64}
+                height={64}
+                className="w-16 h-16 object-cover"
+              />
+            ) : (
+              <User className="w-7 h-7 dark:text-gray-500 text-gray-400" aria-hidden="true" />
+            )}
+          </div>
+
+          <div className="min-w-0">
+            <p className="text-sm font-medium dark:text-white text-gray-900">Foto de perfil</p>
+            <p className="text-xs dark:text-gray-500 text-gray-500 mt-0.5">JPG, PNG o WebP. Máximo 2 MB.</p>
+            <input
+              type="file"
+              id="avatar-file"
+              accept="image/jpeg,image/png,image/webp"
+              onChange={handleAvatarFile}
+              disabled={uploading}
+              className="sr-only"
+            />
+            <label
+              htmlFor="avatar-file"
+              className={`mt-2 inline-flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-xl border transition-all ${
+                uploading
+                  ? 'dark:border-white/10 border-gray-200 dark:text-gray-500 text-gray-400 cursor-wait'
+                  : 'dark:border-primary/30 border-primary/40 text-primary dark:hover:bg-primary/10 hover:bg-primary/5 cursor-pointer'
+              }`}
+            >
+              <Upload className="w-4 h-4" aria-hidden="true" />
+              {uploading ? 'Subiendo...' : profile.avatarPublicUrl ? 'Cambiar foto' : 'Subir foto'}
+            </label>
+          </div>
+        </div>
 
         <Input
           label="Nombre completo"
