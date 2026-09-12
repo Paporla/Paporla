@@ -19,7 +19,7 @@ import {
 import { useReservations } from '@/hooks/useReservations'
 import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
-import Toast from '@/components/ui/Toast'
+import { useToast } from '@/components/ui/ToastProvider'
 import EmptyState from '@/components/ui/EmptyState'
 import PageLoadingSpinner from '@/components/ui/PageLoadingSpinner'
 import { formatMinorPrice } from '@/lib/utils/formatPrice'
@@ -280,9 +280,18 @@ function CancelReservationModal({ reservation, isOpen, onClose, onCancelled }: C
 
 export default function UserReservationsPage() {
   const router = useRouter()
-  const { reservations, loading, error: hookError } = useReservations()
-  const [error, setError] = useState('')
-  const [success, setSuccess] = useState('')
+  const { reservations, loading, error: hookError, invalidate } = useReservations()
+  /*
+   * Lote 7 de avisos globales: el aviso de cancelación ya no vive en un estado
+   * local con su <Toast> al final del JSX; se sirve directamente al camarero
+   * global en cuanto termina la acción.
+   *
+   * De paso se cae el estado `error` de la página, que estaba MUERTO: nadie lo
+   * escribía nunca. Los fallos al cancelar ya se muestran DENTRO del modal,
+   * traducidos y con su Reintentar, que es donde se pueden leer y corregir
+   * (mismo criterio que L-31: un error de formulario no debe volar a los 4 s).
+   */
+  const { addToast } = useToast()
   const [cancellingId, setCancellingId] = useState<string | null>(null)
   const [expandedGroups, setExpandedGroups] = useState({
     activas: true,
@@ -314,7 +323,15 @@ export default function UserReservationsPage() {
     return <PageLoadingSpinner message="Cargando tus reservas..." />
   }
 
-  if (reservations.length === 0) {
+  /*
+   * L-36: el vacío solo es verdad si la carga funcionó. Con `hookError` la
+   * lista está vacía porque NO SE PUDO LEER, no porque no haya reservas, y
+   * afirmar aquí "No tienes reservas activas" sería mentira. Además, este
+   * `return` temprano está ANTES del final del JSX, que es donde vivía el
+   * cartel de error: o sea, cuando fallaba la carga el usuario se quedaba sin
+   * reservas Y sin ninguna explicación.
+   */
+  if (reservations.length === 0 && !hookError) {
     return (
       <EmptyState
         type="reservations"
@@ -340,24 +357,49 @@ export default function UserReservationsPage() {
         </div>
       </div>
 
-      <div className="flex gap-4 flex-wrap">
-        <div className="dark:bg-black/40 bg-gray-100 border dark:border-white/10 border-gray-200 rounded-xl px-4 py-2">
-          <span className="text-2xl font-bold text-primary">{counts.activas}</span>
-          <span className="text-sm dark:text-gray-400 text-gray-600 ml-2">Activas</span>
+      {/*
+        L-36: el fallo de carga se queda escrito, con su reintento, igual que en
+        el panel (L-33), Mis Packs (L-34) y Reservas del comercio (L-35).
+      */}
+      {hookError && (
+        <div
+          role="alert"
+          className="glass-card dark:border-red-500/30 border-red-300 rounded-2xl p-5 flex flex-col sm:flex-row items-start gap-3"
+        >
+          <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
+          <div className="flex-1 min-w-0">
+            <p className="dark:text-white text-gray-900 font-medium text-sm">No pudimos cargar tus reservas</p>
+            <p className="dark:text-gray-400 text-gray-600 text-xs mt-1">
+              Puede que sí tengas reservas: lo que falló fue la lectura, no tu historial. Detalle: {hookError}
+            </p>
+          </div>
+          <Button variant="outline" size="sm" onClick={() => invalidate()}>
+            Reintentar
+          </Button>
         </div>
-        <div className="dark:bg-black/40 bg-gray-100 border dark:border-white/10 border-gray-200 rounded-xl px-4 py-2">
-          <span className="text-2xl font-bold text-green-400">{counts.completadas}</span>
-          <span className="text-sm dark:text-gray-400 text-gray-600 ml-2">Completadas</span>
+      )}
+
+      {/* Cifras: con la carga fallida serían ceros de mentira */}
+      {!hookError && (
+        <div className="flex gap-4 flex-wrap">
+          <div className="dark:bg-black/40 bg-gray-100 border dark:border-white/10 border-gray-200 rounded-xl px-4 py-2">
+            <span className="text-2xl font-bold text-primary">{counts.activas}</span>
+            <span className="text-sm dark:text-gray-400 text-gray-600 ml-2">Activas</span>
+          </div>
+          <div className="dark:bg-black/40 bg-gray-100 border dark:border-white/10 border-gray-200 rounded-xl px-4 py-2">
+            <span className="text-2xl font-bold text-green-400">{counts.completadas}</span>
+            <span className="text-sm dark:text-gray-400 text-gray-600 ml-2">Completadas</span>
+          </div>
+          <div className="dark:bg-black/40 bg-gray-100 border dark:border-white/10 border-gray-200 rounded-xl px-4 py-2">
+            <span className="text-2xl font-bold text-orange-400">{counts.noRetiradas}</span>
+            <span className="text-sm dark:text-gray-400 text-gray-600 ml-2">No retiradas</span>
+          </div>
+          <div className="dark:bg-black/40 bg-gray-100 border dark:border-white/10 border-gray-200 rounded-xl px-4 py-2">
+            <span className="text-2xl font-bold text-red-400">{counts.canceladas}</span>
+            <span className="text-sm dark:text-gray-400 text-gray-600 ml-2">Canceladas</span>
+          </div>
         </div>
-        <div className="dark:bg-black/40 bg-gray-100 border dark:border-white/10 border-gray-200 rounded-xl px-4 py-2">
-          <span className="text-2xl font-bold text-orange-400">{counts.noRetiradas}</span>
-          <span className="text-sm dark:text-gray-400 text-gray-600 ml-2">No retiradas</span>
-        </div>
-        <div className="dark:bg-black/40 bg-gray-100 border dark:border-white/10 border-gray-200 rounded-xl px-4 py-2">
-          <span className="text-2xl font-bold text-red-400">{counts.canceladas}</span>
-          <span className="text-sm dark:text-gray-400 text-gray-600 ml-2">Canceladas</span>
-        </div>
-      </div>
+      )}
 
       {activeReservations.length > 0 && (
         <div className="dark:bg-dark-card/30 bg-gray-50 rounded-2xl border dark:border-dark-border border-gray-200 overflow-hidden">
@@ -526,14 +568,10 @@ export default function UserReservationsPage() {
           onClose={() => setCancellingId(null)}
           onCancelled={() => {
             setCancellingId(null)
-            setSuccess('Reserva cancelada correctamente')
+            addToast('Reserva cancelada correctamente', 'success')
           }}
         />
       )}
-
-      {hookError && <Toast message={hookError} type="error" onClose={() => {}} />}
-      {error && <Toast message={error} type="error" onClose={() => setError('')} />}
-      {success && <Toast message={success} type="success" onClose={() => setSuccess('')} />}
     </div>
   )
 }
