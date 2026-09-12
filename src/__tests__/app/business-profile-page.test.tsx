@@ -95,11 +95,13 @@ describe('BusinessProfilePage (ubicación)', () => {
     fireEvent.change(screen.getByPlaceholderText('10.4961'), { target: { value: '999' } })
     fireEvent.click(screen.getByRole('button', { name: /Guardar cambios/ }))
 
-    // El mensaje aparece DOS veces: la caja roja del formulario (ya visible
-    // al tipear el 999, sin guardar) y el aviso del intento de guardado.
+    // L-31: el mensaje aparece UNA sola vez, en la caja roja del formulario
+    // (que ya estaba visible al tipear el 999). El aviso volador que lo
+    // repetía y se borraba a los 4 s ya no existe.
     await waitFor(() => {
-      expect(screen.getAllByText('La latitud debe estar entre -90 y 90.')).toHaveLength(2)
+      expect(screen.getAllByText('La latitud debe estar entre -90 y 90.')).toHaveLength(1)
     })
+    expect(screen.queryAllByRole('alert')).toHaveLength(0)
     expect(mockRpc).not.toHaveBeenCalledWith('update_own_shop', expect.anything())
     expect(mockRpc).not.toHaveBeenCalledWith('set_shop_hour', expect.anything())
   })
@@ -212,5 +214,71 @@ describe('BusinessProfilePage (lote 8 · avisos globales)', () => {
     expect(await screen.findByText('Cambios descartados')).toBeDefined()
     // El campo vuelve a lo que había en la base.
     expect((screen.getByPlaceholderText('Mi Restaurante') as HTMLInputElement).value).toBe('Panadería Staging A centro')
+  })
+})
+
+describe('BusinessProfilePage (L-31 · validaciones en línea)', () => {
+  it('nombre vacío al guardar: error debajo del campo, sin aviso volador', async () => {
+    rpcOk()
+
+    renderPage()
+    await waitFor(() => expect(mockRpc).toHaveBeenCalledWith('get_my_shop'))
+
+    fireEvent.change(screen.getByPlaceholderText('Mi Restaurante'), { target: { value: '   ' } })
+    fireEvent.click(screen.getByRole('button', { name: /Guardar cambios/ }))
+
+    // Se queda escrito junto al campo (aria-invalid + mensaje), no 4 segundos.
+    const nombre = await screen.findByPlaceholderText('Mi Restaurante')
+    expect(nombre.getAttribute('aria-invalid')).toBe('true')
+    expect(screen.getByText('El nombre del comercio es obligatorio.')).toBeDefined()
+    expect(screen.queryAllByRole('alert')).toHaveLength(0)
+    expect(mockRpc).not.toHaveBeenCalledWith('update_own_shop', expect.anything())
+  })
+
+  it('el error del nombre se va solo en cuanto se escribe un nombre', async () => {
+    rpcOk()
+
+    renderPage()
+    await waitFor(() => expect(mockRpc).toHaveBeenCalledWith('get_my_shop'))
+
+    fireEvent.change(screen.getByPlaceholderText('Mi Restaurante'), { target: { value: '' } })
+    fireEvent.click(screen.getByRole('button', { name: /Guardar cambios/ }))
+    expect(await screen.findByText('El nombre del comercio es obligatorio.')).toBeDefined()
+
+    fireEvent.change(screen.getByPlaceholderText('Mi Restaurante'), { target: { value: 'Panadería' } })
+    await waitFor(() => expect(screen.queryByText('El nombre del comercio es obligatorio.')).toBeNull())
+  })
+
+  it('RUT inválido al guardar: una sola vez, debajo del campo', async () => {
+    rpcOk()
+
+    renderPage()
+    await waitFor(() => expect(mockRpc).toHaveBeenCalledWith('get_my_shop'))
+
+    // Pestaña Información: el RUT ya se valida en vivo debajo del campo.
+    fireEvent.change(screen.getByPlaceholderText('76543210-3'), { target: { value: '12345678-9' } })
+    fireEvent.click(screen.getByRole('button', { name: /Guardar cambios/ }))
+
+    await waitFor(() => expect(screen.queryAllByRole('alert')).toHaveLength(0))
+    expect(mockRpc).not.toHaveBeenCalledWith('update_own_shop', expect.anything())
+  })
+
+  it('horarios inválidos al guardar: lleva a la pestaña Horarios, sin aviso volador', async () => {
+    rpcOk()
+
+    renderPage()
+    await waitFor(() => expect(mockRpc).toHaveBeenCalledWith('get_my_shop'))
+
+    fireEvent.click(screen.getByText('Horarios'))
+    // Hora de cierre anterior a la de apertura en el lunes.
+    fireEvent.change(screen.getByLabelText('Hora de cierre del Lunes'), { target: { value: '06:00' } })
+
+    fireEvent.click(screen.getByRole('button', { name: /Guardar cambios/ }))
+
+    // La caja roja de la pestaña lista el problema y se queda; no hay aviso.
+    expect(await screen.findByText('Corrige estos horarios antes de guardar')).toBeDefined()
+    expect(screen.queryAllByRole('alert')).toHaveLength(0)
+    expect(mockRpc).not.toHaveBeenCalledWith('update_own_shop', expect.anything())
+    expect(mockRpc).not.toHaveBeenCalledWith('set_shop_hour', expect.anything())
   })
 })

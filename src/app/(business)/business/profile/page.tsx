@@ -122,6 +122,12 @@ export default function BusinessProfilePage() {
    */
   const [loadError, setLoadError] = useState<string | null>(null)
   const [loadToken, setLoadToken] = useState(0)
+  /*
+   * L-31: los errores de validación se escriben junto al campo que toca, no
+   * como aviso de 4 segundos. Este interruptor solo se enciende al intentar
+   * guardar, para no marcar en rojo un formulario que nadie ha enviado todavía.
+   */
+  const [nameErrorShown, setNameErrorShown] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
   const [submittingReview, setSubmittingReview] = useState(false)
 
@@ -252,6 +258,8 @@ export default function BusinessProfilePage() {
   const updateForm = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }))
     setIsDirty(true)
+    // L-31: en cuanto hay nombre, el error en línea se va solo.
+    if (field === 'name' && value.trim()) setNameErrorShown(false)
   }
 
   /**
@@ -275,7 +283,11 @@ export default function BusinessProfilePage() {
 
     try {
       if (!formData.name.trim()) {
-        addToast('El nombre del comercio es obligatorio.', 'error')
+        // L-31: en línea debajo del campo (y a la vista: puede que el dueño
+        // esté en otra pestaña). Antes salía un aviso de 4 segundos y, si se
+        // estaba en "Horarios", no había forma de saber qué campo faltaba.
+        setNameErrorShown(true)
+        setActiveTab('info')
         return false
       }
 
@@ -283,7 +295,9 @@ export default function BusinessProfilePage() {
       // inválido, no tiene sentido haber guardado ya el resto del perfil.
       const hourErrors = validateHours(hours)
       if (hourErrors.length > 0) {
-        addToast(`Revisa los horarios. ${hourErrors[0]}`, 'error')
+        // L-31: la pestaña Horarios ya lista cada día inválido en su caja roja
+        // (`validateHours` en vivo). Llevar allí al dueño basta: el aviso
+        // volador repetía el primer error y se borraba solo.
         setActiveTab('hours')
         return false
       }
@@ -294,7 +308,8 @@ export default function BusinessProfilePage() {
       // Postgres en vez de un mensaje claro (F2b).
       const coordCheck = validateCoordinatePair(formData.latitude, formData.longitude)
       if (!coordCheck.ok) {
-        addToast(coordCheck.error ?? 'Coordenadas inválidas.', 'error')
+        // L-31: `ProfileLocationForm` ya enseña el motivo en su caja roja (F2b)
+        // en cuanto el par es inválido. Solo hace falta llevar allí al dueño.
         setActiveTab('location')
         return false
       }
@@ -305,7 +320,8 @@ export default function BusinessProfilePage() {
       // mal escrito, no.
       const rutError = getChileRutError(formData.taxId)
       if (rutError) {
-        addToast(rutError, 'error')
+        // L-31: el RUT ya se valida en vivo debajo del propio campo
+        // (`getChileRutError` como `error` del Input). Ídem: llevar allí.
         setActiveTab('info')
         return false
       }
@@ -607,7 +623,13 @@ export default function BusinessProfilePage() {
           </div>
         )}
 
-        {activeTab === 'info' && <ProfileInfoForm formData={formData} updateForm={updateForm} />}
+        {activeTab === 'info' && (
+          <ProfileInfoForm
+            formData={formData}
+            updateForm={updateForm}
+            nameError={nameErrorShown && !formData.name.trim() ? 'El nombre del comercio es obligatorio.' : undefined}
+          />
+        )}
 
         {activeTab === 'images' && (
           <ProfileImagesForm
