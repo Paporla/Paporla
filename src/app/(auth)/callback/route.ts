@@ -1,5 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
-import { getActiveUserRole, getSafeInternalRedirect } from '@/lib/auth/profile'
+import { getActiveUserRole, getSafeInternalRedirect, withRecoveryMarker } from '@/lib/auth/profile'
 import { logger } from '@/lib/logger'
 import { sendWelcomeEmail } from '@/lib/email'
 import { NextResponse, after } from 'next/server'
@@ -79,7 +79,9 @@ export async function GET(request: Request) {
   }
 
   if (next) {
-    return NextResponse.redirect(new URL(next, request.url))
+    // L-38: se redirige con la marca de recuperación (no se toca `next`, que
+    // arriba se compara tal cual para no mandar el email de bienvenida).
+    return NextResponse.redirect(new URL(withRecoveryMarker(next), request.url))
   }
 
   if (role === 'comercio') {

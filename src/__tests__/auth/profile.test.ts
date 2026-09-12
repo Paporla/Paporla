@@ -5,6 +5,7 @@ import {
   isValidOptionalPhone,
   mapUserProfile,
   normalizePhoneE164,
+  withRecoveryMarker,
   type UserProfileRow,
 } from '@/lib/auth/profile'
 
@@ -79,5 +80,23 @@ describe('getSafeInternalRedirect', () => {
     expect(getSafeInternalRedirect('/packs?city=Santiago')).toBe('/packs?city=Santiago')
     expect(getSafeInternalRedirect('https://evil.example')).toBeNull()
     expect(getSafeInternalRedirect('//evil.example/path')).toBeNull()
+  })
+})
+
+describe('withRecoveryMarker (L-38)', () => {
+  it('marca el destino de restablecer contraseña', () => {
+    expect(withRecoveryMarker('/reset-password')).toBe('/reset-password?recovery=1')
+  })
+
+  it('si el destino ya traía consulta, añade la marca sin romperla', () => {
+    expect(withRecoveryMarker('/reset-password?foo=bar')).toBe('/reset-password?foo=bar&recovery=1')
+  })
+
+  it('no marca ningún otro destino', () => {
+    expect(withRecoveryMarker('/dashboard')).toBe('/dashboard')
+    expect(withRecoveryMarker('/business/profile?new=true')).toBe('/business/profile?new=true')
+    // Ni uno que empiece igual pero sea otra ruta.
+    expect(withRecoveryMarker('/reset-password-2')).toBe('/reset-password-2')
+    expect(withRecoveryMarker('/reset-password/otracosa')).toBe('/reset-password/otracosa')
   })
 })

@@ -56,10 +56,21 @@ function fillAndSubmit(password: string, confirm: string) {
   fireEvent.click(screen.getByRole('button', { name: /Actualizar contraseña/ }))
 }
 
+// L-38: la página solo enseña el formulario si se llega con la marca que pone
+// /callback al venir del enlace del correo. En los tests se simula esa llegada.
+function llegarDesdeElCorreo() {
+  window.history.replaceState({}, '', '/reset-password?recovery=1')
+}
+
+function llegarDirecto() {
+  window.history.replaceState({}, '', '/reset-password')
+}
+
 describe('reset-password page (L-31 · errores en línea)', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     updateUser.mockImplementation(async () => ({ error: null }))
+    llegarDesdeElCorreo()
   })
 
   it('contraseñas distintas: error debajo del campo, sin aviso volador, y no llama a Supabase', async () => {
@@ -133,6 +144,31 @@ describe('reset-password page (L-31 · errores en línea)', () => {
     expect(updateUser).toHaveBeenCalledWith({ password: VALIDA })
     expect(signOut).toHaveBeenCalledTimes(1)
     expect(screen.queryByRole('alert')).toBeNull()
+  })
+
+  it('L-38 · llegando directamente (sin el enlace del correo) no hay formulario', async () => {
+    llegarDirecto()
+    renderPage()
+
+    // Ni campos de contraseña ni botón: no hay manera de cambiar nada.
+    await waitFor(() => expect(screen.queryByRole('button', { name: /Actualizar contraseña/ })).toBeNull())
+    expect(screen.queryAllByPlaceholderText('••••••••')).toHaveLength(0)
+    expect(updateUser).not.toHaveBeenCalled()
+
+    // Y la pantalla dice qué ha pasado y por dónde se cambia la contraseña.
+    expect(screen.getByText('Esta pantalla es para los enlaces que llegan por correo')).toBeDefined()
+    expect(screen.getByText(/no se ha cambiado ninguna contraseña/)).toBeDefined()
+    expect(screen.getByRole('link', { name: /Solicitar un enlace para cambiar mi contraseña/ })).toHaveAttribute(
+      'href',
+      '/forgot-password',
+    )
+  })
+
+  it('L-38 · con la marca del correo sí hay formulario', async () => {
+    renderPage()
+
+    expect(await screen.findByRole('button', { name: /Actualizar contraseña/ })).toBeDefined()
+    expect(screen.getAllByPlaceholderText('••••••••')).toHaveLength(2)
   })
 
   it('antes de intentar enviar no se regaña a nadie', () => {
