@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabaseBrowser } from '@/lib/supabase/client'
 import Link from 'next/link'
@@ -24,7 +24,20 @@ export default function ResetPasswordPage() {
   // uno nuevo), que no se borra solo.
   const [submitAttempted, setSubmitAttempted] = useState(false)
   const [linkError, setLinkError] = useState<string | null>(null)
+  /*
+   * L-38: sin la marca `?recovery=1` (que pone /callback cuando el dueño llega
+   * desde el enlace del correo) esta página NO enseña el formulario. Antes lo
+   * enseñaba siempre, y como `updateUser` cambia la contraseña de quien tenga
+   * la sesión abierta, entrar aquí desde el historial del navegador y pulsar el
+   * botón cambiaba la contraseña de tu propia cuenta sin venir a cuento.
+   * `null` = todavía no se ha leído la marca (un instante, tras el montaje).
+   */
+  const [recovery, setRecovery] = useState<boolean | null>(null)
   const router = useRouter()
+
+  useEffect(() => {
+    setRecovery(new URLSearchParams(window.location.search).get('recovery') === '1')
+  }, [])
 
   // Requisitos de contraseña en tiempo real (compartido)
   const passwordChecks = useMemo(() => getPasswordChecks(password), [password])
@@ -64,6 +77,43 @@ export default function ResetPasswordPage() {
       setTimeout(() => router.replace('/login?password_updated=true'), 3000)
     }
     setLoading(false)
+  }
+
+  // Mientras se lee la marca no se pinta nada: así el formulario no llega a
+  // aparecer ni un fotograma en una visita que no viene del correo.
+  if (recovery === null) return null
+
+  if (!recovery) {
+    return (
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
+        <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-4 flex items-start gap-3">
+          <AlertCircle className="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5" />
+          <div className="space-y-1">
+            <p className="text-sm font-medium text-amber-300">
+              Esta pantalla es para los enlaces que llegan por correo
+            </p>
+            <p className="text-xs text-gray-400">
+              Has entrado directamente, así que no se ha cambiado ninguna contraseña. Si lo que quieres es cambiarla,
+              pide un enlace y te llegará al correo.
+            </p>
+          </div>
+        </div>
+
+        <Link
+          href="/forgot-password"
+          className="w-full justify-center text-sm text-primary hover:underline inline-flex items-center gap-1"
+        >
+          Solicitar un enlace para cambiar mi contraseña <ArrowRight className="w-4 h-4" />
+        </Link>
+
+        <div className="text-center">
+          <Link href="/login" className="text-sm text-gray-400 hover:text-primary inline-flex items-center gap-1">
+            <ArrowLeft className="w-4 h-4" />
+            Volver al inicio de sesión
+          </Link>
+        </div>
+      </motion.div>
+    )
   }
 
   if (success) {

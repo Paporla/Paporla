@@ -75,3 +75,21 @@ export function mapUserProfile(row: UserProfileRow, avatarPublicUrl: string | nu
     updatedAt: row.updated_at,
   }
 }
+
+/**
+ * L-38: la pantalla de "nueva contraseña" solo debe abrirse cuando se llega
+ * desde un enlace de recuperación del correo. Se le pone la marca `recovery=1`
+ * al destino para que la página sepa distinguir ese caso del de quien entra
+ * directamente (historial, marcador, un enlace compartido) con la sesión
+ * abierta: sin la marca no se enseña el formulario y por tanto no se puede
+ * cambiar la contraseña de nadie por accidente.
+ *
+ * NO es una frontera de seguridad: la marca la puede escribir cualquiera en su
+ * propio navegador, y `updateUser` solo toca la cuenta de quien tiene la sesión.
+ * Es un pasamanos para evitar sustos, no un control de acceso.
+ */
+export function withRecoveryMarker(next: string): string {
+  const [pathname, search] = next.split('?')
+  if (pathname !== '/reset-password') return next
+  return search ? `${next}&recovery=1` : `${next}?recovery=1`
+}
