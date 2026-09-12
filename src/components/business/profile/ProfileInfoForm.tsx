@@ -40,9 +40,16 @@ interface ProfileInfoFormProps {
     sanitaryResolution: string
   }
   updateForm: (field: string, value: string) => void
+  /**
+   * L-31: el "nombre obligatorio" se escribe debajo del campo y se queda ahí
+   * hasta que se corrija, en vez de volar como aviso de 4 segundos. Solo lo
+   * pone la página después de un intento de guardado, para no regañar a quien
+   * todavía no ha terminado de rellenar el formulario.
+   */
+  nameError?: string
 }
 
-export default function ProfileInfoForm({ formData, updateForm }: ProfileInfoFormProps) {
+export default function ProfileInfoForm({ formData, updateForm, nameError }: ProfileInfoFormProps) {
   return (
     <div className="dark:bg-black/40 bg-white dark:backdrop-blur-sm backdrop-blur-sm border dark:border-white/10 border-gray-200 rounded-2xl p-6 lg:p-8 space-y-6">
       <h2 className="text-lg font-bold dark:text-white text-gray-900 flex items-center gap-2">
@@ -57,6 +64,7 @@ export default function ProfileInfoForm({ formData, updateForm }: ProfileInfoFor
           onChange={(e) => updateForm('name', e.target.value)}
           placeholder="Mi Restaurante"
           icon={<Store className="w-4 h-4 text-primary" />}
+          error={nameError}
           required
         />
 
