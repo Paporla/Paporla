@@ -1,12 +1,12 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { motion } from 'framer-motion'
 import { pageVariants } from '@/lib/utils/motion'
-import { Calendar, CheckCircle, ShoppingBag } from 'lucide-react'
+import { AlertCircle, Calendar, CheckCircle, ShoppingBag } from 'lucide-react'
 import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
-import Toast from '@/components/ui/Toast'
+import { useToast } from '@/components/ui/ToastProvider'
 import ConfirmModal from '@/components/ui/ConfirmModal'
 import CopyButton from '@/components/ui/CopyButton'
 import LoadingSkeleton from '@/components/business/LoadingSkeleton'
@@ -49,9 +49,11 @@ export default function BusinessReservationsPage() {
     shopId,
     loading,
     error,
+    loadError,
     success,
     setError,
     setSuccess,
+    reload,
     searchTerm,
     setSearchTerm,
     statusFilter,
@@ -69,6 +71,43 @@ export default function BusinessReservationsPage() {
   const [reservationToCancel, setReservationToCancel] = useState<string | null>(null)
   const [confirmModalOpen, setConfirmModalOpen] = useState(false)
   const [reservationToConfirm, setReservationToConfirm] = useState<string | null>(null)
+
+  /*
+   * Patrón puente (lote 6 de avisos globales): el resultado de una ACCIÓN vive
+   * en el hook (`setError`/`setSuccess`), pero el que sirve los avisos es el
+   * provider global, que solo sabe de `addToast`. Estos dos efectos hacen de
+   * traductores: en cuanto el hook publica un mensaje nuevo, se sirve el aviso
+   * y se limpia el estado.
+   *
+   * El `useRef` evita que el aviso salga dos veces (en desarrollo React remonta
+   * los efectos con StrictMode) y limpiar el estado permite que un MISMO
+   * mensaje vuelva a avisar más tarde: si se cancelan dos reservas seguidas, el
+   * comercio ve los dos avisos, no uno. Mismo patrón que en Mis Packs (L-34).
+   */
+  const { addToast } = useToast()
+  const notified = useRef({ error: '', success: '' })
+
+  useEffect(() => {
+    if (!error) {
+      notified.current.error = ''
+      return
+    }
+    if (notified.current.error === error) return
+    notified.current.error = error
+    addToast(error, 'error')
+    setError('')
+  }, [error, addToast, setError])
+
+  useEffect(() => {
+    if (!success) {
+      notified.current.success = ''
+      return
+    }
+    if (notified.current.success === success) return
+    notified.current.success = success
+    addToast(success, 'success')
+    setSuccess('')
+  }, [success, addToast, setSuccess])
 
   // Los grupos miran el reloj (L-24): cuando la ventana de recogida se abre,
   // la reserva pasa SOLA de "Confirmadas" a "Listas para recoger" sin recargar.
@@ -127,8 +166,37 @@ export default function BusinessReservationsPage() {
         <PickupCodeValidator shopId={shopId} />
       </div>
 
-      {/* Estadísticas */}
-      <ReservationStatsBar stats={stats} />
+      {/*
+        L-35: el fallo de carga del listado NO es un aviso pasajero. Antes el
+        error de la RPC acababa en el mismo campo que los de las acciones, así
+        que salía como cartel flotante de 4 s y detrás quedaba "No hay reservas /
+        Las reservas aparecerán aquí cuando lleguen" —mentira cuando lo que falló
+        fue la lectura— más las cifras en cero. Ahora el fallo se queda escrito,
+        se callan las cifras y el vacío, y se puede reintentar sin recargar.
+        "Recogidas de hoy" y el validador de códigos siguen a lo suyo: son otras
+        consultas, con sus propios datos y sus propios errores.
+      */}
+      {loadError && (
+        <div
+          role="alert"
+          className="glass-card dark:border-red-500/30 border-red-300 rounded-2xl p-5 flex flex-col sm:flex-row items-start gap-3"
+        >
+          <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
+          <div className="flex-1 min-w-0">
+            <p className="dark:text-white text-gray-900 font-medium text-sm">No pudimos cargar tus reservas</p>
+            <p className="dark:text-gray-400 text-gray-600 text-xs mt-1">
+              Las reservas siguen ahí, pero no pudimos leerlas: lo que se muestra debajo no es fiable hasta que se
+              carguen. Detalle: {loadError}
+            </p>
+          </div>
+          <Button variant="outline" size="sm" onClick={() => reload()}>
+            Reintentar
+          </Button>
+        </div>
+      )}
+
+      {/* Estadísticas: con la carga fallida, las cifras serían ceros de mentira */}
+      {!loadError && <ReservationStatsBar stats={stats} />}
 
       {/* Filtros + Exportar */}
       <div className="flex items-center gap-4 flex-wrap">
@@ -221,8 +289,8 @@ export default function BusinessReservationsPage() {
           </div>
         )}
 
-        {/* Sin reservas */}
-        {reservations.length === 0 && (
+        {/* Sin reservas (nunca cuando lo que falló fue la carga: L-35) */}
+        {!loadError && reservations.length === 0 && (
           <Card glass className="text-center py-12">
             <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-primary/10 flex items-center justify-center">
               <ShoppingBag className="w-10 h-10 text-primary" />
@@ -299,10 +367,6 @@ export default function BusinessReservationsPage() {
           </div>
         </div>
       )}
-
-      {/* Toasts */}
-      {error && <Toast message={error} type="error" onClose={() => setError('')} />}
-      {success && <Toast message={success} type="success" onClose={() => setSuccess('')} />}
     </motion.div>
   )
 }
