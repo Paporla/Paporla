@@ -183,9 +183,22 @@ export function useBusinessPacks() {
     }
   }
 
+  /*
+   * L-34: el error de CARGA del listado ya no se mezcla con el de una ACCIÓN.
+   * Para la interfaz son dos cosas distintas: el de una acción (publicar,
+   * pausar, eliminar) es un aviso pasajero que se sirve y se olvida; el de
+   * carga es un ESTADO de la página, que debe quedarse escrito y ofrecer
+   * reintento. Mezclados en un solo campo, la página no podía distinguirlos y
+   * los dos volaban como cartel de 4 s (y detrás quedaba un vacío mentiroso).
+   */
+  const loadError = packsQuery.error ? translateDbError(packsQuery.error) : ''
+
   return {
     loading: packsQuery.isLoading,
-    error: error || (packsQuery.error ? translateDbError(packsQuery.error) : ''),
+    /** Error de una ACCIÓN (cambiar estado, eliminar). Se limpia al servir el aviso. */
+    error,
+    /** Error de CARGA del listado: la página lo pinta fijo, con botón de reintentar. */
+    loadError,
     success,
     setError,
     setSuccess,
