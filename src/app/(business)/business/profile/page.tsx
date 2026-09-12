@@ -3,7 +3,9 @@
 import { useState, useEffect } from 'react'
 import { useAuth } from '@/hooks/useAuth'
 import { supabaseBrowser } from '@/lib/supabase/client'
-import Toast from '@/components/ui/Toast'
+import { AlertCircle } from 'lucide-react'
+import { useToast } from '@/components/ui/ToastProvider'
+import Button from '@/components/ui/Button'
 import LoadingSkeleton from '@/components/business/LoadingSkeleton'
 import BusinessProfileLayout from '@/components/business/profile/BusinessProfileLayout'
 import ProfileInfoForm from '@/components/business/profile/ProfileInfoForm'
@@ -112,7 +114,14 @@ export default function BusinessProfilePage() {
   const [previewMode, setPreviewMode] = useState(false)
   const [isDirty, setIsDirty] = useState(false)
   const [saving, setSaving] = useState(false)
-  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null)
+  const { addToast } = useToast()
+  /*
+   * L-37: el fallo de lectura del comercio se guarda aparte (no es un aviso de
+   * 4 segundos) y se pinta como caja fija con Reintentar EN VEZ del formulario.
+   * `loadToken` es el disparador del reintento.
+   */
+  const [loadError, setLoadError] = useState<string | null>(null)
+  const [loadToken, setLoadToken] = useState(0)
   const [isSaving, setIsSaving] = useState(false)
   const [submittingReview, setSubmittingReview] = useState(false)
 
@@ -151,7 +160,15 @@ export default function BusinessProfilePage() {
     const loadShop = async () => {
       const { data, error } = await supabase.rpc('get_my_shop')
       if (error) {
-        setToast({ message: translateDbError(error, 'No se pudo cargar el comercio.'), type: 'error' })
+        /*
+         * L-37: si la lectura falla, `shop` se queda en null y el formulario se
+         * pinta VACÍO: el dueño ve su comercio sin datos, la completitud dice
+         * 0 % y, si escribe y guarda, la página llama a `create_own_shop`
+         * (porque no hay `shop.id`) en vez de `update_own_shop`. Riesgo real de
+         * duplicar el comercio o de creer que se perdió todo. El error se queda
+         * escrito y el formulario no se enseña.
+         */
+        setLoadError(translateDbError(error, 'No se pudo cargar el comercio.'))
         setLoading(false)
         return
       }
@@ -219,7 +236,18 @@ export default function BusinessProfilePage() {
 
     void loadShop()
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user])
+  }, [user, loadToken])
+
+  /**
+   * L-37: Reintentar vuelve a leer el comercio. `loadError` y `loading` se
+   * limpian aquí, en el manejador del clic, y no dentro del efecto: así no se
+   * ajusta estado durante el render.
+   */
+  const retryLoad = () => {
+    setLoadError(null)
+    setLoading(true)
+    setLoadToken((token) => token + 1)
+  }
 
   const updateForm = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }))
@@ -247,7 +275,7 @@ export default function BusinessProfilePage() {
 
     try {
       if (!formData.name.trim()) {
-        setToast({ message: 'El nombre del comercio es obligatorio.', type: 'error' })
+        addToast('El nombre del comercio es obligatorio.', 'error')
         return false
       }
 
@@ -255,7 +283,7 @@ export default function BusinessProfilePage() {
       // inválido, no tiene sentido haber guardado ya el resto del perfil.
       const hourErrors = validateHours(hours)
       if (hourErrors.length > 0) {
-        setToast({ message: `Revisa los horarios. ${hourErrors[0]}`, type: 'error' })
+        addToast(`Revisa los horarios. ${hourErrors[0]}`, 'error')
         setActiveTab('hours')
         return false
       }
@@ -266,7 +294,7 @@ export default function BusinessProfilePage() {
       // Postgres en vez de un mensaje claro (F2b).
       const coordCheck = validateCoordinatePair(formData.latitude, formData.longitude)
       if (!coordCheck.ok) {
-        setToast({ message: coordCheck.error ?? 'Coordenadas inválidas.', type: 'error' })
+        addToast(coordCheck.error ?? 'Coordenadas inválidas.', 'error')
         setActiveTab('location')
         return false
       }
@@ -277,7 +305,7 @@ export default function BusinessProfilePage() {
       // mal escrito, no.
       const rutError = getChileRutError(formData.taxId)
       if (rutError) {
-        setToast({ message: rutError, type: 'error' })
+        addToast(rutError, 'error')
         setActiveTab('info')
         return false
       }
@@ -333,16 +361,17 @@ export default function BusinessProfilePage() {
 
         if (failures.length > 0) {
           const detalle = failures.map((f) => f.day).join(', ')
-          setToast({
-            message: `Se guardó el perfil, pero fallaron los horarios de: ${detalle}. ${failures[0].message}`,
-            type: 'error',
-          })
+          addToast(
+            `Se guardó el perfil, pero fallaron los horarios de: ${detalle}. ${failures[0].message}`,
+            'error',
+            8000,
+          )
           setIsDirty(false)
           return false
         }
 
         const msg = typeof toastMessage === 'string' ? toastMessage : 'Perfil y horarios actualizados'
-        setToast({ message: msg, type: 'success' })
+        addToast(msg, 'success')
         setIsDirty(false)
         return true
       }
@@ -399,20 +428,21 @@ export default function BusinessProfilePage() {
 
       if (failures.length > 0) {
         const detalle = failures.map((f) => f.day).join(', ')
-        setToast({
-          message: `Se creó el comercio, pero fallaron los horarios de: ${detalle}. ${failures[0].message}`,
-          type: 'error',
-        })
+        addToast(
+          `Se creó el comercio, pero fallaron los horarios de: ${detalle}. ${failures[0].message}`,
+          'error',
+          8000,
+        )
         setIsDirty(false)
         return false
       }
 
       const msg = typeof toastMessage === 'string' ? toastMessage : 'Comercio creado en borrador'
-      setToast({ message: msg, type: 'success' })
+      addToast(msg, 'success')
       setIsDirty(false)
       return true
     } catch (err: unknown) {
-      setToast({ message: translateDbError(err, 'No se pudieron guardar los cambios.'), type: 'error' })
+      addToast(translateDbError(err, 'No se pudieron guardar los cambios.'), 'error')
       return false
     } finally {
       setSaving(false)
@@ -436,7 +466,7 @@ export default function BusinessProfilePage() {
     // reciba un SHOP_PROFILE_INCOMPLETE generico. Se le lleva a la pestana.
     const missing = getMissingRequiredFields(formData)
     if (missing.length > 0) {
-      setToast({ message: `Faltan datos obligatorios: ${missing.map((f) => f.label).join(', ')}.`, type: 'error' })
+      addToast(`Faltan datos obligatorios: ${missing.map((f) => f.label).join(', ')}.`, 'error')
       setActiveTab(missing[0].tab)
       return
     }
@@ -445,7 +475,7 @@ export default function BusinessProfilePage() {
     // checkbox no está marcado, se avisa aquí en lugar de dejar que la base
     // responda con un MERCHANT_TERMS_NOT_ACCEPTED tras el clic.
     if (termsRequired && !termsChecked) {
-      setToast({ message: 'Debes aceptar los Términos y Condiciones para Comercios antes de enviar.', type: 'error' })
+      addToast('Debes aceptar los Términos y Condiciones para Comercios antes de enviar.', 'error')
       return
     }
 
@@ -473,9 +503,9 @@ export default function BusinessProfilePage() {
       // La RPC deja el comercio en `pending_review` y limpia el motivo del
       // rechazo anterior. Se refleja igual en pantalla para no recargar.
       setShop({ ...shop, status: 'pending_review', status_reason: null })
-      setToast({ message: 'Comercio enviado a revision. Te avisaremos en 24-48 horas.', type: 'success' })
+      addToast('Comercio enviado a revision. Te avisaremos en 24-48 horas.', 'success')
     } catch (err: unknown) {
-      setToast({ message: translateDbError(err, 'No se pudo enviar a revision.'), type: 'error' })
+      addToast(translateDbError(err, 'No se pudo enviar a revision.'), 'error')
     } finally {
       setSubmittingReview(false)
     }
@@ -504,14 +534,37 @@ export default function BusinessProfilePage() {
       })
     }
     setIsDirty(false)
-    setToast({ message: 'Cambios descartados', type: 'success' })
+    addToast('Cambios descartados', 'success')
   }
 
   const handleDelete = async () => {
-    setToast({ message: 'Eliminar comercio no está disponible en esta versión.', type: 'error' })
+    addToast('Eliminar comercio no está disponible en esta versión.', 'error')
   }
 
   if (loading) return <LoadingSkeleton />
+
+  if (loadError) {
+    return (
+      <div className="min-h-[60vh] flex items-center justify-center p-4">
+        <div
+          role="alert"
+          className="glass-card dark:border-red-500/30 border-red-300 rounded-2xl p-5 w-full max-w-md flex flex-col sm:flex-row items-start gap-3"
+        >
+          <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
+          <div className="flex-1 min-w-0">
+            <p className="dark:text-white text-gray-900 font-medium text-sm">No pudimos cargar tu comercio</p>
+            <p className="dark:text-gray-400 text-gray-600 text-xs mt-1">
+              Tus datos siguen guardados: lo que falló fue la lectura. Vuelve a intentarlo antes de editar nada, porque
+              el formulario aparecería vacío. Detalle: {loadError}
+            </p>
+          </div>
+          <Button variant="outline" size="sm" onClick={retryLoad}>
+            Reintentar
+          </Button>
+        </div>
+      </div>
+    )
+  }
 
   if (previewMode) {
     return <ProfilePreview formData={formData} hours={hours} onBack={() => setPreviewMode(false)} />
@@ -564,7 +617,7 @@ export default function BusinessProfilePage() {
             onCoverChange={(url) => updateForm('coverUrl', url)}
             packImageUrl={formData.packImageUrl}
             onPackImageChange={(url) => updateForm('packImageUrl', url)}
-            onImageError={(message) => setToast({ message, type: 'error' })}
+            onImageError={(message) => addToast(message, 'error')}
             shopId={shop?.id ?? ''}
           />
         )}
@@ -582,8 +635,6 @@ export default function BusinessProfilePage() {
 
         {activeTab === 'settings' && <ProfileSettingsForm onDelete={handleDelete} />}
       </BusinessProfileLayout>
-
-      {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
     </div>
   )
 }

@@ -2,12 +2,19 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 
 /**
- * Pestaña "Ubicación" del perfil del comercio: guarda las coordenadas a la
- * RPC `update_own_shop` (o `create_own_shop` al crear). Los tests fijan dos
- * cosas: (1) F2b — si el par es inválido, el guardado no toca la base y dice
- * POR QUÉ; (2) al crear el comercio las coordenadas no se tiran en silencio
- * (bug real: la página nunca las mandaba a create_own_shop, que sí las
- * aceptaba desde 0009:1285).
+ * Perfil del comercio (`business/profile`): guarda el perfil y los horarios en
+ * las RPC `update_own_shop` / `create_own_shop` + `set_shop_hour`.
+ *
+ * Los tests fijan tres cosas:
+ * (1) F2b — si el par de coordenadas es inválido, el guardado no toca la base y
+ *     dice POR QUÉ (y al crear el comercio las coordenadas no se tiran, bug real:
+ *     la página nunca las mandaba a `create_own_shop`, que sí las aceptaba);
+ * (2) L-37 — si `get_my_shop` falla, la página NO enseña el formulario vacío:
+ *     pinta una caja fija con Reintentar. Con el formulario vacío, `shop.id` no
+ *     existe y al guardar se llamaría a `create_own_shop` en vez de
+ *     `update_own_shop` (riesgo de duplicar el comercio);
+ * (3) lote 8 — los avisos de acción los sirve el camarero global (`useToast`),
+ *     no el `<Toast>` local que vivía al final del JSX.
  */
 
 const mockRpc = vi.hoisted(() => vi.fn())
@@ -25,6 +32,7 @@ vi.mock('@/lib/supabase/client', () => ({
   supabaseBrowser: () => ({ rpc: mockRpc }),
 }))
 
+import { ToastProvider } from '@/components/ui/ToastProvider'
 import BusinessProfilePage from '@/app/(business)/business/profile/page'
 
 const shopRow = {
@@ -45,18 +53,41 @@ const shopRow = {
   status_reason: null,
 }
 
+/** Comercio cargado con normalidad: lo que devuelve la RPC cuando todo va bien. */
+function rpcOk() {
+  mockRpc.mockImplementation((name: string) => {
+    if (name === 'get_my_shop') return Promise.resolve({ data: { shop: shopRow, hours: [] }, error: null })
+    return Promise.resolve({ data: null, error: null })
+  })
+}
+
+/** `get_my_shop` falla: el resto de RPC no llega a llamarse. */
+function rpcLoadFails() {
+  mockRpc.mockImplementation((name: string) => {
+    if (name === 'get_my_shop') return Promise.resolve({ data: null, error: { message: 'red caída' } })
+    return Promise.resolve({ data: null, error: null })
+  })
+}
+
+// Lote 8: los avisos los sirve el ToastProvider global, así que los tests
+// envuelven la página igual que providers.tsx.
+function renderPage() {
+  return render(
+    <ToastProvider>
+      <BusinessProfilePage />
+    </ToastProvider>,
+  )
+}
+
 beforeEach(() => {
   mockRpc.mockReset()
 })
 
 describe('BusinessProfilePage (ubicación)', () => {
   it('F2b: coordenadas inválidas no llaman al RPC y dicen por qué', async () => {
-    mockRpc.mockImplementation((name: string) => {
-      if (name === 'get_my_shop') return Promise.resolve({ data: { shop: shopRow, hours: [] }, error: null })
-      return Promise.resolve({ data: null, error: null })
-    })
+    rpcOk()
 
-    render(<BusinessProfilePage />)
+    renderPage()
     await waitFor(() => expect(mockRpc).toHaveBeenCalledWith('get_my_shop'))
 
     // Pestaña Ubicación → latitud fuera de rango.
@@ -65,7 +96,7 @@ describe('BusinessProfilePage (ubicación)', () => {
     fireEvent.click(screen.getByRole('button', { name: /Guardar cambios/ }))
 
     // El mensaje aparece DOS veces: la caja roja del formulario (ya visible
-    // al tipear el 999, sin guardar) y el toast del intento de guardado.
+    // al tipear el 999, sin guardar) y el aviso del intento de guardado.
     await waitFor(() => {
       expect(screen.getAllByText('La latitud debe estar entre -90 y 90.')).toHaveLength(2)
     })
@@ -81,7 +112,7 @@ describe('BusinessProfilePage (ubicación)', () => {
       return Promise.resolve({ data: null, error: null })
     })
 
-    render(<BusinessProfilePage />)
+    renderPage()
     await waitFor(() => expect(mockRpc).toHaveBeenCalledWith('get_my_shop'))
 
     // "Información" es la pestaña por defecto: nombre. Después, par válido.
@@ -103,5 +134,83 @@ describe('BusinessProfilePage (ubicación)', () => {
         }),
       ),
     )
+  })
+})
+
+describe('BusinessProfilePage (L-37 · fallo de carga)', () => {
+  it('si get_my_shop falla, NO se enseña el formulario vacío: caja fija con Reintentar', async () => {
+    rpcLoadFails()
+
+    renderPage()
+
+    // La caja está escrita y se queda: no es un aviso de 4 segundos.
+    expect(await screen.findByRole('alert')).toBeDefined()
+    expect(screen.getByText('No pudimos cargar tu comercio')).toBeDefined()
+    expect(screen.getByRole('button', { name: /Reintentar/ })).toBeDefined()
+
+    // Y lo importante: el formulario NO está. Si estuviera, el dueño vería su
+    // comercio en blanco y al guardar se llamaría a `create_own_shop`.
+    expect(screen.queryByPlaceholderText('Mi Restaurante')).toBeNull()
+    expect(screen.queryByRole('button', { name: /Guardar cambios/ })).toBeNull()
+    expect(mockRpc).not.toHaveBeenCalledWith('create_own_shop', expect.anything())
+    expect(mockRpc).not.toHaveBeenCalledWith('update_own_shop', expect.anything())
+
+    // Un solo `alert` en pantalla: el fallo de carga no se duplica como aviso.
+    expect(screen.queryAllByRole('alert')).toHaveLength(1)
+  })
+
+  it('Reintentar vuelve a leer y, si ya funciona, enseña el formulario con los datos', async () => {
+    rpcLoadFails()
+
+    renderPage()
+    await screen.findByRole('alert')
+    const primerasLlamadas = mockRpc.mock.calls.filter((c) => c[0] === 'get_my_shop').length
+    expect(primerasLlamadas).toBe(1)
+
+    // Ahora la red responde.
+    rpcOk()
+    fireEvent.click(screen.getByRole('button', { name: /Reintentar/ }))
+
+    await waitFor(() => {
+      const llamadas = mockRpc.mock.calls.filter((c) => c[0] === 'get_my_shop').length
+      expect(llamadas).toBe(2)
+    })
+
+    // La caja se va y el formulario vuelve con el nombre real del comercio.
+    await waitFor(() => expect(screen.queryByRole('alert')).toBeNull())
+    expect((screen.getByPlaceholderText('Mi Restaurante') as HTMLInputElement).value).toBe('Panadería Staging A centro')
+  })
+})
+
+describe('BusinessProfilePage (lote 8 · avisos globales)', () => {
+  it('guardar bien sirve el aviso desde el camarero global', async () => {
+    rpcOk()
+
+    renderPage()
+    await waitFor(() => expect(mockRpc).toHaveBeenCalledWith('get_my_shop'))
+
+    fireEvent.change(screen.getByPlaceholderText('Mi Restaurante'), {
+      target: { value: 'Panadería Staging A centro v2' },
+    })
+    fireEvent.click(screen.getByRole('button', { name: /Guardar cambios/ }))
+
+    await waitFor(() => expect(mockRpc).toHaveBeenCalledWith('update_own_shop', expect.anything()))
+    expect(await screen.findByText('Perfil y horarios actualizados')).toBeDefined()
+  })
+
+  it('descartar los cambios avisa desde el camarero global', async () => {
+    rpcOk()
+
+    renderPage()
+    await waitFor(() => expect(mockRpc).toHaveBeenCalledWith('get_my_shop'))
+
+    fireEvent.change(screen.getByPlaceholderText('Mi Restaurante'), {
+      target: { value: 'algo sin guardar' },
+    })
+    fireEvent.click(screen.getByRole('button', { name: /Descartar/ }))
+
+    expect(await screen.findByText('Cambios descartados')).toBeDefined()
+    // El campo vuelve a lo que había en la base.
+    expect((screen.getByPlaceholderText('Mi Restaurante') as HTMLInputElement).value).toBe('Panadería Staging A centro')
   })
 })
