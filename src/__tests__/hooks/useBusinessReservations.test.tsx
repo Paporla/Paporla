@@ -271,14 +271,47 @@ describe('useBusinessReservations', () => {
     expect(result.current.reservations).toHaveLength(2)
   })
 
-  it('traduce a español los errores de la RPC', async () => {
+  /*
+   * L-35: el fallo de la RPC de listado sale por `loadError`, NO por `error`.
+   * `error` queda reservado a las acciones (cancelar, confirmar), que es lo que
+   * la página sirve como aviso pasajero; el de carga es un estado permanente de
+   * la página con botón de reintento. Antes iban mezclados en el mismo campo.
+   */
+  it('traduce a español los errores de la RPC de listado, por loadError', async () => {
     setupMockClient([], { list_shop_reservations: { message: 'SHOP_NOT_AUTHORIZED', code: '42501' } })
     const { result } = renderHook(() => useBusinessReservations(), { wrapper: createWrapper() })
     await waitFor(() =>
-      expect(result.current.error).toBe(
+      expect(result.current.loadError).toBe(
         'Esta cuenta no gestiona ese comercio. Inicia sesión con la cuenta que lo administra.',
       ),
     )
+    // El canal de las acciones queda limpio: si no, la página serviría el mismo
+    // fallo dos veces (una fija y otra volando a los 4 s).
+    expect(result.current.error).toBe('')
+    expect(result.current.loadError).not.toContain('[object Object]')
+  })
+
+  it('con la carga sana, loadError queda vacío', async () => {
+    setupMockClient([shopRow({ reservation_id: 'r-1' })])
+    const { result } = renderHook(() => useBusinessReservations(), { wrapper: createWrapper() })
+    await waitFor(() => expect(result.current.reservations).toHaveLength(1))
+    expect(result.current.loadError).toBe('')
+    expect(result.current.error).toBe('')
+  })
+
+  it('un fallo de acción no ensucia loadError', async () => {
+    setupMockClient([shopRow({ reservation_id: 'r-1' })], {
+      confirm_shop_reservation: { message: 'NOT_AUTHORIZED_FOR_RESERVATION', code: '42501' },
+    })
+    const { result } = renderHook(() => useBusinessReservations(), { wrapper: createWrapper() })
+    await waitFor(() => expect(result.current.reservations).toHaveLength(1))
+
+    await act(async () => {
+      await result.current.confirmReservation('r-1')
+    })
+
+    expect(result.current.error).toBe('No tienes permiso para gestionar esta reserva.')
+    expect(result.current.loadError).toBe('')
   })
 
   it('stats: ingresos solo por recogidas/completadas y "Hoy" solo por recogidas activas de hoy', async () => {

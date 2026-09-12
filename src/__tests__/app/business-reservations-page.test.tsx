@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import { ToastProvider } from '@/components/ui/ToastProvider'
 import BusinessReservationsPage from '@/app/(business)/business/reservations/page'
 
 /**
@@ -11,19 +12,29 @@ import BusinessReservationsPage from '@/app/(business)/business/reservations/pag
 const hookState = vi.hoisted(() => ({
   reservations: [] as Record<string, unknown>[],
   stats: null as Record<string, number> | null,
+  error: '',
+  loadError: '',
+  success: '',
   cancelReservation: null as ((...args: unknown[]) => Promise<void>) | null,
   confirmReservation: null as ((...args: unknown[]) => Promise<void>) | null,
   confirmResult: null as { code: string | null; packTitle: string; note: string | null } | null,
 }))
 
+// Espías estables para comprobar que la página limpia el estado del hook al
+// servir el aviso (patrón puente) y que Reintentar llama a `reload`.
+const setError = vi.hoisted(() => vi.fn())
+const setSuccess = vi.hoisted(() => vi.fn())
+const reload = vi.hoisted(() => vi.fn())
+
 vi.mock('@/components/business/reservations/useBusinessReservations', () => ({
   useBusinessReservations: () => ({
     shopId: 'shop-a',
     loading: false,
-    error: '',
-    success: '',
-    setError: vi.fn(),
-    setSuccess: vi.fn(),
+    error: hookState.error,
+    loadError: hookState.loadError,
+    success: hookState.success,
+    setError,
+    setSuccess,
     searchTerm: '',
     setSearchTerm: vi.fn(),
     statusFilter: 'all',
@@ -37,7 +48,7 @@ vi.mock('@/components/business/reservations/useBusinessReservations', () => ({
     setConfirmResult: (value: { code: string | null; packTitle: string; note: string | null } | null) => {
       hookState.confirmResult = value
     },
-    reload: vi.fn(),
+    reload,
   }),
 }))
 
@@ -80,11 +91,28 @@ const baseStats = {
   todayCount: 1,
 }
 
+// Lote 6: los avisos los sirve el ToastProvider global, así que los tests
+// envuelven la página igual que providers.tsx.
+function page() {
+  return (
+    <ToastProvider>
+      <BusinessReservationsPage />
+    </ToastProvider>
+  )
+}
+
+function renderPage() {
+  return render(page())
+}
+
 describe('business/reservations page', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     hookState.reservations = []
     hookState.stats = { ...baseStats }
+    hookState.error = ''
+    hookState.loadError = ''
+    hookState.success = ''
     hookState.confirmResult = null
     hookState.cancelReservation = vi.fn().mockResolvedValue(undefined)
     hookState.confirmReservation = vi.fn().mockResolvedValue(undefined)
@@ -97,7 +125,7 @@ describe('business/reservations page', () => {
       row({ reservation_id: 'r-3', status: 'picked_up' }),
       row({ reservation_id: 'r-4', status: 'cancelled' }),
     ]
-    render(<BusinessReservationsPage />)
+    renderPage()
     expect(screen.getByRole('heading', { name: 'Pendientes de confirmar' })).toBeTruthy()
     expect(screen.getByRole('heading', { name: 'Confirmadas' })).toBeTruthy()
     expect(screen.getByRole('heading', { name: 'Historial' })).toBeTruthy()
@@ -107,13 +135,13 @@ describe('business/reservations page', () => {
 
   it('el grupo de pendientes explica qué hace confirmar (regla F2b)', () => {
     hookState.reservations = [row()]
-    render(<BusinessReservationsPage />)
+    renderPage()
     expect(screen.getByText(/Al confirmar, la reserva pasa a lista para recoger/)).toBeTruthy()
   })
 
   it('muestra Recogidas de hoy y el validador (el placeholder ya no existe)', () => {
     hookState.reservations = [row()]
-    render(<BusinessReservationsPage />)
+    renderPage()
     expect(screen.getByTestId('today-pickups')).toBeTruthy()
     expect(screen.getByTestId('pickup-validator')).toBeTruthy()
     expect(screen.queryByText(/vuelven activos en el próximo paso/)).toBeNull()
@@ -121,7 +149,7 @@ describe('business/reservations page', () => {
 
   it('cancela una reserva pasando por el modal de confirmación', async () => {
     hookState.reservations = [row()]
-    render(<BusinessReservationsPage />)
+    renderPage()
 
     fireEvent.click(screen.getByRole('heading', { name: 'Pendientes de confirmar' }))
     const cancelButton = await screen.findByRole('button', { name: /Cancelar/ })
@@ -135,7 +163,7 @@ describe('business/reservations page', () => {
 
   it('confirma una reserva por el modal y muestra el código (una sola vez)', async () => {
     hookState.reservations = [row()]
-    const { rerender } = render(<BusinessReservationsPage />)
+    const { rerender } = renderPage()
 
     fireEvent.click(screen.getByRole('heading', { name: 'Pendientes de confirmar' }))
     fireEvent.click(await screen.findByRole('button', { name: /^Confirmar$/ }))
@@ -154,13 +182,13 @@ describe('business/reservations page', () => {
     expect(screen.getByText(/Este código se muestra una sola vez/)).toBeTruthy()
 
     fireEvent.click(screen.getByRole('button', { name: 'Entendido' }))
-    rerender(<BusinessReservationsPage />)
+    rerender(page())
     expect(screen.queryByText('P4P-ABCD1234')).toBeNull()
   })
 
   it('no pinta el estado legacy "Pendiente" ni datos de contacto del cliente', async () => {
     hookState.reservations = [row()]
-    render(<BusinessReservationsPage />)
+    renderPage()
 
     fireEvent.click(screen.getByRole('heading', { name: 'Pendientes de confirmar' }))
     expect(await screen.findByText('Aguardando confirmación')).toBeTruthy()
@@ -171,7 +199,7 @@ describe('business/reservations page', () => {
 
   it('el historial no ofrece acciones', async () => {
     hookState.reservations = [row({ reservation_id: 'r-9', status: 'cancelled' })]
-    render(<BusinessReservationsPage />)
+    renderPage()
 
     fireEvent.click(screen.getByRole('heading', { name: 'Canceladas' }))
     await waitFor(() => expect(screen.getByText('Cliente A')).toBeTruthy())
@@ -182,13 +210,13 @@ describe('business/reservations page', () => {
   it('muestra los ingresos formateados como CLP canónico', () => {
     hookState.reservations = [row()]
     hookState.stats = { ...baseStats, revenue: 12990 }
-    render(<BusinessReservationsPage />)
+    renderPage()
     expect(screen.getByText('$12.990')).toBeTruthy()
   })
 
   it('muestra el estado vacío y oculta el export', () => {
     hookState.reservations = []
-    render(<BusinessReservationsPage />)
+    renderPage()
     expect(screen.getByText('No hay reservas')).toBeTruthy()
     expect(screen.queryByText('Exportar CSV')).toBeNull()
   })
@@ -202,9 +230,54 @@ describe('business/reservations page', () => {
         pickup_end_at: '2099-01-02T00:00:00-03:00',
       }),
     ]
-    render(<BusinessReservationsPage />)
+    renderPage()
     expect(screen.getByRole('heading', { name: 'Confirmadas' })).toBeTruthy()
     expect(screen.queryByRole('heading', { name: 'Listas para recoger' })).toBeNull()
+  })
+
+  it('lote 6 · éxito de una acción: aviso global y el estado del hook se limpia', () => {
+    hookState.reservations = [row()]
+    hookState.success = 'Reserva cancelada y stock reintegrado'
+    renderPage()
+
+    expect(screen.getByRole('alert')).toHaveTextContent('Reserva cancelada y stock reintegrado')
+    expect(setSuccess).toHaveBeenCalledWith('')
+  })
+
+  it('lote 6 · error de una acción: aviso global de error y el estado del hook se limpia', () => {
+    hookState.reservations = [row()]
+    hookState.error = 'No tienes permiso para gestionar esta reserva.'
+    renderPage()
+
+    expect(screen.getByRole('alert')).toHaveTextContent('No tienes permiso para gestionar esta reserva.')
+    expect(setError).toHaveBeenCalledWith('')
+  })
+
+  it('L-35 · fallo de carga: caja permanente con Reintentar, sin "No hay reservas" ni cifras', () => {
+    hookState.reservations = []
+    hookState.loadError = 'Esta cuenta no gestiona ese comercio.'
+    renderPage()
+
+    const alert = screen.getByRole('alert')
+    expect(alert).toHaveTextContent('No pudimos cargar tus reservas')
+    expect(alert).toHaveTextContent('Esta cuenta no gestiona ese comercio.')
+
+    // Mientras dura el fallo no se afirma que no haya reservas ni se enseñan
+    // cifras que serían ceros de mentira.
+    expect(screen.queryByText('No hay reservas')).toBeNull()
+    expect(screen.queryByText('Ingresos')).toBeNull()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Reintentar' }))
+    expect(reload).toHaveBeenCalledTimes(1)
+  })
+
+  it('sin fallos no hay ningún aviso en la página', () => {
+    hookState.reservations = [row()]
+    renderPage()
+
+    expect(screen.getByText('Ingresos')).toBeTruthy()
+    expect(screen.queryByRole('alert')).toBeNull()
+    expect(screen.queryByRole('button', { name: 'Reintentar' })).toBeNull()
   })
 
   it('L-24: con la ventana abierta, la misma reserva cae en "Listas para recoger"', () => {
@@ -217,7 +290,7 @@ describe('business/reservations page', () => {
         pickup_end_at: '2099-01-01T00:00:00-03:00',
       }),
     ]
-    render(<BusinessReservationsPage />)
+    renderPage()
     expect(screen.getByRole('heading', { name: 'Listas para recoger' })).toBeTruthy()
     expect(screen.queryByRole('heading', { name: 'Confirmadas' })).toBeNull()
   })

@@ -135,16 +135,20 @@ export function useBusinessReservations() {
     staleTime: 15 * 1000,
   })
 
-  // Sin esto el fallo de la RPC se tragaría en silencio (queryError viviría
-  // solo dentro de react-query) y el comercio vería una lista vacía sin
-  // saber por qué (p. ej. 42501). TanStack v5 no trae onError en useQuery,
-  // así que se ajusta el estado DURANTE el render (patrón recomendado por
-  // React para duplicar estado, sin efecto y sin cascada de renders).
-  const [lastQueryError, setLastQueryError] = useState<Error | null>(null)
-  if (queryError !== lastQueryError) {
-    setLastQueryError(queryError)
-    setError(queryError ? translateDbError(queryError) : '')
-  }
+  /*
+   * L-35: el fallo de la RPC ya NO se copia al estado `error` (que es el de las
+   * ACCIONES: cancelar, confirmar). Se deriva aquí como `loadError`, que la
+   * página pinta como estado permanente con botón de reintento.
+   *
+   * El motivo original de sacar el fallo de react-query sigue en pie: sin esto
+   * se tragaría en silencio y el comercio vería una lista vacía sin saber por
+   * qué (p. ej. 42501). Lo que estaba mal era el destino —`error`—, porque la
+   * página pintaba los dos fallos igual: un cartel de 4 s que se esfumaba y
+   * dejaba detrás un "No hay reservas" que era mentira. De paso se elimina el
+   * ajuste de estado durante el render (TanStack v5 no trae onError en useQuery,
+   * pero derivar el valor no necesita ni efecto ni estado duplicado).
+   */
+  const loadError = queryError ? translateDbError(queryError) : ''
 
   const invalidate = () => queryClient.invalidateQueries({ queryKey: ['business-reservations'] })
 
@@ -291,7 +295,10 @@ export function useBusinessReservations() {
   return {
     shopId: shop?.id ?? null,
     loading,
+    /** Error de una ACCIÓN (cancelar, confirmar). Se limpia al servir el aviso. */
     error,
+    /** Error de CARGA del listado: la página lo pinta fijo, con botón de reintentar. */
+    loadError,
     success,
     setError,
     setSuccess,
