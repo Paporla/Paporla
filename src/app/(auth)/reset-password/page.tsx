@@ -5,11 +5,10 @@ import { useRouter } from 'next/navigation'
 import { supabaseBrowser } from '@/lib/supabase/client'
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Lock, ArrowLeft, CheckCircle, Eye, EyeOff, Check, X } from 'lucide-react'
+import { Lock, ArrowLeft, ArrowRight, CheckCircle, Eye, EyeOff, Check, X, AlertCircle } from 'lucide-react'
 import { getPasswordChecks } from '@/lib/utils/validations'
 import Button from '@/components/ui/Button'
 import Input from '@/components/ui/Input'
-import { useToast } from '@/components/ui/ToastProvider'
 
 export default function ResetPasswordPage() {
   const supabase = supabaseBrowser()
@@ -18,31 +17,37 @@ export default function ResetPasswordPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
+  // L-31: los errores de este formulario hay que LEERLOS para corregir algo,
+  // así que se quedan escritos junto al campo en vez de volar 4 segundos.
+  // `submitAttempted` evita regañar a quien todavía no ha pulsado el botón, y
+  // `linkError` es el cartel fijo del enlace caducado (con su enlace a pedir
+  // uno nuevo), que no se borra solo.
+  const [submitAttempted, setSubmitAttempted] = useState(false)
+  const [linkError, setLinkError] = useState<string | null>(null)
   const router = useRouter()
-  // Lote UX punto 4: los fallos viajan al ToastProvider global (role="alert",
-  // 4 s) en vez de un <Toast> local con estado propio. El cartel viejo también
-  // se cerraba solo a los 4 s, así que el comportamiento no cambia: solo se
-  // unifica el sitio donde sale y se quita un temporizador duplicado.
-  const { addToast } = useToast()
 
   // Requisitos de contraseña en tiempo real (compartido)
   const passwordChecks = useMemo(() => getPasswordChecks(password), [password])
 
   const allPasswordChecksPassed = passwordChecks.every((c) => c.passed)
-  const showPasswordHints = password.length > 0 && !allPasswordChecksPassed
+  const showPasswordHints = (password.length > 0 || submitAttempted) && !allPasswordChecksPassed
+
+  // Mensajes en línea: aparecen al intentar enviar y se van solos en cuanto el
+  // campo está bien (se recalculan en cada render, no hay que limpiarlos).
+  const requirementsError =
+    submitAttempted && !allPasswordChecksPassed
+      ? 'La contraseña no cumple todos los requisitos de seguridad'
+      : undefined
+  const mismatchError = submitAttempted && password !== confirmPassword ? 'Las contraseñas no coinciden' : undefined
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    setSubmitAttempted(true)
     setLoading(true)
 
-    if (password !== confirmPassword) {
-      addToast('Las contraseñas no coinciden', 'error')
-      setLoading(false)
-      return
-    }
-
-    if (!allPasswordChecksPassed) {
-      addToast('La contraseña no cumple todos los requisitos de seguridad', 'error')
+    // L-31: ni el aviso de "no coinciden" ni el de "requisitos" vuelan ya; los
+    // dos están escritos debajo de su campo (mismatchError / requirementsError).
+    if (password !== confirmPassword || !allPasswordChecksPassed) {
       setLoading(false)
       return
     }
@@ -50,7 +55,9 @@ export default function ResetPasswordPage() {
     const { error: updateError } = await supabase.auth.updateUser({ password })
 
     if (updateError) {
-      addToast('El enlace no es válido o ha expirado. Solicita uno nuevo.', 'error')
+      // Este fallo no lo arregla el formulario: el enlace caducó. Se queda
+      // escrito, con la salida a mano, hasta que el dueño navegue.
+      setLinkError('El enlace no es válido o ha expirado.')
     } else {
       await supabase.auth.signOut()
       setSuccess(true)
@@ -82,6 +89,21 @@ export default function ResetPasswordPage() {
       <form onSubmit={handleSubmit} className="space-y-5">
         <p className="text-gray-400 text-sm text-center">Ingresa tu nueva contraseña segura.</p>
 
+        {linkError && (
+          <div role="alert" className="rounded-xl border border-red-500/30 bg-red-500/10 p-4 space-y-2">
+            <p className="text-sm font-medium text-red-400 flex items-center gap-2">
+              <AlertCircle className="w-4 h-4 flex-shrink-0" />
+              {linkError}
+            </p>
+            <Link
+              href="/forgot-password"
+              className="text-sm text-primary hover:underline inline-flex items-center gap-1"
+            >
+              Solicitar un enlace nuevo <ArrowRight className="w-4 h-4" />
+            </Link>
+          </div>
+        )}
+
         <div className="relative">
           <Input
             label="Nueva contraseña"
@@ -90,6 +112,7 @@ export default function ResetPasswordPage() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             icon={<Lock className="w-4 h-4" />}
+            error={requirementsError}
             required
           />
           <button
@@ -134,6 +157,7 @@ export default function ResetPasswordPage() {
           value={confirmPassword}
           onChange={(e) => setConfirmPassword(e.target.value)}
           icon={<Lock className="w-4 h-4" />}
+          error={mismatchError}
           required
         />
 
