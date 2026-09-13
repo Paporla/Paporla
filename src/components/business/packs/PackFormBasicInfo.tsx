@@ -4,6 +4,7 @@ import { useState } from 'react'
 import Image from 'next/image'
 import { Package, Tag } from 'lucide-react'
 import Input from '@/components/ui/Input'
+import type { PackFormErrors } from '@/lib/utils/packForm'
 import ImageUpload from '@/components/ui/ImageUpload'
 
 interface BasicData {
@@ -36,6 +37,12 @@ interface Props {
    * antes. Se sigue pudiendo abrir para destacar un pack concreto.
    */
   defaultImageUrl?: string | null
+  /*
+   * L-31: los errores de validación del padre, por campo. Se escriben debajo de
+   * cada input (el `Input` ya trae borde rojo, `aria-invalid` y `aria-describedby`)
+   * en vez de volar como un aviso de 4 segundos que no dice qué campo era.
+   */
+  errors?: PackFormErrors
 }
 
 export default function PackFormBasicInfo({
@@ -46,8 +53,18 @@ export default function PackFormBasicInfo({
   onFileChosen,
   stockReadOnly = false,
   defaultImageUrl,
+  errors,
 }: Props) {
   const update = (partial: Partial<BasicData>) => onChange({ ...data, ...partial })
+
+  /*
+   * Los dos precios comparten la clave `price_cents` en validatePackForm, pero
+   * el mensaje puede ser de uno u otro. Se coloca debajo del campo que de
+   * verdad toca, para no señalar al inocente.
+   */
+  const priceError = errors?.price_cents
+  const originalPriceError = priceError?.toLowerCase().includes('original') ? priceError : undefined
+  const salePriceError = originalPriceError ? undefined : priceError
 
   /* Ya hay una imagen elegida para este pack: entonces no se pliega nada. */
   const hasOwnImage = !!data.image_url
@@ -73,6 +90,7 @@ export default function PackFormBasicInfo({
           value={data.title}
           onChange={(e) => update({ title: e.target.value })}
           icon={<Tag className="w-4 h-4" />}
+          error={errors?.title}
           required
         />
 
@@ -98,6 +116,7 @@ export default function PackFormBasicInfo({
             placeholder="3990"
             value={data.price_cents || ''}
             onChange={(e) => update({ price_cents: parseInt(e.target.value, 10) || 0 })}
+            error={salePriceError}
             required
           />
 
@@ -109,6 +128,7 @@ export default function PackFormBasicInfo({
             placeholder="7990"
             value={data.original_price_cents || ''}
             onChange={(e) => update({ original_price_cents: e.target.value ? parseInt(e.target.value, 10) || 0 : 0 })}
+            error={originalPriceError}
           />
 
           {stockReadOnly ? (
@@ -134,6 +154,7 @@ export default function PackFormBasicInfo({
               value={data.total_stock}
               onChange={(e) => update({ total_stock: parseInt(e.target.value, 10) || 0 })}
               icon={<Package className="w-4 h-4" />}
+              error={errors?.total_stock}
               required
             />
           )}

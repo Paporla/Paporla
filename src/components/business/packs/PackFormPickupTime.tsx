@@ -3,7 +3,7 @@
 import { useRef, useState } from 'react'
 import { Calendar, ChevronDown, Clock, AlertCircle, Pencil } from 'lucide-react'
 import Input from '@/components/ui/Input'
-import { chileDateIn, chileTimeNow } from '@/lib/utils/packForm'
+import { chileDateIn, chileTimeNow, type PackFormErrors } from '@/lib/utils/packForm'
 
 interface PickupData {
   pickup_date: string
@@ -14,6 +14,8 @@ interface PickupData {
 interface Props {
   data: PickupData
   onChange: (data: PickupData) => void
+  /** L-31: errores de validación del padre, escritos junto a lo que toca. */
+  errors?: PackFormErrors
 }
 
 /*
@@ -60,7 +62,7 @@ function formatDay(dateStr: string): string {
   return d.toLocaleDateString('es-CL', { weekday: 'long', day: 'numeric', month: 'long' })
 }
 
-export default function PackFormPickupTime({ data, onChange }: Props) {
+export default function PackFormPickupTime({ data, onChange, errors }: Props) {
   const update = (partial: Partial<PickupData>) => onChange({ ...data, ...partial })
 
   const activeSlot = SLOTS.find((s) => s.start === data.pickup_start_time && s.end === data.pickup_end_time)
@@ -96,6 +98,12 @@ export default function PackFormPickupTime({ data, onChange }: Props) {
    */
   const endBeforeStart =
     !!data.pickup_start_time && !!data.pickup_end_time && data.pickup_start_time >= data.pickup_end_time
+
+  /*
+   * L-31: si la línea roja de "el fin va antes que el inicio" ya está a la
+   * vista, no se repite el mismo motivo con el error que viene del padre.
+   */
+  const timeEndError = endBeforeStart ? undefined : errors?.pickup_end_time
 
   const alreadyPast = isToday && !!data.pickup_start_time && data.pickup_start_time <= chileTimeNow()
 
@@ -166,6 +174,13 @@ export default function PackFormPickupTime({ data, onChange }: Props) {
         </div>
       </div>
 
+      {errors?.pickup_date && (
+        <p className="mt-3 flex items-center gap-2 text-sm text-red-400">
+          <AlertCircle className="w-4 h-4 shrink-0" />
+          {errors.pickup_date}
+        </p>
+      )}
+
       <div className="mt-5">
         <span className="block text-sm font-medium dark:text-gray-300 text-gray-700 mb-2">Franja horaria</span>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
@@ -215,12 +230,14 @@ export default function PackFormPickupTime({ data, onChange }: Props) {
               type="time"
               value={data.pickup_start_time}
               onChange={(e) => update({ pickup_start_time: e.target.value })}
+              error={errors?.pickup_start_time}
             />
             <Input
               label="Hasta"
               type="time"
               value={data.pickup_end_time}
               onChange={(e) => update({ pickup_end_time: e.target.value })}
+              error={timeEndError}
             />
           </div>
         )}
@@ -230,6 +247,17 @@ export default function PackFormPickupTime({ data, onChange }: Props) {
         <p className="mt-4 flex items-center gap-2 text-sm text-red-400">
           <AlertCircle className="w-4 h-4 shrink-0" />
           La hora de fin debe ser posterior a la de inicio.
+        </p>
+      )}
+
+      {/*
+        L-31: con el ajuste manual cerrado no hay campos donde escribir el
+        error, así que se pone aquí. Con él abierto ya lo enseñan los inputs.
+      */}
+      {!showCustom && (errors?.pickup_start_time || timeEndError) && (
+        <p className="mt-4 flex items-center gap-2 text-sm text-red-400">
+          <AlertCircle className="w-4 h-4 shrink-0" />
+          {[errors?.pickup_start_time, timeEndError].filter(Boolean).join(' · ')}
         </p>
       )}
 

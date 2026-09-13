@@ -2,10 +2,10 @@
 
 import { useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
-import { Package, AlertCircle, CheckCircle, Rocket } from 'lucide-react'
+import { Package, AlertCircle, Rocket } from 'lucide-react'
 import { logger } from '@/lib/logger'
 import Button from '@/components/ui/Button'
-import Toast from '@/components/ui/Toast'
+import { useToast } from '@/components/ui/ToastProvider'
 import { supabaseBrowser } from '@/lib/supabase/client'
 import { translateDbError } from '@/lib/utils/db-errors'
 import PackCategoryTemplates from './packs/PackCategoryTemplates'
@@ -20,7 +20,11 @@ import {
   packToFormData,
   buildPackContentParams,
   getPublishBlockers,
+  type PackFormErrors,
 } from '@/lib/utils/packForm'
+
+/** Referencia estable para "sin errores" (evita fabricar un objeto en cada render). */
+const NO_ERRORS: PackFormErrors = {}
 
 /*
  * Contrato que la pantalla que monta el formulario debe entregar.
@@ -97,7 +101,11 @@ export default function PackFormSimplified({
   const isEditing = !!pack && !isDuplicate
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
-  const [success, setSuccess] = useState('')
+  // L-31: los avisos de resultado viajan al camarero global; el error de una
+  // acción se queda escrito en su caja (sin temporizador) y los de validación,
+  // debajo de cada campo.
+  const { addToast } = useToast()
+  const [submitAttempted, setSubmitAttempted] = useState(false)
   const [selectedCategory, setSelectedCategory] = useState<string | null>(pack?.category ?? null)
   const [allergenNotice, setAllergenNotice] = useState(pack?.allergen_notice ?? '')
   const [packFile, setPackFile] = useState<File | null>(null)
@@ -271,19 +279,36 @@ export default function PackFormSimplified({
     image_gallery: isEditing ? (pack?.image_gallery ?? []) : [],
   })
 
+  /*
+   * L-31: los errores de validación se DERIVAN en cada render en vez de
+   * guardarse en estado. Aparecen todos a la vez en el primer intento de
+   * guardado (antes solo se enseñaba el primero, y el comercio iba descubriendo
+   * los demás de uno en uno, a aviso por pulsación) y se van apagando solos
+   * según corrige cada campo. `validatePackForm` es pura y barata.
+   */
+  const fieldErrors = submitAttempted ? validatePackForm(formData) : NO_ERRORS
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setLoading(true)
-    setError('')
-    setSuccess('')
 
+    /*
+     * Validación FRESCA, no `fieldErrors`: ese es el valor del render anterior y
+     * en el primer intento todavía venía vacío (submitAttempted acaba de
+     * cambiar), así que la guarda dejaría pasar un formulario inválido hacia la
+     * base de datos. Es la misma función pura y barata, llamada otra vez.
+     */
     const errors = validatePackForm(formData)
-    const firstError = Object.values(errors)[0]
-    if (firstError) {
-      setError(firstError)
+    setSubmitAttempted(true)
+
+    // Los errores ya están pintados debajo de cada campo: no hace falta ni caja
+    // ni aviso, y mucho menos un resumen que se borra a los 4 segundos.
+    if (Object.keys(errors).length > 0) {
       setLoading(false)
       return
     }
+
+    setLoading(true)
+    setError('')
 
     try {
       if (isEditing && pack) {
@@ -365,9 +390,9 @@ export default function PackFormSimplified({
         setLoading(false)
         return
       }
-      setSuccess('Cambios guardados y pack publicado.')
+      addToast('Cambios guardados y pack publicado.', 'success')
     } else {
-      setSuccess('Cambios guardados.')
+      addToast('Cambios guardados.', 'success')
     }
 
     setTimeout(() => {
@@ -436,12 +461,14 @@ export default function PackFormSimplified({
         setLoading(false)
         return
       }
-      setSuccess('Pack publicado. Ya se puede reservar.')
+      addToast('Pack publicado. Ya se puede reservar.', 'success')
     } else {
-      setSuccess(
+      addToast(
         imagePath
           ? 'Pack guardado como borrador con imagen.'
           : 'Pack guardado como borrador. Falta imagen para publicar.',
+        'success',
+        6000,
       )
     }
 
@@ -475,12 +502,20 @@ export default function PackFormSimplified({
         onSelect={(id, template) => handleCategorySelect(id, template)}
       />
 
-      <form onSubmit={handleSubmit} className="space-y-6">
+      {/*
+       * noValidate: con la validación nativa del navegador activada, un campo
+       * `required` vacío bloquea el envío y sale la burbuja del navegador
+       * ("Completa este campo"), así que nuestros mensajes —en castellano,
+       * debajo de cada campo y con el motivo concreto— no llegaban a verse
+       * nunca. Valida validatePackForm; el navegador solo recoge los datos.
+       */}
+      <form onSubmit={handleSubmit} noValidate className="space-y-6">
         <PackFormBasicInfo
           data={basicData}
           onChange={(d) => setFormData((prev) => ({ ...prev, ...d }))}
           shopId={shopId}
           onError={setError}
+          errors={fieldErrors}
           onFileChosen={(file) => setPackFile(file)}
           stockReadOnly={isEditing}
           defaultImageUrl={defaultImageUrl}
@@ -499,24 +534,18 @@ export default function PackFormSimplified({
           />
         </div>
 
-        <PackFormPickupTime data={pickupData} onChange={(d) => setFormData((prev) => ({ ...prev, ...d }))} />
+        <PackFormPickupTime
+          data={pickupData}
+          onChange={(d) => setFormData((prev) => ({ ...prev, ...d }))}
+          errors={fieldErrors}
+        />
 
         {error && (
-          <div className="rounded-xl border border-red-500/20 bg-red-500/10 p-4 flex gap-3">
+          <div role="alert" className="rounded-xl border border-red-500/20 bg-red-500/10 p-4 flex gap-3">
             <AlertCircle className="w-5 h-5 text-red-400 shrink-0 mt-0.5" />
             <div>
               <h3 className="text-sm font-semibold text-red-200">Error</h3>
               <p className="text-sm text-red-100/70 mt-1">{error}</p>
-            </div>
-          </div>
-        )}
-
-        {success && (
-          <div className="rounded-xl border border-green-500/20 bg-green-500/10 p-4 flex gap-3">
-            <CheckCircle className="w-5 h-5 text-green-400 shrink-0 mt-0.5" />
-            <div>
-              <h3 className="text-sm font-semibold text-green-200">Exito</h3>
-              <p className="text-sm text-green-100/70 mt-1">{success}</p>
             </div>
           </div>
         )}
@@ -589,9 +618,6 @@ export default function PackFormSimplified({
           </Button>
         </div>
       </form>
-
-      {error && <Toast message={error} type="error" onClose={() => setError('')} />}
-      {success && <Toast message={success} type="success" onClose={() => setSuccess('')} />}
     </div>
   )
 }
