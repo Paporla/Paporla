@@ -70,6 +70,9 @@ describe('PackFormSimplified — avisos y validaciones (L-31, lote 9c)', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     mockRpc.mockResolvedValue({ data: null, error: null })
+    // La memoria de la última ventana vive en localStorage y cambia con qué
+    // horas nace el formulario: se limpia para que cada caso parta de cero.
+    window.localStorage.clear()
   })
 
   it('nace limpio: sin errores pintados antes del primer intento', () => {
@@ -99,6 +102,35 @@ describe('PackFormSimplified — avisos y validaciones (L-31, lote 9c)', () => {
     expect(screen.queryAllByRole('alert')).toHaveLength(0)
     // Y no se tocó la base de datos con un formulario inválido.
     expect(mockRpc).not.toHaveBeenCalled()
+  })
+
+  it('con la memoria de la última ventana (Lote D), el formulario nace con las horas puestas y su error no sale', async () => {
+    // Lo que ve el comercio habitual: ya guardó un pack antes, así que las horas
+    // vienen solas y de la validación solo quedan los campos que faltan de
+    // verdad. No es que el error de horas no funcione: es que no hay error.
+    window.localStorage.setItem('paporla_last_pickup_times', JSON.stringify({ start: '18:00', end: '21:00' }))
+    renderForm()
+
+    fireEvent.click(saveButton())
+
+    expect(await screen.findByText('El titulo es requerido')).toBeInTheDocument()
+    expect(screen.getByText('El precio debe ser mayor a 0')).toBeInTheDocument()
+    expect(screen.queryByText(/hora de inicio es obligatoria/)).not.toBeInTheDocument()
+    expect(screen.queryByText(/hora de fin es obligatoria/)).not.toBeInTheDocument()
+  })
+
+  it('si la memoria trae basura, se ignora y las horas vuelven a pedirse', async () => {
+    // getRememberedPickupTimes revalida todo lo que lee de localStorage: solo
+    // entran HH:MM con inicio < fin. Con algo inválido el formulario nace vacío
+    // y la validación pide las horas como a un comercio primerizo.
+    window.localStorage.setItem('paporla_last_pickup_times', JSON.stringify({ start: '25:99', end: '18:00' }))
+    renderForm()
+
+    fireEvent.click(saveButton())
+
+    expect(
+      await screen.findByText('La hora de inicio es obligatoria · La hora de fin es obligatoria'),
+    ).toBeInTheDocument()
   })
 
   it('cada error se apaga solo al corregir su campo, sin volver a pulsar guardar', async () => {
