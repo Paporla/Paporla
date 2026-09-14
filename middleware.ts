@@ -117,7 +117,41 @@ export async function middleware(request: NextRequest) {
     } = await supabase.auth.getUser()
 
     if (!user) {
-      if (requiresAuth) return NextResponse.redirect(new URL('/login', request.url))
+      if (requiresAuth) {
+        /*
+         * L-29 (la mitad que faltaba): al login se le dice A DONDE iba la
+         * persona. Sin esto `useAuth.signIn` no encuentra `?redirect=` en la URL
+         * y siempre acaba en el panel que toca por rol, aunque el usuario
+         * quisiera volver a la ficha que estaba mirando (le pasó al fundador:
+         * corazón sin sesión -> login -> panel, con el favorito sin guardar).
+         *
+         * Se manda la ruta con su query tal cual. El destino lo vuelve a validar
+         * `getSafeInternalRedirect` al entrar, así que un enlace externo
+         * (`?redirect=https://otro-sitio`) nunca cuela: se ignora y se entra por
+         * rol. Aqui no hace falta filtrar nada porque `path` sale del propio
+         * middleware y siempre empieza por '/'.
+         */
+        const loginUrl = new URL('/login', request.url)
+        /*
+         * SIEMPRE la ruta que se intentó abrir, con su query dentro del propio
+         * valor (codificado), y un único parámetro `redirect`. Dos tentativas
+         * que se descartaron por peligrosas:
+         *  - Respetar un `redirect` que viniera en la petición dejaría que
+         *    cualquiera colara un destino ajeno (/dashboard?redirect=https://…).
+         *  - Copiar además los demás parámetros al login acababa en un destino
+         *    mal formado: useAuth reexpide esos parámetros y salía
+         *    /business/packs?tab=x?tab=x.
+         * Así el destino es uno, predecible, y lo valida getSafeInternalRedirect.
+         */
+        loginUrl.searchParams.set('redirect', `${path}${request.nextUrl.search}`)
+        /*
+         * 302 y no el 307 que NextResponse.redirect pone por defecto: el
+         * navegador puede guardar un 307 en caché y seguir mandando al login
+         * aunque la sesión ya exista. Se cambia SOLO aquí; los saltos por rol
+         * de más abajo siguen como estaban.
+         */
+        return NextResponse.redirect(loginUrl, 302)
+      }
       return response
     }
 
