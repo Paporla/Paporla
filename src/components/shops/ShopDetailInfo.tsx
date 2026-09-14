@@ -29,9 +29,16 @@ const DAYS_ORDER = ['Lunes', 'Martes', 'Miercoles', 'Jueves', 'Viernes', 'Sabado
 export default function ShopDetailInfo({ shop, packsCount }: ShopDetailInfoProps) {
   const [showHours, setShowHours] = useState(false)
 
+  /*
+   * L-44 (commit D): antes, sin fecha, salía "Miembro desde Recientemente",
+   * una frase rota: se pegaba una palabra donde iba una fecha. get_public_shop
+   * (0014) no devuelve created_at, así que hoy no hay fecha real que mostrar:
+   * se oculta la línea en vez de inventarse un "Recientemente". El día que la
+   * RPC traiga created_at, esta misma línea vuelve a pintarse sola.
+   */
   const memberSince = shop.created_at
     ? new Date(shop.created_at).toLocaleDateString('es-ES', { year: 'numeric', month: 'long' })
-    : 'Recientemente'
+    : null
 
   // Parse hours
   let hoursData: Record<string, { open: string; close: string; closed: boolean }> = {}
@@ -108,10 +115,12 @@ export default function ShopDetailInfo({ shop, packsCount }: ShopDetailInfoProps
             </a>
           )}
 
-          <div className="flex items-center gap-3 text-sm">
-            <Calendar className="w-4 h-4 text-primary flex-shrink-0" />
-            <span className="dark:text-gray-400 text-gray-600">Miembro desde {memberSince}</span>
-          </div>
+          {memberSince && (
+            <div className="flex items-center gap-3 text-sm">
+              <Calendar className="w-4 h-4 text-primary flex-shrink-0" />
+              <span className="dark:text-gray-400 text-gray-600">Miembro desde {memberSince}</span>
+            </div>
+          )}
         </div>
 
         {/* Stats */}
