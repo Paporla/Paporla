@@ -3,42 +3,47 @@ import { renderHook, waitFor } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { useShops } from '@/hooks/useShops'
 import { supabaseBrowser } from '@/lib/supabase/client'
+import { DEFAULT_MARKET } from '@/lib/constants/markets'
 
 /**
- * Fix F1 (N+1 del directorio): useShops consultaba get_public_shop UNA VEZ
- * POR COMERCIO y en serie — cada consulta esperaba a la anterior. Estos
- * tests fijan el contrato nuevo: peticiones en paralelo (con orden
- * conservado), deduplicación de ids, errores que NO se tragan y omisión
- * limpia del comercio que dejó de ser público entre consulta y consulta.
+ * L-42 (Lote Escaparate, commit B): el directorio deja de depender de los
+ * packs a la venta. Estos tests jubilan los del N+1 de F1 (el bucle en serie y
+ * el Promise.all de get_public_shop ya no existen) y fijan el contrato nuevo:
+ * UNA sola RPC (`list_directory_shops`, 0047) con mercado y límite, y comercios
+ * SIN packs que aparecen igual que los que sí tienen.
  */
 
-function shopPayload(id: string, name: string) {
+function directoryRow(id: string, over: Record<string, unknown> = {}) {
   return {
-    id,
-    name,
-    description: `Descripción de ${name}`,
+    shop_id: id,
+    name: `Comercio ${id}`,
+    description: `Descripción de ${id}`,
     locality_name: 'Santiago',
     logo_path: `${id}/logo.png`,
     cover_path: null,
-    rating: '4.50',
+    rating: 4.5,
+    rating_count: 3,
+    has_available_packs: true,
+    available_pack_count: 2,
+    updated_at: '2026-09-14T00:00:00.000Z',
+    ...over,
   }
 }
 
 type RpcResult = { data: unknown; error: { message: string } | null }
 
 let rpcCalls: Array<{ name: string; params: Record<string, unknown> }>
-let packRows: Array<Record<string, unknown>>
-let shopResponder: (id: string) => Promise<RpcResult>
+let rows: Array<Record<string, unknown>>
+let rpcError: { message: string } | null
 
 function setupSupabase() {
   rpcCalls = []
-  packRows = [{ shop_id: 's1' }, { shop_id: 's2' }, { shop_id: 's1' }] // s1 duplicado a propósito
-  shopResponder = (id: string) => Promise.resolve({ data: shopPayload(id, `Comercio ${id}`), error: null })
+  rows = [directoryRow('s1'), directoryRow('s2')]
+  rpcError = null
   const rpc = vi.fn().mockImplementation((name: string, params: Record<string, unknown>) => {
     rpcCalls.push({ name, params })
-    if (name === 'search_available_packs') return Promise.resolve({ data: packRows, error: null })
-    if (name === 'get_public_shop') return shopResponder(String(params.p_shop_id))
-    return Promise.resolve({ data: null, error: { message: `RPC inesperada: ${name}` } })
+    if (name === 'list_directory_shops') return Promise.resolve({ data: rows, error: rpcError } as RpcResult)
+    return Promise.resolve({ data: null, error: { message: `RPC inesperada: ${name}` } } as RpcResult)
   })
   ;(supabaseBrowser as unknown as { mockReturnValue: (v: unknown) => void }).mockReturnValue({
     rpc,
@@ -57,45 +62,22 @@ function createWrapper() {
   }
 }
 
-describe('useShops — directorio en paralelo y sin mentiras (F1)', () => {
+describe('useShops — directorio completo en un solo viaje (L-42)', () => {
   beforeEach(() => {
     setupSupabase()
   })
 
-  it('consulta cada comercio UNA sola vez (deduplica ids) y conserva el orden', async () => {
+  it('UNA sola consulta a la base: list_directory_shops con mercado y límite', async () => {
     const { result } = renderHook(() => useShops(), { wrapper: createWrapper() })
 
     await waitFor(() => expect(result.current.loading).toBe(false))
 
-    const shopCalls = rpcCalls.filter((c) => c.name === 'get_public_shop').map((c) => c.params.p_shop_id)
-    expect(shopCalls).toEqual(['s1', 's2']) // ni tres, ni desordenado
-    expect(result.current.shops.map((s) => s.id)).toEqual(['s1', 's2'])
+    expect(rpcCalls).toHaveLength(1) // ni N+1 ni Promise.all: un viaje
+    expect(rpcCalls[0].name).toBe('list_directory_shops')
+    expect(rpcCalls[0].params).toEqual({ p_market_id: DEFAULT_MARKET.id, p_limit: 100 })
   })
 
-  it('las consultas van EN PARALELO: la segunda arranca sin esperar a la primera', async () => {
-    // Cerrojo manual: ninguna petición de comercio se resuelve hasta que el
-    // test lo diga. Con el bucle en serie de antes, s2 NUNCA llegaba a
-    // consultarse (s1 bloqueaba) y este test moría en el waitFor: si alguien
-    // reintroduce el N+1, esto se pone rojo.
-    const liberar: Array<() => void> = []
-    shopResponder = (id: string) =>
-      new Promise<RpcResult>((resolve) => {
-        liberar.push(() => resolve({ data: shopPayload(id, `Comercio ${id}`), error: null }))
-      })
-
-    const { result } = renderHook(() => useShops(), { wrapper: createWrapper() })
-
-    await waitFor(() => {
-      const shopCalls = rpcCalls.filter((c) => c.name === 'get_public_shop')
-      expect(shopCalls).toHaveLength(2) // ambas en vuelo a la vez
-    })
-
-    liberar.forEach((fn) => fn())
-    await waitFor(() => expect(result.current.shops).toHaveLength(2))
-    expect(result.current.error).toBeNull()
-  })
-
-  it('mapea la ficha pública: nombre, ciudad, logo con URL de storage y rating numérico', async () => {
+  it('mapea la fila de 0047: ciudad, logo con URL de storage, rating numérico y disponibilidad', async () => {
     const { result } = renderHook(() => useShops(), { wrapper: createWrapper() })
 
     await waitFor(() => expect(result.current.shops).toHaveLength(2))
@@ -107,41 +89,40 @@ describe('useShops — directorio en paralelo y sin mentiras (F1)', () => {
     expect(s1.logo_url).toBe('https://cdn.test/shop-images/s1/logo.png')
     expect(s1.cover_url).toBeNull()
     expect(s1.rating).toBe(4.5)
-    expect(s1.verified).toBe(true) // garantizado por el WHERE de get_public_shop (0014)
+    expect(s1.verified).toBe(true) // garantía del WHERE de 0047, no dato fabricado
+    expect(s1.has_available_packs).toBe(true)
+    expect(s1.available_pack_count).toBe(2)
   })
 
-  it('un error de get_public_shop NO se traga: la página ve el fallo', async () => {
-    shopResponder = (id: string) =>
-      id === 's2'
-        ? Promise.resolve({ data: null, error: { message: 'permission denied' } })
-        : Promise.resolve({ data: shopPayload(id, `Comercio ${id}`), error: null })
+  it('L-42: un comercio SIN packs a la venta aparece igual que los que sí tienen', async () => {
+    rows = [directoryRow('s1'), directoryRow('s2', { has_available_packs: false, available_pack_count: 0 })]
+
+    const { result } = renderHook(() => useShops(), { wrapper: createWrapper() })
+
+    await waitFor(() => expect(result.current.shops).toHaveLength(2))
+
+    expect(result.current.shops.map((s) => s.id)).toEqual(['s1', 's2'])
+    expect(result.current.shops[1].has_available_packs).toBe(false)
+    expect(result.current.shops[1].available_pack_count).toBe(0)
+  })
+
+  it('un error de la RPC NO se traga: la página ve el fallo', async () => {
+    rpcError = { message: 'permission denied' }
 
     const { result } = renderHook(() => useShops(), { wrapper: createWrapper() })
 
     await waitFor(() => expect(result.current.error).not.toBeNull())
     expect(result.current.error).toContain('permission denied')
-    expect(result.current.error).toContain('s2')
   })
 
-  it('comercio que dejó de ser público entre consultas: se omite sin error', async () => {
-    shopResponder = (id: string) =>
-      id === 's2'
-        ? Promise.resolve({ data: null, error: null }) // fila vacía: ya no es público
-        : Promise.resolve({ data: shopPayload(id, `Comercio ${id}`), error: null })
+  it('mercado sin comercios = lista vacía, sin consultas extra', async () => {
+    rows = []
 
-    const { result } = renderHook(() => useShops(), { wrapper: createWrapper() })
-
-    await waitFor(() => expect(result.current.loading).toBe(false))
-    expect(result.current.error).toBeNull()
-    expect(result.current.shops.map((s) => s.id)).toEqual(['s1'])
-  })
-
-  it('catálogo vacío = directorio vacío, sin consultas extra', async () => {
-    packRows = []
     const { result } = renderHook(() => useShops(), { wrapper: createWrapper() })
 
     await waitFor(() => expect(result.current.loading).toBe(false))
     expect(result.current.shops).toEqual([])
-    expect(rpcCalls.filter((c) => c.name === 'get_public_shop')).toHaveLength(0)
+    expect(result.current.error).toBeNull()
+    expect(rpcCalls).toHaveLength(1)
   })
 })
