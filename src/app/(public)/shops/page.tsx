@@ -36,6 +36,14 @@ export default function ShopsPage() {
     return filtered
   }, [shops, searchTerm, selectedCity])
 
+  /*
+   * L-42: el contador de antes ("N comercios disponibles") contaba solo a los
+   * que tenían packs a la venta, porque la lista salía de los packs. Ahora la
+   * lista es la de comercios de Paporla (0047) y la disponibilidad es un dato
+   * aparte: se cuentan las dos cosas y cada una dice lo que es.
+   */
+  const withPacksCount = useMemo(() => shops.filter((shop) => shop.has_available_packs).length, [shops])
+
   if (loading) {
     return (
       <div className="min-h-screen">
@@ -88,53 +96,82 @@ export default function ShopsPage() {
             </p>
 
             <div className="mt-4 text-sm dark:text-gray-500 text-gray-400">
-              <span className="text-primary font-semibold">{filteredShops.length}</span> comercios disponibles
+              <span className="text-primary font-semibold">{shops.length}</span>{' '}
+              {shops.length === 1 ? 'comercio en Paporla' : 'comercios en Paporla'}
+              {withPacksCount > 0 && (
+                <>
+                  {' · '}
+                  <span className="text-primary font-semibold">{withPacksCount}</span> con packs a la venta ahora
+                </>
+              )}
             </div>
           </motion.div>
         </div>
       </div>
 
-      {/* FILTROS */}
-      <div className="container mx-auto px-4 py-8">
-        <div className="flex flex-col md:flex-row gap-4 mb-8 max-w-2xl mx-auto">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 dark:text-gray-500 text-gray-400" />
-            <input
-              type="text"
-              aria-label="Buscar comercios"
-              placeholder="Buscar comercios..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 rounded-xl dark:bg-white/5 bg-white dark:border-white/10 border-gray-200 dark:text-white text-gray-900 placeholder-gray-500 focus:border-primary focus:outline-none transition-all"
-            />
-          </div>
-
-          {cities.length > 0 && (
-            <div className="relative">
-              <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 dark:text-gray-500 text-gray-400" />
-              <select
-                aria-label="Filtrar por ciudad"
-                value={selectedCity}
-                onChange={(e) => setSelectedCity(e.target.value)}
-                className="pl-10 pr-8 py-2.5 rounded-xl dark:bg-white/5 bg-white dark:border-white/10 border-gray-200 dark:text-white text-gray-900 text-sm focus:border-primary focus:outline-none transition-all appearance-none"
-              >
-                <option value="all">Todas las ciudades</option>
-                {cities.map((city) => (
-                  <option key={city} value={city}>
-                    {city}
-                  </option>
-                ))}
-              </select>
+      {/* FILTROS: solo tienen sentido si hay algo que filtrar */}
+      {shops.length > 0 && (
+        <div className="container mx-auto px-4 py-8">
+          <div className="flex flex-col md:flex-row gap-4 mb-8 max-w-2xl mx-auto">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 dark:text-gray-500 text-gray-400" />
+              <input
+                type="text"
+                aria-label="Buscar comercios"
+                placeholder="Buscar comercios..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-10 pr-4 py-2.5 rounded-xl dark:bg-white/5 bg-white dark:border-white/10 border-gray-200 dark:text-white text-gray-900 placeholder-gray-500 focus:border-primary focus:outline-none transition-all"
+              />
             </div>
-          )}
-        </div>
 
-        {/* RESULTADOS */}
-        {filteredShops.length === 0 ? (
+            {cities.length > 0 && (
+              <div className="relative">
+                <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 dark:text-gray-500 text-gray-400" />
+                <select
+                  aria-label="Filtrar por ciudad"
+                  value={selectedCity}
+                  onChange={(e) => setSelectedCity(e.target.value)}
+                  className="pl-10 pr-8 py-2.5 rounded-xl dark:bg-white/5 bg-white dark:border-white/10 border-gray-200 dark:text-white text-gray-900 text-sm focus:border-primary focus:outline-none transition-all appearance-none"
+                >
+                  <option value="all">Todas las ciudades</option>
+                  {cities.map((city) => (
+                    <option key={city} value={city}>
+                      {city}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* RESULTADOS */}
+      <div className="container mx-auto px-4 pb-12">
+        {shops.length === 0 ? (
+          /*
+           * L-42: vacío DE VERDAD (ningún comercio verificado en el mercado).
+           * El mensaje de antes ("No se encontraron comercios / Prueba con
+           * otros filtros") echaba la culpa a unos filtros que ni existían
+           * todavía en pantalla.
+           */
           <div className="text-center py-12 dark:bg-black/40 bg-white/60 backdrop-blur-sm rounded-2xl dark:border-white/10 border-gray-200 border">
             <Store className="w-16 h-16 dark:text-gray-600 text-gray-400 mx-auto mb-4" />
-            <p className="dark:text-gray-400 text-gray-600">No se encontraron comercios</p>
-            <p className="text-sm dark:text-gray-500 text-gray-400 mt-1">Prueba con otros filtros</p>
+            <p className="dark:text-gray-400 text-gray-600">Aún no hay comercios publicados en Paporla</p>
+            <p className="text-sm dark:text-gray-500 text-gray-400 mt-1">
+              Estamos sumando comercios al rescate alimentario: vuelve pronto
+            </p>
+          </div>
+        ) : filteredShops.length === 0 ? (
+          /*
+           * L-42: hay comercios, pero la búsqueda o la ciudad los deja fuera.
+           * Aquí SÍ es cierto lo de probar con otros filtros.
+           */
+          <div className="text-center py-12 dark:bg-black/40 bg-white/60 backdrop-blur-sm rounded-2xl dark:border-white/10 border-gray-200 border">
+            <Search className="w-16 h-16 dark:text-gray-600 text-gray-400 mx-auto mb-4" />
+            <p className="dark:text-gray-400 text-gray-600">Ningún comercio coincide con tu búsqueda</p>
+            <p className="text-sm dark:text-gray-500 text-gray-400 mt-1">Prueba con otro nombre u otra ciudad</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

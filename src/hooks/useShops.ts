@@ -5,72 +5,81 @@ import { supabaseBrowser } from '@/lib/supabase/client'
 import type { Shop } from '@/lib/supabase/types'
 import { DEFAULT_MARKET } from '@/lib/constants/markets'
 
-const SHOPS_QUERY_KEY = 'shops'
+/**
+ * L-42 (Lote Escaparate, commit B): el Shop del directorio con el indicador de
+ * disponibilidad que devuelve `list_directory_shops` (0047). Vive aquí y no en
+ * `lib/supabase/types` porque es un tipo de presentación del directorio: la
+ * tarjeta y la página lo consumen para ordenar y etiquetar ("Sin packs ahora").
+ */
+export interface DirectoryShop extends Shop {
+  has_available_packs: boolean
+  available_pack_count: number
+}
 
-async function fetchShops(): Promise<Shop[]> {
+const SHOPS_QUERY_KEY = 'shops'
+/* 0047 valida 1..100; el directorio no pagina todavía. */
+const DIRECTORY_LIMIT = 100
+
+/**
+ * Fila tal y como la devuelve `list_directory_shops` (migración 0047).
+ * `rating` viaja como numeric de Postgres (número o cadena según el driver):
+ * se normaliza con Number() al mapear.
+ */
+type DirectoryRow = {
+  shop_id: string
+  name: string
+  description: string | null
+  locality_name: string | null
+  logo_path: string | null
+  cover_path: string | null
+  rating: string | number | null
+  rating_count: number
+  has_available_packs: boolean
+  available_pack_count: number
+  updated_at: string
+}
+
+/**
+ * L-42 (Lote Escaparate, commit B): el directorio ya NO se construye a partir
+ * de los packs a la venta. Antes `useShops` llamaba a `search_available_packs`
+ * y deduplicaba comercios: con el catálogo vacío, /shops no enseñaba NADA
+ * aunque hubiera comercios verificados, y el estado vacío culpaba a los
+ * filtros. Ahora una sola RPC (`list_directory_shops`, 0047) devuelve todos
+ * los comercios verificados vivos del mercado, con o sin packs, más el
+ * indicador de disponibilidad para ordenar y etiquetar.
+ *
+ * De paso queda enterrado el N+1 histórico: ni el bucle en serie de antes de
+ * F1 ni el Promise.all de F1 hacen falta — la base resuelve todo en un viaje.
+ *
+ * El `verified: true` fijo no es un dato fabricado: es la garantía del WHERE
+ * de 0047 (status='verified', deleted_at NULL, mercado pilot/active), igual
+ * que lo era el de get_public_shop (0014).
+ */
+async function fetchDirectoryShops(): Promise<DirectoryShop[]> {
   const supabase = supabaseBrowser()
-  const { data, error } = await supabase.rpc('search_available_packs', {
+  const { data, error } = await supabase.rpc('list_directory_shops', {
     p_market_id: DEFAULT_MARKET.id,
-    p_locality_id: undefined,
-    p_latitude: undefined,
-    p_longitude: undefined,
-    p_radius_meters: 10000,
-    p_query: undefined,
-    p_limit: 50,
+    p_limit: DIRECTORY_LIMIT,
   })
 
   if (error) throw new Error(error.message)
 
-  const ids: string[] = []
-  for (const row of (data ?? []) as Record<string, unknown>[]) {
-    const id = String(row.shop_id)
-    if (!ids.includes(id)) ids.push(id)
-  }
-
-  /*
-   * Fix F1 (N+1): antes era un bucle for en serie — un get_public_shop
-   * esperaba al anterior, así que el directorio tardaba N viajes
-   * consecutivos. Ahora van en paralelo con Promise.all, que además
-   * conserva el orden del catálogo. Y el error de un comercio ya no se
-   * traga en silencio: salta y la página muestra el estado de error, porque
-   * un directorio con comercios que desaparecen sin explicación es peor que
-   * un error honesto.
-   */
-  const results = await Promise.all(
-    ids.map(async (id): Promise<Shop | null> => {
-      const { data: payload, error } = await supabase.rpc('get_public_shop', { p_shop_id: id })
-      if (error) throw new Error(`No se pudo cargar el comercio ${id}: ${error.message}`)
-      const raw = (payload as { shop?: Record<string, unknown> } | Record<string, unknown> | null) ?? null
-      const row =
-        raw && typeof raw === 'object' && 'shop' in raw && raw.shop
-          ? (raw.shop as Record<string, unknown>)
-          : (raw as Record<string, unknown> | null)
-      // Fila vacía = el comercio dejó de ser público entre las dos consultas
-      // (pausa, baja, mercado cerrado). No es un error: se omite y en paz.
-      if (!row?.id) return null
-
-      const logoPath = (row.logo_path as string | null) ?? null
-      const coverPath = (row.cover_path as string | null) ?? null
-      return {
-        id: String(row.id),
-        name: String(row.name ?? ''),
-        description: (row.description as string | null) ?? null,
-        city: (row.locality_name as string | null) ?? (row.city as string | null) ?? '',
-        cover_url: coverPath ? supabase.storage.from('shop-images').getPublicUrl(coverPath).data.publicUrl : null,
-        logo_url: logoPath ? supabase.storage.from('shop-images').getPublicUrl(logoPath).data.publicUrl : null,
-        rating: row.rating != null ? Number(row.rating) : 0,
-        /*
-         * Fix F1 (datos fabricados): el `true` fijo parece inventado, pero es
-         * consecuencia del filtro del servidor — get_public_shop solo devuelve
-         * comercios con status='verified' (migración 0014), igual que
-         * search_available_packs. Ningún comercio no verificado llega aquí.
-         */
-        verified: true,
-      } as Shop
-    }),
-  )
-
-  return results.filter((shop): shop is Shop => shop !== null)
+  return ((data ?? []) as DirectoryRow[]).map((row) => {
+    const logoPath = row.logo_path
+    const coverPath = row.cover_path
+    return {
+      id: String(row.shop_id),
+      name: String(row.name ?? ''),
+      description: row.description ?? null,
+      city: row.locality_name ?? '',
+      cover_url: coverPath ? supabase.storage.from('shop-images').getPublicUrl(coverPath).data.publicUrl : null,
+      logo_url: logoPath ? supabase.storage.from('shop-images').getPublicUrl(logoPath).data.publicUrl : null,
+      rating: row.rating != null ? Number(row.rating) : 0,
+      verified: true,
+      has_available_packs: Boolean(row.has_available_packs),
+      available_pack_count: Number(row.available_pack_count ?? 0),
+    } as DirectoryShop
+  })
 }
 
 export function useShops() {
@@ -81,12 +90,11 @@ export function useShops() {
     refetch,
   } = useQuery({
     queryKey: [SHOPS_QUERY_KEY, DEFAULT_MARKET.id],
-    queryFn: fetchShops,
+    queryFn: fetchDirectoryShops,
     /*
-     * Mismo motivo que en el catálogo de packs: el directorio se construye a
-     * partir de los packs a la venta, así que un comercio entra y sale de la
-     * lista según pausa o reanuda. Si no refrescamos al volver a la pestaña,
-     * el cliente ve comercios que ya no tienen nada que ofrecer.
+     * Un comercio entra y sale del indicador de packs según pausa o reanuda,
+     * y puede verificarse uno nuevo en cualquier momento: al volver a la
+     * pestaña conviene repreguntar, como en el catálogo.
      */
     staleTime: 60 * 1000,
     refetchOnWindowFocus: true,
