@@ -5,7 +5,26 @@
 export function translateAuthError(error: unknown): string {
   if (!error) return 'Error desconocido'
 
-  const message = typeof error === 'string' ? error : error instanceof Error ? error.message : String(error)
+  /*
+   * L-41: Supabase y algunas RPCs devuelven el error como OBJETO PLANO
+   * ({ message, status, ... }) en vez de una instancia de Error. El String(objeto)
+   * de antes pintaba "[object Object]" en pantalla al usuario. Se pesca el
+   * .message del objeto plano y, si no trae, se serializa: nunca más el
+   * "[object Object]".
+   */
+  const message =
+    typeof error === 'string'
+      ? error
+      : error instanceof Error
+        ? error.message
+        : typeof error === 'object' &&
+            error !== null &&
+            'message' in error &&
+            typeof (error as { message: unknown }).message === 'string'
+          ? (error as { message: string }).message
+          : typeof error === 'object' && error !== null
+            ? JSON.stringify(error)
+            : String(error)
 
   const lower = message.toLowerCase()
 
