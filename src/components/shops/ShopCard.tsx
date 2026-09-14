@@ -15,6 +15,12 @@ interface ShopCardProps {
     cover_url: string | null
     rating: number
     verified: boolean
+    /*
+     * L-42 (commit C): opcional a propósito. El directorio (0047) lo trae y la
+     * tarjeta lo usa para etiquetar "Sin packs ahora"; otras llamadas que aún
+     * pasan un Shop pelado siguen compilando y simplemente no pintan etiqueta.
+     */
+    has_available_packs?: boolean
   }
   index?: number
 }
@@ -61,6 +67,17 @@ export default function ShopCard({ shop, index = 0 }: ShopCardProps) {
               <div className="px-2 py-1 bg-green-500/90 backdrop-blur-sm text-white text-xs font-medium rounded-lg flex items-center gap-1">
                 <CheckCircle className="w-3 h-3" />
                 Verificado
+              </div>
+            </div>
+          )}
+
+          {/* L-42 (commit C): el comercio está en Paporla aunque hoy no tenga
+              nada a la venta. Se dice en la tarjeta, sin esconderlo: es la
+              etiqueta que el directorio nuevo hace posible. */}
+          {shop.has_available_packs === false && (
+            <div className="absolute bottom-3 left-3 z-10">
+              <div className="px-2 py-1 bg-gray-900/80 backdrop-blur-sm text-gray-100 text-xs font-medium rounded-lg border border-white/20">
+                Sin packs ahora
               </div>
             </div>
           )}

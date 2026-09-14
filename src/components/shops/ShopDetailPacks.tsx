@@ -28,7 +28,7 @@ interface ShopDetailPacksProps {
   shopAddress: string | null
 }
 
-export default function ShopDetailPacks({ packs, shopName: _shopName, shopAddress }: ShopDetailPacksProps) {
+export default function ShopDetailPacks({ packs, shopName, shopAddress }: ShopDetailPacksProps) {
   if (packs.length === 0) {
     return (
       <motion.div
@@ -39,8 +39,15 @@ export default function ShopDetailPacks({ packs, shopName: _shopName, shopAddres
         <div className="w-16 h-16 mx-auto mb-4 rounded-full dark:bg-white/5 bg-gray-100 flex items-center justify-center">
           <Package className="w-8 h-8 dark:text-gray-600 text-gray-400" />
         </div>
-        <p className="dark:text-gray-400 text-gray-600 font-medium">No hay packs disponibles</p>
-        <p className="text-xs dark:text-gray-500 text-gray-400 mt-1">Vuelve mas tarde para ver nuevas opciones</p>
+        {/* L-42 (commit C): vacío honesto con nombre y apellido. Antes decía
+            solo "No hay packs disponibles", que no cuenta si el comercio
+            sigue en Paporla o si es que se fue. */}
+        <p className="dark:text-gray-400 text-gray-600 font-medium">
+          Ahora mismo no hay packs a la venta en {shopName}
+        </p>
+        <p className="text-xs dark:text-gray-500 text-gray-400 mt-1">
+          El comercio sigue en Paporla: sus packs se publican por tiempo limitado y vuelan. Vuelve pronto.
+        </p>
       </motion.div>
     )
   }

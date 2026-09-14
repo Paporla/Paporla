@@ -127,3 +127,32 @@ describe('ShopCard (L-28 · corazón fuera del enlace)', () => {
     expect(screen.getByText('4.5')).toBeTruthy()
   })
 })
+
+describe('ShopCard (L-42 · etiqueta "Sin packs ahora")', () => {
+  it('comercio SIN packs a la venta: la etiqueta se ve', () => {
+    render(
+      <ToastProvider>
+        <ShopCard shop={{ ...shop, has_available_packs: false }} />
+      </ToastProvider>,
+    )
+    expect(screen.getByText('Sin packs ahora')).toBeTruthy()
+  })
+
+  it('comercio CON packs a la venta: sin etiqueta (no estorba)', () => {
+    render(
+      <ToastProvider>
+        <ShopCard shop={{ ...shop, has_available_packs: true }} />
+      </ToastProvider>,
+    )
+    expect(screen.queryByText('Sin packs ahora')).toBeNull()
+  })
+
+  it('sin el dato (un Shop pelado de otra llamada): sin etiqueta, no se inventa', () => {
+    render(
+      <ToastProvider>
+        <ShopCard shop={shop} />
+      </ToastProvider>,
+    )
+    expect(screen.queryByText('Sin packs ahora')).toBeNull()
+  })
+})
