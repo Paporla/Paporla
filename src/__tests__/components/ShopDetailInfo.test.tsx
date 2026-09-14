@@ -52,3 +52,18 @@ describe('ShopDetailInfo — mapa público de OpenStreetMap (L-16)', () => {
     expect(screen.queryByText('Ver en Google Maps')).toBeNull()
   })
 })
+
+describe('ShopDetailInfo — "Miembro desde" sin fechas inventadas (L-44)', () => {
+  it('con fecha real: se pinta el mes y el año', () => {
+    render(<ShopDetailInfo shop={shopConCoords} packsCount={1} />)
+
+    expect(screen.getByText(/Miembro desde septiembre de 2026/)).toBeTruthy()
+  })
+
+  it('sin fecha (get_public_shop no la trae): se oculta la línea, no se inventa "Recientemente"', () => {
+    render(<ShopDetailInfo shop={{ ...shopConCoords, created_at: '' }} packsCount={1} />)
+
+    expect(screen.queryByText(/Miembro desde/)).toBeNull()
+    expect(screen.queryByText(/Recientemente/)).toBeNull()
+  })
+})
