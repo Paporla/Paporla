@@ -200,6 +200,26 @@ export default function ShopDetailInfo({ shop, packsCount }: ShopDetailInfoProps
         </div>
       )}
 
+      {/* L-16 (mitad pública, commit C): el mapa de OpenStreetMap que hasta
+          ahora solo vivía en el formulario del dueño (ProfileLocationForm).
+          Mismo embed interactivo con su marker y su copyright dentro del
+          recuadro; la CSP ya permite openstreetmap.org en frame-src. */}
+      {shop.latitude != null && shop.longitude != null && (
+        <div className="space-y-2">
+          <div className="relative rounded-2xl overflow-hidden border dark:border-white/10 border-gray-200 h-64 bg-gray-100">
+            <iframe
+              title="Mapa de ubicacion del comercio"
+              src={`https://www.openstreetmap.org/export/embed.html?bbox=${(shop.longitude - 0.02).toFixed(4)},${(shop.latitude - 0.01).toFixed(4)},${(shop.longitude + 0.02).toFixed(4)},${(shop.latitude + 0.01).toFixed(4)}&layer=mapnik&marker=${shop.latitude},${shop.longitude}`}
+              className="w-full h-full border-0"
+              loading="lazy"
+            />
+          </div>
+          <p className="text-[10px] dark:text-gray-500 text-gray-500 font-mono">
+            {shop.latitude.toFixed(5)}, {shop.longitude.toFixed(5)}
+          </p>
+        </div>
+      )}
+
       {/* Boton de Google Maps */}
       {shop.latitude && shop.longitude && (
         <div className="border-t dark:border-white/5 border-gray-200 pt-4">
