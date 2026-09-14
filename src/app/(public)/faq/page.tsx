@@ -16,7 +16,6 @@ import {
   Star,
   Heart,
   Mail,
-  MessageCircle,
 } from 'lucide-react'
 import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
@@ -29,6 +28,24 @@ interface FaqItem {
   category: 'general' | 'client' | 'business'
 }
 
+/**
+ * L-45 (auditoría externa A-02, A-08, A-20, A-54, A-74): esta página prometía cosas que no
+ * existen. Regla adoptada: ningún texto de la interfaz puede prometer algo que la app no haga hoy.
+ * Cambios concretos y su porqué:
+ *  - El código de recogida NO es "de 6 dígitos": es `P4P-XXXXXXXX` (migración 0031, línea 82).
+ *  - NO hay comisión que "se descuente automáticamente": los pagos están bloqueados hasta tener
+ *    empresa + MercadoPago (decisión del fundador). Se dice explícitamente.
+ *  - NO hay "billetera virtual" ni "retiros a tu cuenta bancaria": el modelo decidido es la
+ *    liquidación mensual simple (L-12, 2026-09-10), y aún no está implementado. Se dice.
+ *  - La verificación de comercios SÍ es real y SÍ es obligatoria para publicar: `publish_pack`
+ *    exige `shops.status = 'verified'` (0009:1601 y 0037:382) y `search_available_packs` solo
+ *    devuelve packs de comercios verificados (0037:180). Lo que NO existe es un plazo: la revisión
+ *    es manual, así que se quita cualquier promesa de horas (A-54).
+ *  - Se retira el botón "Chat en vivo", que no tenía manejador (A-74). No se sustituye por otra
+ *    promesa: queda el enlace a /contacto.
+ *  - La ventana de cancelación "2 horas antes" SÍ es cierta: `markets.cancellation_cutoff_minutes`
+ *    = 120 para Chile (0015) y `cancel_reservation` la aplica (0016:70). Se mantiene.
+ */
 const faqs: FaqItem[] = [
   {
     question: '¿Qué es Paporla?',
@@ -61,35 +78,35 @@ const faqs: FaqItem[] = [
   {
     question: '¿Cómo recibo mi pedido?',
     answer:
-      'Todas las recogidas son en el local del comercio. Al hacer la reserva, recibirás un código único de 6 dígitos que deberás presentar al llegar. Verifica la dirección y el horario de recogida en el detalle del pack.',
+      'Todas las recogidas son en el local del comercio. Al hacer la reserva recibirás un código de recogida con el formato P4P-XXXXXXXX, que deberás presentar al llegar. Verifica la dirección y la franja horaria de recogida en el detalle del pack.',
     icon: MapPin,
     category: 'client',
   },
   {
     question: '¿Cómo me registro como comercio?',
     answer:
-      'Al registrarte, selecciona la opción "Comercio". Completa los datos de tu negocio y nuestro equipo verificará tu cuenta. Una vez verificada, podrás empezar a publicar packs.',
+      'Al registrarte, selecciona la opción "Comercio" y completa los datos de tu negocio. Tu comercio queda en borrador hasta que nuestro equipo lo revisa y lo verifica: sin verificación no se pueden publicar packs. La revisión es manual y la hacemos nosotros, así que no tenemos un plazo automático que prometerte.',
     icon: Store,
     category: 'business',
   },
   {
     question: '¿Cuánto cuesta publicar packs?',
     answer:
-      'Publicar packs en Paporla es completamente gratuito. Solo pagas una comisión por cada pack vendido, que se descuenta automáticamente. Consulta nuestros términos para más detalles.',
+      'Publicar packs en Paporla es gratis. Hoy no cobramos ninguna comisión: los pagos dentro de la plataforma todavía no están activos. Cuando los activemos, lo anunciaremos con las condiciones por escrito antes de aplicarlas, y ningún comercio verá un cobro que no haya aceptado.',
     icon: CreditCard,
     category: 'business',
   },
   {
-    question: '¿Cómo recibo el pago de mis ventas?',
+    question: '¿Cómo funciona el pago de las ventas?',
     answer:
-      'Los pagos se acumulan en tu billetera virtual dentro de la plataforma. Puedes solicitar un retiro a tu cuenta bancaria una vez al mes. El proceso es transparente y seguro.',
+      'Ahora mismo no se cobra ni se paga nada a través de Paporla, porque los pagos aún no están activos. Lo que muestra el panel del comercio es un registro informativo de las ventas. El modelo que tenemos decidido para cuando se activen es una liquidación mensual por transferencia bancaria: no habrá billetera virtual ni retiros dentro de la aplicación.',
     icon: Shield,
     category: 'business',
   },
   {
     question: '¿Los comercios son verificados?',
     answer:
-      'Sí, todos los comercios pasan por un proceso de verificación para garantizar la calidad y seguridad de los alimentos. Busca el badge de "Verificado" en el perfil del comercio.',
+      'Sí. Un comercio puede registrarse y dejar sus packs preparados, pero no puede publicarlos hasta que nuestro equipo lo verifica, y en el catálogo solo aparecen packs de comercios verificados. La revisión es manual: no tenemos un plazo automático, así que si tu comercio lleva tiempo en revisión, escríbenos.',
     icon: Star,
     category: 'general',
   },
@@ -225,12 +242,9 @@ export default function FAQPage() {
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
               <Link href="/contacto">
                 <Button variant="outline" icon={<Mail className="w-4 h-4" />}>
-                  Correo electrónico
+                  Escríbenos
                 </Button>
               </Link>
-              <Button variant="primary" icon={<MessageCircle className="w-4 h-4" />}>
-                Chat en vivo
-              </Button>
             </div>
           </Card>
         </div>
