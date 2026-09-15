@@ -78,7 +78,7 @@ export default function PrivacidadPage() {
             <div className="flex items-center justify-center gap-4 mt-6 text-sm text-gray-500">
               <div className="flex items-center gap-1">
                 <Calendar className="w-4 h-4" />
-                Última actualización: 15 Enero 2025
+                Última actualización: 16 Septiembre 2026
               </div>
               <div className="flex items-center gap-1">
                 <Shield className="w-4 h-4" />
@@ -445,8 +445,9 @@ export default function PrivacidadPage() {
                   5. Derechos ARCO
                 </h2>
                 <p className="dark:text-gray-300 text-gray-700 mb-3">
-                  En cumplimiento con la <strong>Ley 19.628 de Protección de la Vida Privada de Chile</strong> y
-                  legislaciones similares (LGPD en Brasil, Ley 1581 en Colombia, etc.), usted tiene derecho a:
+                  En cumplimiento con la <strong>Ley 21.719 de Protección de Datos Personales</strong> de Chile —que
+                  reemplaza a la Ley 19.628 y entra en vigencia el 1 de diciembre de 2026— y legislaciones similares
+                  (LGPD en Brasil, Ley 1581 en Colombia, etc.), usted tiene derecho a:
                 </p>
 
                 <div className="grid md:grid-cols-2 gap-4 mt-4">
@@ -544,15 +545,24 @@ export default function PrivacidadPage() {
                 <ul className="list-none mt-3 space-y-2">
                   <li className="flex items-start gap-2">
                     <Clock className="w-4 h-4 text-primary mt-0.5" />
-                    Datos de reservas: <strong>2 años</strong> (requisitos fiscales y legales)
+                    Datos de cuenta: <strong>mientras la cuenta exista</strong>. Al borrarla eliminamos su perfil; los
+                    registros que la ley nos obliga a conservar siguen seudonimizados 6 años.
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <Clock className="w-4 h-4 text-primary mt-0.5" />
+                    Datos de reservas: <strong>6 años</strong> (plazo general de prescripción)
                   </li>
                   <li className="flex items-start gap-2">
                     <Trash2 className="w-4 h-4 text-primary mt-0.5" />
-                    Datos de perfil: <strong>Eliminamos dentro de 30 días</strong>
+                    Datos de verificación de comercios: <strong>6 años tras la baja</strong> (defensa legal)
                   </li>
                   <li className="flex items-start gap-2">
                     <Mail className="w-4 h-4 text-primary mt-0.5" />
-                    Comunicaciones: <strong>1 año</strong>
+                    Registros de comunicaciones: <strong>aprox. 30 días</strong> en el proveedor de correo
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <Mail className="w-4 h-4 text-primary mt-0.5" />
+                    Analítica web: <strong>14 meses</strong>, y solo si aceptaste las cookies
                   </li>
                   <li className="flex items-start gap-2">
                     <Database className="w-4 h-4 text-primary mt-0.5" />

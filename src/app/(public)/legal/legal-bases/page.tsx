@@ -78,7 +78,8 @@ export default function LegalBasesPage() {
           <section>
             <h2 className="text-2xl font-bold text-gradient mb-4">3. Ley de Protección de Datos</h2>
             <p className="dark:text-gray-300 text-gray-700 leading-relaxed">
-              En cumplimiento de la <strong>Ley 19.628 de Protección de la Vida Privada</strong> de Chile, Paporla:
+              En cumplimiento de la <strong>Ley 21.719 de Protección de Datos Personales</strong> de Chile —que
+              reemplaza a la Ley 19.628 y entra en vigencia el 1 de diciembre de 2026—, Paporla:
             </p>
             <ul className="list-disc pl-6 mt-3 space-y-2 dark:text-gray-300 text-gray-700">
               <li>Solo recopila datos con consentimiento explícito y para fines legítimos.</li>
