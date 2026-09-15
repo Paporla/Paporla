@@ -33,6 +33,14 @@ interface FaqItem {
  * existen. Regla adoptada: ningún texto de la interfaz puede prometer algo que la app no haga hoy.
  * Cambios concretos y su porqué:
  *  - El código de recogida NO es "de 6 dígitos": es `P4P-XXXXXXXX` (migración 0031, línea 82).
+ *    CORRECCIÓN posterior (L-64, 2026-09-15): ni siquiera se puede PROMETER ese código. Hoy se
+ *    genera cuando el comercio confirma y se le enseña al comercio UNA SOLA VEZ; en la base solo
+ *    queda su huella SHA-256 (`reservations.pickup_code_hash`, 0005:34 y 0031:91) y el cliente no
+ *    tiene ninguna pantalla donde verlo. Decir "recibirás un código que deberás presentar" era
+ *    mandar al cliente al local con algo que no existe. Se describe el flujo real de hoy: se recoge
+ *    en el local, dentro de la franja, y el comercio busca la reserva a tu nombre
+ *    (`list_shop_reservations` devuelve `customer_display_name` y la pantalla del comercio filtra
+ *    por él). El código volverá a la FAQ cuando el cliente pueda verlo de verdad.
  *  - NO hay comisión que "se descuente automáticamente": los pagos están bloqueados hasta tener
  *    empresa + MercadoPago (decisión del fundador). Se dice explícitamente.
  *  - NO hay "billetera virtual" ni "retiros a tu cuenta bancaria": el modelo decidido es la
@@ -78,7 +86,7 @@ const faqs: FaqItem[] = [
   {
     question: '¿Cómo recibo mi pedido?',
     answer:
-      'Todas las recogidas son en el local del comercio. Al hacer la reserva recibirás un código de recogida con el formato P4P-XXXXXXXX, que deberás presentar al llegar. Verifica la dirección y la franja horaria de recogida en el detalle del pack.',
+      'Todas las recogidas son en el local del comercio, dentro de la franja horaria que elegiste al reservar. El comercio prepara tu pack cuando confirma la reserva. Al llegar, di tu nombre: el comercio busca tu reserva y te la entrega. Verifica la dirección y la franja horaria en el detalle del pack y en Mis reservas.',
     icon: MapPin,
     category: 'client',
   },
