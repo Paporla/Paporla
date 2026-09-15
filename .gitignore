@@ -45,6 +45,8 @@ coverage/
 # Tests
 playwright-report/
 test-results/
+# Sesiones guardadas de Playwright: contienen tokens reales. NUNCA al repo.
+e2e/.auth/
 
 # Vercel
 .vercel
