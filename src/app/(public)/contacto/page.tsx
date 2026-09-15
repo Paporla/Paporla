@@ -4,6 +4,22 @@ import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { Send, CheckCircle, AlertCircle, MapPin, Mail, Clock } from 'lucide-react'
 
+/**
+ * A-03 (auditoría externa): este formulario ANTES mentía. Esperaba 1,5 segundos
+ * con un setTimeout y mostraba "¡Mensaje enviado! Te responderemos pronto" sin
+ * enviar nada a ninguna parte. Quien escribía por un problema creía haber
+ * hablado con Paporla y su mensaje se tiraba a la basura.
+ *
+ * Ahora llama de verdad a /api/contacto. Y si el correo NO sale, se dice: se
+ * muestra el error y se ofrece la dirección real para escribir por cuenta
+ * propia. Un "enviado" falso es peor que un error honesto.
+ */
+
+type SubmitStatus = 'idle' | 'success' | 'error'
+type FieldErrors = Partial<Record<'name' | 'email' | 'subject' | 'message', string>>
+
+const CONTACT_EMAIL = process.env.NEXT_PUBLIC_CONTACT_EMAIL ?? 'hola@paporla.com'
+
 export default function ContactoPage() {
   const [formData, setFormData] = useState({
     name: '',
@@ -11,23 +27,76 @@ export default function ContactoPage() {
     subject: '',
     message: '',
   })
+  // Trampa para robots: un campo que una persona nunca ve ni rellena.
+  const [honeypot, setHoneypot] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle')
+  const [submitStatus, setSubmitStatus] = useState<SubmitStatus>('idle')
+  const [statusMessage, setStatusMessage] = useState('')
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({})
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target
+    setFormData((prev) => ({ ...prev, [name]: value }))
+    // El error se apaga en cuanto la persona empieza a corregir ese campo.
+    setFieldErrors((prev) => (prev[name as keyof FieldErrors] ? { ...prev, [name]: undefined } : prev))
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsSubmitting(true)
-    setTimeout(() => {
-      setSubmitStatus('success')
+    setSubmitStatus('idle')
+    setFieldErrors({})
+
+    try {
+      const response = await fetch('/api/contacto', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...formData, website: honeypot }),
+      })
+
+      const payload: {
+        success?: boolean
+        error?: string
+        field?: string
+        fallbackEmail?: string
+      } = await response.json().catch(() => ({}))
+
+      if (response.ok && payload.success) {
+        setSubmitStatus('success')
+        setStatusMessage('¡Mensaje enviado! Te responderemos pronto.')
+        setFormData({ name: '', email: '', subject: '', message: '' })
+        setHoneypot('')
+        return
+      }
+
+      // Si el servidor dice qué campo está mal, el error va JUNTO al campo.
+      if (payload.field && payload.field in formData) {
+        setFieldErrors({ [payload.field]: payload.error ?? 'Revisa este campo' } as FieldErrors)
+      }
+
+      // Y siempre se deja una salida: la dirección real.
+      setSubmitStatus('error')
+      setStatusMessage(
+        payload.fallbackEmail
+          ? `${payload.error ?? 'No se pudo enviar el mensaje.'} También puedes escribirnos directamente.`
+          : (payload.error ?? 'No se pudo enviar el mensaje. Inténtalo de nuevo.'),
+      )
+    } catch {
+      setSubmitStatus('error')
+      setStatusMessage(
+        'No hemos podido contactar con el servidor. Revisa tu conexión e inténtalo de nuevo, o escríbenos directamente.',
+      )
+    } finally {
       setIsSubmitting(false)
-      setFormData({ name: '', email: '', subject: '', message: '' })
-      setTimeout(() => setSubmitStatus('idle'), 5000)
-    }, 1500)
+    }
   }
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }))
-  }
+  const inputClass = (field: keyof FieldErrors) =>
+    `w-full px-4 py-3 rounded-xl dark:bg-white/10 bg-white dark:text-white text-gray-900 outline-none transition-all ${
+      fieldErrors[field]
+        ? 'border border-red-500/60 focus:border-red-500 focus:ring-2 focus:ring-red-500/20'
+        : 'dark:border-gray-600 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20'
+    }`
 
   return (
     <div className="min-h-screen">
@@ -80,7 +149,11 @@ export default function ContactoPage() {
                   </div>
                   <div>
                     <h3 className="font-semibold">Email</h3>
-                    <p className="text-gray-600 dark:text-gray-300">hola@paporla.com</p>
+                    {/* Antes era texto plano. Si el formulario falla, este enlace
+                        es la salida: que al menos se pueda pulsar. */}
+                    <a href={`mailto:${CONTACT_EMAIL}`} className="text-primary hover:underline break-all">
+                      {CONTACT_EMAIL}
+                    </a>
                   </div>
                 </div>
                 <div className="flex items-start gap-4 p-3 rounded-xl dark:hover:bg-white/5 hover:bg-gray-100 transition-all">
@@ -88,8 +161,8 @@ export default function ContactoPage() {
                     <Clock className="w-5 h-5 text-primary" />
                   </div>
                   <div>
-                    <h3 className="font-semibold">Horario</h3>
-                    <p className="text-gray-600 dark:text-gray-300">Lun - Vie: 9:00 - 18:00</p>
+                    <h3 className="font-semibold">Horario de respuesta</h3>
+                    <p className="text-gray-600 dark:text-gray-300">Lunes a viernes, 9:00 - 18:00</p>
                   </div>
                 </div>
               </div>
@@ -108,20 +181,49 @@ export default function ContactoPage() {
               <p className="text-gray-600 dark:text-gray-400 mb-6">Completa el formulario y te responderemos pronto.</p>
 
               {submitStatus === 'success' && (
-                <div className="mb-6 p-4 rounded-xl bg-green-500/10 border border-green-500/20 text-green-600 dark:text-green-400 flex items-center gap-3">
-                  <CheckCircle className="w-5 h-5" />
-                  <span>¡Mensaje enviado! Te responderemos pronto.</span>
+                <div
+                  role="status"
+                  className="mb-6 p-4 rounded-xl bg-green-500/10 border border-green-500/20 text-green-600 dark:text-green-400 flex items-center gap-3"
+                >
+                  <CheckCircle className="w-5 h-5 shrink-0" />
+                  <span>{statusMessage}</span>
                 </div>
               )}
 
               {submitStatus === 'error' && (
-                <div className="mb-6 p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 flex items-center gap-3">
-                  <AlertCircle className="w-5 h-5" />
-                  <span>Error al enviar. Por favor, intenta nuevamente.</span>
+                <div
+                  role="alert"
+                  className="mb-6 p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 flex items-start gap-3"
+                >
+                  <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
+                  <div>
+                    <p>{statusMessage}</p>
+                    {/* La salida siempre visible cuando algo falla. */}
+                    <a href={`mailto:${CONTACT_EMAIL}`} className="inline-block mt-2 font-semibold underline">
+                      Escribir a {CONTACT_EMAIL}
+                    </a>
+                  </div>
                 </div>
               )}
 
-              <form onSubmit={handleSubmit} className="space-y-5">
+              {/* L-40: noValidate. Sin esto, el navegador bloquea el envío con
+                  su burbuja gris y nuestros mensajes en español no salen nunca. */}
+              <form onSubmit={handleSubmit} noValidate className="space-y-5">
+                {/* Trampa para robots: fuera de la pantalla, sin tabulador ni
+                    lector de pantalla. Quien lo rellene es un bot. */}
+                <div aria-hidden="true" className="absolute left-[-9999px] top-0 w-0 h-0 overflow-hidden">
+                  <label htmlFor="contact-website">No rellenar este campo</label>
+                  <input
+                    id="contact-website"
+                    type="text"
+                    name="website"
+                    tabIndex={-1}
+                    autoComplete="off"
+                    value={honeypot}
+                    onChange={(e) => setHoneypot(e.target.value)}
+                  />
+                </div>
+
                 <div className="grid md:grid-cols-2 gap-5">
                   <div>
                     <label
@@ -137,9 +239,16 @@ export default function ContactoPage() {
                       value={formData.name}
                       onChange={handleChange}
                       required
-                      className="w-full px-4 py-3 rounded-xl dark:bg-white/10 bg-white dark:border-gray-600 border-gray-200 dark:text-white text-gray-900 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
+                      aria-invalid={Boolean(fieldErrors.name)}
+                      aria-describedby={fieldErrors.name ? 'contact-name-error' : undefined}
+                      className={inputClass('name')}
                       placeholder="Tu nombre"
                     />
+                    {fieldErrors.name && (
+                      <p id="contact-name-error" className="mt-1.5 text-sm text-red-500">
+                        {fieldErrors.name}
+                      </p>
+                    )}
                   </div>
                   <div>
                     <label
@@ -155,9 +264,16 @@ export default function ContactoPage() {
                       value={formData.email}
                       onChange={handleChange}
                       required
-                      className="w-full px-4 py-3 rounded-xl dark:bg-white/10 bg-white dark:border-gray-600 border-gray-200 dark:text-white text-gray-900 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
+                      aria-invalid={Boolean(fieldErrors.email)}
+                      aria-describedby={fieldErrors.email ? 'contact-email-error' : undefined}
+                      className={inputClass('email')}
                       placeholder="tu@email.com"
                     />
+                    {fieldErrors.email && (
+                      <p id="contact-email-error" className="mt-1.5 text-sm text-red-500">
+                        {fieldErrors.email}
+                      </p>
+                    )}
                   </div>
                 </div>
 
@@ -175,9 +291,16 @@ export default function ContactoPage() {
                     value={formData.subject}
                     onChange={handleChange}
                     required
-                    className="w-full px-4 py-3 rounded-xl dark:bg-white/10 bg-white dark:border-gray-600 border-gray-200 dark:text-white text-gray-900 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
-                    placeholder="Sobre que quieres hablar?"
+                    aria-invalid={Boolean(fieldErrors.subject)}
+                    aria-describedby={fieldErrors.subject ? 'contact-subject-error' : undefined}
+                    className={inputClass('subject')}
+                    placeholder="¿Sobre qué quieres hablar?"
                   />
+                  {fieldErrors.subject && (
+                    <p id="contact-subject-error" className="mt-1.5 text-sm text-red-500">
+                      {fieldErrors.subject}
+                    </p>
+                  )}
                 </div>
 
                 <div>
@@ -194,9 +317,16 @@ export default function ContactoPage() {
                     value={formData.message}
                     onChange={handleChange}
                     required
-                    className="w-full px-4 py-3 rounded-xl dark:bg-white/10 bg-white dark:border-gray-600 border-gray-200 dark:text-white text-gray-900 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all resize-none"
-                    placeholder="Cuentanos detalladamente tu mensaje..."
+                    aria-invalid={Boolean(fieldErrors.message)}
+                    aria-describedby={fieldErrors.message ? 'contact-message-error' : undefined}
+                    className={inputClass('message')}
+                    placeholder="Cuéntanos detalladamente tu mensaje..."
                   />
+                  {fieldErrors.message && (
+                    <p id="contact-message-error" className="mt-1.5 text-sm text-red-500">
+                      {fieldErrors.message}
+                    </p>
+                  )}
                 </div>
 
                 <motion.button
@@ -204,8 +334,11 @@ export default function ContactoPage() {
                   disabled={isSubmitting}
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
-                  className={`w-full py-4 rounded-xl font-semibold text-white dark:text-black transition-all duration-300 flex items-center justify-center gap-2
-                    ${isSubmitting ? 'bg-gray-500 cursor-not-allowed' : 'bg-gradient-to-r from-primary to-primary/80 hover:shadow-lg hover:shadow-primary/25'}`}
+                  className={`w-full py-4 rounded-xl font-semibold text-white dark:text-black transition-all duration-300 flex items-center justify-center gap-2 ${
+                    isSubmitting
+                      ? 'bg-gray-500 cursor-not-allowed'
+                      : 'bg-gradient-to-r from-primary to-primary/80 hover:shadow-lg hover:shadow-primary/25'
+                  }`}
                 >
                   {isSubmitting ? (
                     <>
