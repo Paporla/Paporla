@@ -14,7 +14,13 @@ interface Step {
 const userSteps: Step[] = [
   { icon: Search, title: 'Explora packs', description: 'Busca packs cerca de ti con descuentos de hasta 70%' },
   { icon: ShoppingBag, title: 'Reserva', description: 'Elige tu pack favorito y reserva en segundos' },
-  { icon: MapPin, title: 'Recoge y disfruta', description: 'Ve al comercio, muestra tu código y recoge' },
+  /**
+   * L-64 (2026-09-15): decía "muestra tu código y recoge", pero el cliente no tiene ningún código
+   * que mostrar. El código se genera al confirmar el comercio (0031:82) y se le enseña al comercio
+   * UNA SOLA VEZ: en la base solo queda su huella SHA-256 y no hay ninguna pantalla del cliente que
+   * lo pinte. Se describe el gesto real de hoy (decir tu nombre en el local, dentro de la franja).
+   */
+  { icon: MapPin, title: 'Recoge y disfruta', description: 'Ve al comercio en tu franja y da tu nombre' },
 ]
 
 interface Props {
