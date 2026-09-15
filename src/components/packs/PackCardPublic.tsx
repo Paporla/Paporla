@@ -145,7 +145,12 @@ export default function PackCardPublic({ pack, onReserve, index, reserving, rese
             <div className="flex items-center gap-1 text-xs dark:text-gray-500 text-gray-400 mb-2">
               <MapPin className="w-3 h-3" />
               <span>{pack.shop_name}</span>
-              <span className="text-primary text-xs ml-1">Verificado</span>
+              {/* A-71: aquí decía "Verificado" escrito a mano, sin mirar ningún
+                  dato. Era verdad por accidente (el RPC y el RLS solo dejan ver
+                  packs de comercios verificados), pero escrito así podía
+                  convertirse en mentira sin que nada lo delatara. La chapita
+                  de verdad vive en la tarjeta del comercio (ShopCard), que sí
+                  la condiciona a `shop.verified`. */}
             </div>
 
             <p className="dark:text-gray-400 text-gray-600 text-sm mb-3 line-clamp-2">

@@ -23,9 +23,12 @@ const userSteps: Step[] = [
   { icon: MapPin, title: 'Recoge y disfruta', description: 'Ve al comercio en tu franja y da tu nombre' },
 ]
 
+/** A-73: este banner ya no recibe `level`. Los niveles ("Aprendiz",
+ *  "Rescatador Elite"...) eran una escala inventada que no se guardaba en
+ *  ninguna parte ni daba derecho a nada. El saludo se queda en lo que es
+ *  cierto para todo el mundo que entra: está a punto de rescatar comida. */
 interface Props {
-  /** Nivel real del usuario ("Aprendiz", "Rescatador"...). Si no se pasa, se usa la palabra genérica. */
-  level?: string
+  className?: string
 }
 
 /**
@@ -41,7 +44,7 @@ interface Props {
  * entendida en todos. Eso cierra el bug de la auditoría de las claves de
  * localStorage descoordinadas.
  */
-export default function OnboardingBanner({ level }: Props) {
+export default function OnboardingBanner({ className }: Props) {
   const [visible, setVisible] = useState(false)
 
   useEffect(() => {
@@ -65,7 +68,7 @@ export default function OnboardingBanner({ level }: Props) {
           initial={{ opacity: 0, y: -20, height: 0 }}
           animate={{ opacity: 1, y: 0, height: 'auto' }}
           exit={{ opacity: 0, y: -20, height: 0 }}
-          className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border border-primary/20 mb-6"
+          className={`relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border border-primary/20 mb-6 ${className ?? ''}`}
         >
           {/* Blob decorativo */}
           <div className="absolute top-0 right-0 w-48 h-48 bg-primary/10 rounded-full blur-3xl" />
@@ -73,9 +76,7 @@ export default function OnboardingBanner({ level }: Props) {
           <div className="relative p-6">
             <div className="flex items-start justify-between mb-5">
               <div>
-                <h2 className="text-lg font-bold dark:text-white text-gray-900">
-                  ¡Bienvenido a Paporla! <span className="text-primary">{level ?? 'Rescatador'}</span>
-                </h2>
+                <h2 className="text-lg font-bold dark:text-white text-gray-900">¡Bienvenido a Paporla!</h2>
                 <p className="text-sm dark:text-gray-400 text-gray-600 mt-1">
                   Así funciona. En 3 pasos empiezas a rescatar comida y ahorrar.
                 </p>

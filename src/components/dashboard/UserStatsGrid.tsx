@@ -9,7 +9,6 @@ interface UserStats {
   totalPacksRescued: number
   co2Saved: number
   moneySaved: number
-  points?: number
   level?: string
 }
 

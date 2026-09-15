@@ -20,6 +20,7 @@ import RecentActivity from '@/components/dashboard/RecentActivity'
 import DashboardSkeleton from '@/components/dashboard/DashboardSkeleton'
 import Button from '@/components/ui/Button'
 import { useToast } from '@/components/ui/ToastProvider'
+import { co2eKgForPacks } from '@/lib/constants/impact'
 import ErrorBoundary from '@/components/ErrorBoundary'
 import { isActiveStatus, sortReservationsByPickupTime } from '@/lib/constants/reservations'
 
@@ -62,20 +63,20 @@ export default function UserDashboardPage() {
     const completed = reservations.filter((r) => r.status === 'picked_up' || r.status === 'completed')
 
     const totalPacksRescued = completed.length
-    const co2Saved = Math.round(totalPacksRescued * 1.2)
+    // A-23: una sola cifra de CO₂ en toda la app (antes 1,2 aquí y 2,5 en la
+    // portada). La constante vive en @/lib/constants/impact.
+    const co2Saved = co2eKgForPacks(totalPacksRescued)
     // moneySaved en unidades mayores. CLP no tiene decimales; cuando LATAM
     // use monedas con centavos, se dividen entre 100.
     const moneySaved = completed.reduce(
       (sum, r) => sum + r.total_amount_minor / 10 ** (r.currency_code === 'CLP' ? 0 : 2),
       0,
     )
-    const points = totalPacksRescued * 10
-
-    let level = 'Aprendiz'
-    if (points >= 500) level = 'Rescatador Elite'
-    else if (points >= 200) level = 'Rescatador Pro'
-    else if (points >= 50) level = 'Rescatador Avanzado'
-    else if (points >= 10) level = 'Rescatador'
+    // A-73: los puntos y los niveles ("Rescatador Elite", etc.) se han quitado.
+    // Eran una escala inventada (packs × 10) que no se guardaba en ninguna
+    // parte, no tenía reglas ni recompensa, y se presentaba al usuario como si
+    // fuera un logro real. Si algún día se construye fidelización de verdad,
+    // vuelve por la puerta grande: con tabla, reglas y beneficios.
 
     // 0028: "Hace X" se cuenta desde el último cambio de la reserva
     // (updated_at): en una activa es igual a created_at; en una cancelada,
@@ -97,8 +98,6 @@ export default function UserDashboardPage() {
         totalPacksRescued,
         co2Saved,
         moneySaved,
-        points,
-        level,
       },
       activities: recentActivities,
     }
@@ -140,7 +139,7 @@ export default function UserDashboardPage() {
         </div>
       )}
 
-      <OnboardingBanner level={stats.level} />
+      <OnboardingBanner />
 
       {/* Bloqueo funcional (F2b): sin mercado, create_payment_reservation
           (0009:285) rechaza la reserva con MARKET_MISMATCH. El banner se
@@ -152,8 +151,7 @@ export default function UserDashboardPage() {
         <UserWelcomeBanner
           userName={user?.displayName ?? 'Usuario'}
           packsRescued={stats.totalPacksRescued}
-          level={stats.level}
-          points={stats.points}
+          co2SavedKg={stats.co2Saved}
         />
       </ErrorBoundary>
 

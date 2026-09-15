@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { logger } from '@/lib/logger'
+import { co2eKgForPacks } from '@/lib/constants/impact'
 
 export interface CommunityStats {
   packsRescued: number
@@ -47,7 +48,7 @@ export async function GET() {
         packsRescued,
         moneySavedMinor: stats?.money_saved_minor ?? 0,
         currencyCode: stats?.currency_code ?? 'CLP',
-        co2SavedKg: packsRescued * 2.5,
+        co2SavedKg: co2eKgForPacks(packsRescued),
         activeShops: stats?.active_shops ?? 0,
         activePacks: stats?.active_packs ?? 0,
       } satisfies CommunityStats,

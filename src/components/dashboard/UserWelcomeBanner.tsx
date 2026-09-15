@@ -1,21 +1,15 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { Package, Award } from 'lucide-react'
+import { Package, Leaf } from 'lucide-react'
 
 interface UserWelcomeBannerProps {
   userName: string
   packsRescued?: number
-  level?: string
-  points?: number
+  co2SavedKg?: number
 }
 
-export default function UserWelcomeBanner({
-  userName,
-  packsRescued = 0,
-  level = 'Aprendiz',
-  points = 0,
-}: UserWelcomeBannerProps) {
+export default function UserWelcomeBanner({ userName, packsRescued = 0, co2SavedKg = 0 }: UserWelcomeBannerProps) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -49,13 +43,17 @@ export default function UserWelcomeBanner({
             </div>
           </div>
 
+          {/* A-73: aquí antes iban unos "puntos" y un "nivel" (Aprendiz,
+              Rescatador Elite...) que se calculaban al vuelo, no se guardaban
+              en ninguna parte y no daban derecho a nada. Se sustituyen por el
+              CO₂ evitado, que sale de los packs reales del usuario. */}
           <div className="flex items-center gap-3 px-4 py-2 rounded-xl dark:bg-black/40 bg-gray-100 backdrop-blur-sm border dark:border-white/10 border-gray-200">
             <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-              <Award className="w-5 h-5 text-primary" />
+              <Leaf className="w-5 h-5 text-primary" />
             </div>
             <div>
-              <p className="text-lg font-bold dark:text-white text-gray-900">{level}</p>
-              <p className="text-[10px] dark:text-gray-500 text-gray-400">{points} pts</p>
+              <p className="text-2xl font-bold dark:text-white text-gray-900">{co2SavedKg}</p>
+              <p className="text-[10px] dark:text-gray-500 text-gray-400">kg CO₂ evitado</p>
             </div>
           </div>
         </div>
