@@ -121,6 +121,34 @@ export const sendEmailSchema = z.object({
 })
 
 // ============================================
+// Formulario de contacto (A-03)
+// ============================================
+/**
+ * El formulario de /contacto es PÚBLICO: lo puede rellenar cualquiera sin
+ * cuenta. Por eso los topes son más estrictos que en un formulario con sesión:
+ * el mensaje va a parar a una bandeja real y no queremos ni muros de texto ni
+ * campos vacíos.
+ */
+export const contactFormSchema = z.object({
+  name: z
+    .string({ required_error: 'Escribe tu nombre' })
+    .trim()
+    .min(2, 'El nombre es demasiado corto')
+    .max(120, 'El nombre es demasiado largo'),
+  email: z.string({ required_error: 'Escribe tu email' }).trim().email('Ese email no parece válido'),
+  subject: z
+    .string({ required_error: 'Escribe un asunto' })
+    .trim()
+    .min(3, 'El asunto es demasiado corto')
+    .max(150, 'El asunto es demasiado largo'),
+  message: z
+    .string({ required_error: 'Escribe tu mensaje' })
+    .trim()
+    .min(10, 'Cuéntanos un poco más (al menos 10 caracteres)')
+    .max(5000, 'El mensaje es demasiado largo (máximo 5000 caracteres)'),
+})
+
+// ============================================
 // Admin — shop ban
 // ============================================
 export const banShopSchema = z.object({

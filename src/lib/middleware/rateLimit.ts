@@ -17,6 +17,10 @@ interface RateLimitRpcPayload {
 }
 
 const routeLimits: Record<string, { limit: number; windowSeconds: number }> = {
+  // A-03: el formulario de contacto es público (sin sesión), así que el tope
+  // es mucho más bajo que el del resto: 5 mensajes cada 5 minutos por IP.
+  // Sin esto, una sola persona podría vaciar la bandeja de soporte en segundos.
+  '/api/contacto': { limit: 5, windowSeconds: 300 },
   '/api/email': { limit: 10, windowSeconds: 60 },
   '/api/auth': { limit: 5, windowSeconds: 60 },
   '/api/reservations': { limit: 20, windowSeconds: 60 },

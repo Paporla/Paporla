@@ -128,3 +128,47 @@ ${ctaButton(` ${baseUrl}/dashboard`, 'Ver detalles')}`,
     'Recoge tu pack hoy',
   )
 }
+
+// ============================================
+// FORMULARIO DE CONTACTO (A-03)
+// ============================================
+/**
+ * Correo que llega a hola@paporla.com cuando alguien escribe desde la web.
+ *
+ * Todo lo que viene del visitante va escapado: si no, un mensaje que contenga
+ * HTML se renderizaría dentro del correo del fundador (phishing con la marca
+ * Paporla). `escapeHtml` va ANTES de convertir los saltos de línea en <br>,
+ * para no escapar los <br> que acabamos de poner.
+ *
+ * El "Responder" del gestor de correo funciona solo: la ruta pone replyTo con
+ * la dirección de quien escribe.
+ */
+export function contactFormTemplate(data: { name: string; email: string; subject: string; message: string }) {
+  const messageHtml = escapeHtml(data.message).replace(/\n/g, '<br>')
+
+  return baseLayout(
+    `
+<h1 style="color:#ffffff;font-size:22px;font-weight:800;margin:0 0 8px;text-align:center;line-height:1.3;">
+  Nuevo mensaje de contacto
+</h1>
+<p style="color:#999999;font-size:14px;line-height:1.6;margin:0 0 26px;text-align:center;">
+  Alguien ha escrito desde el formulario de la web.
+</p>
+
+${detailsCard(`
+${detailItem('Nombre', escapeHtml(data.name))}
+${detailItem('Email', escapeHtml(data.email))}
+${detailItem('Asunto', escapeHtml(data.subject))}
+`)}
+
+<p style="color:#cccccc;font-size:14px;font-weight:600;margin:24px 0 12px;">Mensaje</p>
+<div style="background:#0d1a12;border:1px solid #1a3325;border-radius:12px;padding:16px;color:#e6e6e6;font-size:14px;line-height:1.7;">
+  ${messageHtml}
+</div>
+
+<p style="color:#888888;font-size:12px;line-height:1.6;text-align:center;margin:20px 0 0;">
+  Responde a este correo para contestar directamente a ${escapeHtml(data.name)}.
+</p>`,
+    `Contacto: ${escapeHtml(data.subject)}`,
+  )
+}
