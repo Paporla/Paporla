@@ -366,33 +366,34 @@ SELECT ok(
 -- del comercio devolviendo success=true, y el comercio desaparecia del catalogo.
 --
 -- Las tres guardas viven ANTES de la busqueda del comercio, asi que se pueden
--- probar con identificadores inventados y sin datos de seed: si alguien vuelve
--- a reescribir la funcion y las pierde, estos tests pasan de devolver el error
--- de validacion a devolver SHOP_NOT_OWNED_OR_INACTIVE.
---
--- El helper es SECURITY DEFINER y fija el mismo la marca de sesion, porque los
--- tests remotos de Supabase corren con cli_login_postgres (INHERIT FALSE) y no
--- se puede dar por supuesto que rol esta activo en cada punto.
+-- probar con identificadores de comercio inventados y sin datos de seed: si
+-- alguien vuelve a reescribir la funcion y las pierde, estos tests pasan de
+-- devolver el error de validacion a devolver SHOP_NOT_OWNED_OR_INACTIVE.
+-- Verificado por mutacion: con la 0038 reinstalada fallan exactamente 3 de 4.
 -- ---------------------------------------------------------------------------
 
 CREATE TEMP TABLE _t0049 (caso text PRIMARY KEY, msg text) ON COMMIT DROP;
 
-CREATE FUNCTION _captura_0049(
-  p_caso text,
-  p_lat double precision,
-  p_lng double precision
-)
+CREATE FUNCTION _captura_0049(p_caso text, p_lat double precision, p_lng double precision)
 RETURNS void
 LANGUAGE plpgsql
-SECURITY DEFINER
-SET search_path = pg_catalog, pg_temp, public
 AS $$
 BEGIN
-  PERFORM set_config(
-    'request.jwt.claim.sub',
-    '00000000-0000-0000-0000-0000000000ff',
-    false
-  );
+  -- require_active_caller (0009) no se conforma con que haya un identificador de
+  -- sesion: comprueba que el usuario exista en public.user_profiles con
+  -- account_status = 'active'. Con un uuid inventado la funcion moria en
+  -- ACCOUNT_NOT_ACTIVE antes de llegar a las guardas de coordenadas, y el test
+  -- no media lo que decia medir. Asi que se crea un usuario de verdad. El
+  -- trigger on_auth_user_created (0010) crea su perfil activo. Todo dentro del
+  -- BEGIN/ROLLBACK del fichero, o sea que no deja rastro.
+  DELETE FROM auth.users WHERE id = '00000000-0000-0000-0000-0000000000ff';
+  INSERT INTO auth.users (id, email)
+  VALUES ('00000000-0000-0000-0000-0000000000ff', 'pgtap-0049@example.test');
+
+  -- Se fijan las dos variantes del claim por si auth.uid() lee una u otra.
+  PERFORM set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-0000000000ff', false);
+  PERFORM set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-0000000000ff"}', false);
+
   BEGIN
     PERFORM public.update_own_shop(
       '00000000-0000-0000-0000-000000000000',
@@ -406,36 +407,30 @@ BEGIN
   END;
 END $$;
 
-SET LOCAL ROLE authenticated;
 SELECT _captura_0049('par', -33.4::double precision, NULL::double precision);
 SELECT _captura_0049('lat', 95::double precision, -70.6::double precision);
 SELECT _captura_0049('lng', -33.4::double precision, -200::double precision);
 SELECT _captura_0049('busqueda', NULL::double precision, NULL::double precision);
-RESET ROLE;
 
 SELECT is(
   (SELECT msg FROM _t0049 WHERE caso = 'par'),
   'COORDINATES_MUST_COME_IN_PAIR',
   'update_own_shop rejects a lone coordinate before touching the table (lost in 0024/0038, restored in 0049)'
 );
-
 SELECT is(
   (SELECT msg FROM _t0049 WHERE caso = 'lat'),
   'LATITUDE_OUT_OF_RANGE',
   'update_own_shop validates the latitude range'
 );
-
 SELECT is(
   (SELECT msg FROM _t0049 WHERE caso = 'lng'),
   'LONGITUDE_OUT_OF_RANGE',
   'update_own_shop validates the longitude range'
 );
-
 SELECT is(
   (SELECT msg FROM _t0049 WHERE caso = 'busqueda'),
   'SHOP_NOT_OWNED_OR_INACTIVE',
   'coordinate guards run before the shop lookup, so they are testable without seed data'
 );
-
 SELECT * FROM finish();
 ROLLBACK;
