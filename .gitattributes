@@ -1,0 +1,33 @@
+# PAPORLA — Política de saltos de línea.
+#
+# Problema que resuelve: con core.autocrlf=true (el valor por defecto de git en
+# Windows) git escribe los archivos en disco con CRLF, y Prettier los quiere en
+# LF. Resultado: `prettier --check .` marca TODO el proyecto como mal formateado
+# aunque no se haya tocado nada, y al pegar código en VS Code se pierde el salto
+# de línea final de los archivos.
+#
+# Con `text=auto eol=lf` el repo se guarda siempre en LF y el checkout también
+# entrega LF. Git y Prettier dejan de pelearse.
+#
+# Los binarios van declarados abajo de forma explícita: así git no intenta
+# convertirles los saltos de línea nunca. Comprobado byte a byte.
+
+* text=auto eol=lf
+
+# Binarios: ninguna conversión
+*.png   binary
+*.jpg   binary
+*.jpeg  binary
+*.gif   binary
+*.webp  binary
+*.ico   binary
+*.pdf   binary
+*.woff  binary
+*.woff2 binary
+*.ttf   binary
+*.otf   binary
+*.eot   binary
+*.mp3   binary
+*.mp4   binary
+*.webm  binary
+*.zip   binary
