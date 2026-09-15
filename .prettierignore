@@ -1,0 +1,14 @@
+# PAPORLA — Archivos que Prettier no debe mirar.
+#
+# Prettier no respeta .git/info/exclude (la lista de ignorados locales de git),
+# solo .gitignore y este archivo. Los documentos de trabajo que viven fuera del
+# control de versiones salían como "mal formateados" en cada `prettier --check .`
+# y ensuciaban una comprobación que tiene que ser fiable.
+
+# Documentos locales de auditoría y trabajo, excluidos de git a propósito
+AUDITORIA_EXTERNA_*.md
+
+# SQL: Prettier no tiene parser para .sql, así que ya los ignoraba de hecho.
+# Se declara explícitamente para que quede por escrito y no cambie si un día
+# aparece un plugin.
+supabase/

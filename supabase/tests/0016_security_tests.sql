@@ -18,7 +18,7 @@ SELECT set_config(
   ), 'extensions') || ',public,pg_catalog',
   true
 );
-SELECT plan(34);
+SELECT plan(38);
 
 SELECT ok(
   EXISTS (SELECT 1 FROM pg_extension WHERE extname = 'postgis'),
@@ -353,6 +353,88 @@ SELECT ok(
     'EXECUTE'
   ),
   'shop_mark_picked_up is callable by authenticated but not by anon'
+);
+
+-- ---------------------------------------------------------------------------
+-- L-48 / A-04 (0049): update_own_shop y las coordenadas.
+--
+-- Regresion confirmada por dos auditorias independientes: la 0021 anadio
+-- COALESCE para que un NULL significara "no toques la ubicacion" y la 0022
+-- anadio la validacion de pareja y de rangos; la 0024 y la 0038 reescribieron
+-- la funcion entera y se llevaron las dos cosas por delante. Mientras el bug
+-- estuvo vivo, guardar el perfil sin reenviar coordenadas borraba la ubicacion
+-- del comercio devolviendo success=true, y el comercio desaparecia del catalogo.
+--
+-- Las tres guardas viven ANTES de la busqueda del comercio, asi que se pueden
+-- probar con identificadores inventados y sin datos de seed: si alguien vuelve
+-- a reescribir la funcion y las pierde, estos tests pasan de devolver el error
+-- de validacion a devolver SHOP_NOT_OWNED_OR_INACTIVE.
+--
+-- El helper es SECURITY DEFINER y fija el mismo la marca de sesion, porque los
+-- tests remotos de Supabase corren con cli_login_postgres (INHERIT FALSE) y no
+-- se puede dar por supuesto que rol esta activo en cada punto.
+-- ---------------------------------------------------------------------------
+
+CREATE TEMP TABLE _t0049 (caso text PRIMARY KEY, msg text) ON COMMIT DROP;
+
+CREATE FUNCTION _captura_0049(
+  p_caso text,
+  p_lat double precision,
+  p_lng double precision
+)
+RETURNS void
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = pg_catalog, pg_temp, public
+AS $$
+BEGIN
+  PERFORM set_config(
+    'request.jwt.claim.sub',
+    '00000000-0000-0000-0000-0000000000ff',
+    false
+  );
+  BEGIN
+    PERFORM public.update_own_shop(
+      '00000000-0000-0000-0000-000000000000',
+      '00000000-0000-0000-0000-000000000001',
+      'x', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+      p_lat, p_lng, NULL, NULL, NULL, NULL, NULL
+    );
+    INSERT INTO _t0049 VALUES (p_caso, 'SIN ERROR');
+  EXCEPTION WHEN OTHERS THEN
+    INSERT INTO _t0049 VALUES (p_caso, SQLERRM);
+  END;
+END $$;
+
+SET LOCAL ROLE authenticated;
+SELECT _captura_0049('par', -33.4::double precision, NULL::double precision);
+SELECT _captura_0049('lat', 95::double precision, -70.6::double precision);
+SELECT _captura_0049('lng', -33.4::double precision, -200::double precision);
+SELECT _captura_0049('busqueda', NULL::double precision, NULL::double precision);
+RESET ROLE;
+
+SELECT is(
+  (SELECT msg FROM _t0049 WHERE caso = 'par'),
+  'COORDINATES_MUST_COME_IN_PAIR',
+  'update_own_shop rejects a lone coordinate before touching the table (lost in 0024/0038, restored in 0049)'
+);
+
+SELECT is(
+  (SELECT msg FROM _t0049 WHERE caso = 'lat'),
+  'LATITUDE_OUT_OF_RANGE',
+  'update_own_shop validates the latitude range'
+);
+
+SELECT is(
+  (SELECT msg FROM _t0049 WHERE caso = 'lng'),
+  'LONGITUDE_OUT_OF_RANGE',
+  'update_own_shop validates the longitude range'
+);
+
+SELECT is(
+  (SELECT msg FROM _t0049 WHERE caso = 'busqueda'),
+  'SHOP_NOT_OWNED_OR_INACTIVE',
+  'coordinate guards run before the shop lookup, so they are testable without seed data'
 );
 
 SELECT * FROM finish();
