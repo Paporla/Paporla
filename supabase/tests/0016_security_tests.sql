@@ -18,7 +18,7 @@ SELECT set_config(
   ), 'extensions') || ',public,pg_catalog',
   true
 );
-SELECT plan(31);
+SELECT plan(34);
 
 SELECT ok(
   EXISTS (SELECT 1 FROM pg_extension WHERE extname = 'postgis'),
@@ -306,6 +306,53 @@ SELECT ok(
       AND grantee IN ('anon', 'authenticated')
   ),
   'favorites table stays RPC-only: no direct grants to anon/authenticated'
+);
+
+-- ---------------------------------------------------------------------------
+-- L-64 Camino 1 (0048): shop_mark_picked_up, la entrega sin credencial.
+-- Convención 0041: SECURITY DEFINER con search_path fijo, REVOKE FROM PUBLIC y
+-- sin acceso para anon. El test global de más arriba ya vigila que ninguna
+-- función de public/app_private sea ejecutable por PUBLIC; aquí se fija además
+-- la firma concreta, para que un cambio de search_path o de volatilidad no
+-- pase desapercibido.
+-- ---------------------------------------------------------------------------
+SELECT ok(
+  EXISTS (
+    SELECT 1 FROM pg_proc p
+    JOIN pg_namespace n ON n.oid = p.pronamespace
+    WHERE n.nspname = 'public'
+      AND p.proname = 'shop_mark_picked_up'
+      AND p.prosecdef = true
+      AND p.provolatile = 'v'
+  ),
+  'shop_mark_picked_up exists as SECURITY DEFINER VOLATILE'
+);
+
+SELECT ok(
+  (SELECT p.proconfig[1] LIKE 'search_path=%'
+     AND p.proconfig[1] LIKE '%pg_catalog%'
+     AND p.proconfig[1] LIKE '%app_private%'
+     AND p.proconfig[1] LIKE '%public%'
+   FROM pg_proc p
+   JOIN pg_namespace n ON n.oid = p.pronamespace
+   WHERE n.nspname = 'public'
+     AND p.proname = 'shop_mark_picked_up'
+  ),
+  'shop_mark_picked_up pins its search_path (convention 0041)'
+);
+
+SELECT ok(
+  has_function_privilege(
+    'authenticated',
+    'public.shop_mark_picked_up(uuid)',
+    'EXECUTE'
+  )
+  AND NOT has_function_privilege(
+    'anon',
+    'public.shop_mark_picked_up(uuid)',
+    'EXECUTE'
+  ),
+  'shop_mark_picked_up is callable by authenticated but not by anon'
 );
 
 SELECT * FROM finish();
