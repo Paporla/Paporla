@@ -5,9 +5,11 @@ import { motion } from 'framer-motion'
 import { Store, Search, MapPin } from 'lucide-react'
 import { useShops } from '@/hooks/useShops'
 import ShopCard from '@/components/shops/ShopCard'
+import LoadErrorState from '@/components/ui/LoadErrorState'
 
 export default function ShopsPage() {
-  const { shops, loading } = useShops()
+  // A-07: `error` y `reload` ya los daba el hook; la página los ignoraba.
+  const { shops, loading, error, reload } = useShops()
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedCity, setSelectedCity] = useState<string>('all')
 
@@ -149,7 +151,18 @@ export default function ShopsPage() {
 
       {/* RESULTADOS */}
       <div className="container mx-auto px-4 pb-12">
-        {shops.length === 0 ? (
+        {/*
+          A-07: el fallo de carga va PRIMERO, antes que cualquier estado vacío.
+          Aquí era el caso más grave de los tres: si la consulta fallaba, el
+          directorio afirmaba "Aún no hay comercios publicados en Paporla" y un
+          visitante nuevo se iba pensando que el proyecto estaba vacío.
+
+          Ojo: en JSX un comentario va ENTRE LLAVES, {/* ... *}. Escrito como
+          `/* ... *` a secas no es un comentario, es TEXTO que se pinta.
+        */}
+        {error && !loading ? (
+          <LoadErrorState title="No pudimos cargar los comercios" detail={error} onRetry={() => reload()} />
+        ) : shops.length === 0 ? (
           /*
            * L-42: vacío DE VERDAD (ningún comercio verificado en el mercado).
            * El mensaje de antes ("No se encontraron comercios / Prueba con

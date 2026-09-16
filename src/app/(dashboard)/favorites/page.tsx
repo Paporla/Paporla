@@ -9,13 +9,14 @@ import { useAuth } from '@/hooks/useAuth'
 import { useFavorites } from '@/hooks/useFavorites'
 import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
+import LoadErrorState from '@/components/ui/LoadErrorState'
 import { useToast } from '@/components/ui/ToastProvider'
 import { useState } from 'react'
 
 export default function FavoritesPage() {
   const router = useRouter()
   useAuth()
-  const { favorites, loading, removeFavorite } = useFavorites()
+  const { favorites, loading, error, removeFavorite, reload } = useFavorites()
   // Lote UX punto 4 (piloto): el aviso de fallo viaja al ToastProvider
   // global; la página se queda sin estado de error propio.
   const { addToast } = useToast()
@@ -40,6 +41,19 @@ export default function FavoritesPage() {
           <p className="dark:text-gray-400 text-gray-600 text-lg font-medium">Cargando favoritos...</p>
           <p className="dark:text-gray-600 text-gray-400 text-sm mt-1">Por favor espera</p>
         </div>
+      </div>
+    )
+  }
+
+  /*
+   * A-07: ANTES del estado vacío va el estado de error. Si la consulta falla,
+   * la lista llega vacía y decir "No tienes favoritos" es falso: no sabemos si
+   * el usuario tiene favoritos o no, solo que no hemos conseguido leerlos.
+   */
+  if (error) {
+    return (
+      <div className="py-8">
+        <LoadErrorState title="No pudimos cargar tus favoritos" detail={error} onRetry={() => reload()} />
       </div>
     )
   }

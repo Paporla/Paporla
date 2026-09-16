@@ -11,6 +11,7 @@ import { formatRelativeTime } from '@/lib/utils/formatTime'
 import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
 import EmptyState from '@/components/ui/EmptyState'
+import LoadErrorState from '@/components/ui/LoadErrorState'
 import { useToast } from '@/components/ui/ToastProvider'
 
 const iconMap: Record<string, { icon: React.ComponentType<{ className?: string }>; color: string; bg: string }> = {
@@ -29,7 +30,18 @@ const defaultIcon = { icon: Bell, color: 'text-gray-400', bg: 'bg-gray-500/10' }
 
 export default function NotificationsPage() {
   const router = useRouter()
-  const { notifications, unreadCount, loading: notifLoading, markAsRead, markAllAsRead } = useNotifications()
+  // A-07: `error` y `reload` ya los calculaba el hook, pero la página no los
+  // recogía. Sin ellos, un fallo de carga dejaba la lista vacía y se afirmaba
+  // "Sin notificaciones", que es otra cosa muy distinta.
+  const {
+    notifications,
+    unreadCount,
+    loading: notifLoading,
+    markAsRead,
+    markAllAsRead,
+    error: notifError,
+    reload,
+  } = useNotifications()
   const { loading: authLoading } = useAuth()
   const [filter, setFilter] = useState<'all' | 'unread'>('all')
   // Lote UX punto 4: el aviso de "Marcar todas" viaja al ToastProvider global
@@ -116,7 +128,6 @@ export default function NotificationsPage() {
           )}
         </div>
       </div>
-
       <div className="flex gap-2">
         <button
           onClick={() => setFilter('all')}
@@ -142,8 +153,12 @@ export default function NotificationsPage() {
           )}
         </button>
       </div>
-
-      {filteredNotifications.length === 0 ? (
+      {/* A-07: el fallo de carga va ANTES del estado vacío. Con la lista vacía no
+          se puede distinguir "no tienes notificaciones" de "no las pude leer", y
+          la app no puede afirmar lo primero si no lo sabe. */}
+      {notifError ? (
+        <LoadErrorState title="No pudimos cargar tus notificaciones" detail={notifError} onRetry={() => reload()} />
+      ) : filteredNotifications.length === 0 ? (
         <EmptyState type="notifications" action={{ label: 'Explorar packs', onClick: () => router.push('/packs') }} />
       ) : (
         <div className="space-y-3">
