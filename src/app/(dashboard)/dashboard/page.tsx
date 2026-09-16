@@ -9,7 +9,7 @@ import { pageVariants } from '@/lib/utils/motion'
 import { useAuth } from '@/hooks/useAuth'
 import { useReservations } from '@/hooks/useReservations'
 import { useNowTick } from '@/hooks/useNowTick'
-import { effectiveReservationStatus } from '@/lib/utils/reservationDisplay'
+import { effectiveReservationStatusForCustomer } from '@/lib/utils/reservationDisplay'
 import UserWelcomeBanner from '@/components/dashboard/UserWelcomeBanner'
 import OnboardingBanner from '@/components/onboarding/OnboardingBanner'
 import MarketSelectionBanner from '@/components/dashboard/MarketSelectionBanner'
@@ -96,7 +96,7 @@ export default function UserDashboardPage() {
       type: 'reservation' as const,
       title: r.pack_title,
       description: r.shop_name,
-      status: effectiveReservationStatus(r.status, r.pickup_start_at, r.pickup_end_at, now),
+      status: effectiveReservationStatusForCustomer(r.status, r.pickup_start_at, r.pickup_end_at, now),
       created_at: r.updated_at || r.created_at,
       link: '/reservations',
     }))

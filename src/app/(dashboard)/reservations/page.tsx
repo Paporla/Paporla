@@ -27,7 +27,7 @@ import { formatDate } from '@/lib/utils/formatDate'
 import { canCancelReservation } from '@/lib/utils/canCancelReservation'
 import { getStatusConfig, isActiveStatus, sortReservationsByPickupTime } from '@/lib/constants/reservations'
 import { useNowTick } from '@/hooks/useNowTick'
-import { effectiveReservationStatus } from '@/lib/utils/reservationDisplay'
+import { effectiveReservationStatusForCustomer } from '@/lib/utils/reservationDisplay'
 import { formatPickupWindow } from '@/lib/utils/reserve'
 import type { MyReservation } from '@/types/reservation'
 
@@ -54,7 +54,7 @@ function StatusChip({
   pickupEndAt: string
 }) {
   const now = useNowTick(30_000)
-  const displayStatus = effectiveReservationStatus(status, pickupStartAt, pickupEndAt, now)
+  const displayStatus = effectiveReservationStatusForCustomer(status, pickupStartAt, pickupEndAt, now)
   const config = getStatusConfig(displayStatus)
   const StatusIcon = statusIcons[displayStatus] ?? Clock
   return (

@@ -25,7 +25,7 @@ import ReserveModal from './components/ReserveModal'
 import { useAuth } from '@/hooks/useAuth'
 import { useReservations } from '@/hooks/useReservations'
 import { useNowTick } from '@/hooks/useNowTick'
-import { effectiveReservationStatus, isActiveOwnReservation } from '@/lib/utils/reservationDisplay'
+import { effectiveReservationStatusForCustomer, isActiveOwnReservation } from '@/lib/utils/reservationDisplay'
 import { getStatusConfig } from '@/lib/constants/reservations'
 import { formatMinorPrice } from '@/lib/utils/formatPrice'
 import { getReserveBlockReason, formatPickupWindow } from '@/lib/utils/reserve'
@@ -222,7 +222,7 @@ export default function PackDetailClient({ initialPack }: Props) {
                   Estado:{' '}
                   {
                     getStatusConfig(
-                      effectiveReservationStatus(
+                      effectiveReservationStatusForCustomer(
                         myReservation.status,
                         myReservation.pickup_start_at,
                         myReservation.pickup_end_at,

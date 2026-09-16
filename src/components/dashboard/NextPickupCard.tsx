@@ -10,7 +10,7 @@ import Button from '@/components/ui/Button'
 import CountdownTimer from '@/components/ui/CountdownTimer'
 import { getStatusConfig } from '@/lib/constants/reservations'
 import { useNowTick } from '@/hooks/useNowTick'
-import { effectiveReservationStatus } from '@/lib/utils/reservationDisplay'
+import { effectiveReservationStatusForCustomer } from '@/lib/utils/reservationDisplay'
 import { formatMinorPrice } from '@/lib/utils/formatPrice'
 import { formatPickupWindow } from '@/lib/utils/reserve'
 import type { MyReservation } from '@/types/reservation'
@@ -77,7 +77,12 @@ export default function NextPickupCard({ reservation, loading, error }: NextPick
   }
 
   const config = getStatusConfig(
-    effectiveReservationStatus(reservation.status, reservation.pickup_start_at, reservation.pickup_end_at, now),
+    effectiveReservationStatusForCustomer(
+      reservation.status,
+      reservation.pickup_start_at,
+      reservation.pickup_end_at,
+      now,
+    ),
   )
   const windowLabel = formatPickupWindow(reservation.pickup_start_at, reservation.pickup_end_at, reservation.timezone)
   const totalLabel = formatMinorPrice(reservation.total_amount_minor, reservation.currency_code, 'es-CL')
