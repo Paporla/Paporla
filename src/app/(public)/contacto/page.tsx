@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { Send, CheckCircle, AlertCircle, MapPin, Mail, Clock } from 'lucide-react'
+import { apiHeaders, getCsrfToken } from '@/lib/utils/api-client'
 
 /**
  * A-03 (auditoría externa): este formulario ANTES mentía. Esperaba 1,5 segundos
@@ -47,10 +48,24 @@ export default function ContactoPage() {
     setSubmitStatus('idle')
     setFieldErrors({})
 
+    // El middleware exige el token CSRF en TODAS las mutaciones de /api
+    // (patrón de doble envío: cookie legible + cabecera). Usamos el helper del
+    // proyecto en vez de montar las cabeceras a mano. Si la cookie no está
+    // (navegador con cookies bloqueadas, o primera visita rara), se dice y se
+    // ofrece el correo: mejor eso que un 403 sin explicación.
+    if (!getCsrfToken()) {
+      setSubmitStatus('error')
+      setStatusMessage(
+        'No hemos podido preparar el envío de forma segura. Recarga la página e inténtalo de nuevo, o escríbenos directamente.',
+      )
+      setIsSubmitting(false)
+      return
+    }
+
     try {
       const response = await fetch('/api/contacto', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: apiHeaders(),
         body: JSON.stringify({ ...formData, website: honeypot }),
       })
 
@@ -70,16 +85,21 @@ export default function ContactoPage() {
       }
 
       // Si el servidor dice qué campo está mal, el error va JUNTO al campo.
-      if (payload.field && payload.field in formData) {
-        setFieldErrors({ [payload.field]: payload.error ?? 'Revisa este campo' } as FieldErrors)
+      const badField = payload.field && payload.field in formData ? payload.field : null
+      if (badField) {
+        setFieldErrors({ [badField]: payload.error ?? 'Revisa este campo' } as FieldErrors)
       }
 
       // Y siempre se deja una salida: la dirección real.
+      // Ojo: si el error ya va pegado a su campo, el cartel de arriba NO lo
+      // repite entero —verías dos veces lo mismo y confunde— sino que señala.
       setSubmitStatus('error')
       setStatusMessage(
-        payload.fallbackEmail
-          ? `${payload.error ?? 'No se pudo enviar el mensaje.'} También puedes escribirnos directamente.`
-          : (payload.error ?? 'No se pudo enviar el mensaje. Inténtalo de nuevo.'),
+        badField
+          ? 'Revisa el campo marcado en rojo.'
+          : payload.fallbackEmail
+            ? `${payload.error ?? 'No se pudo enviar el mensaje.'} También puedes escribirnos directamente.`
+            : (payload.error ?? 'No se pudo enviar el mensaje. Inténtalo de nuevo.'),
       )
     } catch {
       setSubmitStatus('error')
