@@ -9,6 +9,13 @@ interface UserStats {
   totalPacksRescued: number
   co2Saved: number
   moneySaved: number
+  /**
+   * A-05: `true` si `moneySaved` es el AHORRO REAL (precio original − pagado).
+   * `false` (o ausente) si la migración 0050 no está aplicada: entonces la
+   * cifra es el importe pagado y la etiqueta tiene que decirlo, porque
+   * "Ahorrado" sería mentir.
+   */
+  savingsAvailable?: boolean
   level?: string
 }
 
@@ -70,7 +77,10 @@ export default function UserStatsGrid({ stats, loading, error }: UserStatsGridPr
     },
     {
       key: 'moneySaved',
-      label: 'Ahorrado',
+      // A-05: la etiqueta sigue a la cifra. Si no se puede calcular el ahorro
+      // real, lo que tenemos es el valor de los packs, y se dice. Nunca una
+      // palabra bonita encima de un número falso.
+      label: stats.savingsAvailable ? 'Ahorrado' : 'Valor de tus packs',
       value: `$${stats.moneySaved.toLocaleString()}`,
       icon: DollarSign,
       color: 'text-primary',

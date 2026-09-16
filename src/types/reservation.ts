@@ -29,6 +29,21 @@ export interface MyReservation {
   /** Importe en unidad menor de currency_code (CLP: pesos, sin centavos). */
   total_amount_minor: number
   currency_code: string
+  /**
+   * Datos para el AHORRO REAL (migración 0050, auditoría A-05).
+   *
+   * Antes el panel llamaba "Ahorrado" a la suma de `total_amount_minor`, que
+   * es el precio del pack: era gasto, no ahorro. Para calcular el descuento
+   * hace falta comparar lo pagado contra el precio de venta al público.
+   *
+   * Opcionales a propósito: mientras la migración 0050 no esté aplicada, la
+   * RPC no devuelve estas columnas y llegan como `undefined`. El panel lo
+   * detecta y cae a una etiqueta honesta en vez de inventar una cifra.
+   */
+  unit_price_minor?: number
+  quantity?: number
+  /** Precio de venta al público del pack; null si no lo declara o ya no existe. */
+  original_price_minor?: number | null
   pickup_start_at: string
   pickup_end_at: string
   /** Zona horaria del mercado al reservar (p. ej. America/Santiago). */

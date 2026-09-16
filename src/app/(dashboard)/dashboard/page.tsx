@@ -20,7 +20,7 @@ import RecentActivity from '@/components/dashboard/RecentActivity'
 import DashboardSkeleton from '@/components/dashboard/DashboardSkeleton'
 import Button from '@/components/ui/Button'
 import { useToast } from '@/components/ui/ToastProvider'
-import { co2eKgForPacks } from '@/lib/constants/impact'
+import { co2eKgForPacks, computeMoneySaved } from '@/lib/constants/impact'
 import ErrorBoundary from '@/components/ErrorBoundary'
 import { isActiveStatus, sortReservationsByPickupTime } from '@/lib/constants/reservations'
 
@@ -66,12 +66,22 @@ export default function UserDashboardPage() {
     // A-23: una sola cifra de CO₂ en toda la app (antes 1,2 aquí y 2,5 en la
     // portada). La constante vive en @/lib/constants/impact.
     const co2Saved = co2eKgForPacks(totalPacksRescued)
-    // moneySaved en unidades mayores. CLP no tiene decimales; cuando LATAM
-    // use monedas con centavos, se dividen entre 100.
-    const moneySaved = completed.reduce(
-      (sum, r) => sum + r.total_amount_minor / 10 ** (r.currency_code === 'CLP' ? 0 : 2),
-      0,
-    )
+    // A-05: "Ahorrado" era la suma de `total_amount_minor`, es decir el PRECIO
+    // DEL PACK. Era gasto, no ahorro. El ahorro real es (precio original − lo
+    // pagado) × unidades, la misma fórmula que usa `community_stats` (0035)
+    // para la landing: así las dos pantallas no pueden contradecirse.
+    //
+    // Degradación: si la migración 0050 no está aplicada, la RPC no trae el
+    // precio original y `savingsAvailable` sale false. Entonces la tarjeta
+    // muestra "Valor de tus packs" con el importe pagado —una cifra que sí
+    // tenemos y una etiqueta que sí es cierta— en vez de un $0 falso.
+    const { available: savingsAvailable, savingsMinor, paidMinor } = computeMoneySaved(completed)
+    // CLP no tiene decimales; cuando LATAM use monedas con centavos, se dividen
+    // entre 100. La moneda se toma de la última reserva rescatada, igual que
+    // hace `community_stats` (0035) en la landing: todas las de un usuario son
+    // del mismo mercado, y así las dos pantallas no pueden discrepar.
+    const divisor = 10 ** (completed.at(-1)?.currency_code === 'CLP' ? 0 : 2)
+    const moneySaved = (savingsAvailable ? savingsMinor : paidMinor) / divisor
     // A-73: los puntos y los niveles ("Rescatador Elite", etc.) se han quitado.
     // Eran una escala inventada (packs × 10) que no se guardaba en ninguna
     // parte, no tenía reglas ni recompensa, y se presentaba al usuario como si
@@ -98,6 +108,7 @@ export default function UserDashboardPage() {
         totalPacksRescued,
         co2Saved,
         moneySaved,
+        savingsAvailable,
       },
       activities: recentActivities,
     }
