@@ -86,6 +86,22 @@ export const STATUS_CONFIG: Record<string, StatusConfig> = {
     bg: 'bg-gray-500/10',
     border: 'border-gray-500/20',
   },
+  /**
+   * A-06: estado DERIVADO, no existe en la base. `RESERVATION_STATUSES` es la
+   * lista que valida la base y NO lo incluye, a propósito: la ventana de
+   * retiro se cerró pero el destino todavía no se decidió (lo decide el cron
+   * de no_show, o el comercio si marca que el cliente sí pasó). Mostrar
+   * 'ready_pickup' en ese hueco mentía: la tarjeta seguía diciendo "Lista
+   * para recoger" indefinidamente si el cron no corría.
+   *
+   * No afirma retiro ni cancelación: solo dice que el horario ya pasó.
+   */
+  window_closed: {
+    label: 'Ventana cerrada',
+    color: 'text-gray-400',
+    bg: 'bg-gray-500/10',
+    border: 'border-gray-500/20',
+  },
 }
 
 /** Etiqueta corta por estado, derivada de STATUS_CONFIG (misma fuente). */

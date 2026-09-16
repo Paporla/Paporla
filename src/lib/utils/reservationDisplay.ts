@@ -38,6 +38,36 @@ export function effectiveReservationStatus(
   return status
 }
 
+/**
+ * A-06: la misma lectura, pero para la TARJETA DEL CLIENTE.
+ *
+ * La función de arriba se usa también en el lado comercio, y ahí su
+ * resultado alimenta FILTROS y el validador de códigos: si la ventana cerró
+ * y devolviéramos otra cosa, una reserva dejaría de aparecer bajo
+ * "Listas para recoger" y el comercio ya no podría validarle el código a un
+ * cliente que llegó tarde. Ese pack se perdería por nuestra culpa. Por eso
+ * la de arriba NO se toca.
+ *
+ * Esta solo sirve para pintar la etiqueta que ve el cliente, y es la que
+ * cierra el hueco: ventana ya cerrada + 'ready_pickup' crudo = "Ventana
+ * cerrada", sin esperar al cron y sin afirmar nada que no se sepa.
+ *
+ * Igual de pura: el "ahora" entra por parámetro.
+ */
+export function effectiveReservationStatusForCustomer(
+  status: string,
+  pickupStartAt: string | null | undefined,
+  pickupEndAt: string | null | undefined,
+  nowMs: number,
+): string {
+  if (status !== 'confirmed' && status !== 'ready_pickup') return status
+
+  const end = pickupEndAt ? new Date(pickupEndAt).getTime() : NaN
+  if (Number.isNaN(end)) return status
+
+  return nowMs > end ? 'window_closed' : effectiveReservationStatus(status, pickupStartAt, pickupEndAt, nowMs)
+}
+
 /** Estados que cuentan como "el usuario YA tiene este pack" (L-10). */
 export const OWNED_PACK_STATUSES = ['payment_pending', 'confirmed', 'ready_pickup', 'picked_up'] as const
 
