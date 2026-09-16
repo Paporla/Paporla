@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
 import {
   validatePackForm,
   getDefaultPackData,
@@ -11,7 +11,9 @@ import {
   type PackContentExtras,
 } from '@/lib/utils/packForm'
 
-const futureDate = new Date(Date.now() + 86400000).toISOString().split('T')[0]
+// Mañana en CHILE, no en UTC. Durante la franja 00:00-03:00 UTC Chile sigue en
+// el día anterior, y calcular esto con `toISOString()` daba un día de más.
+const futureDate = chileDateIn(1)
 
 function makeForm(overrides: Partial<PackFormData> = {}): PackFormData {
   return {
@@ -139,7 +141,40 @@ describe('getDefaultPackData', () => {
     const data = getDefaultPackData('shop-1')
     expect(data.title).toBe('')
     expect(data.total_stock).toBe(1)
-    expect(data.pickup_date).toBe(new Date(Date.now() + 86400000).toISOString().split('T')[0])
+    expect(data.pickup_date).toBe(chileDateIn(1))
+  })
+
+  /**
+   * REGRESIÓN (2026-09-16): este test fallaba en el CI de lunes a domingo, pero
+   * solo durante la franja 00:00-03:00 UTC. GitHub Actions corre en UTC, y en
+   * ese tramo Chile (UTC-3 en verano, UTC-4 en invierno) TODAVÍA ESTÁ EN EL DÍA
+   * ANTERIOR. Entonces "mañana" no era lo mismo en las dos zonas:
+   *
+   *   2026-09-16 01:00 UTC  ->  en Chile son las 22:00 del 2026-09-15
+   *   mañana en Chile = 2026-09-16
+   *   mañana en UTC   = 2026-09-17   <- lo que esperaba el test antiguo
+   *
+   * El código SIEMPRE hizo lo correcto (`chileDateIn(1)`): Paporla es una app
+   * chilena y la fecha de retiro se calcula en hora de Chile. El equivocado era
+   * el test, que calculaba en UTC.
+   *
+   * Se congela el reloj en esa franja para que el fallo sea determinista: así
+   * este test lo cazará siempre, no solo cuando a alguien le toque esa hora.
+   */
+  it('la fecha por defecto es mañana en CHILE, aunque UTC ya vaya un día por delante', () => {
+    vi.useFakeTimers()
+    try {
+      // 01:00 UTC del 16-sep-2026 = 22:00 del 15-sep-2026 en Chile (UTC-3).
+      vi.setSystemTime(new Date('2026-09-16T01:00:00Z'))
+
+      expect(chileDateIn(0)).toBe('2026-09-15') // hoy en Chile
+      expect(getDefaultPackData('shop-1').pickup_date).toBe('2026-09-16')
+
+      // Y lo que el test antiguo daba por bueno (UTC) es justo lo que NO vale.
+      expect(getDefaultPackData('shop-1').pickup_date).not.toBe('2026-09-17')
+    } finally {
+      vi.useRealTimers()
+    }
   })
 })
 
