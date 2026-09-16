@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query'
 import { supabaseBrowser } from '@/lib/supabase/client'
 import { useAdminCounts } from '@/lib/query/useAdminCounts'
 import { useAdminTrend } from '@/components/admin/useAdminTrend'
+import { marketDayKeysBack } from '@/lib/utils/formatDate'
 
 export interface AdminSummary {
   totalUsers: number
@@ -38,11 +39,12 @@ export function useAdminStats() {
   const userStatsQuery = useQuery({
     queryKey: ['admin-user-stats'],
     queryFn: async () => {
-      const lastDays = Array.from({ length: 30 }, (_, i) => {
-        const d = new Date()
-        d.setDate(d.getDate() - i)
-        return d.toISOString().split('T')[0]
-      }).reverse()
+      // Barrida de zonas horarias (2026-09-16): esto hacía `d.setDate()` sobre
+      // la hora LOCAL del navegador y luego `toISOString()` en UTC. En Chile
+      // (UTC-3) eso corría la clave un día entero, así que el gráfico de 30 días
+      // agrupaba los registros en el día equivocado según desde dónde se abriera.
+      // La cuenta vive en `marketDayKeysBack`, que es de mercado y testeable.
+      const lastDays = marketDayKeysBack(30)
       const byDay = await Promise.all(
         lastDays.map(async (day) => {
           const { count, error } = await supabase

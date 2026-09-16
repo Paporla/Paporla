@@ -2,6 +2,7 @@
 
 import { Download } from 'lucide-react'
 import { exportToCSV } from '@/lib/utils/csv'
+import { dateKeyInTimezone } from '@/lib/utils/formatDate'
 import Button from '@/components/ui/Button'
 
 interface ExportCSVButtonProps {
@@ -33,7 +34,10 @@ export default function ExportCSVButton({
   disabled,
 }: ExportCSVButtonProps) {
   const handleExport = () => {
-    const date = new Date().toISOString().split('T')[0]
+    // Barrida de zonas horarias (2026-09-16): la fecha iba en UTC, así que un
+    // comercio chileno que exportara después de las 21:00 se encontraba el
+    // archivo fechado al día siguiente. Se usa la fecha del mercado.
+    const date = dateKeyInTimezone(new Date().toISOString())
     exportToCSV(data, `${filename}_${date}`, columns)
   }
 

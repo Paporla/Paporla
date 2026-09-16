@@ -74,3 +74,23 @@ export const dateKeyInTimezone = (iso: string | null, timeZone: string = 'Americ
     timeZone,
   }).format(date)
 }
+
+/**
+ * Últimos `count` días del MERCADO (America/Santiago), del más antiguo al más
+ * reciente, como claves YYYY-MM-DD. Para series y gráficos de "últimos N días".
+ *
+ * Barrida de zonas horarias (2026-09-16): el panel de admin construía esta serie
+ * con `d.setDate()` sobre la hora LOCAL del navegador y luego `toISOString()` en
+ * UTC. En Chile (UTC-3/-4) eso corría TODA la serie un día, así que los
+ * registros caían en la columna equivocada según desde dónde se abriera.
+ *
+ * Se ancla en la fecha del mercado y se recorre hacia atrás con aritmética de
+ * calendario sobre medianoche UTC: ni la zona del navegador ni el cambio de
+ * hora de verano la mueven. Mismo patrón que ya usaban useBusinessAnalytics y
+ * useBusinessDashboard, que sí estaban bien.
+ */
+export const marketDayKeysBack = (count: number, now: Date = new Date()): string[] => {
+  const todayKey = dateKeyInTimezone(now.toISOString())
+  const base = new Date(`${todayKey}T00:00:00Z`).getTime()
+  return Array.from({ length: count }, (_, i) => new Date(base - (count - 1 - i) * 86400000).toISOString().slice(0, 10))
+}
