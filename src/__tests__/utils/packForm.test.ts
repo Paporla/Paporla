@@ -76,7 +76,12 @@ describe('validatePackForm', () => {
   })
 
   it('rejects a pickup window that already started', () => {
-    const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0]
+    // Barrida de zonas horarias (2026-09-16): "ayer" se calculaba en UTC y la
+    // validación compara en hora de Chile. Durante la franja 00:00-03:00 UTC
+    // ambas zonas están en días distintos y "ayer en UTC" era HOY en Chile, así
+    // que esto quedaba al borde de fallar según la hora a la que corriera.
+    // `chileDateIn(-1)` es ayer en Chile siempre, caiga cuando caiga.
+    const yesterday = chileDateIn(-1)
     const errors = validatePackForm(makeForm({ pickup_date: yesterday }))
     expect(errors.pickup_start_time).toBeTruthy()
   })

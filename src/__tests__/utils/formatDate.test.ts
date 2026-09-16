@@ -1,5 +1,11 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { formatDate, formatRelativeDate, formatPickupWindow, dateKeyInTimezone } from '@/lib/utils/formatDate'
+import {
+  formatDate,
+  formatRelativeDate,
+  formatPickupWindow,
+  dateKeyInTimezone,
+  marketDayKeysBack,
+} from '@/lib/utils/formatDate'
 
 describe('formatDate', () => {
   it('returns "Fecha no disponible" for null', () => {
@@ -98,5 +104,66 @@ describe('dateKeyInTimezone', () => {
   it('devuelve cadena vacía sin fecha o fecha inválida', () => {
     expect(dateKeyInTimezone(null)).toBe('')
     expect(dateKeyInTimezone('no es una fecha')).toBe('')
+  })
+})
+
+/**
+ * Barrida de zonas horarias (2026-09-16).
+ *
+ * El panel de admin construía la serie de "últimos 30 días" así:
+ *
+ *     const d = new Date()
+ *     d.setDate(d.getDate() - i)          // hora LOCAL del navegador
+ *     return d.toISOString().split('T')[0] // ...y luego se lee en UTC
+ *
+ * Mezclar las dos zonas corría TODA la serie un día: en Chile (UTC-3/-4), pasar
+ * de la tarde a UTC caía casi siempre en el día siguiente. El gráfico agrupaba
+ * los registros en la columna equivocada, y el error cambiaba según DESDE DÓNDE
+ * se abriera el panel: en un navegador en UTC salía bien y en uno chileno no.
+ *
+ * Estas pruebas fijan que la serie se ancla en la fecha del MERCADO.
+ */
+describe('marketDayKeysBack', () => {
+  it('devuelve la serie en orden cronológico y terminando hoy', () => {
+    // Mediodía UTC del 30-sep: en Chile también es 30 (09:00, UTC-3 en verano).
+    const keys = marketDayKeysBack(5, new Date('2026-09-30T12:00:00Z'))
+    expect(keys).toEqual(['2026-09-26', '2026-09-27', '2026-09-28', '2026-09-29', '2026-09-30'])
+  })
+
+  it('NO se corre un día cuando Chile va por detrás de UTC (el bug del admin)', () => {
+    // 01:00 UTC del 16-sep-2026 = 22:00 del 15-sep en Chile (verano, UTC-3).
+    // Aquí las dos zonas están en DÍAS DISTINTOS. El código antiguo devolvía
+    // ...14, 15, 16 (la lectura en UTC); el correcto termina el 15, que es el
+    // día que es "hoy" en Chile.
+    const keys = marketDayKeysBack(3, new Date('2026-09-16T01:00:00Z'))
+
+    expect(keys).toEqual(['2026-09-13', '2026-09-14', '2026-09-15'])
+    expect(keys.at(-1)).not.toBe('2026-09-16') // lo que daba el código viejo
+  })
+
+  it('la longitud es exacta y no hay huecos ni días repetidos', () => {
+    const keys = marketDayKeysBack(30, new Date('2026-09-16T01:00:00Z'))
+    expect(keys).toHaveLength(30)
+    expect(new Set(keys).size).toBe(30)
+
+    // Cada par consecutivo se lleva exactamente un día de calendario.
+    for (let i = 1; i < keys.length; i++) {
+      const diff =
+        (new Date(`${keys[i]}T00:00:00Z`).getTime() - new Date(`${keys[i - 1]}T00:00:00Z`).getTime()) / 86400000
+      expect(diff).toBe(1)
+    }
+  })
+
+  it('atraviesa el cambio de hora de verano sin saltos', () => {
+    // En Chile el horario de verano arranca el primer domingo de septiembre
+    // (2026-09-06): ese día tiene 23 horas. La aritmética sobre medianoche UTC
+    // lo atraviesa igual, sin duplicar ni perder ningún día.
+    const keys = marketDayKeysBack(10, new Date('2026-09-10T12:00:00Z'))
+
+    expect(keys).toHaveLength(10)
+    expect(new Set(keys).size).toBe(10)
+    expect(keys[0]).toBe('2026-09-01')
+    expect(keys.at(-1)).toBe('2026-09-10')
+    expect(keys).toContain('2026-09-06') // el día del cambio sigue estando
   })
 })
