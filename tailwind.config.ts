@@ -12,9 +12,18 @@ const config: Config = {
         primary: 'rgb(var(--color-primary-rgb) / <alpha-value>)',
         'primary-light': 'rgb(var(--color-primary-light-rgb) / <alpha-value>)',
         'primary-dark': 'rgb(var(--color-primary-dark-rgb) / <alpha-value>)',
-        secondary: '#ff8a3c',
-        'secondary-light': '#ffa666',
-        'secondary-dark': '#e67320',
+        // A-12: el naranja estaba a mano aquí, así que valía igual en claro
+        // y en oscuro. Era ilegible sobre la crema (2.21:1) y correcto sobre
+        // el fondo oscuro (8.36:1). Ahora sale de variables CSS, como el
+        // primario, y cada tema usa el suyo.
+        secondary: 'rgb(var(--color-secondary-rgb) / <alpha-value>)',
+        'secondary-light': 'rgb(var(--color-secondary-light-rgb) / <alpha-value>)',
+        'secondary-dark': 'rgb(var(--color-secondary-dark-rgb) / <alpha-value>)',
+        // A-12: color del texto ENCIMA del primario. No es una preferencia
+        // estética: ningún verde cumple a la vez con texto blanco y con
+        // texto negro, así que esto es un token y no se improvisa en cada
+        // botón. Blanco en claro (5.48:1), casi negro en oscuro (14.62:1).
+        'on-primary': 'rgb(var(--color-on-primary-rgb) / <alpha-value>)',
         dark: {
           DEFAULT: '#0a0a1a',
           card: '#0f0f1a',
