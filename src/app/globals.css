@@ -12,9 +12,35 @@
    contraste en claro se ajusta en el paso 5 (WCAG AA).
    ============================================ */
 /* Propuesta B «crema + bosque con chispa neon» (31-ago): fondo crema
-   calido, texto verde-carbon, y un primario UTILIZABLE sobre claro
-   (#0c9d61, AA sobre crema). El neon #00ff88 NO se usa suelto en claro:
-   vive dentro de las "islas oscuras" (hero, CTA), via --color-island-*. */
+   calido, texto verde-carbon. El neon #00ff88 NO se usa suelto en claro:
+   vive dentro de las "islas oscuras" (hero, CTA), via --color-island-*.
+
+   A-12 (contraste): el comentario anterior afirmaba que #0c9d61 era
+   "AA sobre crema" y NO lo era. Medido con la formula WCAG:
+
+     #0c9d61 como TEXTO sobre crema ......... 3.29:1  (AA exige 4.5:1)
+     blanco sobre #0c9d61 (botón CTA) ....... 3.49:1  (AA exige 4.5:1)
+
+   Es decir, el verde fallaba por los DOS lados. Y hay un tercer caso que
+   tira para el otro lado: texto NEGRO sobre ese verde daba 5.61:1. Ningún
+   verde puede cumplir blanco-encima y negro-encima a la vez, así que el
+   color del texto del botón deja de estar al criterio de cada componente y
+   pasa a ser un token: --color-on-primary (blanco en claro, casi negro en
+   oscuro, donde el primario es neon).
+
+   Paleta de claro resultante, toda verificada >= 4.5:1 sobre crema y con
+   blanco encima cuando hace de fondo:
+
+     primario ........... #047857   5.17:1 texto /  5.48:1 con blanco
+     primario-dark ...... #065f46   7.24:1 texto /  7.68:1 con blanco
+     primario-light ..... #059669   3.55:1 texto -> solo decorativo
+     secundario ......... #b45309   4.73:1 texto /  5.02:1 con blanco
+     secundario-dark .... #92400e   6.68:1 texto /  7.09:1 con blanco
+     texto apagado ...... #5a6b5c   5.36:1 texto
+     peligro ............ #b91c1c   6.10:1 texto /  6.47:1 con blanco
+
+   El modo oscuro NO se toca: todos sus valores ya cumplen (el primario
+   neon da 14.62:1 sobre #0a0a1a). */
 :root {
   --color-bg: #faf8f3;
   --color-bg-card: #ffffff;
@@ -23,15 +49,28 @@
   --color-hover: rgba(26, 46, 36, 0.05);
   --color-text: #1a2e24;
   --color-text-secondary: #3d5044;
-  --color-text-muted: #7d8a7d;
-  --color-primary: #0c9d61;
-  --color-primary-light: #16b873;
-  --color-primary-dark: #047857;
-  --color-primary-rgb: 12 157 97;
-  --color-primary-light-rgb: 22 184 115;
-  --color-primary-dark-rgb: 4 120 87;
-  --color-secondary: #ff8a3c;
-  --color-danger: #ef4444;
+  --color-text-muted: #5a6b5c;
+  --color-primary: #047857;
+  --color-primary-light: #059669;
+  --color-primary-dark: #065f46;
+  --color-primary-rgb: 4 120 87;
+  --color-primary-light-rgb: 5 150 105;
+  --color-primary-dark-rgb: 6 95 70;
+  /* El naranja SI cambia entre temas: el vivo #ff8a3c da 8.36:1 sobre el
+     fondo oscuro pero solo 2.21:1 sobre la crema. Por eso ahora sale de
+     variables (antes estaba a mano en tailwind.config y valía para los dos
+     temas a la vez, lo que lo hacía ilegible en claro). */
+  --color-secondary: #b45309;
+  --color-secondary-light: #a85a0a;
+  --color-secondary-dark: #92400e;
+  --color-secondary-rgb: 180 83 9;
+  --color-secondary-light-rgb: 168 90 10;
+  --color-secondary-dark-rgb: 146 64 14;
+  --color-danger: #b91c1c;
+  /* Texto encima del primario. Ver nota de arriba: es un token, no una
+     decisión suelta en cada botón. */
+  --color-on-primary: #ffffff;
+  --color-on-primary-rgb: 255 255 255;
   --glass-bg: rgba(255, 255, 255, 0.8);
   --glass-border: rgba(26, 46, 36, 0.1);
   --glass-shadow: 0 4px 24px rgba(26, 46, 36, 0.08);
@@ -58,6 +97,19 @@
   --color-primary-rgb: 0 255 136;
   --color-primary-light-rgb: 51 255 163;
   --color-primary-dark-rgb: 0 204 110;
+  /* A-12: el naranja vivo SI es correcto en oscuro (8.36:1), por eso aquí
+     se conserva tal cual. Solo el modo claro necesitaba oscurecerlo.
+     Peligro rojo #ef4444 sobre #0a0a1a: 5.21:1, también correcto. */
+  --color-secondary: #ff8a3c;
+  --color-secondary-light: #ffa666;
+  --color-secondary-dark: #e67320;
+  --color-secondary-rgb: 255 138 60;
+  --color-secondary-light-rgb: 255 166 102;
+  --color-secondary-dark-rgb: 230 115 32;
+  --color-danger: #ef4444;
+  /* Sobre el neon, el texto va casi negro (14.62:1); el blanco sería 1.34:1. */
+  --color-on-primary: #0a0a1a;
+  --color-on-primary-rgb: 10 10 26;
   --glass-bg: rgba(15, 15, 26, 0.7);
   --glass-border: rgba(255, 255, 255, 0.08);
   --glass-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
