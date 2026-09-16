@@ -53,7 +53,7 @@ export default function CookieConsentBanner() {
               <button
                 type="button"
                 onClick={() => decide('accepted')}
-                className="flex-1 px-4 py-2.5 rounded-xl bg-primary text-white dark:text-black text-sm font-semibold hover:opacity-90 transition-opacity"
+                className="flex-1 px-4 py-2.5 rounded-xl bg-primary text-on-primary text-sm font-semibold hover:opacity-90 transition-opacity"
               >
                 Aceptar analítica
               </button>

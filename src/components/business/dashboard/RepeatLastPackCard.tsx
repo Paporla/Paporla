@@ -42,7 +42,7 @@ export default function RepeatLastPackCard({ packs }: { packs: DashboardPack[] }
         </div>
         <Link
           href={`/business/packs/${lastPack.id}/duplicate`}
-          className="flex items-center justify-center gap-2 bg-primary hover:bg-primary-light text-dark font-bold px-5 py-3 rounded-xl transition-all text-sm flex-shrink-0"
+          className="flex items-center justify-center gap-2 bg-primary hover:bg-primary-dark text-on-primary font-bold px-5 py-3 rounded-xl transition-all text-sm flex-shrink-0"
         >
           Repetir mi último pack <ArrowRight className="w-4 h-4" />
         </Link>

@@ -187,7 +187,7 @@ export default function PackCardPublic({ pack, onReserve, index, reserving, rese
             disabled={!canReserve || reserving === pack.id}
             className={`w-full py-2.5 rounded-xl font-semibold transition-all flex items-center justify-center gap-2 ${
               canReserve
-                ? 'bg-primary text-black hover:bg-primary/90'
+                ? 'bg-primary text-on-primary hover:bg-primary/90'
                 : 'dark:bg-gray-700 bg-gray-200 dark:text-gray-400 text-gray-500 cursor-not-allowed'
             }`}
           >

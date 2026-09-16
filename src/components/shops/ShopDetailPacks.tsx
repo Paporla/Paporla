@@ -105,7 +105,7 @@ export default function ShopDetailPacks({ packs, shopName, shopAddress }: ShopDe
 
                     <div className="absolute top-3 left-3 flex gap-2">
                       {discount && (
-                        <span className="text-xs font-bold bg-primary text-black px-2.5 py-1 rounded-full">
+                        <span className="text-xs font-bold bg-primary text-on-primary px-2.5 py-1 rounded-full">
                           -{discount}%
                         </span>
                       )}

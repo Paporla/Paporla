@@ -77,7 +77,7 @@ export default function ShareButton({
       ) : (
         <button
           onClick={handleClick}
-          className={`${variantMap[variant]} ${sizeMap[size]} flex items-center gap-2 bg-primary text-black hover:bg-primary/90 transition-all shadow-lg shadow-primary/20`}
+          className={`${variantMap[variant]} ${sizeMap[size]} flex items-center gap-2 bg-primary text-on-primary hover:bg-primary/90 transition-all shadow-lg shadow-primary/20`}
         >
           <Share2 className={size === 'sm' ? 'w-4 h-4' : 'w-5 h-5'} />
           <span>Compartir</span>

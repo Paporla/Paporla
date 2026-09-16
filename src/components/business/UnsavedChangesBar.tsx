@@ -34,7 +34,7 @@ export default function UnsavedChangesBar({ isDirty, onSave, onDiscard, saving }
             <button
               onClick={() => onSave()}
               disabled={saving}
-              className="flex items-center gap-2 bg-primary hover:bg-primary/80 text-black text-sm font-bold px-5 py-2 rounded-xl transition-all disabled:opacity-50"
+              className="flex items-center gap-2 bg-primary hover:bg-primary/80 text-on-primary text-sm font-bold px-5 py-2 rounded-xl transition-all disabled:opacity-50"
             >
               <Save className="w-4 h-4" />
               {saving ? 'Guardando...' : 'Guardar cambios'}

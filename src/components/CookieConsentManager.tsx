@@ -55,7 +55,7 @@ export default function CookieConsentManager() {
           type="button"
           onClick={() => decide('accepted')}
           disabled={consent === 'accepted'}
-          className="flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold bg-primary text-white dark:text-black hover:opacity-90 transition-opacity disabled:opacity-40 disabled:cursor-not-allowed"
+          className="flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold bg-primary text-on-primary hover:opacity-90 transition-opacity disabled:opacity-40 disabled:cursor-not-allowed"
         >
           <CheckCircle className="w-4 h-4" /> Aceptar analítica
         </button>

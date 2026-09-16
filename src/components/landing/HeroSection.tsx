@@ -56,7 +56,7 @@ export default function HeroSection() {
             >
               <Link
                 href="/packs"
-                className="group relative overflow-hidden inline-flex items-center justify-center gap-2 px-8 py-3 rounded-full bg-primary text-white dark:text-black font-semibold transition-all shadow-lg shadow-primary/30 hover:shadow-xl hover:shadow-primary/40 text-center"
+                className="group relative overflow-hidden inline-flex items-center justify-center gap-2 px-8 py-3 rounded-full bg-primary text-on-primary font-semibold transition-all shadow-lg shadow-primary/30 hover:shadow-xl hover:shadow-primary/40 text-center"
               >
                 <span className="relative z-10">Ver packs cerca de mí</span>
                 <ArrowRight className="w-4 h-4 relative z-10 group-hover:translate-x-1 transition" />

@@ -82,7 +82,7 @@ export default function PackCategoryTemplates({ selectedCategory, onSelect }: Pr
             onClick={() => onSelect(cat.id, cat.template)}
             className={`px-4 py-2 rounded-full text-sm transition-all ${
               selectedCategory === cat.id
-                ? 'bg-primary text-black font-medium'
+                ? 'bg-primary text-on-primary font-medium'
                 : 'dark:bg-white/5 bg-gray-100 dark:text-gray-400 text-gray-600 dark:hover:bg-white/10 hover:bg-gray-200'
             }`}
           >

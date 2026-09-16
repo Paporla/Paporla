@@ -104,7 +104,7 @@ export default function Header() {
             ) : (
               <Link
                 href="/login"
-                className="px-5 py-2 rounded-full bg-primary text-black font-medium hover:bg-primary/90 transition-all shadow-lg shadow-primary/20"
+                className="px-5 py-2 rounded-full bg-primary text-on-primary font-medium hover:bg-primary/90 transition-all shadow-lg shadow-primary/20"
               >
                 Iniciar Sesión
               </Link>
@@ -152,7 +152,7 @@ export default function Header() {
               {!user && (
                 <Link
                   href="/register"
-                  className="px-4 py-2 bg-primary text-black rounded-lg text-center font-medium"
+                  className="px-4 py-2 bg-primary text-on-primary rounded-lg text-center font-medium"
                   onClick={() => setIsMenuOpen(false)}
                 >
                   Registrarse

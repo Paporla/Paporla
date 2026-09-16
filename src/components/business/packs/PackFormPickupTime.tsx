@@ -134,7 +134,7 @@ export default function PackFormPickupTime({ data, onChange, errors }: Props) {
                 onClick={() => update({ pickup_date: dateStr })}
                 className={`px-4 py-2.5 rounded-xl text-sm transition-all ${
                   selected
-                    ? 'bg-primary text-black font-semibold'
+                    ? 'bg-primary text-on-primary font-semibold'
                     : 'dark:bg-white/5 bg-gray-100 dark:text-gray-300 text-gray-700 dark:hover:bg-white/10 hover:bg-gray-200'
                 }`}
               >
@@ -153,7 +153,7 @@ export default function PackFormPickupTime({ data, onChange, errors }: Props) {
           <div
             className={`relative flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm transition-all cursor-pointer ${
               isCustomDate
-                ? 'bg-primary text-black font-semibold'
+                ? 'bg-primary text-on-primary font-semibold'
                 : 'dark:bg-white/5 bg-gray-100 dark:text-gray-300 text-gray-700 dark:hover:bg-white/10 hover:bg-gray-200'
             }`}
           >
@@ -199,7 +199,7 @@ export default function PackFormPickupTime({ data, onChange, errors }: Props) {
                 }}
                 className={`px-3 py-3 rounded-xl text-left transition-all border ${
                   selected
-                    ? 'bg-primary text-black font-semibold border-primary'
+                    ? 'bg-primary text-on-primary font-semibold border-primary'
                     : past
                       ? 'dark:bg-white/5 bg-gray-100 dark:text-gray-600 text-gray-400 border-transparent cursor-not-allowed opacity-50'
                       : 'dark:bg-white/5 bg-gray-100 dark:text-gray-300 text-gray-700 border-transparent dark:hover:bg-white/10 hover:bg-gray-200'

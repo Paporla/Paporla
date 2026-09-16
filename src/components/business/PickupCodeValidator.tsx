@@ -113,7 +113,7 @@ export default function PickupCodeValidator({ shopId }: { shopId: string }) {
             onClick={handleValidate}
             disabled={!credential || busy}
             aria-label="Validar código de recogida"
-            className="flex items-center gap-2 bg-primary hover:bg-primary-light disabled:opacity-50 disabled:cursor-not-allowed text-dark font-bold px-6 py-3 rounded-xl transition-all text-sm"
+            className="flex items-center gap-2 bg-primary hover:bg-primary-dark disabled:opacity-50 disabled:cursor-not-allowed text-on-primary font-bold px-6 py-3 rounded-xl transition-all text-sm"
           >
             {busy ? (
               <Loader2 className="w-5 h-5 animate-spin" />

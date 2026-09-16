@@ -114,7 +114,7 @@ export default function EmptyState({
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             onClick={action.onClick}
-            className="px-6 py-2.5 rounded-xl bg-primary text-black font-semibold hover:opacity-90 transition-all duration-200 text-sm"
+            className="px-6 py-2.5 rounded-xl bg-primary text-on-primary font-semibold hover:opacity-90 transition-all duration-200 text-sm"
           >
             {action.label}
           </motion.button>

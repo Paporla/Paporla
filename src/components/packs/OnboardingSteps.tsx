@@ -112,7 +112,7 @@ export default function OnboardingSteps() {
             <div className="text-center mt-6">
               <button
                 onClick={dismiss}
-                className="px-6 py-2 rounded-xl bg-primary text-black font-medium text-sm hover:bg-primary/90 transition-all"
+                className="px-6 py-2 rounded-xl bg-primary text-on-primary font-medium text-sm hover:bg-primary/90 transition-all"
               >
                 ¡Entendido, vamos a rescatar!
               </button>

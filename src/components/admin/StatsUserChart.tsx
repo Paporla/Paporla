@@ -29,7 +29,7 @@ export default function StatsUserChart({ data }: Props) {
             <button
               key={r}
               onClick={() => setRange(r)}
-              className={`text-[11px] font-medium px-2.5 py-1.5 rounded-md transition-all ${range === r ? 'bg-primary text-black' : 'dark:text-gray-500 text-gray-400 dark:hover:text-white hover:text-gray-900'}`}
+              className={`text-[11px] font-medium px-2.5 py-1.5 rounded-md transition-all ${range === r ? 'bg-primary text-on-primary' : 'dark:text-gray-500 text-gray-400 dark:hover:text-white hover:text-gray-900'}`}
             >
               {r === '7d' ? '7D' : r === '30d' ? '30D' : 'Todo'}
             </button>
