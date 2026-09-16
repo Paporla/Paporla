@@ -45,7 +45,11 @@
 
 BEGIN;
 
-DROP FUNCTION public.list_my_reservations(timestamp with time zone, uuid, integer);
+-- DROP ... IF EXISTS: así el script se puede VOLVER A EJECUTAR sin miedo. Si una
+-- ejecución anterior se quedó a medias (el DROP se aplicó y el CREATE falló, por
+-- ejemplo por un tipo mal declarado), la función no existe y un DROP a secas
+-- abortaría otra vez dejando la base igual de rota.
+DROP FUNCTION IF EXISTS public.list_my_reservations(timestamp with time zone, uuid, integer);
 
 CREATE OR REPLACE FUNCTION public.list_my_reservations(
   p_before_created_at timestamptz DEFAULT NULL,
@@ -73,8 +77,14 @@ RETURNS TABLE (
   shop_latitude double precision,
   shop_longitude double precision,
   -- 0050 (A-05): datos para el ahorro real del panel del usuario.
+  -- ⚠️ Los tipos son los EXACTOS de las columnas, no "equivalentes": si se
+  -- declara `quantity integer` siendo `smallint`, Postgres falla en tiempo de
+  -- ejecución con "structure of query does not match function result type".
+  --   * reservations.unit_price_minor  bigint   (0005:22)
+  --   * reservations.quantity          smallint (0005:21)
+  --   * packs.original_price_minor     bigint   (0004:20)
   unit_price_minor bigint,
-  quantity integer,
+  quantity smallint,
   original_price_minor bigint
 )
 LANGUAGE plpgsql
