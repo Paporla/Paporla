@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback, useMemo } from 'react'
 import { supabaseBrowser } from '@/lib/supabase/client'
 import { useAuth } from './useAuth'
 import { translateDbError } from '@/lib/utils/db-errors'
@@ -41,7 +41,17 @@ export function countUnread(rows: ReadonlyArray<Pick<Notification, 'read_at'>>):
 
 export function useNotifications() {
   const { user } = useAuth()
-  const supabase = supabaseBrowser()
+  /**
+   * A-11: cliente estable durante toda la vida del hook.
+   *
+   * Antes se creaba en cada render, y aquí el daño era mayor que en
+   * `useAuth`: los tres efectos de abajo dependen de `supabase`, así que
+   * cada render desmontaba y volvía a montar el canal de Realtime — con un
+   * nombre nuevo cada vez (`Date.now()` + aleatorio). Además de la red que
+   * se gasta, entre desuscribir y resuscribir hay un hueco en el que una
+   * notificación que llegue justo ahí se pierde.
+   */
+  const supabase = useMemo(() => supabaseBrowser(), [])
   const [notifications, setNotifications] = useState<Notification[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)

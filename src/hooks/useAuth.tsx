@@ -1,6 +1,6 @@
 'use client'
 
-import { createContext, useContext, useEffect, useState, useCallback, useRef, type ReactNode } from 'react'
+import { createContext, useContext, useEffect, useState, useCallback, useMemo, useRef, type ReactNode } from 'react'
 import { supabaseBrowser } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import * as Sentry from '@sentry/nextjs'
@@ -41,7 +41,21 @@ const AuthContext = createContext<AuthContextValue | null>(null)
 // ─── Provider ───────────────────────────────────────────
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const supabase = supabaseBrowser()
+  /**
+   * A-11: el cliente se crea UNA vez por proveedor, no en cada render.
+   *
+   * `supabaseBrowser()` llama a `createBrowserClient` cada vez, así que
+   * antes esto devolvía un cliente NUEVO en cada render. Como `fetchProfile`
+   * depende de él, y `getUser` de `fetchProfile`, y el efecto de la
+   * suscripción de sesión depende de `[getUser, supabase]`, las tres piezas
+   * cambiaban de identidad en cada render y el efecto se volvía a ejecutar
+   * entero: desuscribir, resuscribir y volver a pedir el perfil. Una y otra
+   * vez, mientras el usuario estuviera logueado.
+   *
+   * Con el cliente estable, toda la cadena se estabiliza y el efecto corre
+   * una sola vez.
+   */
+  const supabase = useMemo(() => supabaseBrowser(), [])
   const router = useRouter()
 
   const [user, setUser] = useState<UserProfile | null>(null)
