@@ -1,6 +1,8 @@
 import type { Metadata } from 'next'
 import { ReactNode } from 'react'
 import { createClient } from '@/lib/supabase/server'
+// A-09: compartido con la página para no repetir la consulta.
+import { loadPublicShop } from './loadPublicShop'
 
 interface Props {
   children: ReactNode
@@ -26,9 +28,11 @@ export async function generateMetadata({ params }: MetadataProps): Promise<Metad
   const { id } = await params
 
   try {
+    // A-09: los datos vienen del cargador compartido con la página (una sola
+    // consulta por visita). El cliente solo hace falta para armar la URL
+    // pública de la imagen, que no es red.
     const supabase = await createClient()
-
-    const { data: shop } = await supabase.rpc('get_public_shop', { p_shop_id: id })
+    const shop = await loadPublicShop(id)
 
     const row = shop as {
       name: string

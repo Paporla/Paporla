@@ -1,22 +1,16 @@
 import type { Metadata } from 'next'
-import { createClient } from '@/lib/supabase/server'
 import ShopDetailClient from './ShopDetailClient'
 import { notFound } from 'next/navigation'
+// A-09: cargador compartido con el layout (una sola consulta por visita).
+import { loadPublicShop } from './loadPublicShop'
 
 interface Props {
   params: Promise<{ id: string }>
 }
 
-async function loadShop(id: string) {
-  const supabase = await createClient()
-  const { data, error } = await supabase.rpc('get_public_shop', { p_shop_id: id })
-  if (error || !data) return null
-  return data
-}
-
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params
-  const data = await loadShop(id)
+  const data = await loadPublicShop(id)
   const row = (
     data && typeof data === 'object' && 'shop' in (data as object)
       ? (data as { shop: Record<string, unknown> }).shop
@@ -38,7 +32,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function ShopDetailPage({ params }: Props) {
   const { id } = await params
-  const data = await loadShop(id)
+  const data = await loadPublicShop(id)
   if (!data) notFound()
   return <ShopDetailClient shopId={id} initialShop={data as Record<string, unknown>} />
 }
