@@ -126,6 +126,14 @@ COMMENT ON FUNCTION public.list_my_reservations(timestamptz, uuid, integer) IS
   último cambio de estado y coordenadas del comercio (0028) y con los datos de
   precio pagado y precio original (0050) para calcular el ahorro real del panel.';
 
+-- ⚠️ LOS DOS REVOKE NO SON ADORNO: CREATE FUNCTION concede EXECUTE a PUBLIC
+-- por defecto, y como esta migración hace DROP + CREATE, la función renace con
+-- ese permiso puesto. Sin los revoke, el test 7 de 0016_security_tests.sql
+-- ("no Paporla public/app_private function is executable by PUBLIC") falla.
+-- Es exactamente lo que pasó con la 0028 y hubo que parchear en la 0041.
+-- Es el mismo trío que ya hacen 0047 y 0048.
+REVOKE EXECUTE ON FUNCTION public.list_my_reservations(timestamptz, uuid, integer) FROM PUBLIC;
+REVOKE EXECUTE ON FUNCTION public.list_my_reservations(timestamptz, uuid, integer) FROM anon;
 GRANT EXECUTE ON FUNCTION public.list_my_reservations(timestamptz, uuid, integer) TO authenticated;
 
 COMMIT;
