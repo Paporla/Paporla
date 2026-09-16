@@ -519,7 +519,10 @@ export default function BusinessProfilePage() {
       // La RPC deja el comercio en `pending_review` y limpia el motivo del
       // rechazo anterior. Se refleja igual en pantalla para no recargar.
       setShop({ ...shop, status: 'pending_review', status_reason: null })
-      addToast('Comercio enviado a revision. Te avisaremos en 24-48 horas.', 'success')
+      // A-54: antes prometía "Te avisaremos en 24-48 horas". No hay SLA (la revisión
+      // es manual) ni aviso automático. Se le dice dónde mirar el estado, que sí es
+      // cierto: el banner de esta misma página cambia al aprobarse.
+      addToast('Comercio enviado a revisión. Podrás ver el estado en esta página.', 'success')
     } catch (err: unknown) {
       addToast(translateDbError(err, 'No se pudo enviar a revision.'), 'error')
     } finally {

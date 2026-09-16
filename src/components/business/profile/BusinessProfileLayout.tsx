@@ -18,6 +18,9 @@ import {
 } from 'lucide-react'
 import type { ShopStatus, MissingField } from '@/lib/utils/shopReview'
 
+/** Mismo criterio que en el pie, el formulario de contacto y las plantillas de correo. */
+const CONTACT_EMAIL = process.env.NEXT_PUBLIC_CONTACT_EMAIL ?? 'hola@paporla.com'
+
 export interface ProfileTab {
   id: string
   label: string
@@ -123,8 +126,21 @@ function StatusNotice({
       <div className="mt-4 flex items-start gap-3 bg-yellow-500/5 border border-yellow-500/20 rounded-xl px-4 py-3">
         <Shield className="w-4 h-4 text-yellow-400 flex-shrink-0 mt-0.5" />
         <p className="text-xs text-yellow-700 dark:text-yellow-300">
-          <span className="font-semibold">En revisión.</span> Estamos revisando tu comercio, normalmente en 24-48 horas.
-          Te avisaremos en cuanto esté aprobado.
+          {/*
+            A-54: esto decía "normalmente en 24-48 horas" y "te avisaremos en cuanto
+            esté aprobado". Ninguna de las dos se puede cumplir hoy: la revisión es
+            MANUAL (el panel de administración está pospuesto) y no existe ningún
+            aviso automático de aprobación. Un comercio se quedaba esperando una
+            respuesta en dos días que podía no llegar nunca.
+            Se dice lo que sí pasa y se le da una forma de comprobarlo y de preguntar.
+          */}
+          <span className="font-semibold">En revisión.</span> Hemos recibido tus datos y los revisamos a mano. Hoy no
+          hay un plazo garantizado ni aviso automático: vuelve a esta página para ver cómo va. Si tienes dudas,
+          escríbenos a{' '}
+          <a href={`mailto:${CONTACT_EMAIL}`} className="underline underline-offset-2 hover:no-underline">
+            {CONTACT_EMAIL}
+          </a>
+          .
         </p>
       </div>
     )
