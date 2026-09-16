@@ -1,38 +1,15 @@
 import type { Metadata } from 'next'
 import { headers } from 'next/headers'
-import { createClient } from '@/lib/supabase/server'
 import PackDetailClient from './PackDetailClient'
 import type { SerializedPack } from './PackDetailClient'
+// A-09: el cargador vive aparte para que el layout y la página compartan
+// la MISMA consulta (antes cada uno hacía la suya).
+import { loadPublicPack } from './loadPublicPack'
 import { notFound } from 'next/navigation'
 import { jsonLdToScriptContent } from '@/lib/utils/json-ld'
 
 interface Props {
   params: Promise<{ id: string }>
-}
-
-/**
- * Carga el pack para la página de detalle.
- *
- * Usa get_pack_public (migración 0029) en vez de search_available_packs:
- * la búsqueda del catálogo solo expone packs RESERVABLES (stock > 0 y
- * ventana futura), así que un pack agotado — o con la ventana ya pasada —
- * no aparecía y la página daba 404. get_pack_public devuelve el pack por su
- * id aunque esté agotado: la página entonces muestra el estado real (botón
- * "Agotado" / "Recogida finalizada") en vez de un 404.
- *
- * Sigue dando 404 cuando de verdad no existe: id inválido, mercado
- * waitlist/cerrado, pack no activo o comercio no verificado/eliminado.
- */
-async function loadPublicPack(id: string) {
-  const supabase = await createClient()
-  // p_pack_id es el nombre EXACTO del parámetro en la base (0029): PostgREST
-  // localiza la función por nombre de parámetro (los tests lo fijan).
-  const { data, error } = await supabase.rpc('get_pack_public', { p_pack_id: id })
-
-  if (error) return { supabase, row: null as Record<string, unknown> | null }
-
-  const row = ((data ?? []) as Record<string, unknown>[]).find((item) => item.pack_id === id) ?? null
-  return { supabase, row }
 }
 
 /**

@@ -1,7 +1,8 @@
 import type { Metadata } from 'next'
 import { ReactNode } from 'react'
-import { createClient } from '@/lib/supabase/server'
 import { formatChilePesos } from '@/lib/utils/formatPrice'
+// A-09: compartido con la página para no repetir la consulta.
+import { loadPublicPack } from './loadPublicPack'
 
 interface Props {
   children: ReactNode
@@ -28,19 +29,16 @@ export async function generateMetadata({ params }: MetadataProps): Promise<Metad
   const { id } = await params
 
   try {
-    const supabase = await createClient()
+    // A-09: misma consulta que la página y el cuerpo (una sola por visita).
+    const { supabase, row: loaded } = await loadPublicPack(id)
 
-    const { data: pack } = await supabase.rpc('get_pack_public', { p_pack_id: id })
-
-    const row = (Array.isArray(pack) ? pack[0] : pack) as
-      | {
-          title: string
-          description: string | null
-          price_minor: number
-          currency_code: string
-          image_path: string | null
-        }
-      | undefined
+    const row = loaded as {
+      title: string
+      description: string | null
+      price_minor: number
+      currency_code: string
+      image_path: string | null
+    } | null
 
     if (row) {
       let ogImage: string | undefined
