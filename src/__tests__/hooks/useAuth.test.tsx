@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { act, renderHook, waitFor } from '@testing-library/react'
+import { useState, type ReactNode } from 'react'
 import { supabaseBrowser } from '@/lib/supabase/client'
 
 /**
@@ -489,5 +490,76 @@ describe('useAuth', () => {
 
   it('usar useAuth fuera del proveedor falla con un mensaje que dice qué hacer', () => {
     expect(() => renderHook(() => useAuth())).toThrow(/debe usarse dentro de <AuthProvider>/)
+  })
+})
+
+/**
+ * A-11: el cliente de Supabase se recreaba en cada render.
+ *
+ * `supabaseBrowser()` llama a `createBrowserClient` cada vez, así que sin
+ * `useMemo` el proveedor fabricaba un cliente NUEVO en cada render. Como
+ * `fetchProfile` depende de él, `getUser` de `fetchProfile`, y el efecto de
+ * la suscripción de sesión de `[getUser, supabase]`, las tres piezas cambiaban
+ * de identidad en cada render y el efecto se re-ejecutaba entero: desuscribir,
+ * resuscribir y volver a pedir el perfil. Sin parar, mientras el usuario
+ * estuviera con la sesión abierta.
+ */
+describe('useAuth — el cliente se crea una sola vez (A-11)', () => {
+  /**
+   * Este es el que de verdad detecta el bug. Medido: sin `useMemo`, tres
+   * repintados del proveedor fabricaban 5 clientes (1 del montaje, 1 del
+   * repintado natural de la carga y 3 de los forzados). Con `useMemo`, 1.
+   *
+   * Ojo con cómo se fuerza el repintado: el `rerender()` de `renderHook`
+   * sólo vuelve a pintar al consumidor del hook, NO al `AuthProvider` de
+   * encima, que es donde se crea el cliente. Hay que repintar el wrapper.
+   */
+  it('repintar el proveedor no fabrica clientes de Supabase nuevos', async () => {
+    const mocks = buildClient()
+    withSession(mocks)
+    mocks.maybeSingle.mockResolvedValue({ data: profileRow(), error: null })
+
+    let bump: () => void = () => {}
+    function Wrapper({ children }: { children: ReactNode }) {
+      const [n, setN] = useState(0)
+      bump = () => setN(n + 1)
+      return <AuthProvider>{children}</AuthProvider>
+    }
+
+    const { result } = renderHook(() => useAuth(), { wrapper: Wrapper })
+    await waitFor(() => expect(result.current.user).not.toBeNull())
+
+    await act(async () => {
+      bump()
+    })
+    await act(async () => {
+      bump()
+    })
+    await act(async () => {
+      bump()
+    })
+
+    expect(vi.mocked(supabaseBrowser)).toHaveBeenCalledTimes(1)
+  })
+
+  /**
+   * Invariante general de la suscripción, NO un detector de A-11: medido,
+   * este test pasa también sin `useMemo`. Se queda porque vigila algo que
+   * importa por sí mismo: que durante la carga no se desuscriba la sesión y
+   * se vuelva a suscribir (entre una cosa y la otra hay un hueco en el que
+   * un cierre de sesión o un token renovado se perdería).
+   */
+  it('al terminar la carga no se desuscribe ni se resuscribe la sesión', async () => {
+    const mocks = buildClient()
+    withSession(mocks)
+    mocks.maybeSingle.mockResolvedValue({ data: profileRow(), error: null })
+
+    const { result } = renderAuth()
+    await waitFor(() => expect(result.current.user).not.toBeNull())
+    await waitFor(() => expect(result.current.loading).toBe(false))
+
+    // Una sola suscripción para toda la vida del proveedor.
+    expect(mocks.onAuthStateChange).toHaveBeenCalledTimes(1)
+    expect(mocks.unsubscribe).not.toHaveBeenCalled()
   })
 })
