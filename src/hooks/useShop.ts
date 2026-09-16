@@ -3,7 +3,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { supabaseBrowser } from '@/lib/supabase/client'
 import type { Shop, Pack } from '@/lib/supabase/types'
-import { DEFAULT_MARKET } from '@/lib/constants/markets'
 
 interface ShopWithPacks {
   shop: Shop | null
@@ -55,13 +54,20 @@ async function fetchShop(shopId: string): Promise<ShopWithPacks> {
     longitude: row.longitude != null ? Number(row.longitude) : null,
   } as Shop
 
-  const { data: packRows, error: packsError } = await supabase.rpc('search_available_packs', {
-    p_market_id: DEFAULT_MARKET.id,
-    p_locality_id: undefined,
-    p_latitude: undefined,
-    p_longitude: undefined,
-    p_radius_meters: 10000,
-    p_query: undefined,
+  /**
+   * A-10: antes esto pedía `search_available_packs` SIN filtro de comercio y
+   * con el tope de 50 que admite esa función, y luego filtraba aquí por
+   * shop_id. Si había más de 50 packs de otros comercios por delante, los de
+   * este quedaban fuera del límite y su ficha mostraba "0 packs" aunque sí
+   * estuviera vendiendo.
+   *
+   * `list_shop_packs` (0051) filtra en la base, así que el límite nunca se
+   * come los packs propios. Y devuelve el stock TOTAL real: antes se
+   * fabricaba copiando el stock restante, y la tarjeta decía "Stock: 3/3"
+   * cuando en realidad se habían vendido 7 de 10.
+   */
+  const { data: packRows, error: packsError } = await supabase.rpc('list_shop_packs', {
+    p_shop_id: shopId,
     p_limit: 50,
   })
 
@@ -69,24 +75,22 @@ async function fetchShop(shopId: string): Promise<ShopWithPacks> {
     return { shop, packs: [] }
   }
 
-  const packs = ((packRows ?? []) as Record<string, unknown>[])
-    .filter((p) => String(p.shop_id) === shopId)
-    .map((p) => {
-      const imagePath = (p.image_path as string | null) ?? null
-      const imageUrl = imagePath ? supabase.storage.from('pack-images').getPublicUrl(imagePath).data.publicUrl : null
-      return {
-        id: String(p.pack_id),
-        title: String(p.title ?? ''),
-        description: (p.description as string | null) ?? null,
-        price_cents: Number(p.price_minor ?? 0),
-        original_price_cents: p.original_price_minor != null ? Number(p.original_price_minor) : null,
-        remaining_stock: Number(p.remaining_stock ?? 0),
-        total_stock: Number(p.remaining_stock ?? 0),
-        image_url: imageUrl,
-        is_active: true,
-        shop_id: shopId,
-      } as Pack
-    })
+  const packs = ((packRows ?? []) as Record<string, unknown>[]).map((p) => {
+    const imagePath = (p.image_path as string | null) ?? null
+    const imageUrl = imagePath ? supabase.storage.from('pack-images').getPublicUrl(imagePath).data.publicUrl : null
+    return {
+      id: String(p.pack_id),
+      title: String(p.title ?? ''),
+      description: (p.description as string | null) ?? null,
+      price_cents: Number(p.price_minor ?? 0),
+      original_price_cents: p.original_price_minor != null ? Number(p.original_price_minor) : null,
+      remaining_stock: Number(p.remaining_stock ?? 0),
+      total_stock: Number(p.total_stock ?? 0),
+      image_url: imageUrl,
+      is_active: true,
+      shop_id: shopId,
+    } as Pack
+  })
 
   return { shop, packs }
 }
