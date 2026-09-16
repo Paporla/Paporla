@@ -96,7 +96,14 @@ export function useFavorites() {
   const queryKey = [FAVORITES_QUERY_KEY, user?.id]
 
   // --- Query: cargar favoritos ---
-  const { data = [], isLoading } = useQuery({
+  // A-07: `error` se expone. Antes el hook se lo callaba y la página no tenía
+  // forma de saber si la lista estaba vacía o si la carga había fallado, así
+  // que ante un fallo acababa afirmando "No tienes favoritos".
+  const {
+    data = [],
+    isLoading,
+    error,
+  } = useQuery({
     queryKey,
     queryFn: () => fetchFavorites(),
     enabled: !!user,
@@ -143,6 +150,8 @@ export function useFavorites() {
     favorites,
     favoriteShopIds,
     loading: isLoading,
+    /** A-07: mensaje del fallo de carga, o null. La página lo pinta antes que el estado vacío. */
+    error: error?.message ?? null,
     addFavorite: (shopId: string) => addMutation.mutateAsync(shopId),
     removeFavorite: (shopId: string) => removeMutation.mutateAsync(shopId),
     toggleFavorite,

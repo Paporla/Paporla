@@ -45,6 +45,13 @@ export function useNotifications() {
   const [notifications, setNotifications] = useState<Notification[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  /**
+   * A-07: contador para poder REINTENTAR. La carga vive en un efecto que
+   * depende de `user`; sin esta señal no había forma de volver a pedir los
+   * datos tras un fallo, así que la pantalla se quedaba en el estado vacío
+   * para siempre.
+   */
+  const [reloadNonce, setReloadNonce] = useState(0)
 
   // Estado derivado, no un `unreadCount` aparte que mantener sincronizado
   // (antes se recalculaba dentro de otros updaters, que es un desfase
@@ -81,7 +88,8 @@ export function useNotifications() {
     return () => {
       cancelled = true
     }
-  }, [user, supabase])
+    // `reloadNonce` entra a propósito: es la señal de "vuelve a cargar".
+  }, [user, supabase, reloadNonce])
 
   // Suscripción a cambios en tiempo real de MIS filas (INSERT/UPDATE).
   // No hay handler de DELETE: el RLS no permite borrar notificaciones.
@@ -160,5 +168,14 @@ export function useNotifications() {
     return true
   }, [notifications, supabase])
 
-  return { notifications, unreadCount, markAsRead, markAllAsRead, loading, error }
+  return {
+    notifications,
+    unreadCount,
+    markAsRead,
+    markAllAsRead,
+    loading,
+    error,
+    /** A-07: vuelve a pedir las notificaciones después de un fallo de carga. */
+    reload: () => setReloadNonce((n) => n + 1),
+  }
 }
