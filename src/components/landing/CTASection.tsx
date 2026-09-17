@@ -41,7 +41,13 @@ export default function CTASection() {
         >
           <div className="absolute -inset-0.5 bg-gradient-to-r from-primary/20 to-primary/10 rounded-card-lg blur-xl opacity-0 group-hover:opacity-40 transition duration-500" />
 
-          <div className="relative rounded-card-lg bg-white dark:bg-dark-card p-10 md:p-12 text-center border border-black/[0.06] dark:border-white/10 shadow-sm">
+          {/* En claro va bien una tarjeta blanca sobre la crema. En oscuro NO:
+              una tarjeta casi negra (#0f0f1a) sobre el fondo (#0a0a1a) es un
+              bloque plano que no pega con nada. El idioma de esta portada en
+              oscuro es el degradado translucido teñido del primario, el mismo
+              que usan las tarjetas de cifras. Se copia de ahí a propósito:
+              dos secciones contiguas tienen que parecer la misma página. */}
+          <div className="relative rounded-card-lg bg-white dark:bg-transparent dark:bg-gradient-to-br dark:from-primary/[0.18] dark:to-primary/[0.05] p-10 md:p-12 text-center border border-black/[0.06] dark:border-white/10 shadow-sm dark:shadow-none">
             <h2 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-3">
               ¿Listo para <span className="text-primary">rescatar comida</span>?
             </h2>
@@ -66,13 +72,14 @@ export default function CTASection() {
               </Link>
             </div>
 
-            <div className="relative my-6">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-black/10 dark:border-white/10"></div>
-              </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-4 bg-white dark:bg-dark-card text-gray-500 text-xs">O</span>
-              </div>
+            {/* Antes la línea pasaba POR DETRÁS de la letra y había que taparla
+                con un fondo del mismo color. Eso obliga a adivinar el color de
+                la tarjeta, y falla en cuanto la tarjeta es translúcida: se ve
+                el parche. Con una línea a cada lado no hay nada que tapar. */}
+            <div className="flex items-center gap-4 my-6">
+              <div className="flex-1 h-px bg-black/10 dark:bg-white/10" />
+              <span className="text-xs text-gray-500">O</span>
+              <div className="flex-1 h-px bg-black/10 dark:bg-white/10" />
             </div>
 
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
