@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test'
-import { paginaSana, sinErrorDeCarga } from './helpers/pagina'
+import { visitarSana, paginaSana, sinErrorDeCarga } from './helpers/pagina'
 
 /**
  * A-16: el test se llamaba "complete reservation flow: browse -> reserve ->
@@ -15,9 +15,7 @@ import { paginaSana, sinErrorDeCarga } from './helpers/pagina'
 test.describe('Authenticated Critical Flow', () => {
   test('flujo de reserva: se crea de verdad y aparece en Mis Reservas', async ({ page }) => {
     // --- 1. Listado -------------------------------------------------------
-    await page.goto('/packs')
-    await page.waitForLoadState('networkidle')
-    await paginaSana(page, { titulo: /Packs Disponibles/ })
+    await visitarSana(page, '/packs', { titulo: /Packs Disponibles/ })
     await sinErrorDeCarga(page)
 
     const tarjeta = page.locator('a[href^="/packs/"]').first()
@@ -28,8 +26,10 @@ test.describe('Authenticated Critical Flow', () => {
 
     // --- 2. Ficha del pack ------------------------------------------------
     await tarjeta.click()
-    await page.waitForLoadState('networkidle')
 
+    // Aqui no navegamos nosotros: venimos de un clic, asi que se comprueba la
+    // página en la que ya estamos en lugar de volver a cargar.
+    await page.waitForURL(/\/packs\//, { timeout: 15000 })
     const h1 = await paginaSana(page)
     const títuloPack = ((await h1.textContent()) ?? '').trim()
     // "Pack no encontrado" es el estado de 404: eso no es un pack válido.
@@ -37,7 +37,9 @@ test.describe('Authenticated Critical Flow', () => {
 
     // --- 3. Reservar (obligatorio, sin .catch que lo oculte) --------------
     const botonReservar = page.getByRole('button', { name: /^reservar$/i }).first()
-    await expect(botonReservar, 'no aparecio el boton de reservar en la ficha del pack').toBeVisible({ timeout: 10000 })
+    await expect(botonReservar, 'no aparecio el boton de reservar en la ficha del pack').toBeVisible({
+      timeout: 10000,
+    })
     await botonReservar.click()
 
     // --- 4. El modal y las políticas --------------------------------------
@@ -63,9 +65,7 @@ test.describe('Authenticated Critical Flow', () => {
 
     // --- 6. LA RESERVA EXISTE --------------------------------------------
     // Esto es lo que el test anterior nunca hacia.
-    await page.goto('/reservations')
-    await page.waitForLoadState('networkidle')
-    await paginaSana(page, { titulo: /Mis Reservas/ })
+    await visitarSana(page, '/reservations', { titulo: /Mis Reservas/ })
     await sinErrorDeCarga(page)
 
     const reserva = page.getByText(títuloPack, { exact: false }).first()
@@ -75,30 +75,22 @@ test.describe('Authenticated Critical Flow', () => {
   })
 
   test('el panel carga con datos del usuario', async ({ page }) => {
-    await page.goto('/dashboard')
-    await page.waitForLoadState('networkidle')
-    await paginaSana(page, { titulo: /^Hola,/ })
+    await visitarSana(page, '/dashboard', { titulo: /^Hola,/ })
     await expect(page).toHaveTitle(/Paporla|Dashboard|Panel/i)
   })
 
   test('la página de perfil carga y muestra su titular', async ({ page }) => {
-    await page.goto('/profile')
-    await page.waitForLoadState('networkidle')
-    await paginaSana(page, { titulo: /Mi perfil/ })
+    await visitarSana(page, '/profile', { titulo: /Mi perfil/ })
     await sinErrorDeCarga(page)
   })
 
   test('la página de notificaciones carga y muestra su titular', async ({ page }) => {
-    await page.goto('/notifications')
-    await page.waitForLoadState('networkidle')
-    await paginaSana(page, { titulo: /Notificaciones/ })
+    await visitarSana(page, '/notifications', { titulo: /Notificaciones/ })
     await sinErrorDeCarga(page)
   })
 
   test('la página de favoritos carga y muestra su titular', async ({ page }) => {
-    await page.goto('/favorites')
-    await page.waitForLoadState('networkidle')
-    await paginaSana(page, { titulo: /Mis Favoritos/ })
+    await visitarSana(page, '/favorites', { titulo: /Mis Favoritos/ })
     await sinErrorDeCarga(page)
   })
 })
