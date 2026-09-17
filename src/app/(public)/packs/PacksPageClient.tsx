@@ -16,7 +16,8 @@ import PacksLoadingGrid from '@/components/packs/PacksLoadingGrid'
 const ITEMS_PER_PAGE = 9
 
 export default function PacksPage() {
-  const { packs, filters, loading, error: hookError, setFilters, retry } = usePublicPacks()
+  const { packs, filters, loading, error: hookError, setFilters, retry, localities } = usePublicPacks()
+  const cityNames = useMemo(() => localities.map((l) => l.name), [localities])
   const [currentPage, setCurrentPage] = useState(1)
   const router = useRouter()
 
@@ -77,7 +78,12 @@ export default function PacksPage() {
 
       <div className="container mx-auto px-4 py-8">
         <OnboardingSteps />
-        <PackFiltersAdvanced onFilterChange={handleFilterChange} />
+        {/*
+          El desplegable de ciudades sale de la base de datos. Sin esta prop el
+          componente usaba su valor por defecto: `cities = ['Santiago']` escrito
+          a mano, que es justo lo que impedía crecer a otras comunas.
+        */}
+        <PackFiltersAdvanced onFilterChange={handleFilterChange} cities={cityNames} />
 
         {loading ? (
           <PacksLoadingGrid />

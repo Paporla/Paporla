@@ -60,6 +60,10 @@ vi.mock('@/hooks/usePublicPacks', () => ({
     },
     loading: false,
     error: '',
+    // El hook real SIEMPRE devuelve un array (query.data ?? []), nunca
+    // undefined. Si este mock no lo trae, la página revienta al hacer
+    // localities.map. El mock tiene que reflejar el contrato de verdad.
+    localities: [{ id: 'loc-santiago', name: 'Santiago' }],
     setError: vi.fn(),
     setFilters: vi.fn(),
   }),

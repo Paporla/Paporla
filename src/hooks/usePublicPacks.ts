@@ -4,6 +4,7 @@ import { useMemo, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { supabaseBrowser } from '@/lib/supabase/client'
 import { DEFAULT_MARKET } from '@/lib/constants/markets'
+import { useLocalities } from '@/hooks/useLocalities'
 import type { Database } from '@/types/database.generated'
 import type { PublicPack } from '@/components/packs/PackCardPublic'
 
@@ -36,6 +37,25 @@ export function usePublicPacks() {
   const [filters, setFilters] = useState<Filters>(DEFAULT_FILTERS)
   const [localError, setError] = useState('')
 
+  // La lista de ciudades del desplegable viene de la base de datos, no escrita
+  // a mano. useLocalities trae { id, name }; el desplegable muestra el nombre y
+  // aquí se traduce a id, que es lo que la RPC necesita.
+  const { localities } = useLocalities()
+
+  /**
+   * El filtro guarda el NOMBRE de la localidad (es lo que ve el usuario y lo
+   * que se muestra en los "chips" de filtros activos); la RPC quiere el id.
+   *
+   * Si el nombre no encuentra id — una ciudad dada de baja, o un filtro viejo
+   * en la URL — devolvemos null y NO filtramos. Enseñar todos los packs es un
+   * fallo mucho mejor que enseñar cero: el usuario ve que hay cosas y puede
+   * quitar el filtro.
+   */
+  const localityId = useMemo(() => {
+    if (!filters.city) return null
+    return localities.find((l) => l.name === filters.city)?.id ?? null
+  }, [filters.city, localities])
+
   const query = useQuery({
     queryKey: [
       'public-packs',
@@ -44,11 +64,16 @@ export function usePublicPacks() {
       filters.location?.lat,
       filters.location?.lng,
       filters.radiusKm,
+      localityId,
     ],
     queryFn: async (): Promise<PublicPack[]> => {
       const { data, error } = await supabase.rpc('search_available_packs', {
         p_market_id: DEFAULT_MARKET.id,
-        p_locality_id: undefined,
+        // Antes iba `undefined` y el filtro se hacía en el navegador sobre los
+        // 50 packs que devolvía el límite. Con más de 50 packs en el catálogo,
+        // filtrar por ciudad podía dar cero resultados aunque sí hubiera packs
+        // en esa ciudad. Ahora filtra la base de datos, que ve todo el catálogo.
+        p_locality_id: localityId ?? undefined,
         p_latitude: filters.location?.lat,
         p_longitude: filters.location?.lng,
         p_radius_meters: Math.round(filters.radiusKm * 1000),
@@ -121,9 +146,11 @@ export function usePublicPacks() {
     if (filters.showAvailableOnly) {
       result = result.filter((pack) => pack.remaining_stock > 0)
     }
-    if (filters.city && !filters.location) {
-      result = result.filter((pack) => pack.locality_name === filters.city)
-    }
+    // Antes aquí se filtraba por ciudad comparando nombres, sobre los 50 packs
+    // que devolvía el límite. Ya no: la ciudad se manda a la base de datos como
+    // p_locality_id y ella devuelve solo lo que toca. Mantener las dos cosas
+    // sería pedirle al navegador que vuelva a comprobar lo que ya comprobó la
+    // base, y si algún día el nombre y el id no cuadran, daría cero resultados.
 
     if (filters.sortBy === 'price_asc') {
       result.sort((a, b) => a.price_minor - b.price_minor)
@@ -143,6 +170,8 @@ export function usePublicPacks() {
   return {
     allPacks,
     packs,
+    // La página las necesita para rellenar el desplegable de ciudades.
+    localities,
     filters,
     loading: query.isLoading,
     error: localError || query.error?.message || '',
