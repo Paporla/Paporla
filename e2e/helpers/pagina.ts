@@ -204,21 +204,37 @@ export async function contarPacks(page: Page): Promise<number> {
 export function vigilarRpc(page: Page, nombreRpc: string): () => string {
   const partes: string[] = []
 
-  // Se registran TODAS las respuestas, no solo las que fallan. Puede pasar
-  // (y pasa) que una devuelva 200 con la lista vacía y otra falle: ver solo
-  // los errores llevaría a la conclusión contraria.
+  // Se registra TODO lo que pasa por la API REST de Supabase, no solo la RPC
+  // que nos interesa. Si el listener no ve ni una sola llamada, eso ya es un
+  // dato: significa que el fallo ocurre ANTES de llegar a la red.
+  const esDeSupabase = (url: string) => url.includes('/rest/v1/')
+
   page.on('response', (respuesta) => {
-    if (!respuesta.url().includes(nombreRpc)) return
+    if (!esDeSupabase(respuesta.url())) return
+    const cual = respuesta.url().split('/rest/v1/')[1] ?? respuesta.url()
     void respuesta
       .text()
       .then((cuerpo) => {
         const trozo = cuerpo.replace(/\s+/g, ' ').trim().slice(0, 200)
-        partes.push(`HTTP ${respuesta.status()} -> ${trozo || '(cuerpo vacío)'}`)
+        partes.push(`[${cual}] HTTP ${respuesta.status()} -> ${trozo || '(cuerpo vacío)'}`)
       })
       .catch(() => {
-        partes.push(`HTTP ${respuesta.status()} (cuerpo ilegible)`)
+        partes.push(`[${cual}] HTTP ${respuesta.status()} (cuerpo ilegible)`)
       })
   })
 
-  return () => (partes.length > 0 ? partes.join(' | ') : '')
+  // Peticiones que ni siquiera llegaron a tener respuesta.
+  page.on('requestfailed', (peticion) => {
+    if (!esDeSupabase(peticion.url())) return
+    const cual = peticion.url().split('/rest/v1/')[1] ?? peticion.url()
+    partes.push(`[${cual}] PETICION FALLIDA: ${peticion.failure()?.errorText ?? 'sin detalle'}`)
+  })
+
+  // Errores de consola: aqui cae cualquier aviso del cliente de Supabase.
+  page.on('console', (mensaje) => {
+    if (mensaje.type() !== 'error') return
+    partes.push(`[consola] ${mensaje.text().slice(0, 200)}`)
+  })
+
+  return () => (partes.length > 0 ? partes.join(' | ') : `SIN NINGUNA LLAMADA A /rest/v1/ (${nombreRpc})`)
 }
