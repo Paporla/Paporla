@@ -144,3 +144,97 @@ describe('el naranja depende del tema (A-12)', () => {
     }
   })
 })
+
+/* ---------------------------------------------------------------------------
+   A-12b: los acentos de color de Tailwind estan calibrados para fondo oscuro.
+   En claro, green-400 da 1.64:1 y yellow-400 1.44:1: invisibles. Son 299 usos,
+   asi que se recogen en una regla global de globals.css en vez de uno a uno.
+
+   Este test lee esas reglas y comprueba que el color al que se remapea cada
+   clase llega a AA. Si alguien toca un valor y lo aclara, aqui salta.
+--------------------------------------------------------------------------- */
+
+/** Compone un color con alfa sobre un fondo conocido (para los rgb(... / 0.9)). */
+function sobreFondo(color: string, fondo: string): string {
+  const m = color.match(/rgba?\(\s*(\d+)\s+(\d+)\s+(\d+)(?:\s*\/\s*([\d.]+))?\s*\)/)
+  if (!m) return color
+  const alfa = m[4] === undefined ? 1 : Number(m[4])
+  const base = fondo
+    .replace('#', '')
+    .match(/../g)!
+    .map((h) => parseInt(h, 16))
+  const capa = [1, 2, 3].map((i) => Number(m[i]))
+  const mezcla = capa.map((c, i) => Math.round(c * alfa + base[i] * (1 - alfa)))
+  return `#${  mezcla.map((c) => c.toString(16).padStart(2, '0')).join('')}`
+}
+
+describe('acentos de color en modo claro (A-12b)', () => {
+  const limpio = sinComentarios(CSS)
+
+  /**
+   * Extrae las reglas `html:not(.dark) .clase { propiedad: valor; }`.
+   * Cada selector de la lista trae su propio prefijo, y ese prefijo contiene
+   * un `.dark` que no es clase nuestra: se quita antes de extraer.
+   */
+  const reglas = [
+    ...limpio.matchAll(
+      /html:not\(\.dark\)((?:\s*(?:html:not\(\.dark\)\s*)?\.[-a-z0-9\\/]+\s*,?\s*)+)\{\s*(color|fill|background-color):\s*([^;]+);/gi,
+    ),
+  ].map((m) => ({
+    clases: [...m[1].replace(/html:not\(\.dark\)/gi, '').matchAll(/\.([-a-z0-9\\/]+)/gi)].map((c) => c[1]),
+    propiedad: m[2],
+    valor: m[3].trim(),
+  }))
+
+  it('la regla existe y cubre las seis familias', () => {
+    expect(reglas.length).toBeGreaterThan(0)
+    const todas = reglas.flatMap((r) => r.clases).join(' ')
+    for (const familia of ['red', 'green', 'amber', 'blue', 'yellow', 'orange']) {
+      expect(todas, `familia ${familia}`).toContain(`text-${familia}-400`)
+    }
+  })
+
+  it('cada color de TEXTO remapeado llega a AA sobre crema y sobre tarjeta', () => {
+    const textos = reglas.filter((r) => r.propiedad === 'color')
+    expect(textos.length).toBeGreaterThanOrEqual(6)
+    for (const r of textos) {
+      for (const fondo of [CLARO['--color-bg'], CLARO['--color-bg-card']]) {
+        const ratio = contraste(sobreFondo(r.valor, fondo), fondo)
+        expect(ratio, `${r.clases.join(',')} = ${r.valor} sobre ${fondo}`).toBeGreaterThanOrEqual(AA)
+      }
+    }
+  })
+
+  it('los rellenos de icono llegan a AA (WCAG 1.4.11 pide 3:1; damos mas)', () => {
+    const rellenos = reglas.filter((r) => r.propiedad === 'fill')
+    expect(rellenos.length).toBeGreaterThanOrEqual(2)
+    for (const r of rellenos) {
+      const ratio = contraste(sobreFondo(r.valor, CLARO['--color-bg-card']), CLARO['--color-bg-card'])
+      expect(ratio, `${r.clases.join(',')} = ${r.valor}`).toBeGreaterThanOrEqual(AA)
+    }
+  })
+
+  it('los fondos solidos admiten texto blanco encima', () => {
+    const fondos = reglas.filter((r) => r.propiedad === 'background-color')
+    expect(fondos.length).toBeGreaterThanOrEqual(3)
+    for (const r of fondos) {
+      const ratio = contraste('#ffffff', sobreFondo(r.valor, CLARO['--color-bg-card']))
+      expect(ratio, `blanco sobre ${r.clases.join(',')} = ${r.valor}`).toBeGreaterThanOrEqual(AA)
+    }
+  })
+
+  it('la regla NO toca los tintes (bg-red-500/10 y compania)', () => {
+    // Si alguien remapeara .bg-red-500\/10, cambiarian de color decenas de chips.
+    const todas = reglas.flatMap((r) => r.clases).join(' ')
+    expect(todas).not.toContain('bg-red-500\\/10')
+    expect(todas).not.toContain('bg-green-500\\/10')
+  })
+
+  it('la regla solo aplica en claro: ninguna lleva prefijo .dark', () => {
+    for (const r of reglas) {
+      for (const c of r.clases) {
+        expect(c.startsWith('dark'), `clase ${c}`).toBe(false)
+      }
+    }
+  })
+})
