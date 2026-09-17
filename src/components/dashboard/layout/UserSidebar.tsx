@@ -47,7 +47,10 @@ export default function UserSidebar() {
           />
         </div>
         <div>
-          <h1 className="font-bold text-gray-900 dark:text-white text-lg">Paporla</h1>
+          {/* El logo NO es un titular. Si fuera <h1> cada pagina del panel
+              tendria dos: este primero y el de verdad ("Hola, Ana", "Mi perfil").
+              Un lector de pantalla anunciaria "Paporla" como titular de la pagina. */}
+          <p className="font-bold text-gray-900 dark:text-white text-lg">Paporla</p>
           <p className="text-[10px] text-gray-500">Panel de Usuario</p>
         </div>
       </div>
