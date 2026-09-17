@@ -59,7 +59,9 @@ export default function BusinessSidebar() {
           />
         </div>
         <div>
-          <h1 className="font-bold text-gray-900 dark:text-white text-lg">Paporla</h1>
+          {/* El logo NO es un titular: con <h1> esta pagina tendria dos
+              y el primero seria "Paporla" en vez del titular real. */}
+          <p className="font-bold text-gray-900 dark:text-white text-lg">Paporla</p>
           <p className="text-[10px] text-gray-500">Panel de Comercio</p>
         </div>
       </div>
