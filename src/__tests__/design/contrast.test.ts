@@ -165,7 +165,7 @@ function sobreFondo(color: string, fondo: string): string {
     .map((h) => parseInt(h, 16))
   const capa = [1, 2, 3].map((i) => Number(m[i]))
   const mezcla = capa.map((c, i) => Math.round(c * alfa + base[i] * (1 - alfa)))
-  return `#${  mezcla.map((c) => c.toString(16).padStart(2, '0')).join('')}`
+  return `#${mezcla.map((c) => c.toString(16).padStart(2, '0')).join('')}`
 }
 
 describe('acentos de color en modo claro (A-12b)', () => {
