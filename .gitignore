@@ -24,7 +24,12 @@ yarn-debug.log*
 yarn-error.log*
 
 # Editor
-.vscode/
+# OJO con el patron: `.vscode/` (con barra final) excluye el DIRECTORIO entero
+# y git ni entra en el, asi que una excepcion como `!.vscode/settings.json` no
+# surtiria efecto aunque se escriba. Se ignoran las CONTENIDO (.vscode/*) y
+# despues se vuelve a incluir el unico fichero que interesa compartir.
+.vscode/*
+!.vscode/settings.json
 .idea
 
 # Sistema operativo
@@ -58,4 +63,4 @@ e2e/.auth/
 # Otros
 lib.txt
 # Sentry Config File
-.env.sentry-build-plugin
+.env.sentry-build-plugin```

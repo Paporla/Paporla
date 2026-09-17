@@ -1,0 +1,15 @@
+{
+  // PAPORLA — Ajustes de VS Code compartidos con el equipo.
+  //
+  // Problema que resuelve: en Windows, VS Code guarda los saltos de línea como
+  // CRLF por defecto, y Prettier exige LF. Resultado: `prettier --check .`
+  // marca el fichero como mal formateado aunque el contenido sea idéntico, y
+  // el CI se pone rojo sin que se haya roto nada.
+  //
+  // Comprobado: el mismo ci.yml pasa la comprobación en LF y falla en CRLF.
+  //
+  // Con `files.eol` en "\n" el editor guarda siempre en LF y el problema
+  // desaparece en el origen, en vez de tener que arreglarlo a posteriori con
+  // `npm run format`.
+  "files.eol": "\n"
+}
