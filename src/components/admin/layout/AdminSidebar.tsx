@@ -40,7 +40,9 @@ export default function AdminSidebar() {
           />
         </div>
         <div>
-          <h1 className="font-bold dark:text-white text-gray-900 text-lg">Paporla</h1>
+          {/* El logo NO es un titular: con <h1> esta pagina tendria dos
+              y el primero seria "Paporla" en vez del titular real. */}
+          <p className="font-bold dark:text-white text-gray-900 text-lg">Paporla</p>
           <p className="text-[10px] dark:text-gray-500 text-gray-500">Panel de Administracion</p>
         </div>
       </div>
