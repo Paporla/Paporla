@@ -51,6 +51,54 @@ interface ContextoComprobacion {
 }
 
 /**
+ * A-53 / A-33: el banner de cookies.
+ *
+ * `CookieConsentBanner.tsx` se pinta en `fixed bottom-0 inset-x-0 z-[90]`,
+ * encima de todo. En la ficha del pack tapa justo el botón de "Reservar", asi
+ * que el flujo de reserva falla con un clic que Playwright no puede hacer.
+ * Y el `storageState` de `auth.setup.ts` no incluia la decisión de cookies,
+ * asi que el banner volvia a salir en cada test autenticado.
+ *
+ * La solución no es perseguir el banner a clics (es una carrera: aparece
+ * animado y a veces después del primer render). Es decidir ANTES de que la
+ * página cargue, escribiendo en localStorage con `addInitScript`, que se
+ * ejecuta en cada navegación antes de correr el JavaScript de la app.
+ *
+ * Se elige 'rejected'("Solo esenciales") a propósito: es la opción honesta
+ * por defecto y, de paso, los tests no cargan GTM/GA4, asi que van más rápido
+ * y sin ruido de red de analítica.
+ *
+ * La forma del valor es la que espera `src/lib/utils/cookieConsent.ts`:
+ * `{ version: '1', value, decidedAt }`. Si un día cambia CONSENT_VERSION hay
+ * que cambiarlo aquí también.
+ */
+const CONSENT_KEY = 'paporla-cookie-consent'
+const CONSENT_VERSION = '1'
+
+/** Contextos a los que ya se les ha inyectado el consentimiento. */
+const yaPreparados = new WeakSet<object>()
+
+export async function prepararConsentimiento(page: Page): Promise<void> {
+  if (yaPreparados.has(page)) return
+  yaPreparados.add(page)
+
+  await page.addInitScript(
+    ({ key, version }) => {
+      try {
+        window.localStorage.setItem(
+          key,
+          JSON.stringify({ version, value: 'rejected', decidedAt: new Date().toISOString() }),
+        )
+      } catch {
+        // localStorage bloqueado: el banner volverá a salir. No es motivo
+        // para reventar el test aquí; si tapa un botón, el fallo lo dirá.
+      }
+    },
+    { key: CONSENT_KEY, version: CONSENT_VERSION },
+  )
+}
+
+/**
  * Navega a `ruta` y comprueba que la página esta sana.
  *
  * Es la forma recomendada: registra el escucha de excepciones ANTES de
@@ -59,6 +107,9 @@ interface ContextoComprobacion {
  */
 export async function visitarSana(page: Page, ruta: string, opciones: OpcionesPaginaSana = {}): Promise<Locator> {
   const { timeout = 15000 } = opciones
+
+  // El banner de cookies se decide antes de cargar, no después (ver arriba).
+  await prepararConsentimiento(page)
 
   const excepciones: string[] = []
   const alReventar = (error: Error) => excepciones.push(error.message.split('\n')[0])
@@ -132,4 +183,42 @@ export async function sinErrorDeCarga(page: Page): Promise<void> {
 /** Devuelve el número de tarjetas de pack listadas en /packs. */
 export async function contarPacks(page: Page): Promise<number> {
   return page.locator('a[href^="/packs/"]').count()
+}
+
+/**
+ * Vigila las respuestas de una RPC de Supabase y devuelve una función que
+ * cuenta qué falló, si falló algo.
+ *
+ * Por qué hace falta: la interfaz muestra un mensaje genérico ("No pudimos
+ * cargar el catálogo") y hace BIEN — enseñarle a un cliente el error en crudo
+ * de la base de datos no le ayuda en nada. Pero ese mensaje tampoco le dice
+ * nada a quien lo depura: no distingue un permiso denegado de una función que
+ * no existe o de un argumento inválido.
+ *
+ * Esto recoge el cuerpo real de la respuesta para que, cuando el catálogo
+ * falle, el propio test cuente el motivo en vez de repetir el mensaje bonito.
+ *
+ * Hay que llamarlo ANTES de navegar: una respuesta que ya llegó no se puede
+ * vigilar después.
+ */
+export function vigilarRpc(page: Page, nombreRpc: string): () => string {
+  const partes: string[] = []
+
+  // Se registran TODAS las respuestas, no solo las que fallan. Puede pasar
+  // (y pasa) que una devuelva 200 con la lista vacía y otra falle: ver solo
+  // los errores llevaría a la conclusión contraria.
+  page.on('response', (respuesta) => {
+    if (!respuesta.url().includes(nombreRpc)) return
+    void respuesta
+      .text()
+      .then((cuerpo) => {
+        const trozo = cuerpo.replace(/\s+/g, ' ').trim().slice(0, 200)
+        partes.push(`HTTP ${respuesta.status()} -> ${trozo || '(cuerpo vacío)'}`)
+      })
+      .catch(() => {
+        partes.push(`HTTP ${respuesta.status()} (cuerpo ilegible)`)
+      })
+  })
+
+  return () => (partes.length > 0 ? partes.join(' | ') : '')
 }
