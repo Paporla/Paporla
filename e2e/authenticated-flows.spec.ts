@@ -90,7 +90,15 @@ test.describe('Authenticated Critical Flow', () => {
   })
 
   test('la página de favoritos carga y muestra su titular', async ({ page }) => {
-    await visitarSana(page, '/favorites', { titulo: /Mis Favoritos/ })
+    // No tener favoritos es un estado VÁLIDO, no un fallo: la página lo dice
+    // con su propio titular ("No tienes favoritos"), que ahora es el <h1>
+    // porque en ese caso el estado vacío ES la página.
+    //
+    // Lo que no puede pasar es que no haya titular ninguno, o que la página
+    // muestre el estado de error. Las dos cosas las vigila visitarSana y
+    // sinErrorDeCarga. Confundir "vacío" con "roto" sería el mismo error que
+    // cometíamos antes en /packs.
+    await visitarSana(page, '/favorites', { titulo: /Mis Favoritos|No tienes favoritos/ })
     await sinErrorDeCarga(page)
   })
 })
