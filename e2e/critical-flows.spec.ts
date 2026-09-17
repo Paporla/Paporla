@@ -1,10 +1,16 @@
 import { test, expect } from '@playwright/test'
-import { paginaSana, sinErrorDeCarga } from './helpers/pagina'
+import { visitarSana, sinErrorDeCarga } from './helpers/pagina'
 
 /**
  * A-15: los tests de páginas publicas eran `expect(page.locator('body')).toBeVisible()`,
  * que pasa con un 500, con un crash de React y con una página en blanco.
  * Ahora cada página tiene que demostrar que muestra su propio titular.
+ *
+ * 2026-09-17: se sustituye `page.goto(...)` + `waitForLoadState('networkidle')`
+ * + `paginaSana(...)` por `visitarSana(...)`, que hace las tres cosas y además
+ * registra las excepciones antes de navegar. `networkidle` no es fiable en el
+ * modo desarrollo de Next.js porque el websocket de recarga en caliente deja
+ * la red permanentemente ocupada.
  */
 test.describe('Protected Routes', () => {
   const rutasProtegidas = ['/dashboard', '/reservations', '/favorites', '/business', '/admin']
@@ -20,45 +26,35 @@ test.describe('Protected Routes', () => {
 
 test.describe('Public Pages', () => {
   test('la portada muestra su titular', async ({ page }) => {
-    await page.goto('/')
-    await page.waitForLoadState('networkidle')
-    await paginaSana(page, { titulo: /Comida de calidad/ })
+    await visitarSana(page, '/', { titulo: /Comida de calidad/ })
     await sinErrorDeCarga(page)
   })
 
   test('sobre nosotros muestra su titular', async ({ page }) => {
-    await page.goto('/about')
-    await page.waitForLoadState('networkidle')
-    await paginaSana(page, { titulo: /Sobre Paporla/ })
+    await visitarSana(page, '/about', { titulo: /Sobre Paporla/ })
     await sinErrorDeCarga(page)
   })
 
   test('las preguntas frecuentes muestran su titular', async ({ page }) => {
-    await page.goto('/faq')
-    await page.waitForLoadState('networkidle')
-    await paginaSana(page, { titulo: /Preguntas Frecuentes/ })
+    await visitarSana(page, '/faq', { titulo: /Preguntas Frecuentes/ })
     await sinErrorDeCarga(page)
   })
 
   test('contacto muestra su titular y el formulario', async ({ page }) => {
-    await page.goto('/contacto')
-    await page.waitForLoadState('networkidle')
-    await paginaSana(page, { titulo: /Cont.ctanos/ })
+    await visitarSana(page, '/contacto', { titulo: /Cont.ctanos/ })
     await sinErrorDeCarga(page)
     await expect(page.locator('form')).toBeVisible()
   })
 
   test('login tiene los campos del formulario', async ({ page }) => {
-    await page.goto('/login')
-    await page.waitForLoadState('networkidle')
+    await visitarSana(page, '/login')
     await expect(page.locator('input[name="email"]')).toBeVisible()
     await expect(page.locator('input[name="password"]')).toBeVisible()
     await expect(page.locator('button[type="submit"]')).toBeVisible()
   })
 
   test('registro tiene los campos del formulario', async ({ page }) => {
-    await page.goto('/register')
-    await page.waitForLoadState('networkidle')
+    await visitarSana(page, '/register')
     await expect(page.locator('input[name="name"]')).toBeVisible()
     await expect(page.locator('input[name="email"]')).toBeVisible()
     await expect(page.locator('input[name="password"]')).toBeVisible()

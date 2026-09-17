@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test'
-import { paginaSana, sinErrorDeCarga } from './helpers/pagina'
+import { visitarSana, sinErrorDeCarga } from './helpers/pagina'
 
 /**
  * A-15: antes el unico assert era que el <body> era visible.
@@ -11,17 +11,12 @@ import { paginaSana, sinErrorDeCarga } from './helpers/pagina'
  */
 test.describe('Packs browsing', () => {
   test('el listado carga y muestra su titular', async ({ page }) => {
-    await page.goto('/packs')
-    await page.waitForLoadState('networkidle')
-
-    await paginaSana(page, { titulo: /Packs Disponibles/ })
+    await visitarSana(page, '/packs', { titulo: /Packs Disponibles/ })
     await sinErrorDeCarga(page)
   })
 
   test('si hay packs, cada tarjeta enlaza a su ficha', async ({ page }) => {
-    await page.goto('/packs')
-    await page.waitForLoadState('networkidle')
-    await paginaSana(page, { titulo: /Packs Disponibles/ })
+    await visitarSana(page, '/packs', { titulo: /Packs Disponibles/ })
 
     const tarjetas = page.locator('a[href^="/packs/"]')
     const cuantas = await tarjetas.count()
