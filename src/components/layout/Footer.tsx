@@ -73,7 +73,7 @@ export default function Footer() {
             <div className="flex flex-col items-center md:items-start">
               <Link href="/" className="flex items-center gap-2 group mb-3">
                 <Image
-                  src="/images/logo-transparent.png"
+                  src="/images/logo-128.png"
                   alt="Paporla"
                   width={32}
                   height={32}

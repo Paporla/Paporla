@@ -31,13 +31,7 @@ export default function AdminSidebar() {
       {/* Logo */}
       <div className="flex items-center gap-3 px-6 py-5 border-b dark:border-dark-border border-gray-200">
         <div className="w-9 h-9 rounded-xl bg-primary/20 flex items-center justify-center">
-          <Image
-            src="/images/logo-transparent.png"
-            alt="Paporla"
-            width={36}
-            height={36}
-            className="w-9 h-9 object-contain"
-          />
+          <Image src="/images/logo-128.png" alt="Paporla" width={36} height={36} className="w-9 h-9 object-contain" />
         </div>
         <div>
           {/* El logo NO es un titular: con <h1> esta pagina tendria dos
