@@ -335,6 +335,10 @@ export default function UserReservationsPage() {
     return (
       <EmptyState
         type="reservations"
+        // Este return sustituye a TODA la pagina, asi que el titular del
+        // estado vacio es el <h1>. Sin esto, sin reservas la pagina no tenia
+        // ningun <h1>: solo un <h3> huerfano.
+        nivelTitular={1}
         action={{
           label: 'Explorar packs',
           onClick: () => router.push('/packs'),
