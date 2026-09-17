@@ -69,7 +69,11 @@ export default function FavoritesPage() {
         <div className="w-24 h-24 rounded-full bg-primary/10 flex items-center justify-center mb-4">
           <Heart className="w-12 h-12 text-primary" />
         </div>
-        <h2 className="text-xl font-bold dark:text-white text-gray-900 mb-2">No tienes favoritos</h2>
+        {/* El estado vacio ES la pagina, asi que su titular es el <h1>. Con un
+            <h2> la pagina se quedaba sin ningun <h1> y el esquema quedaba roto:
+            el primer titular que encontraba un lector de pantalla era un nivel
+            2 sin padre. Las clases no cambian: el aspecto es el mismo. */}
+        <h1 className="text-xl font-bold dark:text-white text-gray-900 mb-2">No tienes favoritos</h1>
         <p className="dark:text-gray-400 text-gray-600 mb-6">
           Guarda tus comercios favoritos para encontrarlos fácilmente después
         </p>
