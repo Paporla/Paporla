@@ -1,5 +1,6 @@
 import { test as setup } from '@playwright/test'
 import path from 'path'
+import { prepararConsentimiento } from './helpers/pagina'
 
 const authFile = path.join(__dirname, '.auth/user.json')
 
@@ -12,6 +13,11 @@ setup('authenticate', async ({ page }) => {
     setup.skip(true, 'E2E_TEST_EMAIL y E2E_TEST_PASSWORD no configurados. Crea un usuario de prueba en Supabase.')
     return
   }
+
+  // El banner de cookies se decide antes de cargar la página, no a clics:
+  // asi la decisión queda dentro del storageState y el banner no vuelve a
+  // salir en ningún test autenticado tapando el botón de reservar.
+  await prepararConsentimiento(page)
 
   await page.goto('/login')
   await page.waitForSelector('input[name="email"]', { timeout: 15000 })
