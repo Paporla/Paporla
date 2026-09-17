@@ -72,16 +72,30 @@ jobs:
       # este cambio no rompe la rama hoy; frena el dia que aparezca una.
       - run: npm audit --audit-level=high
 
-  e2e:
-    name: E2E (Playwright)
+  e2e-publico:
+    name: E2E publico (solo lectura)
     runs-on: ubuntu-latest
     needs: [lint-and-typecheck, test]
-    # EXCLUIDO en ramas feat/* a proposito. Estos tests necesitan una cuenta
-    # real (E2E_TEST_EMAIL / E2E_TEST_PASSWORD) y escriben datos de prueba en
-    # la base de datos a la que se conectan. Mientras la base de staging sea
-    # la candidata a convertirse en produccion, correrlos desde aqui la
-    # ensuciaria. Se activaran cuando exista un entorno aislado para E2E.
-    if: ${{ !startsWith(github.ref, 'refs/heads/feat/') }}
+    # ---------------------------------------------------------------------------
+    # Este job corre en TODAS las ramas, incluidas feat/*, y FRENA las fusiones.
+    # Puede permitirse lo segundo porque esta limitado al proyecto `chromium`
+    # de Playwright, que agrupa critical-flows, login y packs:
+    #
+    #   critical-flows .. solo navega con page.goto()
+    #   packs ........... solo lee el catalogo, ni un click
+    #   login ........... rellena el formulario con credenciales FALSAS a
+    #                     proposito, para comprobar el mensaje de error
+    #
+    # Ninguno necesita cuenta y ninguno escribe en la base de datos. Y para que
+    # no pueda escribir ni por descuido, aqui no se inyecta ni la service role
+    # key ni las credenciales de prueba: sin ellas el proyecto `authenticated`
+    # se auto-omite (esta en playwright.config.ts), asi que es IMPOSIBLE que
+    # este job toque datos.
+    #
+    # Antes habia un unico job de E2E excluido en ramas feat/*, asi que en las
+    # ramas de trabajo no corria ningun test end-to-end. Con esta separacion se
+    # recupera cobertura justo donde se trabaja, sin tocar la base de staging.
+    # ---------------------------------------------------------------------------
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
@@ -90,7 +104,51 @@ jobs:
           cache: 'npm'
       - run: npm ci
       - run: npx playwright install --with-deps chromium
-      - run: npm run test:e2e
+      - run: npm run test:e2e -- --project=chromium
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+          NEXT_PUBLIC_SITE_URL: http://localhost:3000
+      # El informe se sube aunque el test falle: es la forma de ver QUE pagina
+      # se rompio sin tener que reproducirlo en local.
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: always()
+        with:
+          name: playwright-report-publico
+          path: playwright-report/
+          retention-days: 7
+
+  e2e-autenticado:
+    name: E2E autenticado (escribe datos)
+    runs-on: ubuntu-latest
+    needs: [lint-and-typecheck, test]
+    # ---------------------------------------------------------------------------
+    # Este NO frena las fusiones porque esta apagado, y apagado se queda.
+    #
+    # El proyecto `authenticated` (authenticated-flows y dashboard) si escribe:
+    # crea reservas reales en la base de datos a la que se conecta. Mientras la
+    # base de staging sea la candidata a convertirse en produccion, correr esto
+    # desde el CI la ensuciaria con reservas de prueba.
+    #
+    # Se activa cuando exista una base de datos aislada solo para E2E. Mientras
+    # tanto se deja el job escrito y desactivado, no borrado, para que el dia
+    # que exista ese entorno solo haya que quitar la linea de abajo.
+    #
+    # Ojo con reactivarlo copiando el job antiguo: ejecutaba `npm run test:e2e`
+    # SIN filtrar proyecto, asi que corria tambien los autenticados. Por eso
+    # aqui se fija --project=authenticated de forma explicita: lo que no se
+    # nombra, no corre.
+    # ---------------------------------------------------------------------------
+    if: ${{ false }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 22
+          cache: 'npm'
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:e2e -- --project=authenticated
         env:
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
@@ -104,7 +162,6 @@ jobs:
           name: playwright-report
           path: playwright-report/
           retention-days: 7
-
   build:
     name: Build
     runs-on: ubuntu-latest
