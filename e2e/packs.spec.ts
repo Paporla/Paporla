@@ -18,7 +18,19 @@ test.describe('Packs browsing', () => {
   test('si hay packs, cada tarjeta enlaza a su ficha', async ({ page }) => {
     await visitarSana(page, '/packs', { titulo: /Packs Disponibles/ })
 
+    // OJO: el <h1> lo pinta PacksHeroSection de inmediato, pero los packs
+    // llegan DESPUES, por fetch. Contar las tarjetas nada mas cargar el
+    // titular daba cero siempre —y no porque no hubiera packs, sino por una
+    // carrera. Antes de contar hay que esperar a que el catalogo se resuelva:
+    // o sale el skeleton de "Buscando packs..." como muy tarde, o ya hay
+    // tarjetas, o ya sale el estado vacio.
     const tarjetas = page.locator('a[href^="/packs/"]')
+    const vacio = page.getByText(/No hay packs|No encontramos|No pudimos cargar/i)
+    await expect(
+      tarjetas.first().or(vacio.first()),
+      'el catálogo no terminó de cargar: ni tarjetas ni estado vacío',
+    ).toBeVisible({ timeout: 20000 })
+
     const cuantas = await tarjetas.count()
 
     if (cuantas === 0) {
