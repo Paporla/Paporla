@@ -501,3 +501,95 @@ html:not(.dark) .text-gray-300,
 html:not(.dark) .text-gray-400 {
   color: #4b5563;
 }
+
+/* ============================================================================
+   ACENTOS DE COLOR EN MODO CLARO (A-12b, 2026-09-16)
+
+   Las clases de color de Tailwind estan calibradas para fondo OSCURO. Sobre
+   el crema del modo claro se caen: green-400 da 1.64:1, yellow-400 1.44:1,
+   amber-400 1.57:1, orange-400 2.13:1, blue-400 2.40:1, red-400 2.61:1.
+   Son, literalmente, invisibles: AA exige 4.5:1 en texto normal.
+
+   Son 299 usos repartidos en 15 clases, asi que no se arreglan uno a uno: se
+   recogen aqui, con el mismo patron que ya usabamos con los grises.
+
+   Cada familia baja a su tono 700, que pasa con margen tanto sobre el crema
+   como sobre el blanco de las tarjetas (el fondo mas exigente):
+
+     rojo     #b91c1c   6.10 / 6.47      verde    #15803d   4.73 / 5.02
+     ambar    #b45309   4.73 / 5.02      azul     #1d4ed8   6.31 / 6.70
+     amarillo #a16207   4.64 / 4.92      naranja  #c2410c   4.88 / 5.18
+
+   Ademas se remapean los rellenos de los iconos (fill), donde el amarillo de
+   las estrellas daba 1.44:1, y los fondos solidos que llevan texto blanco
+   encima (blanco sobre red-500 daban 3.76:1). En los chips al 90% el verde
+   necesita el tono 800: con el 700 se queda en 4.17:1.
+
+   IMPORTANTE: esto NO toca los tintes tipo bg-red-500/10. En Tailwind son
+   clases distintas (.bg-red-500\/10), asi que siguen exactamente igual y
+   ningun chip cambia de color.
+
+   El modo oscuro no se toca: ahi los tonos 400 dan entre 7.09 y 12.80:1.
+   ============================================================================ */
+
+html:not(.dark) .text-red-300,
+html:not(.dark) .text-red-400,
+html:not(.dark) .text-red-500 {
+  color: #b91c1c;
+}
+
+html:not(.dark) .text-green-300,
+html:not(.dark) .text-green-400,
+html:not(.dark) .text-green-500 {
+  color: #15803d;
+}
+
+html:not(.dark) .text-amber-300,
+html:not(.dark) .text-amber-400,
+html:not(.dark) .text-amber-500 {
+  color: #b45309;
+}
+
+html:not(.dark) .text-blue-300,
+html:not(.dark) .text-blue-400,
+html:not(.dark) .text-blue-500 {
+  color: #1d4ed8;
+}
+
+html:not(.dark) .text-yellow-300,
+html:not(.dark) .text-yellow-400,
+html:not(.dark) .text-yellow-500 {
+  color: #a16207;
+}
+
+html:not(.dark) .text-orange-300,
+html:not(.dark) .text-orange-400,
+html:not(.dark) .text-orange-500 {
+  color: #c2410c;
+}
+
+/* Relleno de iconos (las estrellas de valoracion, el corazon de favoritos).
+   WCAG 1.4.11 pide 3:1 para graficos; el amarillo 400 daba 1.44:1. */
+html:not(.dark) .fill-yellow-300,
+html:not(.dark) .fill-yellow-400,
+html:not(.dark) .fill-yellow-500 {
+  fill: #a16207;
+}
+
+html:not(.dark) .fill-red-400,
+html:not(.dark) .fill-red-500 {
+  fill: #b91c1c;
+}
+
+/* Fondos solidos con texto blanco encima: blanco sobre red-500 eran 3.76:1. */
+html:not(.dark) .bg-red-500 {
+  background-color: #b91c1c;
+}
+
+html:not(.dark) .bg-red-500\/90 {
+  background-color: rgb(185 28 28 / 0.9);
+}
+
+html:not(.dark) .bg-green-500\/90 {
+  background-color: rgb(22 101 52 / 0.9);
+}
