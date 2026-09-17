@@ -6,7 +6,7 @@ import { useAuth } from '@/hooks/useAuth'
 import { useFavorites } from '@/hooks/useFavorites'
 import { useRouter } from 'next/navigation'
 import { useToast } from '@/components/ui/ToastProvider'
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 interface FavoriteButtonProps {
   shopId: string
@@ -30,6 +30,45 @@ export default function FavoriteButton({
   // (2) ya no hay temporizador propio de 2 s duplicando el del provider.
   const { addToast } = useToast()
   const [isAnimating, setIsAnimating] = useState(false)
+
+  /*
+   * Los dos temporizadores de handleClick se apuntan aqui para poder
+   * cancelarlos si el boton desaparece de pantalla antes de que salten.
+   *
+   * Por que hace falta, con un ejemplo de cada uno:
+   *
+   *   - El de 300 ms llama a setIsAnimating. Si el componente ya no esta,
+   *     React intenta actualizar algo que no existe. En el CI reventaba con
+   *     "ReferenceError: window is not defined" porque saltaba DESPUES de que
+   *     Vitest desmontara el entorno del fichero de test, y hacia fallar la
+   *     corrida entera sin que el test tuviera culpa ninguna.
+   *
+   *   - El de 1500 ms es peor: empuja a /login. Si alguien pulsa el corazon
+   *     sin sesion y en ese segundo y medio se va a otra pagina, acababa en el
+   *     login sin haberlo pedido. Eso no es un problema de tests: lo sufre una
+   *     persona.
+   */
+  const temporizadores = useRef<ReturnType<typeof setTimeout>[]>([])
+
+  useEffect(() => {
+    // Se guarda la referencia: la limpieza se ejecuta al desmontar y tiene que
+    // mirar el MISMO array, no el que haya en ese momento.
+    const pendientes = temporizadores.current
+    return () => {
+      pendientes.forEach(clearTimeout)
+      pendientes.length = 0
+    }
+  }, [])
+
+  /** Arranca un temporizador que se cancela solo si el boton se desmonta. */
+  const temporizar = (accion: () => void, ms: number) => {
+    const id = setTimeout(() => {
+      const i = temporizadores.current.indexOf(id)
+      if (i !== -1) temporizadores.current.splice(i, 1)
+      accion()
+    }, ms)
+    temporizadores.current.push(id)
+  }
 
   const isFav = isFavorite(shopId)
 
@@ -61,7 +100,7 @@ export default function FavoriteButton({
       */
       const volver = `${window.location.pathname}${window.location.search}`
       const params = new URLSearchParams({ redirect: volver })
-      setTimeout(() => router.push(`/login?${params.toString()}`), 1500)
+      temporizar(() => router.push(`/login?${params.toString()}`), 1500)
       return
     }
 
@@ -72,7 +111,7 @@ export default function FavoriteButton({
       addToast(isFav ? 'Eliminado de favoritos' : 'Comercio guardado en favoritos', 'success')
     }
 
-    setTimeout(() => setIsAnimating(false), 300)
+    temporizar(() => setIsAnimating(false), 300)
   }
 
   return (

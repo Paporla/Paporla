@@ -1,6 +1,6 @@
 'use client'
 
-import { createContext, useContext, useState, useCallback, type ReactNode } from 'react'
+import { createContext, useContext, useState, useCallback, useEffect, useRef, type ReactNode } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X, AlertCircle, CheckCircle, Info } from 'lucide-react'
 
@@ -31,13 +31,38 @@ let toastCounter = 0
 export function ToastProvider({ children }: { children: ReactNode }) {
   const [toasts, setToasts] = useState<ToastMessage[]>([])
 
+  /*
+   * Cada aviso agenda un temporizador de 4 s para retirarse. Se apuntan todos
+   * para cancelarlos si el provider se desmonta antes.
+   *
+   * Sin esto, al cerrar sesion o cambiar de layout a los pocos segundos de
+   * saltar un aviso, el temporizador disparaba igual y llamaba a setToasts
+   * sobre un componente que ya no estaba montado. No se veia nada en pantalla,
+   * pero era trabajo muerto y, en los tests, una fuente de errores
+   * intermitentes: el temporizador saltaba despues de que Vitest desmontara el
+   * entorno del fichero y aparecia un "window is not defined" que no señalaba
+   * a este componente sino a quien hubiera pedido el ultimo aviso.
+   */
+  const temporizadores = useRef<ReturnType<typeof setTimeout>[]>([])
+
+  useEffect(() => {
+    const pendientes = temporizadores.current
+    return () => {
+      pendientes.forEach(clearTimeout)
+      pendientes.length = 0
+    }
+  }, [])
+
   const addToast = useCallback((message: string, type: ToastType = 'info', durationMs = 4000) => {
     const id = `toast-${++toastCounter}-${Date.now()}`
     setToasts((prev) => [...prev, { id, message, type }])
 
-    setTimeout(() => {
+    const temporizador = setTimeout(() => {
+      const i = temporizadores.current.indexOf(temporizador)
+      if (i !== -1) temporizadores.current.splice(i, 1)
       setToasts((prev) => prev.filter((t) => t.id !== id))
     }, durationMs)
+    temporizadores.current.push(temporizador)
   }, [])
 
   const removeToast = useCallback((id: string) => {
