@@ -157,7 +157,7 @@ describe('GET /api/cron/pickup-reminders', () => {
       category: 'pickup',
       type: 'pickup_reminder',
       title: 'Tu recogida de hoy: Pack sorpresa',
-      body: 'Hoy recoges "Pack sorpresa" en Panadería Staging A (11:00–18:00, hora de Chile).',
+      body: 'Hoy recoges "Pack sorpresa" en Panadería Staging A (11:00–18:00, hora local).',
       data: {
         reservation_id: 'res-1',
         pickup_start_at: '2026-08-28T15:00:00Z',
@@ -174,7 +174,7 @@ describe('GET /api/cron/pickup-reminders', () => {
       category: 'shop_operations',
       type: 'pickup_reminder',
       title: 'Recogida de hoy: Pack sorpresa',
-      body: 'Un cliente recogerá "Pack sorpresa" hoy (11:00–18:00, hora de Chile).',
+      body: 'Un cliente recogerá "Pack sorpresa" hoy (11:00–18:00, hora local).',
       data: {
         reservation_id: 'res-1',
         pickup_start_at: '2026-08-28T15:00:00Z',
@@ -184,6 +184,73 @@ describe('GET /api/cron/pickup-reminders', () => {
       shop_id: 'shop-a',
       pack_id: 'pack-a',
     })
+  })
+
+  // -------------------------------------------------------------------------
+  // Zona horaria: la de la reserva, no la de Chile
+  // -------------------------------------------------------------------------
+  // Antes el crón formateaba todo en America/Santiago. Con una sola comuna
+  // daba igual; al llegar a otros países, un aviso en Buenos Aires habría
+  // dado la hora de Chile.
+  //
+  // 2026-08-28T15:00:00Z son las 11:00 en Santiago (UTC-4) y las 12:00 en
+  // Buenos Aires (UTC-3). Mismo instante, dos horas locales distintas.
+  // -------------------------------------------------------------------------
+
+  it('usa la zona horaria de la reserva, no la de Chile', async () => {
+    resRows = [{ ...todayReservation, timezone_snapshot: 'America/Argentina/Buenos_Aires' }]
+    shopRows = [{ id: 'shop-a', owner_id: 'owner-a' }]
+
+    const { GET } = await import('@/app/api/cron/pickup-reminders/route')
+    const response = await GET(authorizedRequest())
+
+    expect(response.status).toBe(200)
+    // 12:00–19:00 de Buenos Aires, no las 11:00–18:00 de Santiago.
+    expect(mockInsert).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({
+        body: 'Hoy recoges "Pack sorpresa" en Panadería Staging A (12:00–19:00, hora local).',
+      }),
+    )
+  })
+
+  it('una reserva sin zona horaria no se cae: usa la de reemplazo', async () => {
+    resRows = [{ ...todayReservation, timezone_snapshot: null }]
+    shopRows = [{ id: 'shop-a', owner_id: 'owner-a' }]
+
+    const { GET } = await import('@/app/api/cron/pickup-reminders/route')
+    const response = await GET(authorizedRequest())
+    const body = await response.json()
+
+    expect(response.status).toBe(200)
+    expect(body.user_reminders).toBe(1)
+    // Sin zona horaria cae en America/Santiago: 11:00, como antes del cambio.
+    expect(mockInsert).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({
+        body: 'Hoy recoges "Pack sorpresa" en Panadería Staging A (11:00–18:00, hora local).',
+      }),
+    )
+  })
+
+  it('una zona horaria inválida no tumba el crón entero', async () => {
+    // Intl.DateTimeFormat LANZA un RangeError si la zona no existe. Sin la
+    // comprobación, una sola fila mal grabada dejaría a TODOS sin aviso.
+    resRows = [{ ...todayReservation, timezone_snapshot: 'Marte/Olympus_Mons' }]
+    shopRows = [{ id: 'shop-a', owner_id: 'owner-a' }]
+
+    const { GET } = await import('@/app/api/cron/pickup-reminders/route')
+    const response = await GET(authorizedRequest())
+    const body = await response.json()
+
+    expect(response.status).toBe(200)
+    expect(body.user_reminders).toBe(1)
+    expect(mockInsert).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({
+        body: 'Hoy recoges "Pack sorpresa" en Panadería Staging A (11:00–18:00, hora local).',
+      }),
+    )
   })
 
   it('does not repeat a reminder already sent in the last 24 h', async () => {
