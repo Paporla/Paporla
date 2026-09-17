@@ -287,6 +287,30 @@ body::before {
     }
   }
 
+  /* Seguridad para el texto en degradado.
+     `background-clip: text` + `color: transparent` pinta las letras con el
+     FONDO, no con color. Si el navegador anula los fondos, las letras
+     desaparecen: se queda transparente sobre transparente. Pasa en el modo
+     de alto contraste de Windows (`forced-colors: active`), al imprimir, y
+     en cualquier tema forzado por el sistema.
+
+     Y no es un caso marginal: lo activa sobre todo gente con baja visión,
+     que es justo quien más necesita leer el titular. En Paporla el
+     titular de /packs, /about, /faq y /contacto es degradado, así que esas
+     cuatro páginas se quedaban SIN título en alto contraste.
+
+     Esto devuelve el color de texto del sistema. No cambia ni un píxel en
+     condiciones normales: quien no use alto contraste no nota nada. */
+  @media (forced-colors: active) {
+    .text-gradient,
+    .text-gradient-hero {
+      background: none;
+      -webkit-background-clip: border-box;
+      background-clip: border-box;
+      color: CanvasText;
+    }
+  }
+
   /* --- ISLA OSCURA (propuesta B) --- */
   /* Bloque verde bosque donde el neon sigue vivo en modo claro. En dark
      se vuelve transparente y la seccion hereda el fondo global. */
