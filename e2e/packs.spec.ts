@@ -1,5 +1,5 @@
 import { test, expect, type Page } from '@playwright/test'
-import { visitarSana, sinErrorDeCarga } from './helpers/pagina'
+import { visitarSana, sinErrorDeCarga, vigilarRpc } from './helpers/pagina'
 
 /**
  * A-15: antes el unico assert era que el <body> era visible.
@@ -32,6 +32,18 @@ import { visitarSana, sinErrorDeCarga } from './helpers/pagina'
  * válido, pero "No pudimos cargar el catálogo" es la aplicación fallando, y
  * los dos dejan la página sin tarjetas.
  */
+/**
+ * Vigila la llamada que alimenta el catálogo. Se registra antes de navegar,
+ * porque una respuesta que ya llegó no se puede vigilar después.
+ *
+ * La interfaz tapa el error real con un mensaje amable (y hace bien), así que
+ * sin esto el test solo podría repetir "No pudimos cargar el catálogo", que no
+ * dice ni qué falló ni por qué.
+ */
+function vigilarCatalogo(page: Page): () => string {
+  return vigilarRpc(page, 'search_available_packs')
+}
+
 async function esperarCatalogo(page: Page): Promise<{ cuantas: number; aviso: string }> {
   const tarjetas = page.locator('a[href^="/packs/"]')
   const aviso = page.getByText(/No hay packs|No encontramos|No pudimos cargar/i).first()
@@ -50,17 +62,22 @@ async function esperarCatalogo(page: Page): Promise<{ cuantas: number; aviso: st
 
 test.describe('Packs browsing', () => {
   test('el listado carga y muestra su titular', async ({ page }) => {
+    const errorRpc = vigilarCatalogo(page)
     await visitarSana(page, '/packs', { titulo: /Packs Disponibles/ })
 
     // Sin esta espera el test se ganaba de velocidad al error: comprobaba
     // que no habia aviso de fallo antes de que el fetch hubiera terminado.
     const { aviso } = await esperarCatalogo(page)
-    expect(aviso, `el catálogo muestra estado de error: "${aviso}"`).not.toMatch(/no pudimos|algo fall/i)
+    expect(
+      `${aviso}${errorRpc() ? ` || ${errorRpc()}` : ''}`,
+      'el catálogo no cargó. Arriba va el motivo real de la base de datos, no el mensaje amable de la interfaz.',
+    ).not.toMatch(/no pudimos|algo fall/i)
 
     await sinErrorDeCarga(page)
   })
 
   test('si hay packs, cada tarjeta enlaza a su ficha', async ({ page }) => {
+    const errorRpc = vigilarCatalogo(page)
     await visitarSana(page, '/packs', { titulo: /Packs Disponibles/ })
 
     const { cuantas, aviso } = await esperarCatalogo(page)
@@ -69,9 +86,10 @@ test.describe('Packs browsing', () => {
       // Sin tarjetas tiene que haber un estado vacío HONESTO. Y hay que decir
       // cuál salió: que el catálogo esté vacío es válido, que no se pueda
       // cargar no lo es, y los dos dejan la página igual de vacía.
-      expect(aviso, `la página no mostró packs y tampoco dijo por qué. Mensaje en pantalla: "${aviso}"`).toMatch(
-        /no hay packs|no encontramos/i,
-      )
+      expect(
+        `${aviso}${errorRpc() ? ` || ${errorRpc()}` : ''}`,
+        'la página no mostró packs y tampoco dijo por qué. Arriba va el mensaje y el motivo real.',
+      ).toMatch(/no hay packs|no encontramos/i)
       return
     }
 
