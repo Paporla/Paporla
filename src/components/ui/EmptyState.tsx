@@ -13,6 +13,19 @@ interface EmptyStateProps {
     onClick: () => void
   }
   compact?: boolean
+  /**
+   * Nivel del titular del estado vacio.
+   *
+   * Por defecto 3, que es lo correcto cuando el estado vacio va DENTRO de una
+   * pagina que ya tiene su <h1> (por ejemplo, debajo del listado de packs).
+   *
+   * Hay que poner 1 cuando el estado vacio ES la pagina entera: en
+   * /reservations, sin reservas, no se renderiza nada mas. Con <h3> esa pagina
+   * se quedaba sin ningun <h1>, y el primer titular del documento era un nivel
+   * 3 huerfano. Un lector de pantalla que pide "ir al titular" no encontraba
+   * nada.
+   */
+  nivelTitular?: 1 | 2 | 3
 }
 
 const emptyStateConfig: Record<
@@ -73,11 +86,15 @@ export default function EmptyState({
   description: customDescription,
   action,
   compact,
+  nivelTitular = 3,
 }: EmptyStateProps) {
   const config = type ? emptyStateConfig[type] : emptyStateConfig.generic
   const Icon = customIcon || config.icon
   const title = customTitle || config.title
   const description = customDescription || config.description
+
+  // Variable en mayuscula: para JSX hace falta que parezca un componente.
+  const Titular = `h${nivelTitular}` as 'h1' | 'h2' | 'h3'
 
   if (compact) {
     return (
@@ -105,7 +122,7 @@ export default function EmptyState({
           <Icon className="w-10 h-10 text-primary" />
         </div>
 
-        <h3 className="text-xl font-bold dark:text-white text-gray-900 mb-2">{title}</h3>
+        <Titular className="text-xl font-bold dark:text-white text-gray-900 mb-2">{title}</Titular>
 
         <p className="dark:text-gray-400 text-gray-600 mb-6 text-sm">{description}</p>
 
