@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react'
 import FavoriteButton from '@/components/favorites/FavoriteButton'
 import { ToastProvider } from '@/components/ui/ToastProvider'
 
@@ -112,5 +112,66 @@ describe('FavoriteButton (toasts globales)', () => {
 
     await waitFor(() => expect(favState.toggleFavorite).toHaveBeenCalledTimes(1))
     expect(screen.queryByRole('alert')).toBeNull()
+  })
+
+  /**
+   * Regresión: el salto al login se agendaba con 1500 ms de retardo y NUNCA se
+   * cancelaba. Si el botón desaparecía de pantalla antes de ese segundo y
+   * medio, la persona acababa en /login sin haberlo pedido.
+   *
+   * Es el mismo defecto que reventó el CI con "window is not defined" (allí
+   * saltaba el de la animación, de 300 ms), pero este es el que sufre alguien
+   * de verdad: pulsar el corazón sin sesión, irse a otra página y encontrarse
+   * en el login.
+   *
+   * Se comprueba el EFECTO, no el mecanismo: que empuje o no empuje. Contar
+   * temporizadores pendientes no sirve aquí porque framer-motion agenda los
+   * suyos y el número no depende solo de este componente.
+   */
+  it('sin sesión: si el botón desaparece antes de 1,5 s, NO te manda al login', async () => {
+    authState.user = null
+    vi.useFakeTimers()
+    try {
+      const { unmount } = renderButton()
+
+      fireEvent.click(screen.getByRole('button'))
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(0)
+      })
+
+      // La persona se va de la página mucho antes de los 1,5 s.
+      unmount()
+
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(2000)
+      })
+
+      expect(push).not.toHaveBeenCalled()
+    } finally {
+      vi.useRealTimers()
+    }
+  })
+
+  /**
+   * Y la cara buena de la moneda: si el botón SIGUE en pantalla, el salto al
+   * login tiene que ocurrir. Sin este test, el anterior pasaría también
+   * borrando la redirección a secas.
+   */
+  it('sin sesión: si el botón sigue en pantalla, sí te manda al login', async () => {
+    authState.user = null
+    vi.useFakeTimers()
+    try {
+      renderButton()
+
+      fireEvent.click(screen.getByRole('button'))
+
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(2000)
+      })
+
+      expect(push).toHaveBeenCalledWith('/login?redirect=%2F')
+    } finally {
+      vi.useRealTimers()
+    }
   })
 })
