@@ -1,63 +1,54 @@
 import { test, expect } from '@playwright/test'
+import { paginaSana, sinErrorDeCarga } from './helpers/pagina'
 
+/**
+ * A-15: los tests de páginas publicas eran `expect(page.locator('body')).toBeVisible()`,
+ * que pasa con un 500, con un crash de React y con una página en blanco.
+ * Ahora cada página tiene que demostrar que muestra su propio titular.
+ */
 test.describe('Protected Routes', () => {
-  test('dashboard redirects to login', async ({ page }) => {
-    await page.goto('/dashboard')
-    await page.waitForURL(/\/login/, { timeout: 15000 })
-    await expect(page).toHaveURL(/\/login/)
-  })
+  const rutasProtegidas = ['/dashboard', '/reservations', '/favorites', '/business', '/admin']
 
-  test('reservations redirects to login', async ({ page }) => {
-    await page.goto('/reservations')
-    await page.waitForURL(/\/login/, { timeout: 15000 })
-    await expect(page).toHaveURL(/\/login/)
-  })
-
-  test('favorites redirects to login', async ({ page }) => {
-    await page.goto('/favorites')
-    await page.waitForURL(/\/login/, { timeout: 15000 })
-    await expect(page).toHaveURL(/\/login/)
-  })
-
-  test('business redirects to login', async ({ page }) => {
-    await page.goto('/business')
-    await page.waitForURL(/\/login/, { timeout: 15000 })
-    await expect(page).toHaveURL(/\/login/)
-  })
-
-  test('admin redirects to login', async ({ page }) => {
-    await page.goto('/admin')
-    await page.waitForURL(/\/login/, { timeout: 15000 })
-    await expect(page).toHaveURL(/\/login/)
-  })
+  for (const ruta of rutasProtegidas) {
+    test(`${ruta} redirige a login si no hay sesión`, async ({ page }) => {
+      await page.goto(ruta)
+      await page.waitForURL(/\/login/, { timeout: 15000 })
+      await expect(page).toHaveURL(/\/login/)
+    })
+  }
 })
 
 test.describe('Public Pages', () => {
-  test('home page loads', async ({ page }) => {
+  test('la portada muestra su titular', async ({ page }) => {
     await page.goto('/')
     await page.waitForLoadState('networkidle')
-    await expect(page.locator('body')).toBeVisible()
+    await paginaSana(page, { titulo: /Comida de calidad/ })
+    await sinErrorDeCarga(page)
   })
 
-  test('about page loads', async ({ page }) => {
+  test('sobre nosotros muestra su titular', async ({ page }) => {
     await page.goto('/about')
     await page.waitForLoadState('networkidle')
-    await expect(page.locator('body')).toBeVisible()
+    await paginaSana(page, { titulo: /Sobre Paporla/ })
+    await sinErrorDeCarga(page)
   })
 
-  test('FAQ page loads', async ({ page }) => {
+  test('las preguntas frecuentes muestran su titular', async ({ page }) => {
     await page.goto('/faq')
     await page.waitForLoadState('networkidle')
-    await expect(page.locator('body')).toBeVisible()
+    await paginaSana(page, { titulo: /Preguntas Frecuentes/ })
+    await sinErrorDeCarga(page)
   })
 
-  test('contact page loads', async ({ page }) => {
+  test('contacto muestra su titular y el formulario', async ({ page }) => {
     await page.goto('/contacto')
     await page.waitForLoadState('networkidle')
-    await expect(page.locator('body')).toBeVisible()
+    await paginaSana(page, { titulo: /Cont.ctanos/ })
+    await sinErrorDeCarga(page)
+    await expect(page.locator('form')).toBeVisible()
   })
 
-  test('login page has form elements', async ({ page }) => {
+  test('login tiene los campos del formulario', async ({ page }) => {
     await page.goto('/login')
     await page.waitForLoadState('networkidle')
     await expect(page.locator('input[name="email"]')).toBeVisible()
@@ -65,7 +56,7 @@ test.describe('Public Pages', () => {
     await expect(page.locator('button[type="submit"]')).toBeVisible()
   })
 
-  test('register page has form elements', async ({ page }) => {
+  test('registro tiene los campos del formulario', async ({ page }) => {
     await page.goto('/register')
     await page.waitForLoadState('networkidle')
     await expect(page.locator('input[name="name"]')).toBeVisible()
@@ -73,17 +64,18 @@ test.describe('Public Pages', () => {
     await expect(page.locator('input[name="password"]')).toBeVisible()
   })
 
-  test('404 page works for unknown routes', async ({ page }) => {
+  test('una ruta inexistente devuelve 404', async ({ page }) => {
     const response = await page.goto('/esta-ruta-no-existe-12345')
-    if (response) expect(response.status()).toBe(404)
+    expect(response, 'no hubo respuesta').not.toBeNull()
+    expect(response!.status()).toBe(404)
   })
 })
 
 test.describe('API', () => {
-  test('health endpoint returns healthy (or degraded if no DB)', async ({ request }) => {
+  test('health responde healthy o degraded, nunca otra cosa', async ({ request }) => {
     const response = await request.get('/api/health')
     const body = await response.json()
-    // 200 = healthy, 503 = degraded (sin DB en CI)
+    // 200 = healthy, 503 = degraded (sin base de datos accesible).
     expect([200, 503]).toContain(response.status())
     expect(['healthy', 'degraded']).toContain(body.status)
   })
