@@ -27,6 +27,7 @@ import {
   MessageCircle,
   Store,
   Calendar,
+  Download,
 } from 'lucide-react'
 
 export default function PrivacidadPage() {
@@ -35,7 +36,7 @@ export default function PrivacidadPage() {
     { id: 'uso', title: '2. Uso de la Información', icon: Eye },
     { id: 'compartir', title: '3. Compartir Información', icon: UserCheck },
     { id: 'proteccion', title: '4. Protección de Datos', icon: Lock },
-    { id: 'derechos', title: '5. Derechos ARCO', icon: RefreshCw },
+    { id: 'derechos', title: '5. Derechos ARCO-P', icon: RefreshCw },
     { id: 'cookies', title: '6. Uso de Cookies', icon: Cookie },
     { id: 'retencion', title: '7. Retención de Datos', icon: Clock },
     { id: 'menores', title: '8. Privacidad de Menores', icon: Shield },
@@ -442,7 +443,7 @@ export default function PrivacidadPage() {
               <div className="glass-card rounded-2xl p-6 md:p-8 backdrop-blur-sm">
                 <h2 className="text-2xl md:text-3xl font-bold mb-4 text-gradient flex items-center gap-3">
                   <RefreshCw className="w-6 h-6 text-primary" />
-                  5. Derechos ARCO
+                  5. Derechos ARCO-P
                 </h2>
                 <p className="dark:text-gray-300 text-gray-700 mb-3">
                   En cumplimiento con la <strong>Ley 21.719 de Protección de Datos Personales</strong> de Chile —que
@@ -479,14 +480,24 @@ export default function PrivacidadPage() {
                     </h3>
                     <p className="text-sm mt-1">Oponerse al uso de sus datos para fines específicos.</p>
                   </div>
+                  <div className="p-4 rounded-xl dark:bg-white/5 bg-gray-100">
+                    <h3 className="font-bold text-primary flex items-center gap-2">
+                      <Download className="w-4 h-4" />
+                      Portabilidad
+                    </h3>
+                    <p className="text-sm mt-1">
+                      Recibir tus datos en un formato abierto para llevarlos a otro servicio.
+                    </p>
+                  </div>
                 </div>
 
                 <div className="mt-4 p-4 rounded-lg bg-primary/10 text-center">
                   <p className="font-semibold">
-                    📧 Para ejercer tus derechos ARCO, contacta a: <strong>datos@paporla.com</strong>
+                    📧 Para ejercer tus derechos ARCO-P, contacta a: <strong>datos@paporla.com</strong>
                   </p>
                   <p className="text-xs mt-1">
-                    Respondemos todas las solicitudes en un plazo máximo de 15 días hábiles
+                    Respondemos en 30 días naturales, prorrogables una vez por 30 más con aviso motivado, según la Ley
+                    21.719
                   </p>
                 </div>
               </div>
