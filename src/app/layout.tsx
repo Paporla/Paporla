@@ -43,7 +43,10 @@ export const metadata: Metadata = {
       'Conectamos comercios con excedentes de comida con personas que necesitan alimentarse. Reduce el desperdicio, ayuda a tu comunidad.',
     images: [
       {
-        url: '/og-image.svg',
+        // Paso 43: PNG real de 1200x630; WhatsApp, Telegram y Twitter no
+        // pintan SVG, que es lo que había antes y por eso los links
+        // compartidos salían sin imagen.
+        url: '/og-image.png',
         width: 1200,
         height: 630,
         alt: 'Paporla - Rescate Alimentario',
@@ -54,7 +57,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Paporla - Rescate Alimentario',
     description: 'Conectamos comercios con excedentes de comida con personas que necesitan alimentarse.',
-    images: ['/og-image.svg'],
+    images: ['/og-image.png'],
     creator: '@paporla',
   },
   robots: {

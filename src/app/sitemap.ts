@@ -73,6 +73,31 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: 'yearly' as const,
       priority: 0.2,
     },
+    // Paso 43: estas cuatro existían y no estaban listadas (auditoría AI-14).
+    {
+      url: `${siteUrl}/shops`,
+      lastModified: LAST_MODIFIED,
+      changeFrequency: 'daily' as const,
+      priority: 0.9,
+    },
+    {
+      url: `${siteUrl}/legal/legal-bases`,
+      lastModified: LAST_MODIFIED,
+      changeFrequency: 'yearly' as const,
+      priority: 0.3,
+    },
+    {
+      url: `${siteUrl}/legal/politicas-retiro`,
+      lastModified: LAST_MODIFIED,
+      changeFrequency: 'yearly' as const,
+      priority: 0.3,
+    },
+    {
+      url: `${siteUrl}/legal/terminos-comercios`,
+      lastModified: LAST_MODIFIED,
+      changeFrequency: 'yearly' as const,
+      priority: 0.3,
+    },
   ]
 
   // Páginas dinámicas: packs (por mercado pilot/active) y comercios verificados

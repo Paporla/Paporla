@@ -54,7 +54,7 @@ describe('sitemap con list_public_packs + list_public_shops (0035, Fase 8)', () 
     vi.unstubAllEnvs()
   })
 
-  it('8 estáticas + packs por mercado + comercios, con lastModified real', async () => {
+  it('12 estáticas + packs por mercado + comercios, con lastModified real', async () => {
     mock.rpc.mockImplementation((name: string) => {
       if (name === 'list_public_packs') {
         return Promise.resolve({
@@ -72,7 +72,7 @@ describe('sitemap con list_public_packs + list_public_shops (0035, Fase 8)', () 
 
     expect(mock.rpc).toHaveBeenCalledWith('list_public_packs', { p_market_id: 'm-chi', p_limit: 50 })
     expect(mock.rpc).toHaveBeenCalledWith('list_public_shops', { p_limit: 100 })
-    expect(pages).toHaveLength(10)
+    expect(pages).toHaveLength(14)
     expect(pages).toContainEqual({
       url: 'https://www.paporla.com/packs/pack-1',
       lastModified: new Date('2026-08-01T12:00:00.000Z'),
@@ -92,7 +92,7 @@ describe('sitemap con list_public_packs + list_public_shops (0035, Fase 8)', () 
     const pages = await loadSitemap()
 
     expect(mock.rpc).not.toHaveBeenCalled()
-    expect(pages).toHaveLength(8)
+    expect(pages).toHaveLength(12)
   })
 
   it('error en la DB → solo páginas estáticas (no rompe el build)', async () => {
@@ -100,7 +100,7 @@ describe('sitemap con list_public_packs + list_public_shops (0035, Fase 8)', () 
 
     const pages = await loadSitemap()
 
-    expect(pages).toHaveLength(8)
+    expect(pages).toHaveLength(12)
   })
 
   it('sin mercados habilitados → sin páginas de packs (los comercios sí se listan)', async () => {
@@ -120,6 +120,6 @@ describe('sitemap con list_public_packs + list_public_shops (0035, Fase 8)', () 
     expect(mock.rpc).toHaveBeenCalledTimes(1)
     expect(mock.rpc).toHaveBeenCalledWith('list_public_shops', { p_limit: 100 })
     expect(mock.rpc).not.toHaveBeenCalledWith('list_public_packs', expect.anything())
-    expect(pages).toHaveLength(9) // 8 estáticas + 1 comercio (sin mercados no hay packs)
+    expect(pages).toHaveLength(13) // 12 estáticas + 1 comercio (sin mercados no hay packs)
   })
 })
