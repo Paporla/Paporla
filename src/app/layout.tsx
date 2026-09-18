@@ -9,6 +9,7 @@ import GoogleTagManager from '@/components/GoogleTagManager'
 import CookieConsentBanner from '@/components/CookieConsentBanner'
 import { PWAProvider } from '@/components/ui/PWAProvider'
 import ThemeScript from '@/components/layout/ThemeScript'
+import WelcomeGate from '@/components/pwa/WelcomeGate'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -120,6 +121,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         />
       </head>
       <body className={inter.className}>
+        <WelcomeGate />
         <GoogleTagManager nonce={nonce} />
         <a
           href="#main-content"

@@ -617,3 +617,130 @@ html:not(.dark) .bg-red-500\/90 {
 html:not(.dark) .bg-green-500\/90 {
   background-color: rgb(22 101 52 / 0.9);
 }
+
+/* ---- Pantalla de bienvenida PWA (paso 42) ----
+   Fondo = background_color del manifest (#063926) para que el splash del
+   sistema y esta pantalla sean continuidad. El bloque global de
+   prefers-reduced-motion de arriba ya neutraliza estas animaciones. */
+.welcome-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 24px;
+  text-align: center;
+  background: #063926;
+  color: #f0d9a0;
+  opacity: 1;
+  transition: opacity 350ms ease;
+}
+.welcome-overlay--saliendo {
+  opacity: 0;
+}
+.welcome-mascot {
+  width: min(46vw, 190px);
+  height: auto;
+  animation: welcome-flota 3.4s ease-in-out infinite;
+}
+@keyframes welcome-flota {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-9px);
+  }
+}
+.welcome-wordmark {
+  margin: 0;
+  font-size: clamp(28px, 7vw, 40px);
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  text-shadow: 0 0 18px rgb(240 217 160 / 0.45);
+}
+.welcome-chips {
+  display: flex;
+  gap: 8px;
+}
+.welcome-chip {
+  padding: 3px 12px;
+  border: 1px solid rgb(240 217 160 / 0.35);
+  border-radius: 999px;
+  font-size: 12px;
+  color: rgb(240 217 160 / 0.6);
+}
+.welcome-chip--activa {
+  background: #f0d9a0;
+  border-color: #f0d9a0;
+  color: #063926;
+  font-weight: 700;
+}
+.welcome-tagline {
+  margin: 0;
+  font-size: 15px;
+  color: #eaf4ee;
+}
+.welcome-microcopy {
+  margin: 0;
+  min-height: 1.2em;
+  font-size: 13px;
+  color: rgb(234 244 238 / 0.75);
+}
+.welcome-barra {
+  width: min(70vw, 260px);
+  height: 6px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgb(240 217 160 / 0.25);
+}
+.welcome-barra-relleno {
+  height: 100%;
+  border-radius: 999px;
+  background: #f0d9a0;
+  transition: width 220ms ease;
+}
+.welcome-estrellas {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.welcome-star {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: #f0d9a0;
+  animation: welcome-titila 2.8s ease-in-out infinite;
+}
+.welcome-star.s1 {
+  top: 18%;
+  left: 22%;
+}
+.welcome-star.s2 {
+  top: 26%;
+  left: 74%;
+  animation-delay: 0.7s;
+}
+.welcome-star.s3 {
+  top: 64%;
+  left: 16%;
+  animation-delay: 1.4s;
+}
+.welcome-star.s4 {
+  top: 70%;
+  left: 80%;
+  animation-delay: 2.1s;
+}
+@keyframes welcome-titila {
+  0%,
+  100% {
+    opacity: 0.15;
+  }
+  50% {
+    opacity: 0.9;
+  }
+}
