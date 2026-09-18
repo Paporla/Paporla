@@ -75,13 +75,13 @@ export const metadata: Metadata = {
       { url: '/favicon/favicon.ico', sizes: 'any' },
       { url: '/favicon/favicon-16x16.png', sizes: '16x16', type: 'image/png' },
       { url: '/favicon/favicon-32x32.png', sizes: '32x32', type: 'image/png' },
-      { url: '/favicon/favicon-96x96.png', sizes: '96x96', type: 'image/png' },
-      { url: '/favicon/icon-192.png', sizes: '192x192', type: 'image/png' },
-      { url: '/favicon/icon-512.png', sizes: '512x512', type: 'image/png' },
+      { url: '/favicon/favicon-96x96.png?v=2', sizes: '96x96', type: 'image/png' },
+      { url: '/favicon/icon-192.png?v=2', sizes: '192x192', type: 'image/png' },
+      { url: '/favicon/icon-512.png?v=2', sizes: '512x512', type: 'image/png' },
     ],
     apple: '/favicon/apple-touch-icon.png',
   },
-  manifest: '/favicon/site.webmanifest',
+  manifest: '/favicon/site.webmanifest?v=2',
 }
 
 export const viewport: Viewport = {
@@ -114,7 +114,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               name: 'Paporla',
               description: 'Rescate Alimentario - Comida en buen estado de comercios locales para tu mesa.',
               url: process.env.NEXT_PUBLIC_SITE_URL ?? 'https://paporla.com',
-              logo: `${process.env.NEXT_PUBLIC_SITE_URL ?? 'https://paporla.com'}/favicon/icon-512.png`,
+              logo: `${process.env.NEXT_PUBLIC_SITE_URL ?? 'https://paporla.com'}/favicon/icon-512.png?v=2`,
               sameAs: ['https://instagram.com/paporla'],
               address: { '@type': 'PostalAddress', addressLocality: '', addressCountry: '' },
             }),
