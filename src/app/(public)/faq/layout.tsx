@@ -1,14 +1,14 @@
 import type { Metadata } from 'next'
+import { seo } from '@/lib/seo'
 
-export const metadata: Metadata = {
-  title: 'Preguntas Frecuentes — Paporla',
-  description: 'Resuelve tus dudas sobre cómo funciona Paporla: reservas, pagos, recogida y más.',
-  openGraph: {
-    title: 'FAQ — Preguntas Frecuentes | Paporla',
-    description: 'Todo lo que necesitas saber sobre Paporla: cómo reservar, pagar y recoger tus packs.',
-  },
-}
+/**
+ * /faq es un componente de cliente ('use client') y Next ignora cualquier
+ * metadata exportada desde un cliente. Este layout de servidor, que solo
+ * envuelve, es la forma canónica de ponerle canonical y og:url a la ruta
+ * (paso 44b).
+ */
+export const metadata: Metadata = seo('/faq')
 
-export default function FaqMetadataLayout({ children }: { children: React.ReactNode }) {
-  return <>{children}</>
+export default function FaqLayout({ children }: { children: React.ReactNode }) {
+  return children
 }
