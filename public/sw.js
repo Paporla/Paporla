@@ -1,5 +1,5 @@
-const CACHE_NAME = 'paporla-v3'
-const STATIC_CACHE = 'paporla-static-v3'
+const CACHE_NAME = 'paporla-v4'
+const STATIC_CACHE = 'paporla-static-v4'
 
 // Respuesta de emergencia cuando no hay red NI cache: evita el TypeError
 // "Failed to convert value to 'Response'" (respondWith con undefined).
@@ -105,7 +105,7 @@ self.addEventListener('push', (event) => {
     const data = event.data.json()
     const options = {
       body: data.body || '',
-      icon: '/favicon/web-app-manifest-192x192.png',
+      icon: '/favicon/icon-192.png',
       badge: '/favicon/favicon-96x96.png',
       vibrate: [200, 100, 200],
       data: data.data || {},
