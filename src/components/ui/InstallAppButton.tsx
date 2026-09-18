@@ -20,13 +20,17 @@ type BIPEvent = Event & {
 export default function InstallAppButton() {
   const [deferred, setDeferred] = useState<BIPEvent | null>(null)
   const [showHelp, setShowHelp] = useState(false)
-  const [installed, setInstalled] = useState(() =>
-    typeof window !== 'undefined' && window.matchMedia
-      ? window.matchMedia('(display-mode: standalone)').matches
-      : false,
-  )
+  const [installed, setInstalled] = useState(false)
 
   useEffect(() => {
+    /* eslint-disable react-hooks/set-state-in-effect -- standalone solo puede
+       leerse tras montar; derivarlo en el render inicial desfasa la hidratacion
+       (el servidor siempre ve false; la app instalada veria true). Ese desfase
+       era el error #418 en las apps instaladas. */
+    if (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) {
+      setInstalled(true)
+    }
+    /* eslint-enable react-hooks/set-state-in-effect */
     const onBIP = (e: Event) => {
       e.preventDefault()
       setDeferred(e as BIPEvent)

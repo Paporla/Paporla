@@ -10,6 +10,7 @@ export default function ThemeScript({ nonce }: { nonce?: string }) {
           (function() {
             try {
               var stored = localStorage.getItem('paporla-theme');
+document.documentElement.style.backgroundColor = stored === 'light' ? '#faf8f3' : '#0a0a1a';
               if (stored === 'light') {
                 document.documentElement.classList.remove('dark');
               } else {
@@ -17,6 +18,7 @@ export default function ThemeScript({ nonce }: { nonce?: string }) {
               }
             } catch(e) {
               document.documentElement.classList.add('dark');
+              document.documentElement.style.backgroundColor = '#0a0a1a';
             }
           })();
         `,
