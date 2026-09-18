@@ -104,7 +104,7 @@ export default function Header() {
             ) : (
               <Link
                 href="/login"
-                className="px-5 py-2 rounded-full bg-primary text-on-primary font-medium hover:bg-primary/90 transition-all shadow-lg shadow-primary/20"
+                className="px-4 py-2 text-sm whitespace-nowrap md:px-5 md:py-2 md:text-base rounded-full bg-primary text-on-primary font-medium hover:bg-primary/90 transition-all shadow-lg shadow-primary/20"
               >
                 Iniciar Sesión
               </Link>

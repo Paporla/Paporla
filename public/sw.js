@@ -20,12 +20,18 @@ self.addEventListener('install', () => {
 })
 
 self.addEventListener('activate', (event) => {
+  // Al activar un worker NUEVO (o sea, un deploy nuevo) se borra TAMBIEN el
+  // cache de HTML (CACHE_NAME). Motivo: las paginas cacheadas viven en la
+  // misma url ('/') entre deployments; si un toque de red fallaba, el worker
+  // servia HTML de un build viejo mezclado con la vida nueva: destellos,
+  // saltos y sensacion de version vieja contra nueva en el movil.
+  // STATIC_CACHE se conserva: sus urls llevan hash de contenido y nunca
+  // mienten sobre su version. Sin cache de HTML, offline sigue teniendo
+  // pagina de cortesia (offlineFallback) y los assets ya visitados.
   event.waitUntil(
     caches
       .keys()
-      .then((keys) =>
-        Promise.all(keys.filter((key) => key !== CACHE_NAME && key !== STATIC_CACHE).map((key) => caches.delete(key))),
-      ),
+      .then((keys) => Promise.all(keys.filter((key) => key !== STATIC_CACHE).map((key) => caches.delete(key)))),
   )
   event.waitUntil(self.clients.claim())
 })
