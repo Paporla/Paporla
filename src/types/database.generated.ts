@@ -1759,6 +1759,41 @@ export type Database = {
           updated_at: string
         }[]
       }
+      list_directory_shops: {
+        Args: { p_limit?: number; p_market_id?: string }
+        Returns: {
+          available_pack_count: number
+          cover_path: string
+          description: string
+          has_available_packs: boolean
+          locality_name: string
+          logo_path: string
+          name: string
+          rating: number
+          rating_count: number
+          shop_id: string
+          updated_at: string
+        }[]
+      }
+      list_my_favorites: {
+        Args: never
+        Returns: {
+          address: string
+          category: string
+          cover_path: string
+          favorite_id: string
+          favorited_at: string
+          locality_name: string
+          logo_path: string
+          name: string
+          phone_e164: string
+          rating: number
+          rating_count: number
+          shop_id: string
+          shop_status: string
+          verified: boolean
+        }[]
+      }
       list_my_reservations: {
         Args: {
           p_before_created_at?: string
@@ -1769,18 +1804,25 @@ export type Database = {
           cancel_reason: string
           created_at: string
           currency_code: string
+          image_path: string
+          original_price_minor: number
           pack_id: string
           pack_title: string
           payment_status: string
           pickup_end_at: string
           pickup_start_at: string
+          quantity: number
           reservation_id: string
           shop_address: string
           shop_id: string
+          shop_latitude: number
+          shop_longitude: number
           shop_name: string
           status: string
           timezone: string
           total_amount_minor: number
+          unit_price_minor: number
+          updated_at: string
         }[]
       }
       list_public_reviews: {
@@ -1795,6 +1837,24 @@ export type Database = {
           created_at: string
           rating: number
           review_id: string
+        }[]
+      }
+      list_shop_packs: {
+        Args: { p_limit?: number; p_shop_id: string }
+        Returns: {
+          category: string
+          currency_code: string
+          description: string
+          image_path: string
+          original_price_minor: number
+          pack_id: string
+          pickup_end_at: string
+          pickup_start_at: string
+          price_minor: number
+          remaining_stock: number
+          timezone: string
+          title: string
+          total_stock: number
         }[]
       }
       list_shop_reservations: {
@@ -2007,6 +2067,7 @@ export type Database = {
         }
         Returns: Json
       }
+      shop_mark_picked_up: { Args: { p_reservation_id: string }; Returns: Json }
       submit_own_shop_for_review: { Args: { p_shop_id: string }; Returns: Json }
       update_own_profile: {
         Args: {
