@@ -79,3 +79,5 @@ e2e/.auth/
 lib.txt
 # Sentry Config File
 .env.sentry-build-plugin
+aplicar_*.ps1
+*.bak
