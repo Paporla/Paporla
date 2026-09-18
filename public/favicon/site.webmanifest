@@ -2,22 +2,59 @@
   "name": "Paporla - Rescate Alimentario",
   "short_name": "Paporla",
   "description": "Rescata comida, ayuda al planeta y ahorra. Conectamos comercios con excedentes de comida.",
+  "id": "/",
   "start_url": "/",
+  "scope": "/",
+  "lang": "es-CL",
+  "dir": "ltr",
   "display": "standalone",
-  "background_color": "#0a0a1a",
-  "theme_color": "#00ff88",
+  "background_color": "#063926",
+  "theme_color": "#063926",
+  "categories": ["food", "shopping", "lifestyle"],
   "icons": [
     {
-      "src": "/favicon/web-app-manifest-192x192.png",
+      "src": "/favicon/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/favicon/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/favicon/icon-maskable-192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "maskable"
     },
     {
-      "src": "/favicon/web-app-manifest-512x512.png",
+      "src": "/favicon/icon-maskable-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
+    },
+    {
+      "src": "/favicon/favicon-96x96.png",
+      "sizes": "96x96",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Packs de hoy",
+      "short_name": "Packs",
+      "url": "/packs",
+      "icons": [{ "src": "/favicon/icon-192.png", "sizes": "192x192", "type": "image/png" }]
+    },
+    {
+      "name": "Comercios",
+      "short_name": "Comercios",
+      "url": "/shops",
+      "icons": [{ "src": "/favicon/icon-192.png", "sizes": "192x192", "type": "image/png" }]
     }
   ]
 }
