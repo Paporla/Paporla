@@ -56,11 +56,26 @@ e2e/.auth/
 # Vercel
 .vercel
 
-# IA / Asistentes (pueden contener secretos)
+# IA / Asistentes (pueden contener secretos pegados en la conversacion)
+# Regla aprendida el 2026-09-18: un volcado de agente (.deepseek/state/) se quedo
+# un mes en el historial con la service_role de produccion dentro. Estos
+# directorios NUNCA deben entrar al repo, sea publico o privado.
 .codewhale/
 .deepseek/
+.claude/
+.cursor/
+.aider*
+.continue/
+.windsurf/
+.trae/
+.qwen/
+.gemini/
+.roo/
+.cline/
+**/state/subagents*.json
+**/state/subagents*.lock
 
 # Otros
 lib.txt
 # Sentry Config File
-.env.sentry-build-plugin```
+.env.sentry-build-plugin
