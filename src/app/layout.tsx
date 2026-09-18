@@ -18,8 +18,7 @@ export const metadata: Metadata = {
     default: 'Paporla - Rescate Alimentario',
     template: '%s | Paporla',
   },
-  description:
-    'Conectamos comercios con excedentes de comida con personas que necesitan alimentarse. Reduce el desperdicio, ayuda a tu comunidad.',
+  description: 'Rescatamos comida en buen estado de comercios locales para tu mesa. Menos desperdicio, más comunidad.',
   keywords: [
     'rescate alimentario',
     'comida',
@@ -40,7 +39,7 @@ export const metadata: Metadata = {
     siteName: 'Paporla',
     title: 'Paporla - Rescate Alimentario',
     description:
-      'Conectamos comercios con excedentes de comida con personas que necesitan alimentarse. Reduce el desperdicio, ayuda a tu comunidad.',
+      'Rescatamos comida en buen estado de comercios locales para tu mesa. Menos desperdicio, más comunidad.',
     images: [
       {
         // Paso 43: PNG real de 1200x630; WhatsApp, Telegram y Twitter no
@@ -56,7 +55,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'Paporla - Rescate Alimentario',
-    description: 'Conectamos comercios con excedentes de comida con personas que necesitan alimentarse.',
+    description: 'Rescatamos comida en buen estado de comercios locales para tu mesa.',
     images: ['/og-image.png'],
     creator: '@paporla',
   },
@@ -113,8 +112,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               '@context': 'https://schema.org',
               '@type': 'Organization',
               name: 'Paporla',
-              description:
-                'Rescate Alimentario - Conectamos comercios con excedentes de comida con personas que necesitan alimentarse.',
+              description: 'Rescate Alimentario - Comida en buen estado de comercios locales para tu mesa.',
               url: process.env.NEXT_PUBLIC_SITE_URL ?? 'https://paporla.com',
               logo: `${process.env.NEXT_PUBLIC_SITE_URL ?? 'https://paporla.com'}/favicon/icon-512.png`,
               sameAs: ['https://instagram.com/paporla'],
