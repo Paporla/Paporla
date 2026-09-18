@@ -126,21 +126,28 @@ describe('applyRateLimit', () => {
     expect(body.error).toMatch(/Demasiadas solicitudes/)
   })
 
-  it('fails open and logs when the service RPC is unavailable', async () => {
+  it('AI-03: con el RPC caido ya no falla abierto: limita en local y registra', async () => {
     mockRpc.mockResolvedValue({ data: null, error: new Error('RPC unavailable') })
+    const ip = '203.0.113.12'
 
-    const response = await applyRateLimit(createRequest('/api/auth', { 'x-real-ip': '203.0.113.12' }))
+    const primeras = []
+    for (let i = 0; i < 5; i++) {
+      primeras.push(await applyRateLimit(createRequest('/api/auth', { 'x-real-ip': ip })))
+    }
+    const sexta = await applyRateLimit(createRequest('/api/auth', { 'x-real-ip': ip }))
 
-    expect(response).toBeNull()
+    expect(primeras.every((r) => r !== null && r.status !== 429)).toBe(true)
+    expect(sexta?.status).toBe(429)
     expect(mockLoggerError).toHaveBeenCalledWith('RateLimit service_check_rate_limit', expect.any(Error))
   })
 
-  it('fails open and logs an invalid RPC response', async () => {
+  it('AI-03: una respuesta RPC invalida tambien cae al limitador local', async () => {
     mockRpc.mockResolvedValue({ data: { allowed: true }, error: null })
 
     const response = await applyRateLimit(createRequest('/api/auth', { 'x-real-ip': '203.0.113.13' }))
 
-    expect(response).toBeNull()
+    expect(response).not.toBeNull()
+    expect(response?.status).not.toBe(429)
     expect(mockLoggerError).toHaveBeenCalled()
   })
 })

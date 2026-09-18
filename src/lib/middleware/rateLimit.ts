@@ -76,6 +76,46 @@ function isRateLimitPayload(value: unknown): value is RateLimitRpcPayload {
   )
 }
 
+/**
+ * Limitador LOCAL de emergencia (AI-03).
+ *
+ * Antes, si el RPC de rate limit fallaba (caída de Supabase, timeout, respuesta
+ * rara), `checkCanonicalRateLimit` devolvía null y la petición pasaba SIN
+ * límite alguno: fallar abierto en el formulario público de contacto permite
+ * vaciar la bandeja de soporte justo cuando la base está caída.
+ *
+ * Ahora, sobre un fallo, se aplica este limitador en memoria del propio
+ * isolate: ventana deslizante por identificador y ruta. En el edge de Vercel
+ * la memoria es por instancia, así que no es tan fuerte como el contador
+ * centralizado de la base, pero cierra la puerta: nadie puede hacer más de
+ * `limit` peticiones por ventana en la instancia que le atendió.
+ *
+ * El mapa tiene tope de claves para que un ataque de IPs dispersas no pueda
+ * comerse la memoria: al llenarse, se evicta la entrada más antigua.
+ */
+const fallbackBuckets = new Map<string, number[]>()
+const FALLBACK_MAX_KEYS = 5000
+
+function fallbackRateLimit(identifier: string, action: string, limit: number, windowSeconds: number): RateLimitResult {
+  const key = `${action}:${identifier}`
+  const now = Date.now()
+  const windowMs = windowSeconds * 1000
+  const stamps = (fallbackBuckets.get(key) ?? []).filter((t) => now - t < windowMs)
+  const allowed = stamps.length < limit
+  if (allowed) stamps.push(now)
+  fallbackBuckets.set(key, stamps)
+  if (fallbackBuckets.size > FALLBACK_MAX_KEYS) {
+    const oldest = fallbackBuckets.keys().next().value
+    if (oldest !== undefined) fallbackBuckets.delete(oldest)
+  }
+  return {
+    allowed,
+    remaining: Math.max(0, limit - stamps.length),
+    resetAt: (stamps[0] ?? now) + windowMs,
+    blockedUntil: null,
+  }
+}
+
 async function checkCanonicalRateLimit(
   identifier: string,
   action: string,
@@ -113,11 +153,11 @@ async function checkCanonicalRateLimit(
       blockedUntil,
     }
   } catch (error) {
-    // Disponibilidad controlada: Supabase Auth mantiene sus propios límites y el
-    // resto de endpoints conserva sus controles de autorización. Un fallo del
-    // limitador se registra, pero no convierte toda la API en un 429 permanente.
+    // AI-03: ya no se falla abierto. Un fallo del limitador centralizado se
+    // registra y se delega en el limitador local de emergencia, que sigue
+    // poniendo tope por IP y ruta en esta instancia.
     logger.error('RateLimit service_check_rate_limit', error)
-    return null
+    return fallbackRateLimit(identifier, action, limit, windowSeconds)
   }
 }
 
