@@ -5,6 +5,7 @@ import type { SerializedPack } from './PackDetailClient'
 // A-09: el cargador vive aparte para que el layout y la página compartan
 // la MISMA consulta (antes cada uno hacía la suya).
 import { loadPublicPack } from './loadPublicPack'
+import { seo } from '@/lib/seo'
 import { notFound } from 'next/navigation'
 import { jsonLdToScriptContent } from '@/lib/utils/json-ld'
 
@@ -73,7 +74,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const title = String(row.title ?? 'Pack')
   const description = String(row.description ?? '').slice(0, 160) || `Pack sorpresa disponible - ${title}`
 
-  return {
+  return seo(`/packs/${id}`, {
     title,
     description,
     openGraph: {
@@ -86,7 +87,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       description,
       images: imageUrl ? [imageUrl] : [],
     },
-  }
+  })
 }
 
 // Nota (f8.5 S2): esta página NO debe tener ningún boundary <Suspense> con

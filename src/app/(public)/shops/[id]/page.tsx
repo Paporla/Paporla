@@ -3,6 +3,7 @@ import ShopDetailClient from './ShopDetailClient'
 import { notFound } from 'next/navigation'
 // A-09: cargador compartido con el layout (una sola consulta por visita).
 import { loadPublicShop } from './loadPublicShop'
+import { seo } from '@/lib/seo'
 
 interface Props {
   params: Promise<{ id: string }>
@@ -24,10 +25,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const name = String(row.name ?? 'Comercio')
   const description = String(row.description ?? '').slice(0, 160) || `Descubre los packs de ${name} en Paporla.`
 
-  return {
+  return seo(`/shops/${id}`, {
     title: `${name} | Paporla`,
     description,
-  }
+  })
 }
 
 export default async function ShopDetailPage({ params }: Props) {

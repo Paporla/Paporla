@@ -3,6 +3,10 @@ import HeroSection from '@/components/landing/HeroSection'
 import BenefitsSection from '@/components/landing/BenefitsSection'
 import StatsSection from '@/components/landing/StatsSection'
 import CTASection from '@/components/landing/CTASection'
+import { seo } from '@/lib/seo'
+
+// Paso 44: canonical de la home (/) y og:url coherente.
+export const metadata = seo('/')
 
 export default function LandingPage() {
   return (
