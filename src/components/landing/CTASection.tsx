@@ -3,6 +3,7 @@
 import { motion } from 'framer-motion'
 import Link from 'next/link'
 import { ArrowRight, UserPlus } from 'lucide-react'
+import InstallAppButton from '@/components/ui/InstallAppButton'
 
 /**
  * CTA final de la portada.
@@ -96,6 +97,10 @@ export default function CTASection() {
               >
                 ¿Ya tienes cuenta? <span className="text-primary font-medium">Iniciar sesión</span>
               </Link>
+            </div>
+
+            <div className="flex justify-center mt-6">
+              <InstallAppButton />
             </div>
 
             <div className="flex items-center justify-center gap-6 mt-8 pt-5 border-t border-black/10 dark:border-white/10">
