@@ -10,7 +10,7 @@ import { DEFAULT_MARKET } from '@/lib/constants/markets'
  * Lee los documentos legales publicados para el mercado (terminos y
  * privacidad del consumidor) y ofrece el almacen de cola: al registrarse no
  * hay sesion todavia (el correo se confirma despues), asi que la aceptacion
- * se encola en sessionStorage y PendingConsentRecorder la escribe en la base
+ * se encola en localStorage y PendingConsentRecorder la escribe en la base
  * con accept_legal_document en cuanto existe usuario autenticado. Eso deja
  * la prueba exigida por la Ley 21.719: quien, que version, cuando, desde donde.
  */
@@ -77,16 +77,19 @@ export interface PendingConsent {
 export function queuePendingConsent(docs: ConsumerLegalDoc[]) {
   if (docs.length === 0) return
   try {
-    sessionStorage.setItem(CLAVE_PENDIENTE, JSON.stringify({ at: new Date().toISOString(), docs }))
+    localStorage.setItem(CLAVE_PENDIENTE, JSON.stringify({ at: new Date().toISOString(), docs }))
   } catch {
     /* navegacion privada sin storage: sin cola no hay registro, y el aviso
-       del checkbox igualmente quedo mostrado al usuario */
+       del checkbox igualmente quedo mostrado al usuario. localStorage y no
+       sessionStorage a proposito: el correo de confirmacion se abre en OTRA
+       pestana, y sessionStorage no viaja entre pestanas (bug cazado en la
+       prueba manual del fundador: cero filas en legal_acceptances). */
   }
 }
 
 export function takePendingConsent(): PendingConsent | null {
   try {
-    const raw = sessionStorage.getItem(CLAVE_PENDIENTE)
+    const raw = localStorage.getItem(CLAVE_PENDIENTE)
     return raw ? (JSON.parse(raw) as PendingConsent) : null
   } catch {
     return null
@@ -95,7 +98,7 @@ export function takePendingConsent(): PendingConsent | null {
 
 export function clearPendingConsent() {
   try {
-    sessionStorage.removeItem(CLAVE_PENDIENTE)
+    localStorage.removeItem(CLAVE_PENDIENTE)
   } catch {
     /* nada que hecho */
   }

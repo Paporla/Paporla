@@ -49,7 +49,7 @@ const propsBase = {
 
 beforeEach(() => {
   rpcMock.mockReset()
-  sessionStorage.clear()
+  localStorage.clear()
 })
 
 describe('paso 45: consentimiento del consumidor', () => {
