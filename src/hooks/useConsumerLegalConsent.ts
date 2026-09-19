@@ -39,10 +39,19 @@ export function useConsumerLegalConsent() {
   useEffect(() => {
     let cancelled = false
     const load = async () => {
-      const { data, error } = await supabaseBrowser().rpc('list_current_legal_documents', {
-        p_market_id: DEFAULT_MARKET.id,
-        p_language: 'es',
-      })
+      // try/catch a proposito: ni un cliente parcial (tests viejos con mock
+      // sin rpc) ni una caida rara deben romper el registro. Sin documentos
+      // legibles no se exige nada nuevo y el checkbox estatico sigue cubriendo.
+      let data: unknown = null
+      let error: unknown = null
+      try {
+        ;({ data, error } = await supabaseBrowser().rpc('list_current_legal_documents', {
+          p_market_id: DEFAULT_MARKET.id,
+          p_language: 'es',
+        }))
+      } catch {
+        error = new Error('cliente sin rpc')
+      }
       if (cancelled) return
       if (!error && data) {
         setDocs((data as ConsumerLegalDoc[]).filter((d) => TIPOS_CONSUMIDOR.includes(d.document_type) && d.is_required))

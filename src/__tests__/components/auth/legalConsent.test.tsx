@@ -94,6 +94,15 @@ describe('paso 45: consentimiento del consumidor', () => {
     await waitFor(() => expect(takePendingConsent()).toBeNull())
   })
 
+  it('un cliente sin rpc no rompe el hook: degrada a sin documentos', async () => {
+    rpcMock.mockImplementation(() => {
+      throw new Error('rpc ausente')
+    })
+    const { result } = renderHook(() => useConsumerLegalConsent())
+    await waitFor(() => expect(result.current.loading).toBe(false))
+    expect(result.current.docs).toHaveLength(0)
+  })
+
   it('si una aceptacion falla, la cola se conserva para reintentar', async () => {
     rpcMock.mockResolvedValue({ data: null, error: { message: 'no' } })
     queuePendingConsent([DOC])
