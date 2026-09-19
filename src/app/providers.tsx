@@ -3,6 +3,7 @@
 import { MotionConfig } from 'framer-motion'
 import { ThemeProvider } from '@/context/ThemeContext'
 import { AuthProvider } from '@/hooks/useAuth'
+import PendingConsentRecorder from '@/components/auth/PendingConsentRecorder'
 import ErrorBoundary from '@/components/ErrorBoundary'
 import { QueryProvider } from '@/lib/query/provider'
 import { ToastProvider } from '@/components/ui/ToastProvider'
@@ -12,6 +13,7 @@ export default function Providers({ children, nonce }: { children: React.ReactNo
   return (
     <ErrorBoundary>
       <AuthProvider>
+        <PendingConsentRecorder />
         <QueryProvider>
           {process.env.NODE_ENV === 'development' && <ReactQueryDevtools initialIsOpen={false} />}
           <ThemeProvider>

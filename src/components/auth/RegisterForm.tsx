@@ -10,6 +10,7 @@ import { useToast } from '@/components/ui/ToastProvider'
 import RegisterFormFields from './RegisterFormFields'
 import { ArrowRight } from 'lucide-react'
 import { registerSchema } from '@/lib/utils/validations'
+import { useConsumerLegalConsent, queuePendingConsent, DOC_LABELS } from '@/hooks/useConsumerLegalConsent'
 
 export default function RegisterForm() {
   // Los botones «Registra tu comercio» (landing, about) enlazan con
@@ -55,6 +56,7 @@ export default function RegisterForm() {
     validateField(field, formData[field as keyof typeof formData] as string)
   }
   const [agreedToTerms, setAgreedToTerms] = useState(false)
+  const { docs: legalDocs } = useConsumerLegalConsent()
   const { signUp } = useAuth()
   const { addToast } = useToast()
 
@@ -112,6 +114,9 @@ export default function RegisterForm() {
           ? { name: formData.shopName, description: null, address: null, city: null, phone: formData.phone ?? null }
           : undefined,
       )
+      // Paso 45: se encola la aceptacion de los documentos publicados; el
+      // recorder la escribe en la base cuando exista usuario autenticado.
+      queuePendingConsent(legalDocs)
       setSuccess(true)
     } catch (err) {
       addToast(err instanceof Error ? err.message : 'Error al registrarse', 'error')
@@ -152,6 +157,10 @@ export default function RegisterForm() {
         formData={formData}
         onChange={setFormData}
         agreedToTerms={agreedToTerms}
+        legalDocs={legalDocs.map((d) => ({
+          label: DOC_LABELS[d.document_type] ?? d.document_type,
+          url: d.content_url,
+        }))}
         onTermsChange={setAgreedToTerms}
         errors={fieldErrors}
         onClearError={(field) =>

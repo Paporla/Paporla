@@ -22,6 +22,8 @@ interface Props {
   formData: FormData
   onChange: (data: FormData) => void
   agreedToTerms: boolean
+  /** Documentos legales publicados (paso 45). Si llegan, el checkbox los enlaza con nombre vivo. */
+  legalDocs?: { label: string; url: string }[]
   onTermsChange: (v: boolean) => void
   errors?: Record<string, string | undefined>
   onClearError?: (field: string) => void
@@ -33,6 +35,7 @@ export default function RegisterFormFields({
   formData,
   onChange,
   agreedToTerms,
+  legalDocs,
   onTermsChange,
   errors = {},
   onClearError,
@@ -199,14 +202,31 @@ export default function RegisterFormFields({
           className="mt-1 w-4 h-4 rounded border-gray-700 bg-gray-800 text-primary focus:ring-primary"
         />
         <label htmlFor="terms" className="text-sm text-gray-400 leading-relaxed">
-          Acepto los{' '}
-          <Link href="/legal/terminos" className="text-primary hover:underline">
-            Terminos y Condiciones
-          </Link>{' '}
-          y la{' '}
-          <Link href="/legal/privacidad" className="text-primary hover:underline">
-            Politica de Privacidad
-          </Link>
+          {legalDocs && legalDocs.length > 0 ? (
+            <>
+              Acepto{' '}
+              {legalDocs.map((d, i) => (
+                <span key={d.url}>
+                  {i > 0 && (i === legalDocs.length - 1 ? ' y ' : ', ')}
+                  <Link href={d.url} className="text-primary hover:underline">
+                    {d.label}
+                  </Link>
+                </span>
+              ))}
+              , versiones publicadas vigentes al crear mi cuenta.
+            </>
+          ) : (
+            <>
+              Acepto los{' '}
+              <Link href="/legal/terminos" className="text-primary hover:underline">
+                Terminos y Condiciones
+              </Link>{' '}
+              y la{' '}
+              <Link href="/legal/privacidad" className="text-primary hover:underline">
+                Politica de Privacidad
+              </Link>
+            </>
+          )}
         </label>
       </motion.div>
     </div>
