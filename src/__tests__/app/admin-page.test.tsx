@@ -30,6 +30,26 @@ const useAdminDashboardMock = vi.hoisted(() => vi.fn())
 vi.mock('@/components/admin/useAdminDashboard', () => ({
   useAdminDashboard: useAdminDashboardMock,
 }))
+// ADMIN-3: los números de negocio son otra RPC (admin_business_snapshot,
+// 0055); se mockean como el resto de hooks del panel.
+vi.mock('@/components/admin/useAdminBusiness', () => ({
+  useAdminBusiness: () => ({
+    business: {
+      paid_count: 5,
+      revenue_minor: 19950,
+      units_saved: 3,
+      cancelled_count: 1,
+      no_show_count: 0,
+      total_count: 6,
+      cancel_rate: 16.7,
+      packs_active: 4,
+      packs_paused: 1,
+      currency: 'CLP',
+    },
+    loading: false,
+    error: '',
+  }),
+}))
 vi.mock('@/hooks/useAuth', () => ({
   useAuth: () => ({ user: { id: 'admin-1', email: 'admin@paporla.test' } }),
 }))
@@ -107,6 +127,17 @@ describe('AdminDashboardPage (página)', () => {
     render(<AdminDashboardPage />)
     expect(screen.getByText('Panel de Administración')).toBeTruthy()
     expect(screen.getByText('admin@paporla.test')).toBeTruthy()
+  })
+
+  it('ADMIN-3: muestra los números de negocio (ventas, salvados, cancelación, packs activos)', () => {
+    render(<AdminDashboardPage />)
+    expect(screen.getByText('Números de negocio')).toBeTruthy()
+    expect(screen.getByText('Ventas cobradas')).toBeTruthy()
+    expect(screen.getByText('5 reservas pagadas')).toBeTruthy()
+    expect(screen.getByText('Packs salvados')).toBeTruthy()
+    expect(screen.getByText('Tasa de cancelación')).toBeTruthy()
+    expect(screen.getByText('16.7%')).toBeTruthy()
+    expect(screen.getByText('Packs activos ahora')).toBeTruthy()
   })
 
   it('Fase 6.6: con error de carga muestra el estado de error con Reintentar (no skeleton infinito)', async () => {

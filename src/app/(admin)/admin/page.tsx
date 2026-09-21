@@ -5,6 +5,7 @@ import { Shield } from 'lucide-react'
 import { useAdminDashboard } from '@/components/admin/useAdminDashboard'
 import AdminNavCards from '@/components/admin/AdminNavCards'
 import AdminStatCards from '@/components/admin/AdminStatCards'
+import AdminBusinessCards from '@/components/admin/AdminBusinessCards'
 import AdminPanelError from '@/components/admin/AdminPanelError'
 import AlertsPanel from './components/AlertsPanel'
 import RecentActivity from './components/RecentActivity'
@@ -51,6 +52,9 @@ export default function AdminDashboard() {
 
       <AdminNavCards stats={stats} />
       <AdminStatCards stats={stats} />
+
+      {/* ADMIN-3: ventas cobradas, packs salvados, cancelación y packs activos */}
+      <AdminBusinessCards />
 
       <AlertsPanel />
 
