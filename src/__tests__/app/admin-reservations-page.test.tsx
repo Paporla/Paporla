@@ -49,6 +49,11 @@ function fila(overrides: Partial<AdminReservationRow>): AdminReservationRow {
     timezone_snapshot: 'America/Santiago',
     created_at: '2026-09-25T10:00:00Z',
     updated_at: '2026-09-25T12:00:00Z',
+    cancel_reason: null,
+    cancelled_at: null,
+    ready_at: '2026-09-25T14:00:00Z',
+    picked_up_at: null,
+    completed_at: null,
     ...overrides,
   }
 }
@@ -62,6 +67,8 @@ const filaCancelada = fila({
   shop_name: 'Café Verde',
   status: 'cancelled',
   payment_status: 'refunded',
+  cancel_reason: 'Me quedé sin tiempo para pasar',
+  cancelled_at: '2026-09-26T15:30:00Z',
 })
 
 function setup() {
@@ -157,6 +164,47 @@ describe('AdminReservationsPage (ADMIN-1)', () => {
     expect(screen.getByText('1 de 2 reservas')).toBeTruthy()
     expect(screen.queryByText('María Gonzalez')).toBeNull()
     expect(screen.getByText('Carlos Soto')).toBeTruthy()
+  })
+
+  it('L-67: la ficha de una CANCELADA muestra fecha y motivo de cancelación', () => {
+    hooksState.reservations = [filaCancelada]
+    setup()
+
+    fireEvent.click(screen.getAllByRole('button', { name: /Detalle/ })[0])
+
+    expect(screen.getByText('Motivo de cancelación')).toBeTruthy()
+    expect(screen.getByText('Me quedé sin tiempo para pasar')).toBeTruthy()
+    // El hito Cancelada está en el historial (también hay badge en la tabla)
+    expect(screen.getAllByText('Cancelada').length).toBeGreaterThanOrEqual(1)
+    // ...con la hora en la zona horaria de la RESERVA, no la del navegador
+    const esperado = new Intl.DateTimeFormat('es-CL', {
+      dateStyle: 'medium',
+      timeStyle: 'short',
+      timeZone: 'America/Santiago',
+    }).format(new Date('2026-09-26T15:30:00Z'))
+    expect(screen.getByText(esperado)).toBeTruthy()
+  })
+
+  it('L-67: la ficha de una RETIRADA muestra la hora de retiro y sin caja de motivo', () => {
+    const retirada = fila({
+      reservation_id: 'res-cccc-3',
+      status: 'picked_up',
+      picked_up_at: '2026-09-30T19:45:00Z',
+    })
+    hooksState.reservations = [retirada]
+    setup()
+
+    fireEvent.click(screen.getAllByRole('button', { name: /Detalle/ })[0])
+
+    expect(screen.getByText('Retirada')).toBeTruthy()
+    const esperado = new Intl.DateTimeFormat('es-CL', {
+      dateStyle: 'medium',
+      timeStyle: 'short',
+      timeZone: 'America/Santiago',
+    }).format(new Date('2026-09-30T19:45:00Z'))
+    expect(screen.getByText(esperado)).toBeTruthy()
+    // Si no fue cancelada no hay caja de motivo
+    expect(screen.queryByText('Motivo de cancelación')).toBeNull()
   })
 
   it('sin reservas muestra el estado vacío total', () => {

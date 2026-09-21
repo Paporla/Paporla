@@ -31,6 +31,11 @@ function adminReservationRow(overrides: Partial<AdminReservationRow> = {}): Admi
     timezone_snapshot: 'America/Santiago',
     created_at: '2026-09-25T10:00:00Z',
     updated_at: '2026-09-25T10:00:00Z',
+    cancel_reason: null,
+    cancelled_at: null,
+    ready_at: null,
+    picked_up_at: null,
+    completed_at: null,
     ...overrides,
   }
 }
@@ -85,5 +90,19 @@ describe('useAdminReservations', () => {
     setupMockClient([], { message: 'ADMIN_REQUIRED', code: '42501' })
     const { result } = renderHook(() => useAdminReservations(), { wrapper: createWrapper() })
     await waitFor(() => expect(result.current.error).toBe('Esta acción requiere permisos de administrador.'))
+  })
+
+  it('expone el ciclo de vida (0054): motivo y fecha de cancelación', async () => {
+    const cancelada = adminReservationRow({
+      status: 'cancelled',
+      payment_status: 'refunded',
+      cancel_reason: 'No podré pasar por la ventana',
+      cancelled_at: '2026-09-26T15:30:00Z',
+    })
+    setupMockClient([cancelada])
+    const { result } = renderHook(() => useAdminReservations(), { wrapper: createWrapper() })
+    await waitFor(() => expect(result.current.loading).toBe(false))
+    expect(result.current.reservations[0].cancel_reason).toBe('No podré pasar por la ventana')
+    expect(result.current.reservations[0].cancelled_at).toBe('2026-09-26T15:30:00Z')
   })
 })

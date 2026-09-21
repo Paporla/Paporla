@@ -1,7 +1,7 @@
 'use client'
 
 import { AnimatePresence, motion } from 'framer-motion'
-import { X, CalendarCheck, User, Store, Package, CreditCard, Clock, ShieldCheck } from 'lucide-react'
+import { X, CalendarCheck, User, Store, Package, CreditCard, Clock, ShieldCheck, History } from 'lucide-react'
 import Button from '@/components/ui/Button'
 import { formatMinorPrice } from '@/lib/utils/formatPrice'
 import { formatDate, formatPickupWindow } from '@/lib/utils/formatDate'
@@ -15,11 +15,29 @@ interface ReservationModalProps {
 }
 
 /**
- * Ficha de detalle de una reserva (ADMIN-1): todo lo que el panel sabe de la
- * transacción, en un solo vistazo, para responder soporte sin entrar a la
- * base. SOLO LECTURA a propósito: cambiar estados de reserva es territorio
- * del flujo de recogida del comercio (código hasheado) — no hay botones
- * de "arreglar a mano" aquí.
+ * Fecha + hora en la zona horaria de la RESERVA (no la del navegador), para
+ * que el operador vea las horas como las vivió el comercio y el comprador.
+ * (Local a propósito: es el único lugar del panel que necesita fecha+hora.)
+ */
+function formatMoment(iso: string, tz: string): string {
+  return new Intl.DateTimeFormat('es-CL', {
+    dateStyle: 'medium',
+    timeStyle: 'short',
+    timeZone: tz,
+  }).format(new Date(iso))
+}
+
+/**
+ * Ficha de detalle de una reserva (ADMIN-1, historial en ADMIN-1b/L-67):
+ * todo lo que el panel sabe de la transacción, en un solo vistazo, para
+ * responder soporte sin entrar a la base. SOLO LECTURA a propósito: cambiar
+ * estados de reserva es territorio del flujo de recogida del comercio
+ * (código hasheado) — no hay botones de "arreglar a mano" aquí.
+ *
+ * El historial (0054) muestra CUÁNDO pasó cada cosa y, si fue cancelada,
+ * el motivo registrado por quien la canceló (cancel_reservation lo exige,
+ * 3-1000 caracteres — 0009:465). Los huecos ("—") son honestos: es un
+ * momento por el que la reserva todavía no pasó.
  */
 export default function ReservationModal({ isOpen, reservation, onClose }: ReservationModalProps) {
   if (!reservation) return null
@@ -27,6 +45,16 @@ export default function ReservationModal({ isOpen, reservation, onClose }: Reser
   const st = getReservationStatusConfig(reservation.status)
   const pay = getPaymentStatusConfig(reservation.payment_status)
   const tz = reservation.timezone_snapshot || 'America/Santiago'
+  const fueCancelada = reservation.status === 'cancelled' || reservation.cancelled_at !== null
+
+  /** Hitos del ciclo de vida en orden; solo se listan los que existen. */
+  const hitos = [
+    { label: 'Creada', at: reservation.created_at },
+    { label: 'Lista para recoger', at: reservation.ready_at },
+    { label: 'Retirada', at: reservation.picked_up_at },
+    { label: 'Completada', at: reservation.completed_at },
+    ...(fueCancelada ? [{ label: 'Cancelada', at: reservation.cancelled_at }] : []),
+  ].filter((h) => h.at !== null)
 
   return (
     <AnimatePresence>
@@ -137,10 +165,35 @@ export default function ReservationModal({ isOpen, reservation, onClose }: Reser
                     <span className={`text-xs px-3 py-1 rounded-full ${pay.className}`}>Pago: {pay.label}</span>
                   </div>
 
-                  {/* Fechas de auditoría */}
+                  {/* Historial del ciclo de vida (0054 / L-67): horas en la zona
+                      horaria de la reserva. Sin inventar hitos: si no pasó, no sale. */}
+                  <div className="rounded-xl dark:bg-white/5 bg-gray-100 p-3">
+                    <p className="flex items-center gap-1.5 text-[11px] font-medium dark:text-gray-400 text-gray-600 mb-2">
+                      <History className="w-3.5 h-3.5" /> Historial
+                    </p>
+                    <ul className="space-y-1.5">
+                      {hitos.map((hito) => (
+                        <li key={hito.label} className="flex items-baseline justify-between gap-3 text-xs">
+                          <span className="dark:text-gray-300 text-gray-700">{hito.label}</span>
+                          <span className="dark:text-gray-400 text-gray-600 whitespace-nowrap">
+                            {formatMoment(hito.at as string, tz)}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                    {fueCancelada ? (
+                      <div className="mt-3 rounded-lg border border-red-500/30 bg-red-500/5 p-2.5">
+                        <p className="text-[11px] font-medium text-red-400 mb-0.5">Motivo de cancelación</p>
+                        <p className="text-xs dark:text-gray-300 text-gray-700 break-words">
+                          {reservation.cancel_reason?.trim() || 'Sin motivo registrado'}
+                        </p>
+                      </div>
+                    ) : null}
+                  </div>
+
+                  {/* Auditoría */}
                   <p className="text-[11px] dark:text-gray-500 text-gray-400">
-                    Creada: {formatDate(reservation.created_at)} · Última actualización:{' '}
-                    {formatDate(reservation.updated_at)}
+                    Última actualización: {formatDate(reservation.updated_at)}
                   </p>
 
                   {/* Nota honesta sobre el código de retiro */}

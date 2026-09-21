@@ -5,10 +5,12 @@ import { supabaseBrowser } from '@/lib/supabase/client'
 import { translateDbError } from '@/lib/utils/db-errors'
 
 /**
- * Fila que devuelve la RPC `list_admin_reservations` (0032): usuario desde
- * user_profiles (display_name, email) y comercio/pack desde las SNAPSHOTS de
- * la propia reserva (0005). Nada de campos inventados: es el mismo contrato
- * que la página servía en Fase 6.5, ahora también en el cliente.
+ * Fila que devuelve la RPC `list_admin_reservations` (0032, extendida en
+ * 0054): usuario desde user_profiles (display_name, email), comercio/pack
+ * desde las SNAPSHOTS de la propia reserva (0005) y ciclo de vida completo
+ * (motivo/fecha de cancelación, ready_at, picked_up_at, completed_at).
+ * Nada de campos inventados: es el mismo contrato que la página servía en
+ * Fase 6.5, ahora también en el cliente.
  */
 export interface AdminReservationRow {
   reservation_id: string
@@ -28,6 +30,12 @@ export interface AdminReservationRow {
   timezone_snapshot: string
   created_at: string
   updated_at: string
+  /** Ciclo de vida (0054). La base ya los llenaba por diseño (CHECKs 0005). */
+  cancel_reason: string | null
+  cancelled_at: string | null
+  ready_at: string | null
+  picked_up_at: string | null
+  completed_at: string | null
 }
 
 /**
