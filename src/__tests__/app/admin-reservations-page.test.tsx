@@ -1,99 +1,187 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { render, screen, fireEvent } from '@testing-library/react'
 
 /**
- * Página /admin/reservations (Fase 6.5, 0032): sobre la RPC canónica
- * list_admin_reservations. La página legacy hacía .from('reservations') con
- * un join shop:shops(name) que NO existe en el esquema (no hay FK directa
- * reservations→shops) y leía campos inexistentes (total_price_cents,
- * user_profiles.name). Aquí se protege:
- *  1. El nombre EXACTO de la RPC y su parámetro p_limit.
- *  2. El mapeo de filas: comercio y pack salen de las snapshots de la
- *     reserva (0005), el usuario de user_profiles (display_name, email).
- *  3. La ventana de recogida en la zona horaria de la reserva (Santiago),
- *     no la del navegador.
- *  4. El enum real de status (0005) en los badges.
- *  5. Los estados de error (mensaje traducido) y vacío.
+ * Página /admin/reservations (ADMIN-1): soporte de reservas. El hook de
+ * listado es el contrato de datos y se mockea por completo (sus pruebas
+ * RPC viven en src/__tests__/hooks/useAdminReservations.test.tsx). Aquí se
+ * protege el comportamiento NUEVO:
+ *  1. La tabla muestra las filas y cada una abre la ficha (Detalle).
+ *  2. La búsqueda filtra por comprador/email/pack/comercio ("X de Y").
+ *  3. Los chips de estado filtran con conteo.
+ *  4. Sin resultados hay estado honesto con "Limpiar filtros".
+ *  5. La ficha muestra los DOS estados (reserva y pago) y la nota del código
+ *     hasheado (no se puede buscar por código de retiro, por diseño).
+ *  6. Estados de carga, error y vacío total.
  */
 
-const mock = vi.hoisted(() => ({
-  rpc: vi.fn(),
+const hooksState = vi.hoisted(() => ({
+  reservations: [] as unknown[],
+  loading: false,
+  error: '',
 }))
 
-vi.mock('@/lib/supabase/server', () => ({
-  createClient: async () => ({ rpc: mock.rpc }),
+const useAdminReservationsMock = vi.hoisted(() => vi.fn())
+
+vi.mock('@/components/admin/useAdminReservations', () => ({
+  useAdminReservations: useAdminReservationsMock,
 }))
 
-vi.mock('@/lib/auth/requireAuth', () => ({
-  requireAuth: async () => ({ user: { id: 'admin-1' }, role: 'admin' }),
-}))
+import AdminReservationsPage from '@/app/(admin)/admin/reservations/page'
+import { AdminReservationRow } from '@/components/admin/useAdminReservations'
 
-const filaReserva = {
-  reservation_id: 'res-1',
-  user_id: 'user-a',
-  user_name: 'Usuario A',
-  user_email: 'user.a.staging@paporla.test',
-  shop_id: 'shop-1',
-  shop_name: 'Panadería Staging A',
-  shop_address: 'Calle Los Aromos 123',
-  pack_title: 'Pack Panadería Artesanal',
-  total_amount_minor: '3990',
-  currency_code: 'CLP',
-  status: 'ready_pickup',
-  payment_status: 'paid',
-  pickup_start_at: '2026-09-30T18:00:00Z',
-  pickup_end_at: '2026-09-30T21:00:00Z',
-  timezone_snapshot: 'America/Santiago',
-  created_at: '2026-09-25T10:00:00Z',
-  updated_at: '2026-09-25T10:00:00Z',
+function fila(overrides: Partial<AdminReservationRow>): AdminReservationRow {
+  return {
+    reservation_id: 'res-aaaa-1',
+    user_id: 'user-a',
+    user_name: 'María Gonzalez',
+    user_email: 'maria@paporla.test',
+    shop_id: 'shop-1',
+    shop_name: 'Panadería La Esperanza',
+    shop_address: 'Av. Providencia 1234',
+    pack_title: 'Pack Sorpresa de Panadería',
+    total_amount_minor: '4500',
+    currency_code: 'CLP',
+    status: 'ready_pickup',
+    payment_status: 'paid',
+    pickup_start_at: '2026-09-30T23:00:00Z',
+    pickup_end_at: '2026-10-01T00:30:00Z',
+    timezone_snapshot: 'America/Santiago',
+    created_at: '2026-09-25T10:00:00Z',
+    updated_at: '2026-09-25T12:00:00Z',
+    ...overrides,
+  }
 }
 
-async function loadPage() {
-  const mod = await import('@/app/(admin)/admin/reservations/page')
-  render(await mod.default())
+const filaLista = fila({})
+const filaCancelada = fila({
+  reservation_id: 'res-bbbb-2',
+  user_name: 'Carlos Soto',
+  user_email: 'carlos@paporla.test',
+  pack_title: 'Pack Café & Croissant',
+  shop_name: 'Café Verde',
+  status: 'cancelled',
+  payment_status: 'refunded',
+})
+
+function setup() {
+  return render(<AdminReservationsPage />)
 }
 
-describe('/admin/reservations con list_admin_reservations (0032, Fase 6.5)', () => {
+describe('AdminReservationsPage (ADMIN-1)', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    // mockImplementation (no mockReturnValue): lee el estado EN VIVO, así los
+    // tests pueden reasignar hooksState dentro del cuerpo del test.
+    useAdminReservationsMock.mockImplementation(() => ({
+      reservations: hooksState.reservations,
+      loading: hooksState.loading,
+      error: hooksState.error,
+    }))
   })
 
-  it('llama a list_admin_reservations con p_limit 200 y pinta usuario/pack/comercio', async () => {
-    mock.rpc.mockResolvedValue({ data: [filaReserva], error: null })
-    await loadPage()
-    expect(mock.rpc).toHaveBeenCalledWith('list_admin_reservations', { p_limit: 200 })
-    expect(screen.getByText('Usuario A')).toBeInTheDocument()
-    expect(screen.getByText('user.a.staging@paporla.test')).toBeInTheDocument()
-    expect(screen.getByText('Pack Panadería Artesanal')).toBeInTheDocument()
-    expect(screen.getByText('Panadería Staging A')).toBeInTheDocument()
+  it('muestra las reservas y abre la ficha con el botón Detalle', () => {
+    hooksState.reservations = [filaLista, filaCancelada]
+    setup()
+
+    expect(screen.getByText('María Gonzalez')).toBeTruthy()
+    expect(screen.getByText('Carlos Soto')).toBeTruthy()
+    expect(screen.getAllByRole('button', { name: /Detalle/ })).toHaveLength(2)
+
+    fireEvent.click(screen.getAllByRole('button', { name: /Detalle/ })[0])
+
+    expect(screen.getByText('Detalle de reserva')).toBeTruthy()
+    // El email aparece dos veces (tabla + ficha)
+    expect(screen.getAllByText('maria@paporla.test').length).toBeGreaterThanOrEqual(1)
+    // Los DOS estados de la transacción, no solo el de reserva
+    expect(screen.getByText('Reserva: Lista para recoger')).toBeTruthy()
+    expect(screen.getByText('Pago: Pagado')).toBeTruthy()
+    // Nota honesta: el código de retiro no se muestra ni se busca
+    expect(screen.getByText(/cifrado \(hash\) en la base por diseño/)).toBeTruthy()
   })
 
-  it('mapea total_amount_minor (string de PostgREST) al precio CLP y el estado real al badge', async () => {
-    mock.rpc.mockResolvedValue({ data: [filaReserva], error: null })
-    await loadPage()
-    expect(screen.getByText('$3.990')).toBeInTheDocument()
-    expect(screen.getByText('Lista para recoger')).toBeInTheDocument()
+  it('la fila completa también abre la ficha', () => {
+    hooksState.reservations = [filaLista]
+    setup()
+
+    fireEvent.click(screen.getByText('Pack Sorpresa de Panadería'))
+    expect(screen.getByText('Detalle de reserva')).toBeTruthy()
   })
 
-  it('pinta la ventana de recogida en la zona horaria de la reserva (Santiago)', async () => {
-    // 18:00Z – 21:00Z = 15:00 – 18:00 America/Santiago.
-    mock.rpc.mockResolvedValue({ data: [filaReserva], error: null })
-    await loadPage()
-    expect(screen.getByText(/15:00 – 18:00/)).toBeInTheDocument()
-  })
+  it('la búsqueda por comercio reduce a "X de Y reservas"', () => {
+    hooksState.reservations = [filaLista, filaCancelada]
+    setup()
 
-  it('rpc en error: muestra el mensaje traducido (no el código crudo)', async () => {
-    mock.rpc.mockResolvedValue({
-      data: null,
-      error: { message: 'INVALID_ADMIN_RESERVATIONS_PAGE_ARGUMENTS', code: '22023' },
+    fireEvent.change(screen.getByPlaceholderText(/Buscar por comprador/), {
+      target: { value: 'café' },
     })
-    await loadPage()
-    expect(screen.getByText(/No se pudo cargar la página de reservas/)).toBeInTheDocument()
+
+    expect(screen.getByText('1 de 2 reservas')).toBeTruthy()
+    expect(screen.queryByText('María Gonzalez')).toBeNull()
+    expect(screen.getByText('Carlos Soto')).toBeTruthy()
   })
 
-  it('sin reservas: estado vacío', async () => {
-    mock.rpc.mockResolvedValue({ data: [], error: null })
-    await loadPage()
-    expect(screen.getByText('No hay reservas registradas')).toBeInTheDocument()
+  it('la búsqueda por email del comprador también encuentra', () => {
+    hooksState.reservations = [filaLista, filaCancelada]
+    setup()
+
+    fireEvent.change(screen.getByPlaceholderText(/Buscar por comprador/), {
+      target: { value: 'maria@' },
+    })
+
+    expect(screen.getByText('1 de 2 reservas')).toBeTruthy()
+    expect(screen.getByText('María Gonzalez')).toBeTruthy()
+  })
+
+  it('sin resultados muestra estado honesto y "Limpiar filtros" restaura', () => {
+    hooksState.reservations = [filaLista]
+    setup()
+
+    fireEvent.change(screen.getByPlaceholderText(/Buscar por comprador/), {
+      target: { value: 'zzz-sin-coincidencias' },
+    })
+    expect(screen.getByText('Ninguna reserva coincide con la búsqueda')).toBeTruthy()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Limpiar filtros' }))
+    expect(screen.getByText('María Gonzalez')).toBeTruthy()
+    expect(screen.getByText('1 reserva en total — todas las transacciones')).toBeTruthy()
+  })
+
+  it('los chips de estado filtran y cuentan', () => {
+    hooksState.reservations = [filaLista, filaCancelada]
+    setup()
+
+    expect(screen.getByText('Todas (2)')).toBeTruthy()
+    fireEvent.click(screen.getByRole('button', { name: 'Cancelada (1)' }))
+
+    expect(screen.getByText('1 de 2 reservas')).toBeTruthy()
+    expect(screen.queryByText('María Gonzalez')).toBeNull()
+    expect(screen.getByText('Carlos Soto')).toBeTruthy()
+  })
+
+  it('sin reservas muestra el estado vacío total', () => {
+    hooksState.reservations = []
+    setup()
+
+    expect(screen.getByText('No hay reservas registradas')).toBeTruthy()
+    expect(screen.queryByRole('table')).toBeNull()
+  })
+
+  it('con error de la RPC muestra el mensaje traducido', () => {
+    hooksState.reservations = []
+    hooksState.error = 'Esta acción requiere permisos de administrador.'
+    setup()
+
+    expect(screen.getByText(/Error al cargar reservas/)).toBeTruthy()
+    expect(screen.queryByRole('table')).toBeNull()
+  })
+
+  it('mientras carga muestra skeleton y no tabla', () => {
+    hooksState.reservations = []
+    hooksState.loading = true
+    setup()
+
+    expect(screen.queryByRole('table')).toBeNull()
+    expect(screen.queryByText('Reservas')).toBeNull()
   })
 })

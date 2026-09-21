@@ -1,58 +1,92 @@
-import { createClient } from '@/lib/supabase/server'
-import { requireAuth } from '@/lib/auth/requireAuth'
-import { CalendarCheck, User, Store, Package } from 'lucide-react'
-import { formatMinorPrice } from '@/lib/utils/formatPrice'
-import { formatDate, formatPickupWindow } from '@/lib/utils/formatDate'
+'use client'
+
+import { useMemo, useState } from 'react'
+import { CalendarCheck, Search, Filter } from 'lucide-react'
+import Input from '@/components/ui/Input'
+import Button from '@/components/ui/Button'
+import Skeleton from '@/components/ui/Skeleton'
 import { translateDbError } from '@/lib/utils/db-errors'
+import { useAdminReservations, AdminReservationRow } from '@/components/admin/useAdminReservations'
+import { RESERVATION_STATUSES, getReservationStatusConfig } from '@/lib/constants/reservationStatus'
+import ReservationsTable from '../components/ReservationsTable'
+import ReservationModal from '../components/ReservationModal'
 
 /**
- * Página /admin/reservations (Fase 6.5): sobre la RPC canónica
- * `list_admin_reservations` (0032). La versión anterior hacía
- * `.from('reservations')` con un join `shop:shops(name)` que no existe en el
- * esquema (no hay FK directa reservations→shops; la cadena pasa por packs) y
- * leía campos legacy inexistentes (total_price_cents, user_profiles.name).
- * El comercio y el pack salen de las snapshots de la propia reserva (0005).
+ * Página /admin/reservations (ADMIN-1): soporte de reservas del panel.
+ *
+ * Antes (Fase 6.5) era una tabla de solo lectura servida desde el servidor:
+ * imposible ubicar la reserva de un comprador que escribe por soporte. Ahora:
+ *  - Datos por la RPC canónica `list_admin_reservations` (0032) vía
+ *    useAdminReservations (límite 500, el máximo de la RPC).
+ *  - Búsqueda y filtro por estado EN EL CLIENTE (mismo patrón que la
+ *    búsqueda de comercios; con +500 reservas se migran a la RPC, ver hook).
+ *  - Ficha de detalle por reserva (ReservationModal), solo lectura.
+ *
+ * NOTA: NO se puede buscar por código de retiro — vive hasheado en la base
+ * (0005) a propósito. La búsqueda es por comprador/pack/comercio/id.
  */
+export default function AdminReservationsPage() {
+  const { reservations, loading, error } = useAdminReservations()
+  const [statusFilter, setStatusFilter] = useState<string>('all')
+  const [searchTerm, setSearchTerm] = useState('')
+  const [selected, setSelected] = useState<AdminReservationRow | null>(null)
+  const [modalOpen, setModalOpen] = useState(false)
 
-/** Fila que devuelve la RPC `list_admin_reservations` (0032). */
-interface AdminReservationRow {
-  reservation_id: string
-  user_id: string | null
-  user_name: string | null
-  user_email: string | null
-  shop_id: string
-  shop_name: string | null
-  shop_address: string | null
-  pack_title: string | null
-  total_amount_minor: number | string
-  currency_code: string
-  status: string
-  payment_status: string
-  pickup_start_at: string
-  pickup_end_at: string
-  timezone_snapshot: string
-  created_at: string
-  updated_at: string
-}
+  const openReservation = (reservation: AdminReservationRow) => {
+    setSelected(reservation)
+    setModalOpen(true)
+  }
 
-const reservationStatusConfig: Record<string, { label: string; className: string }> = {
-  payment_pending: { label: 'Pago pendiente', className: 'bg-amber-500/10 text-amber-400' },
-  confirmed: { label: 'Confirmada', className: 'bg-blue-500/10 text-blue-400' },
-  ready_pickup: { label: 'Lista para recoger', className: 'bg-primary/10 text-primary' },
-  picked_up: { label: 'Recogida', className: 'bg-green-500/10 text-green-400' },
-  completed: { label: 'Completada', className: 'bg-green-500/10 text-green-400' },
-  cancelled: { label: 'Cancelada', className: 'bg-red-500/10 text-red-400' },
-  no_show: { label: 'No show', className: 'bg-orange-500/10 text-orange-400' },
-  expired: { label: 'Expirada', className: 'bg-gray-500/10 text-gray-400' },
-}
+  /** Cuentas por estado para los chips (sobre TODO el listado, no el filtrado). */
+  const statusCounts = useMemo(() => {
+    const counts: Record<string, number> = {}
+    for (const r of reservations) {
+      counts[r.status] = (counts[r.status] ?? 0) + 1
+    }
+    return counts
+  }, [reservations])
 
-export default async function AdminReservationsPage() {
-  await requireAuth(['admin', 'super_admin'])
+  /** Búsqueda por comprador (nombre/email), pack, comercio o id de reserva. */
+  const filtered = useMemo(() => {
+    const q = searchTerm.trim().toLowerCase()
+    return reservations.filter((r) => {
+      if (statusFilter !== 'all' && r.status !== statusFilter) return false
+      if (!q) return true
+      const haystack = [r.user_name ?? '', r.user_email ?? '', r.pack_title ?? '', r.shop_name ?? '', r.reservation_id]
+        .join(' ')
+        .toLowerCase()
+      return haystack.includes(q)
+    })
+  }, [reservations, statusFilter, searchTerm])
 
-  const supabase = await createClient()
+  const clearFilters = () => {
+    setSearchTerm('')
+    setStatusFilter('all')
+  }
 
-  const { data: rawReservations, error } = await supabase.rpc('list_admin_reservations', { p_limit: 200 })
-  const reservations = (rawReservations ?? []) as unknown as AdminReservationRow[]
+  const hayFiltros = statusFilter !== 'all' || searchTerm.trim() !== ''
+  const truncated = reservations.length >= 500
+
+  if (loading) {
+    return (
+      <div className="space-y-6 pb-8">
+        <div className="relative overflow-hidden bg-gradient-to-br from-primary/5 via-transparent to-secondary/5 -mt-8 -mx-4 px-4 py-8 rounded-b-3xl">
+          <Skeleton className="h-10 w-48 mb-2" />
+          <Skeleton className="h-4 w-72" />
+        </div>
+        <div className="flex gap-2 flex-wrap">
+          {[...Array(4)].map((_, i) => (
+            <Skeleton key={i} className="h-8 w-32 rounded-full" />
+          ))}
+        </div>
+        <div className="glass-card rounded-2xl p-4 space-y-3">
+          {[...Array(6)].map((_, i) => (
+            <Skeleton key={i} className="h-12 w-full" />
+          ))}
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="space-y-6 pb-8">
@@ -64,7 +98,12 @@ export default async function AdminReservationsPage() {
           <div>
             <h1 className="text-3xl font-bold dark:text-white text-gray-900">Reservas</h1>
             <p className="dark:text-gray-400 text-gray-600 text-sm">
-              {reservations.length} reservas en total — todas las transacciones
+              {hayFiltros
+                ? `${filtered.length} de ${reservations.length} reservas`
+                : `${reservations.length} ${
+                    reservations.length === 1 ? 'reserva' : 'reservas'
+                  } en total — todas las transacciones`}
+              {truncated ? ' (mostrando las 500 más recientes)' : ''}
             </p>
           </div>
         </div>
@@ -74,88 +113,85 @@ export default async function AdminReservationsPage() {
         <div className="rounded-2xl border border-red-500/30 bg-red-500/5 p-6 text-center">
           <p className="text-red-400">Error al cargar reservas: {translateDbError(error)}</p>
         </div>
-      ) : !reservations || reservations.length === 0 ? (
+      ) : reservations.length === 0 ? (
         <div className="glass-card rounded-2xl p-12 text-center">
           <CalendarCheck className="w-12 h-12 text-gray-600 mx-auto mb-3" />
           <p className="dark:text-gray-400 text-gray-600">No hay reservas registradas</p>
         </div>
       ) : (
-        <div className="glass-card rounded-2xl overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead className="dark:bg-white/5 bg-gray-100">
-                <tr>
-                  <th className="text-left px-4 py-3 text-xs font-medium dark:text-gray-400 text-gray-600">Usuario</th>
-                  <th className="text-left px-4 py-3 text-xs font-medium dark:text-gray-400 text-gray-600">Pack</th>
-                  <th className="text-left px-4 py-3 text-xs font-medium dark:text-gray-400 text-gray-600">Comercio</th>
-                  <th className="text-left px-4 py-3 text-xs font-medium dark:text-gray-400 text-gray-600">Ventana</th>
-                  <th className="text-left px-4 py-3 text-xs font-medium dark:text-gray-400 text-gray-600">Precio</th>
-                  <th className="text-left px-4 py-3 text-xs font-medium dark:text-gray-400 text-gray-600">Estado</th>
-                  <th className="text-right px-4 py-3 text-xs font-medium dark:text-gray-400 text-gray-600">Fecha</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y dark:divide-white/5 divide-gray-200">
-                {reservations.map((r) => {
-                  const st = reservationStatusConfig[r.status] ?? {
-                    label: r.status,
-                    className: 'bg-gray-500/10 text-gray-400',
-                  }
-                  return (
-                    <tr key={r.reservation_id} className="dark:hover:bg-white/5 hover:bg-gray-50 transition-colors">
-                      <td className="px-4 py-3">
-                        <div className="flex items-center gap-2">
-                          <User className="w-4 h-4 text-gray-500 flex-shrink-0" />
-                          <div>
-                            <p className="font-medium dark:text-white text-gray-900 text-xs">
-                              {r.user_name ?? 'Usuario eliminado'}
-                            </p>
-                            <p className="text-[10px] dark:text-gray-500 text-gray-400">{r.user_email ?? ''}</p>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-4 py-3">
-                        <div className="flex items-center gap-2">
-                          <Package className="w-4 h-4 text-gray-500 flex-shrink-0" />
-                          <span className="dark:text-gray-300 text-gray-700 truncate max-w-[150px]">
-                            {r.pack_title ?? '—'}
-                          </span>
-                        </div>
-                      </td>
-                      <td className="px-4 py-3">
-                        <div className="flex items-center gap-2">
-                          <Store className="w-4 h-4 text-gray-500 flex-shrink-0" />
-                          <div>
-                            <span className="dark:text-gray-400 text-gray-600 text-xs">{r.shop_name ?? '—'}</span>
-                            {r.shop_address ? (
-                              <p className="text-[10px] dark:text-gray-500 text-gray-400">{r.shop_address}</p>
-                            ) : null}
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-4 py-3 text-[11px] dark:text-gray-400 text-gray-600 whitespace-nowrap">
-                        {formatPickupWindow(
-                          r.pickup_start_at,
-                          r.pickup_end_at,
-                          r.timezone_snapshot || 'America/Santiago',
-                        )}
-                      </td>
-                      <td className="px-4 py-3 dark:text-gray-400 text-gray-600">
-                        {formatMinorPrice(Number(r.total_amount_minor ?? 0), r.currency_code, 'es-CL')}
-                      </td>
-                      <td className="px-4 py-3">
-                        <span className={`text-[10px] px-2 py-0.5 rounded-full ${st.className}`}>{st.label}</span>
-                      </td>
-                      <td className="px-4 py-3 text-right text-[11px] dark:text-gray-500 text-gray-400">
-                        {formatDate(r.created_at)}
-                      </td>
-                    </tr>
-                  )
-                })}
-              </tbody>
-            </table>
+        <>
+          {/* Chips de filtro por estado, con conteo sobre el total (patrón comercios) */}
+          <div className="flex gap-2 flex-wrap">
+            <button
+              onClick={() => setStatusFilter('all')}
+              className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
+                statusFilter === 'all'
+                  ? 'bg-primary text-on-primary'
+                  : 'dark:bg-white/5 bg-gray-100 dark:text-gray-300 text-gray-700 hover:bg-primary/20 dark:hover:bg-white/10'
+              }`}
+            >
+              Todas ({reservations.length})
+            </button>
+            {RESERVATION_STATUSES.map((status) => {
+              const config = getReservationStatusConfig(status)
+              return (
+                <button
+                  key={status}
+                  onClick={() => setStatusFilter(status)}
+                  className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
+                    statusFilter === status
+                      ? 'bg-primary text-on-primary'
+                      : 'dark:bg-white/5 bg-gray-100 dark:text-gray-300 text-gray-700 hover:bg-primary/20 dark:hover:bg-white/10'
+                  }`}
+                >
+                  {config.label} ({statusCounts[status] ?? 0})
+                </button>
+              )
+            })}
           </div>
-        </div>
+
+          {/* Barra de búsqueda (por comprador, pack, comercio o id — NUNCA por código de retiro: vive hasheado) */}
+          <div className="flex flex-col sm:flex-row gap-4 justify-between">
+            <div className="relative flex-1 max-w-md">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 dark:text-gray-500 text-gray-400" />
+              <Input
+                placeholder="Buscar por comprador, email, pack o comercio..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+            <div className="text-sm dark:text-gray-400 text-gray-600 flex items-center gap-2">
+              <Filter className="w-4 h-4" />
+              Mostrando: {filtered.length}
+            </div>
+          </div>
+
+          {filtered.length === 0 ? (
+            <div className="glass-card rounded-2xl p-12 text-center">
+              <Search className="w-12 h-12 text-gray-600 mx-auto mb-3" />
+              <p className="dark:text-gray-400 text-gray-600 font-medium mb-1">
+                Ninguna reserva coincide con la búsqueda
+              </p>
+              <p className="dark:text-gray-500 text-gray-400 text-sm mb-4">
+                Prueba con otro nombre, email o comercio (el código de retiro no es buscable: vive cifrado en la base).
+              </p>
+              <Button variant="secondary" onClick={clearFilters}>
+                Limpiar filtros
+              </Button>
+            </div>
+          ) : (
+            <ReservationsTable rows={filtered} onOpen={openReservation} />
+          )}
+        </>
       )}
+
+      <ReservationModal
+        key={selected?.reservation_id ?? 'none'}
+        isOpen={modalOpen}
+        reservation={selected}
+        onClose={() => setModalOpen(false)}
+      />
     </div>
   )
 }
