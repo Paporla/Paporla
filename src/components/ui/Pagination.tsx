@@ -55,7 +55,7 @@ export default function Pagination({ currentPage, totalPages, onPageChange, sibl
   if (totalPages <= 1) return null
 
   return (
-    <div className="flex justify-center items-center gap-2 mt-8">
+    <div className="flex flex-wrap justify-center items-center gap-2 mt-8 px-4">
       <motion.button
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
@@ -70,7 +70,7 @@ export default function Pagination({ currentPage, totalPages, onPageChange, sibl
         <ChevronLeft className="w-5 h-5" />
       </motion.button>
 
-      <div className="flex gap-2">
+      <div className="flex gap-2 flex-wrap justify-center">
         {generatePageNumbers().map((page, index) => (
           <motion.button
             key={index}

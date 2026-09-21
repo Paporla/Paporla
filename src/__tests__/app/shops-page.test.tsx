@@ -18,6 +18,14 @@ const shopsState = vi.hoisted(() => ({
   error: null as string | null,
 }))
 
+vi.mock('@/hooks/useAuth', () => ({
+  useAuth: () => ({ user: null }),
+}))
+
+vi.mock('next/navigation', () => ({
+  usePathname: () => '/shops',
+}))
+
 vi.mock('@/hooks/useShops', () => ({
   useShops: () => ({
     shops: shopsState.shops,

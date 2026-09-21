@@ -5,6 +5,7 @@ import ShopDetailHeader from '@/components/shops/ShopDetailHeader'
 import ShopDetailInfo from '@/components/shops/ShopDetailInfo'
 import ShopDetailPacks from '@/components/shops/ShopDetailPacks'
 import PageLoader from '@/components/ui/PageLoader'
+import PublicMobileNav from '@/components/layout/PublicMobileNav'
 import { Store } from 'lucide-react'
 
 interface Props {
@@ -40,7 +41,8 @@ export default function ShopDetailClient({ shopId }: Props) {
   }
 
   return (
-    <div className="min-h-screen pb-12">
+    <div className="min-h-screen pb-24 lg:pb-12">
+      <PublicMobileNav />
       <ShopDetailHeader
         shop={{
           ...shop,

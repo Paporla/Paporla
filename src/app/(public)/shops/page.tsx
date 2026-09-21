@@ -6,6 +6,7 @@ import { Store, Search, MapPin } from 'lucide-react'
 import { useShops } from '@/hooks/useShops'
 import ShopCard from '@/components/shops/ShopCard'
 import LoadErrorState from '@/components/ui/LoadErrorState'
+import PublicMobileNav from '@/components/layout/PublicMobileNav'
 
 export default function ShopsPage() {
   // A-07: `error` y `reload` ya los daba el hook; la página los ignoraba.
@@ -48,12 +49,13 @@ export default function ShopsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen">
+      <div className="min-h-screen pb-20 lg:pb-0">
+        <PublicMobileNav />
         <div className="container mx-auto px-4 py-12">
           <div className="animate-pulse">
             <div className="h-8 w-48 dark:bg-gray-800 bg-gray-200 rounded mb-2 mx-auto" />
-            <div className="h-4 w-96 dark:bg-gray-800 bg-gray-200 rounded mb-8 mx-auto" />
-            <div className="flex gap-4 mb-8 justify-center">
+            <div className="h-4 w-full max-w-[24rem] dark:bg-gray-800 bg-gray-200 rounded mb-8 mx-auto" />
+            <div className="flex gap-4 mb-8 justify-center flex-wrap px-4">
               <div className="h-10 w-64 dark:bg-gray-800 bg-gray-200 rounded" />
               <div className="h-10 w-32 dark:bg-gray-800 bg-gray-200 rounded" />
             </div>
@@ -76,7 +78,8 @@ export default function ShopsPage() {
   }
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen pb-20 lg:pb-0">
+      <PublicMobileNav />
       {/* HEADER */}
       <div className="relative overflow-hidden bg-gradient-to-br from-primary/5 via-transparent to-secondary/5 pt-20 pb-12">
         <div className="absolute top-20 left-10 w-64 h-64 bg-primary/10 rounded-full blur-3xl animate-pulse" />

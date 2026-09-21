@@ -12,6 +12,7 @@ import EmptyState from '@/components/ui/EmptyState'
 import PacksHeroSection from '@/components/packs/PacksHeroSection'
 import OnboardingSteps from '@/components/packs/OnboardingSteps'
 import PacksLoadingGrid from '@/components/packs/PacksLoadingGrid'
+import PublicMobileNav from '@/components/layout/PublicMobileNav'
 
 const ITEMS_PER_PAGE = 9
 
@@ -73,7 +74,8 @@ export default function PacksPage() {
    * resultados: héroe, onboarding y filtros siguen montados mientras carga.
    */
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen pb-20 lg:pb-0">
+      <PublicMobileNav />
       <PacksHeroSection count={packs.length} />
 
       <div className="container mx-auto px-4 py-8">

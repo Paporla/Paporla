@@ -40,6 +40,7 @@ vi.mock('@/hooks/useAuth', () => ({
 }))
 
 vi.mock('next/navigation', () => ({
+  usePathname: () => '/',
   useRouter: () => ({ push: vi.fn() }),
 }))
 

@@ -20,7 +20,12 @@ vi.mock('@/lib/analytics/events', () => ({
   trackClickReserve: vi.fn(),
 }))
 
+vi.mock('@/hooks/useAuth', () => ({
+  useAuth: () => ({ user: null }),
+}))
+
 vi.mock('next/navigation', () => ({
+  usePathname: () => '/packs',
   useRouter: () => ({ push: vi.fn() }),
 }))
 

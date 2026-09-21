@@ -14,6 +14,7 @@ const owned = vi.hoisted(() => ({
 }))
 
 vi.mock('next/navigation', () => ({
+  usePathname: () => '/packs/pack-1',
   useRouter: () => ({ push: vi.fn(), back: vi.fn() }),
 }))
 

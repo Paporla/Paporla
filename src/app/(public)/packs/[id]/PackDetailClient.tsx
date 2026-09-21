@@ -20,6 +20,7 @@ import {
 } from 'lucide-react'
 import { motion } from 'framer-motion'
 import Button from '@/components/ui/Button'
+import PublicMobileNav from '@/components/layout/PublicMobileNav'
 import ShareButton from '@/components/ui/ShareButton'
 import ReserveModal from './components/ReserveModal'
 import { useAuth } from '@/hooks/useAuth'
@@ -123,7 +124,8 @@ export default function PackDetailClient({ initialPack }: Props) {
   }
 
   return (
-    <div className="min-h-screen pb-12">
+    <div className="min-h-screen pb-24 lg:pb-12">
+      <PublicMobileNav />
       <div className="container mx-auto px-4 py-8">
         <div className="flex items-center justify-between mb-6">
           <button

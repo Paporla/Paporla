@@ -14,7 +14,12 @@ import { render, screen, fireEvent } from '@testing-library/react'
 const mockPush = vi.hoisted(() => vi.fn())
 const mockTrackClickReserve = vi.hoisted(() => vi.fn())
 
+vi.mock('@/hooks/useAuth', () => ({
+  useAuth: () => ({ user: null }),
+}))
+
 vi.mock('next/navigation', () => ({
+  usePathname: () => '/packs',
   useRouter: () => ({ push: mockPush, prefetch: vi.fn() }),
 }))
 
