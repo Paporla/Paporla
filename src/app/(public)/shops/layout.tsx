@@ -7,7 +7,11 @@ import { seo } from '@/lib/seo'
  * envuelve, es la forma canónica de ponerle canonical y og:url a la ruta.
  * El detalle /shops/[id] pisa este canonical con el suyo propio.
  */
-export const metadata: Metadata = seo('/shops')
+export const metadata: Metadata = seo('/shops', {
+  title: 'Comercios Aliados',
+  description:
+    'Descubre panaderías, cafeterías, restaurantes y supermercados aliados de Paporla que rescatan su comida en buen estado para tu mesa.',
+})
 
 export default function ShopsLayout({ children }: { children: React.ReactNode }) {
   return children

@@ -7,7 +7,10 @@ import { seo } from '@/lib/seo'
  * envuelve, es la forma canónica de ponerle canonical y og:url a la ruta
  * (paso 44b).
  */
-export const metadata: Metadata = seo('/contacto')
+export const metadata: Metadata = seo('/contacto', {
+  title: 'Contacto',
+  description: 'Habla con el equipo de Paporla: soporte para consumidores y comercios, alianzas y prensa.',
+})
 
 export default function ContactoLayout({ children }: { children: React.ReactNode }) {
   return children
