@@ -98,7 +98,20 @@ self.addEventListener('fetch', (event) => {
       .catch(() =>
         caches
           .match(event.request)
-          .then((cached) => cached || (isHtml ? caches.match('/') : undefined))
+          .then((cached) => {
+            if (cached) return cached
+            if (!isHtml) return undefined
+            // La home como respaldo solo para paginas PUBLICAS: servir el HTML
+            // de la home bajo /dashboard provocaba hidratacion imposible (#418)
+            // cuando la red caia en zona privada (cazado con el DNS del
+            // fundador caido el 2026-09-19).
+            const u2 = new URL(event.request.url)
+            const isPrivate =
+              /^\/(dashboard|admin|business|profile|reservations|favorites|notifications|settings)(\/|$)/.test(
+                u2.pathname,
+              )
+            return isPrivate ? undefined : caches.match('/')
+          })
           .then((cached) => cached || offlineFallback(isHtml)),
       ),
   )
