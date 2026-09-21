@@ -29,9 +29,15 @@ export default function PendingConsentRecorder() {
           p_legal_document_id: doc.legal_document_id,
           p_app_platform: 'web',
           p_app_version: '',
-          p_acceptance_context: 'consumer_registration',
+          p_acceptance_context: 'signup',
         })
-        if (error) return // se conserva la cola: se reintenta al montar otra vez
+        if (error) {
+          // se conserva la cola y se libera el candado: reintentara en el
+          // siguiente montaje SIN necesitar recargar (bug cazado en la prueba
+          // manual: el candado quedaba tomado y la cola dormida en la pestana)
+          enCurso.current = false
+          return
+        }
       }
       clearPendingConsent()
       enCurso.current = false

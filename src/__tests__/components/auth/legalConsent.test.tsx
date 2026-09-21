@@ -90,7 +90,7 @@ describe('paso 45: consentimiento del consumidor', () => {
     render(<PendingConsentRecorder />)
     await waitFor(() => expect(rpcMock).toHaveBeenCalledTimes(2))
     expect(rpcMock.mock.calls[0][0]).toBe('accept_legal_document')
-    expect(rpcMock.mock.calls[0][1].p_acceptance_context).toBe('consumer_registration')
+    expect(rpcMock.mock.calls[0][1].p_acceptance_context).toBe('signup')
     await waitFor(() => expect(takePendingConsent()).toBeNull())
   })
 
